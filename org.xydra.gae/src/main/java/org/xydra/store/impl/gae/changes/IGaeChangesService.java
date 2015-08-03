@@ -24,19 +24,19 @@ public interface IGaeChangesService {
 
 	/**
 	 * Fetch a range of events from the datastore.
-	 * 
+	 *
 	 * See also {@link GetEventsRequest}.
-	 * 
+	 *
 	 * @param address
 	 *            never null
 	 * @param beginRevision
 	 *            inclusive
 	 * @param endRevision
 	 *            inclusive
-	 * 
+	 *
 	 * @see XydraStore#getEvents(XId, String, GetEventsRequest[],
 	 *      org.xydra.store.Callback)
-	 * 
+	 *
 	 * @return a list of events or null if this model was never created. The
 	 *         list might contain fewer elements than the range implies.
 	 */
@@ -49,12 +49,12 @@ public interface IGaeChangesService {
 	 * current revision number (from {@link InstanceRevisionManager} The result
 	 * is stored in {@link InstanceRevisionManager} and returned for
 	 * convenience.
-	 * 
+	 *
 	 * @param includeTentative
 	 *            TODO docu tentative
-	 * 
+	 *
 	 * @return ...
-	 * 
+	 *
 	 * @see XydraStore#getModelRevisions(XId, String, GetWithAddressRequest[],
 	 *      Callback)
 	 */
@@ -63,9 +63,9 @@ public interface IGaeChangesService {
 	/**
 	 * Grabs the lowest available revision number and registers a change for
 	 * that revision number with the provided locks.
-	 * 
+	 *
 	 * @param lastTaken
-	 * 
+	 *
 	 * @param locks
 	 *            which locks to get
 	 * @param actorId
@@ -73,14 +73,14 @@ public interface IGaeChangesService {
 	 * @return Information associated with the change such as the grabbed
 	 *         revision, the locks, the start time and the change
 	 *         {@link SEntity} .
-	 * 
+	 *
 	 *         Note: Reads revCache.lastTaken
 	 */
 	GaeChange grabRevisionAndRegisterLocks(long lastTaken, GaeLocks locks, XId actorId);
 
 	/**
 	 * Cache given change, if status is committed.
-	 * 
+	 *
 	 * @param change
 	 *            to be cached
 	 */
@@ -90,9 +90,9 @@ public interface IGaeChangesService {
 
 	/**
 	 * Mark the given change as committed.
-	 * 
+	 *
 	 * @param change
-	 * 
+	 *
 	 * @param status
 	 *            The new (and final) status.
 	 */

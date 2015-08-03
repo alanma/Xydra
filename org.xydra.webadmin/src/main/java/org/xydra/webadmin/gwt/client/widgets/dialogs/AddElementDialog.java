@@ -1,5 +1,6 @@
 package org.xydra.webadmin.gwt.client.widgets.dialogs;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
@@ -44,24 +45,24 @@ public class AddElementDialog extends DialogBox {
 	@UiField(provided = true)
 	ButtonPanel buttonPanel;
 
-	private XAddress address;
+	private final XAddress address;
 
-	public AddElementDialog(final Presenter presenter, XAddress address, String text) {
+	public AddElementDialog(final Presenter presenter, final XAddress address, final String text) {
 
 		super();
 
 		this.address = address;
 
-		ClickHandler okHandler = new ClickHandler() {
+		final ClickHandler okHandler = new ClickHandler() {
 
 			@Override
-			public void onClick(ClickEvent event) {
+			public void onClick(final ClickEvent event) {
 				String value = "";
 				try {
 					value = AddElementDialog.this.textArea.getValue().toString();
 					Presenter.processUserInput(AddElementDialog.this.address, value);
 					AddElementDialog.this.removeFromParent();
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					String errorMessage = e.getMessage();
 					for (int i = 0; i < e.getStackTrace().length; i++) {
 						errorMessage += e.getStackTrace()[i] + "\n";
@@ -74,10 +75,10 @@ public class AddElementDialog extends DialogBox {
 		};
 
 		this.buttonPanel = new ButtonPanel(okHandler, this);
-		this.textArea = new XIdEditor(XX.toId("newID"), new EditListener() {
+		this.textArea = new XIdEditor(Base.toId("newID"), new EditListener() {
 
 			@Override
-			public void newValue(XValue value) {
+			public void newValue(final XValue value) {
 				// nothing
 
 			}
@@ -85,9 +86,10 @@ public class AddElementDialog extends DialogBox {
 		this.textArea.getTextBox().addKeyDownHandler(new KeyDownHandler() {
 
 			@Override
-			public void onKeyDown(KeyDownEvent event) {
-				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER)
+			public void onKeyDown(final KeyDownEvent event) {
+				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
 					AddElementDialog.this.buttonPanel.clickOk();
+				}
 			}
 
 		});
@@ -95,12 +97,13 @@ public class AddElementDialog extends DialogBox {
 
 		this.setStyleName("dialogStyle");
 
-		String[] addressedSuccessors = { "nothing", "Object", "Field", "Model" };
+		final String[] addressedSuccessors = { "nothing", "Object", "Field", "Model" };
 		String dialogTitle = addressedSuccessors[address.getAddressedType().ordinal()];
-		if (address.getRepository().equals(XX.toId("noRepo")))
+		if (address.getRepository().equals(Base.toId("noRepo"))) {
 			dialogTitle = "Repository";
-		this.setText("add " + dialogTitle);
-		this.center();
+		}
+		setText("add " + dialogTitle);
+		center();
 	}
 
 	public void selectEverything() {

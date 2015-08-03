@@ -4,5 +4,5 @@ import org.xydra.base.rmof.XWritableObject;
 
 
 public interface XExistsWritableObject extends XWritableObject, XExistsReadableObject, XExists {
-    
+
 }

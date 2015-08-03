@@ -3,6 +3,7 @@ package org.xydra.core.serialize;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.xydra.base.Base;
 import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
 import org.xydra.base.value.XV;
@@ -15,38 +16,38 @@ import org.xydra.core.serialize.json.JsonSerializer;
 
 
 public class HowToSerializeAndParseExample {
-	
-	public static void main(String[] args) {
+
+	public static void main(final String[] args) {
 		// given a model1
-		XId actorId = XX.toId("actor1");
-		String passwordHash = "secret";
-		MemoryRepository repo = new MemoryRepository(actorId, passwordHash, XX.toId("repo1"));
-		XModel model1 = repo.createModel(XX.toId("model1"));
-		model1.createObject(XX.toId("john")).createField(XX.toId("phone"))
+		final XId actorId = Base.toId("actor1");
+		final String passwordHash = "secret";
+		final MemoryRepository repo = new MemoryRepository(actorId, passwordHash, Base.toId("repo1"));
+		final XModel model1 = repo.createModel(Base.toId("model1"));
+		model1.createObject(Base.toId("john")).createField(Base.toId("phone"))
 		        .setValue(XV.toValue("123-456"));
-		
+
 		// set up corresponding serialiser & parser
-		JsonSerializer serializer = new JsonSerializer();
-		JsonParser parser = new JsonParser();
-		
+		final JsonSerializer serializer = new JsonSerializer();
+		final JsonParser parser = new JsonParser();
+
 		// serialise with revisions
-		XydraOut out = serializer.create();
+		final XydraOut out = serializer.create();
 		out.enableWhitespace(true, true);
 		SerializedModel.serialize(model1, out);
 		assertTrue(out.isClosed());
-		String data = out.getData();
+		final String data = out.getData();
 		// store data
-		
+
 		System.out.println(data);
-		
+
 		// later: load dater
-		XydraElement xydraElement = parser.parse(data);
-		XModel modelAgain = SerializedModel.toModel(actorId, passwordHash, xydraElement);
+		final XydraElement xydraElement = parser.parse(data);
+		final XModel modelAgain = SerializedModel.toModel(actorId, passwordHash, xydraElement);
 		assertTrue(XCompareUtils.equalState(model1, modelAgain));
-		
+
 		// check that there is a change log
-		XChangeLog changeLog = modelAgain.getChangeLog();
+		final XChangeLog changeLog = modelAgain.getChangeLog();
 		assertNotNull(changeLog);
 	}
-	
+
 }

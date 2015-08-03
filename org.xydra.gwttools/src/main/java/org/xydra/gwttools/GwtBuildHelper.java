@@ -11,10 +11,10 @@ import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 
 /**
- * 
- * 
+ *
+ *
  * @author xamde
- * 
+ *
  */
 public class GwtBuildHelper implements Runnable {
 
@@ -22,14 +22,14 @@ public class GwtBuildHelper implements Runnable {
 
 	/**
 	 * Copy from target dir to src, so that a local Jetty works
-	 * 
+	 *
 	 * @param warPath
 	 *            e.g. './target/myname-0.1.2-SNAPSHOT'
 	 * @param moduleName
 	 *            e.g. 'mygwtmodule'
 	 */
-	public static void copyCompiledGwtModule(String warPath, String moduleName) {
-		File targetGwt = new File(warPath + "/" + moduleName);
+	public static void copyCompiledGwtModule(final String warPath, final String moduleName) {
+		final File targetGwt = new File(warPath + "/" + moduleName);
 		if (!targetGwt.exists()) {
 			log.error("GWT data not found in " + targetGwt.getAbsolutePath()
 					+ ". Some AJAX will not work. \n Please run 'mvn gwt:compile' first"
@@ -37,7 +37,7 @@ public class GwtBuildHelper implements Runnable {
 			System.exit(1);
 		}
 		assert targetGwt.isDirectory();
-		File sourceWebAppGwt = new File("./src/main/webapp/" + moduleName);
+		final File sourceWebAppGwt = new File("./src/main/webapp/" + moduleName);
 		assert sourceWebAppGwt.getParentFile().exists() : "Found no folder "
 				+ sourceWebAppGwt.getParentFile().getAbsolutePath();
 		log.info("Copying GWT files temporarily to " + sourceWebAppGwt.getAbsolutePath());
@@ -45,7 +45,7 @@ public class GwtBuildHelper implements Runnable {
 		sourceWebAppGwt.mkdirs();
 		try {
 			FileUtils.copyDirectory(targetGwt, sourceWebAppGwt);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -55,24 +55,24 @@ public class GwtBuildHelper implements Runnable {
 	 * @return true if the given dir looks like a folder in which GWT code was
 	 *         compiled
 	 */
-	static boolean looksLikeGwtDir(File dir) {
-		File clearCache = new File(dir, "clear.cache.gif");
-		File hosted = new File(dir, "hosted.html");
+	static boolean looksLikeGwtDir(final File dir) {
+		final File clearCache = new File(dir, "clear.cache.gif");
+		final File hosted = new File(dir, "hosted.html");
 		return clearCache.exists() && hosted.exists();
 	}
 
 	/**
 	 * Copies a source file to a target file
-	 * 
+	 *
 	 * @param srcFile
 	 * @param targetFile
 	 */
-	public static void copyFile(String srcFile, String targetFile) {
-		File src = new File(srcFile);
-		File target = new File(targetFile);
+	public static void copyFile(final String srcFile, final String targetFile) {
+		final File src = new File(srcFile);
+		final File target = new File(targetFile);
 		try {
 			FileUtils.copyFile(src, target);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			log.error("Could not copy from '" + srcFile + "' to '" + targetFile + "'", e);
 		}
 	}
@@ -82,19 +82,19 @@ public class GwtBuildHelper implements Runnable {
 	 * @return a list of all directories that are a) direct children of the
 	 *         given targetDir and b) look like they contain compiled GWT code; @NeverNull
 	 */
-	public static List<File> autoDiscoverAllGwtModulesInTarget(File targetDir) {
-		List<File> list = new ArrayList<File>();
+	public static List<File> autoDiscoverAllGwtModulesInTarget(final File targetDir) {
+		final List<File> list = new ArrayList<File>();
 
 		assert targetDir.isDirectory();
-		File[] subDirs = targetDir.listFiles(new FileFilter() {
+		final File[] subDirs = targetDir.listFiles(new FileFilter() {
 
 			@Override
-			public boolean accept(File pathname) {
+			public boolean accept(final File pathname) {
 				return pathname.isDirectory();
 			}
 		});
 
-		for (File f : subDirs) {
+		for (final File f : subDirs) {
 			if (f.getName().contains(".gen.")) {
 				log.info("Found GWT module "
 						+ f.getAbsolutePath()
@@ -110,38 +110,38 @@ public class GwtBuildHelper implements Runnable {
 	/**
 	 * Scans warPath and copies all auto-detected GWT compile-result module
 	 * folders to src/main/webapp/{folder}
-	 * 
+	 *
 	 * @param warPath
 	 *            to be scanned
 	 */
-	public static void copyAllGwtModulesFoundInTarget(String warPath) {
-		File targetDir = new File(warPath);
+	public static void copyAllGwtModulesFoundInTarget(final String warPath) {
+		final File targetDir = new File(warPath);
 		if (!targetDir.exists()) {
 			log.error("Target WAR dir not found as \n" + "  " + targetDir.getAbsolutePath() + "\n"
 					+ "Compile something first, e.g. call 'mvn compile'\n"
 					+ " - and make sure your pom is packaging=war.");
 			System.exit(1);
 		}
-		List<File> subDirs = autoDiscoverAllGwtModulesInTarget(targetDir);
+		final List<File> subDirs = autoDiscoverAllGwtModulesInTarget(targetDir);
 		if (subDirs.isEmpty()) {
 			log.warn("No subdirectories found in " + targetDir.getAbsolutePath()
 					+ " - nothing copied.");
 			return;
 		}
 		assert subDirs != null;
-		for (File subDir : subDirs) {
+		for (final File subDir : subDirs) {
 			if (looksLikeGwtDir(subDir)) {
 				copyCompiledGwtModule(warPath, subDir.getName());
 			}
 		}
 	}
 
-	public GwtBuildHelper(String warPath) {
+	public GwtBuildHelper(final String warPath) {
 		super();
 		this.warPath = warPath;
 	}
 
-	private String warPath;
+	private final String warPath;
 
 	@Override
 	public void run() {

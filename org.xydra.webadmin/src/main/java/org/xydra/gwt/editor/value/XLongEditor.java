@@ -11,7 +11,7 @@ public class XLongEditor extends AtomicXValueEditor<XLongValue> implements KeyPr
 
 	private final TextBox editor = new TextBox();
 
-	public XLongEditor(long oldValue, EditListener listener) {
+	public XLongEditor(final long oldValue, final EditListener listener) {
 		super(listener);
 
 		this.editor.setText(Long.toString(oldValue));
@@ -34,7 +34,7 @@ public class XLongEditor extends AtomicXValueEditor<XLongValue> implements KeyPr
 	}
 
 	@Override
-	public void onKeyPress(KeyPressEvent e) {
+	public void onKeyPress(final KeyPressEvent e) {
 
 		// char cc = e.getCharCode();
 		//

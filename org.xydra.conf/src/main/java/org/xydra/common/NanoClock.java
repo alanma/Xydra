@@ -5,12 +5,12 @@ import org.xydra.annotations.NotThreadSafe;
 
 /**
  * A simple named clock for measuring time. Nanosecond precision.
- * 
+ *
  * TODO move to xydra code or similar, rename into neutral name. In JS, there is
  * only milliseconds.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 
 @NotThreadSafe
@@ -29,8 +29,9 @@ public class NanoClock {
 	 */
 	public synchronized NanoClock start() {
 		this.start = now();
-		if (this.firstStart == -1)
+		if (this.firstStart == -1) {
 			this.firstStart = this.start;
+		}
 		return this;
 	}
 
@@ -43,7 +44,7 @@ public class NanoClock {
 	 * @param name for the statistics @NeverNull
 	 * @return this instance for API chaining
 	 */
-	public synchronized NanoClock stop(@NeverNull String name) {
+	public synchronized NanoClock stop(@NeverNull final String name) {
 		stopAndGetDuration(name);
 		return this;
 	}
@@ -52,12 +53,12 @@ public class NanoClock {
 	 * @param name for last clock entry @NeverNull
 	 * @return duration since last start in milliseconds
 	 */
-	public synchronized long stopAndGetDuration(@NeverNull String name) {
+	public synchronized long stopAndGetDuration(@NeverNull final String name) {
 		if (this.start == -1) {
 			throw new IllegalStateException("Cannot stop a clock that was never started.");
 		}
-		long stop = now();
-		double durationInMs = (stop - this.start) / 1000000d;
+		final long stop = now();
+		final double durationInMs = (stop - this.start) / 1000000d;
 		this.stats.append(name).append("=").append(durationInMs).append("ms <br />\n");
 		this.start = -1;
 		return (long) durationInMs;
@@ -66,11 +67,11 @@ public class NanoClock {
 	/**
 	 * Stops the clock with the given name for the clock entry and immediately
 	 * restarts it.
-	 * 
+	 *
 	 * @param name
 	 * @NeverNull
 	 */
-	public synchronized void stopAndStart(@NeverNull String name) {
+	public synchronized void stopAndStart(@NeverNull final String name) {
 		stop(name);
 		start();
 	}
@@ -79,8 +80,8 @@ public class NanoClock {
 	 * @param name for last clock entry @NeverNull
 	 * @return duration since last start in milliseconds
 	 */
-	public synchronized long stopStartAndGetLastDuration(@NeverNull String name) {
-		long d = stopAndGetDuration(name);
+	public synchronized long stopStartAndGetLastDuration(@NeverNull final String name) {
+		final long d = stopAndGetDuration(name);
 		start();
 		return d;
 	}
@@ -93,8 +94,8 @@ public class NanoClock {
 		return this.stats.toString() + " total=" + getDurationSinceStart() + "ms";
 	}
 
-	public static void main(String[] args) {
-		NanoClock c = new NanoClock();
+	public static void main(final String[] args) {
+		final NanoClock c = new NanoClock();
 		c.start();
 		c.stop("a");
 		c.start();
@@ -106,7 +107,7 @@ public class NanoClock {
 		System.out.println(c.getStats());
 	}
 
-	public synchronized NanoClock append(@NeverNull String s) {
+	public synchronized NanoClock append(@NeverNull final String s) {
 		this.stats.append(s);
 		return this;
 	}
@@ -116,7 +117,7 @@ public class NanoClock {
 	 *         was not started ever.
 	 */
 	public synchronized long getDurationSinceStart() {
-		return (long) (((now() - this.firstStart)) / 1000000d);
+		return (long) ((now() - this.firstStart) / 1000000d);
 	}
 
 	private static long now() {

@@ -10,22 +10,22 @@ import com.google.gwt.logging.impl.StackTracePrintStream;
 
 public class ClickableLinksInEclipseGwtLogFormatter extends FormatterImpl {
 
-	private boolean showStackTraces;
+	private final boolean showStackTraces;
 
-	public ClickableLinksInEclipseGwtLogFormatter(boolean showStackTraces) {
+	public ClickableLinksInEclipseGwtLogFormatter(final boolean showStackTraces) {
 		this.showStackTraces = showStackTraces;
 	}
 
 	@Override
-	public String format(LogRecord event) {
-		StringBuilder message = new StringBuilder();
+	public String format(final LogRecord event) {
+		final StringBuilder message = new StringBuilder();
 		message.append(EclipseFormat.format(event, 1));
 		if (this.showStackTraces && event.getThrown() != null) {
 
 			final StringBuilder builder = new StringBuilder();
-			PrintStream stream = new StackTracePrintStream(builder) {
+			final PrintStream stream = new StackTracePrintStream(builder) {
 				@Override
-				public void append(String str) {
+				public void append(final String str) {
 					builder.append(str);
 				}
 

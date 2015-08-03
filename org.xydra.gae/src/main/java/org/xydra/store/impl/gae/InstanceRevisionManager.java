@@ -19,13 +19,13 @@ import com.google.common.cache.Cache;
  * <li>a facade and manager for the Instance-wide cache</li>
  * <li>passive, it does not trigger any kind of recalculation.</li>
  * </ol>
- * 
+ *
  * The instance revision cache is shared among all objects within one Java
  * Virtual Machine via the {@link InstanceContext}. Instance-wide shared state
  * is managed as a {@link RevisionInfo}.
- * 
+ *
  * ----
- * 
+ *
  * These values are managed:
  * <ul>
  * <li>LastTaken (shared on instance)</li>
@@ -37,26 +37,26 @@ import com.google.common.cache.Cache;
  * </ul>
  * </li>
  * </ul>
- * 
+ *
  * A model has a <em>current revision number</em> (Current). It is incremented
  * every time a change operation succeeds. Not necessarily only one step.
- * 
+ *
  * For each value, the revision cache maintains a shared minimal value, which
  * can be re-used among all threads as a starting point to compute the
  * thread-local variables. TODO rewrite
- * 
+ *
  * These invariants are true (lowercase = estimated values, uppercase = real
  * values):
- * 
+ *
  * Estimates are less or equal to the real value: currentRev <= CURRENT_REV;
  * lastCommited <= LAST_COMMITED; lastTaken <= LAST_TAKEN;
- * 
+ *
  * currentRev <= lastSilentCommitted <= lastCommited <= lastTaken;
- * 
+ *
  * CURRENT_REV <= LAST_COMMITED <= LAST_TAKEN;
- * 
+ *
  * The following diagram shows an example:
- * 
+ *
  * <pre>
  *                  | Possible Status:
  *                  |   Success = (SuccessExecuted)
@@ -100,9 +100,9 @@ import com.google.common.cache.Cache;
  * r00              |   ---    |   ????????????????? |
  * -----------------+----------+---------+-----------+
  * </pre>
- * 
+ *
  * TODO must be thread-safe
- * 
+ *
  * @author xamde
  */
 public class InstanceRevisionManager {
@@ -119,12 +119,12 @@ public class InstanceRevisionManager {
 	 *            ..
 	 */
 	@XGaeOperation()
-	public InstanceRevisionManager(XAddress modelAddress) {
+	public InstanceRevisionManager(final XAddress modelAddress) {
 		log.debug(XGaeDebugHelper.init(REVMANAGER_NAME));
 		this.modelAddress = modelAddress;
-		assert this.getInstanceRevisionInfo() != null;
-		assert this.getInstanceRevisionInfo().getGaeModelRevision() != null;
-		assert this.getInstanceRevisionInfo().getGaeModelRevision().getModelRevision() != null;
+		assert getInstanceRevisionInfo() != null;
+		assert getInstanceRevisionInfo().getGaeModelRevision() != null;
+		assert getInstanceRevisionInfo().getGaeModelRevision().getModelRevision() != null;
 	}
 
 	/**
@@ -134,8 +134,8 @@ public class InstanceRevisionManager {
 	 *         cached, and returned.
 	 */
 	public RevisionInfo getInstanceRevisionInfo() {
-		Cache<String, Object> instanceContext = InstanceContext.getInstanceCache();
-		String key = this.modelAddress + "/revisions";
+		final Cache<String, Object> instanceContext = InstanceContext.getInstanceCache();
+		final String key = this.modelAddress + "/revisions";
 		synchronized (instanceContext) {
 			RevisionInfo instanceRevInfo = (RevisionInfo) instanceContext.getIfPresent(key);
 			if (instanceRevInfo == null) {

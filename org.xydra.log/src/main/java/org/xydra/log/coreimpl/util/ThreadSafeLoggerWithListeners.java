@@ -9,7 +9,7 @@ import org.xydra.log.api.Logger;
 /**
  * Log to logger and delegate to {@link ILogListener}. Thread-safe version of
  * {@link LoggerWithListeners}.
- * 
+ *
  * @author kaidel
  */
 @ThreadSafe
@@ -17,13 +17,13 @@ public class ThreadSafeLoggerWithListeners extends LoggerWithListeners {
 
 	/**
 	 * Constructs a new instance.
-	 * 
+	 *
 	 * @param logger
 	 *            needs to be thread-safe
 	 * @param logListeners
 	 *            @CanBeNull
 	 */
-	public ThreadSafeLoggerWithListeners(Logger logger, final Collection<ILogListener> logListeners) {
+	public ThreadSafeLoggerWithListeners(final Logger logger, final Collection<ILogListener> logListeners) {
 		super(logger, logListeners);
 	}
 
@@ -36,70 +36,70 @@ public class ThreadSafeLoggerWithListeners extends LoggerWithListeners {
 	 */
 
 	@Override
-	public void debug(String msg) {
+	public void debug(final String msg) {
 		synchronized (this.logListeners) {
 			super.debug(msg);
 		}
 	}
 
 	@Override
-	public void debug(String msg, Throwable t) {
+	public void debug(final String msg, final Throwable t) {
 		synchronized (this.logListeners) {
 			super.debug(msg, t);
 		}
 	}
 
 	@Override
-	public void error(String msg) {
+	public void error(final String msg) {
 		synchronized (this.logListeners) {
 			super.error(msg);
 		}
 	}
 
 	@Override
-	public void error(String msg, Throwable t) {
+	public void error(final String msg, final Throwable t) {
 		synchronized (this.logListeners) {
 			super.error(msg, t);
 		}
 	}
 
 	@Override
-	public void info(String msg) {
+	public void info(final String msg) {
 		synchronized (this.logListeners) {
 			super.info(msg);
 		}
 	}
 
 	@Override
-	public void info(String msg, Throwable t) {
+	public void info(final String msg, final Throwable t) {
 		synchronized (this.logListeners) {
 			super.info(msg, t);
 		}
 	}
 
 	@Override
-	public void trace(String msg) {
+	public void trace(final String msg) {
 		synchronized (this.logListeners) {
 			super.trace(msg);
 		}
 	}
 
 	@Override
-	public void trace(String msg, Throwable t) {
+	public void trace(final String msg, final Throwable t) {
 		synchronized (this.logListeners) {
 			super.trace(msg, t);
 		}
 	}
 
 	@Override
-	public void warn(String msg) {
+	public void warn(final String msg) {
 		synchronized (this.logListeners) {
 			super.warn(msg);
 		}
 	}
 
 	@Override
-	public void warn(String msg, Throwable t) {
+	public void warn(final String msg, final Throwable t) {
 		synchronized (this.logListeners) {
 			super.warn(msg, t);
 		}

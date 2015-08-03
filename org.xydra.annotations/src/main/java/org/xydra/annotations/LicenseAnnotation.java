@@ -8,11 +8,11 @@ import java.lang.annotation.Target;
 /**
  * Meta-meta data to record the fact that an annotation contains license
  * information about a package, class or method.
- * 
+ *
  * All license annotations must have the methods
- * 
+ *
  * String project(); boolean modified();
- * 
+ *
  * @author xamde
  */
 @Retention(RetentionPolicy.RUNTIME)

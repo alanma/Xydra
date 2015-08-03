@@ -7,10 +7,10 @@ import org.xydra.core.change.XModelEventListener;
 
 public class DummyModelEventListener implements XModelEventListener {
 	XEvent event;
-	
+
 	@Override
-	public void onChangeEvent(XModelEvent event) {
+	public void onChangeEvent(final XModelEvent event) {
 		this.event = event;
 	}
-	
+
 }

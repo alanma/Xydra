@@ -6,6 +6,7 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
@@ -20,6 +21,7 @@ import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
+import org.xydra.restless.utils.SharedHtmlUtils;
 import org.xydra.testgae.server.model.xmas.Wish;
 import org.xydra.testgae.server.model.xmas.WishList;
 import org.xydra.testgae.server.model.xmas.Xmas;
@@ -27,7 +29,7 @@ import org.xydra.xgae.gaeutils.GaeTestfixer;
 
 /**
  * Expose a single {@link Wish} to the web.
- * 
+ *
  * @author xamde
  */
 public class WishResource {
@@ -35,7 +37,7 @@ public class WishResource {
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(WishResource.class);
 
-	public static void restless(Restless r, String path) {
+	public static void restless(final Restless r, final String path) {
 		r.addMethod(path + "/{repo}/{list}/{wish}/delete", "GET", WishResource.class, "delete",
 				false, // .
 				new RestlessParameter("repo", null),// .
@@ -74,139 +76,139 @@ public class WishResource {
 		);
 	}
 
-	public static synchronized void delete(String repoStr, String listStr, String wishStr,
-			HttpServletRequest req, HttpServletResponse res) throws IOException {
+	public static synchronized void delete(final String repoStr, final String listStr, final String wishStr,
+			final HttpServletRequest req, final HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		ServletUtils.headers(res, "text/html");
-		Writer w = HtmlUtils.startHtmlPage(res, "Delete");
+		final Writer w = HtmlUtils.startHtmlPage(res, "Delete");
 		w.write("Deleting<br />");
 
-		NanoClock s1 = new NanoClock().start();
+		final NanoClock s1 = new NanoClock().start();
 
 		// create txn
-		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
-				XX.toId(listStr)));
-		WishList wishList = new WishList(txnModel);
+		final DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
+				Base.toId(listStr)));
+		final WishList wishList = new WishList(txnModel);
 		// manipulate txn
-		wishList.removeWish(XX.toId(wishStr));
+		wishList.removeWish(Base.toId(wishStr));
 		// execute txn
-		XTransaction txn = txnModel.toTransaction();
+		final XTransaction txn = txnModel.toTransaction();
 		Xmas.executeTransaction(txn);
 
 		s1.stop("delete a wish");
 		w.write(s1.getStats() + "<br/>\n");
 
-		w.write(HtmlUtils.link("..", "See all wishes in this list"));
+		w.write(SharedHtmlUtils.link("..", "See all wishes in this list"));
 		w.flush();
 		w.close();
 	}
 
-	public static synchronized void editName(String repoStr, String listStr, String wishStr,
-			String name, HttpServletResponse res) throws IOException {
+	public static synchronized void editName(final String repoStr, final String listStr, final String wishStr,
+			final String name, final HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		ServletUtils.headers(res, "text/html");
-		Writer w = HtmlUtils.startHtmlPage(res, "Edit Name");
+		final Writer w = HtmlUtils.startHtmlPage(res, "Edit Name");
 		w.write("Renaming to " + name + " <br />");
 
-		NanoClock s1 = new NanoClock().start();
+		final NanoClock s1 = new NanoClock().start();
 
 		// create txn
-		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
-				XX.toId(listStr)));
-		WishList wishList = new WishList(txnModel);
+		final DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
+				Base.toId(listStr)));
+		final WishList wishList = new WishList(txnModel);
 		// manipulate txn
-		wishList.editWishName(XX.toId(wishStr), name);
+		wishList.editWishName(Base.toId(wishStr), name);
 		// execute txn
-		XTransaction txn = txnModel.toTransaction();
+		final XTransaction txn = txnModel.toTransaction();
 		Xmas.executeTransaction(txn);
 
 		s1.stop("edit a wish");
 		w.write(s1.getStats() + "<br/>\n");
 
-		w.write(HtmlUtils.link("..", "See all wishes in this list"));
+		w.write(SharedHtmlUtils.link("..", "See all wishes in this list"));
 		w.flush();
 		w.close();
 	}
 
-	public static synchronized void editPrice(String repoStr, String listStr, String wishStr,
-			String priceStr, HttpServletResponse res) throws IOException {
+	public static synchronized void editPrice(final String repoStr, final String listStr, final String wishStr,
+			final String priceStr, final HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		ServletUtils.headers(res, "text/html");
-		Writer w = HtmlUtils.startHtmlPage(res, "Edit Price");
+		final Writer w = HtmlUtils.startHtmlPage(res, "Edit Price");
 		w.write("Changig price to " + priceStr + " <br />");
 
-		NanoClock s1 = new NanoClock().start();
+		final NanoClock s1 = new NanoClock().start();
 
 		// create txn
-		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
-				XX.toId(listStr)));
-		WishList wishList = new WishList(txnModel);
+		final DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
+				Base.toId(listStr)));
+		final WishList wishList = new WishList(txnModel);
 		// manipulate txn
-		int price = Integer.parseInt(priceStr);
-		wishList.editWishPrice(XX.toId(wishStr), price);
+		final int price = Integer.parseInt(priceStr);
+		wishList.editWishPrice(Base.toId(wishStr), price);
 		// execute txn
-		XTransaction txn = txnModel.toTransaction();
+		final XTransaction txn = txnModel.toTransaction();
 		Xmas.executeTransaction(txn);
 
 		s1.stop("edit a wish");
 		w.write(s1.getStats() + "<br/>\n");
 
-		w.write(HtmlUtils.link("..", "See all wishes in this list"));
+		w.write(SharedHtmlUtils.link("..", "See all wishes in this list"));
 		w.flush();
 		w.close();
 	}
 
-	public static synchronized void editUrl(String repoStr, String listStr, String wishStr,
-			String urlStr, HttpServletResponse res) throws IOException {
+	public static synchronized void editUrl(final String repoStr, final String listStr, final String wishStr,
+			final String urlStr, final HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		ServletUtils.headers(res, "text/html");
-		Writer w = HtmlUtils.startHtmlPage(res, "Edit URL");
+		final Writer w = HtmlUtils.startHtmlPage(res, "Edit URL");
 		w.write("Changing URL to " + urlStr + " <br />");
 
-		NanoClock s1 = new NanoClock().start();
+		final NanoClock s1 = new NanoClock().start();
 
 		// create txn
-		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
-				XX.toId(listStr)));
-		WishList wishList = new WishList(txnModel);
+		final DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
+				Base.toId(listStr)));
+		final WishList wishList = new WishList(txnModel);
 		// manipulate txn
-		wishList.editWishUrl(XX.toId(wishStr), urlStr);
+		wishList.editWishUrl(Base.toId(wishStr), urlStr);
 		// execute txn
-		XTransaction txn = txnModel.toTransaction();
+		final XTransaction txn = txnModel.toTransaction();
 		Xmas.executeTransaction(txn);
 
 		s1.stop("edit a wish");
 		w.write(s1.getStats() + "<br/>\n");
 
-		w.write(HtmlUtils.link("..", "See all wishes in this list"));
+		w.write(SharedHtmlUtils.link("..", "See all wishes in this list"));
 		w.flush();
 		w.close();
 	}
 
-	public static synchronized void get(String repoStr, String listStr, String wishStr,
-			HttpServletResponse res) throws IOException {
+	public static synchronized void get(final String repoStr, final String listStr, final String wishStr,
+			final HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		ServletUtils.headers(res, "text/html");
-		Wish wish = load(repoStr, listStr, wishStr);
-		Writer w = HtmlUtils.startHtmlPage(res, "List");
+		final Wish wish = load(repoStr, listStr, wishStr);
+		final Writer w = HtmlUtils.startHtmlPage(res, "List");
 		w.write(wish.toHtml());
-		w.write(HtmlUtils.link("/xmas/" + repoStr + "/" + listStr, "See all wishes in this lists"));
+		w.write(SharedHtmlUtils.link("/xmas/" + repoStr + "/" + listStr, "See all wishes in this lists"));
 		w.flush();
 		w.close();
 	}
 
-	private static Wish load(String repoStr, String listStr, String wishStr) {
-		return load(Xmas.getRepository(repoStr), XX.toId(listStr), XX.toId(wishStr));
+	private static Wish load(final String repoStr, final String listStr, final String wishStr) {
+		return load(Xmas.getRepository(repoStr), Base.toId(listStr), Base.toId(wishStr));
 	}
 
-	public static Wish load(XWritableRepository repo, XId listId, XId wishId) {
+	public static Wish load(final XWritableRepository repo, final XId listId, final XId wishId) {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		XWritableModel model = repo.createModel(listId);
-		XWritableObject xo = model.createObject(wishId);
+		final XWritableModel model = repo.createModel(listId);
+		final XWritableObject xo = model.createObject(wishId);
 		return new Wish(xo);
 	}
 
-	public static String toRootRelativeUrl(String repoStr, String list, XId wishId) {
+	public static String toRootRelativeUrl(final String repoStr, final String list, final XId wishId) {
 		return "/xmas/" + repoStr + "/" + list + "/" + wishId;
 	}
 

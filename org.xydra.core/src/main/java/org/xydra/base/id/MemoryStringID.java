@@ -10,7 +10,7 @@ import org.xydra.base.value.ValueType;
 /**
  * An implementation of {@link XId} where an ID is represented by a String
  * value.
- * 
+ *
  * @author xamde
  */
 
@@ -29,24 +29,25 @@ public class MemoryStringID implements XId, Serializable {
 
 	/**
 	 * No syntax checks are performed.
-	 * 
+	 *
 	 * @param uriString
 	 */
-	protected MemoryStringID(String uriString) {
+	protected MemoryStringID(final String uriString) {
 		this.string = uriString.intern();
 	}
 
 	@Override
-	public int compareTo(XId o) {
-		return this.toString().compareTo(o.toString());
+	public int compareTo(final XId o) {
+		return toString().compareTo(o.toString());
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(final Object other) {
 		if (other instanceof MemoryStringID) {
-			MemoryStringID otherMemoryStringID = (MemoryStringID) other;
-			if (otherMemoryStringID.string == this.string)
+			final MemoryStringID otherMemoryStringID = (MemoryStringID) other;
+			if (otherMemoryStringID.string == this.string) {
 				return true;
+			}
 			return otherMemoryStringID.string.equals(this.string);
 		} else if (other instanceof XId) {
 			return ((XId) other).toString().equals(this.string);

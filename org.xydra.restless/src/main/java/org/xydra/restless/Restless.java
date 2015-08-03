@@ -35,14 +35,14 @@ import org.xydra.restless.utils.XmlUtils;
 
 /**
  * A minimalistic servlet to help using servlets.
- * 
+ *
  * Most configuration happens in Java code.
- * 
+ *
  * Usage:
- * 
+ *
  * <p>
  * 1) in web.xml add
- * 
+ *
  * <pre>
  * &lt;servlet&gt;
  *  &lt;servlet-name&gt;restless&lt;/servlet-name&gt;
@@ -63,34 +63,34 @@ import org.xydra.restless.utils.XmlUtils;
  *  &lt;url-pattern&gt;/mypath/*&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
  * </pre>
- * 
+ *
  * </p>
- * 
+ *
  * <p>
  * 2) create a corresponding class org.xydra.example.ExampleApp. See
  * org.xydra.restless.example.ExampleApp in test sources.
  * </p>
- * 
+ *
  * <p>
  * 3) The ExampleApp initialises the resources of your application. More
  * precisely, it calls
- * 
+ *
  * <pre>
  * public static void restless(Restless restless, String path) { ... }
  * </pre>
- * 
+ *
  * where path is the empty string if called from web.xml and a path with form
  * "/path" (by convention) if called from other Restless Apps.
- * 
+ *
  * See org.xydra.restless.example.ExampleApp in test sources for an example.
  * </p>
- * 
+ *
  * <p>
  * 4) The configuration can always be accessed at the URL "/admin/restless"
  * </p>
- * 
+ *
  * @author xamde
- * 
+ *
  */
 
 @ThreadSafe
@@ -104,13 +104,13 @@ public class Restless extends HttpServlet {
 	 * {@link #onRequestStarted(IRestlessContext)}) and after the Java method
 	 * finished processing the request (
 	 * {@link #onRequestFinished(IRestlessContext)}).
-	 * 
+	 *
 	 * Via {@link IRestlessContext#getRequestIdentifier()} a correlation from
 	 * start to finish can be achieved.
-	 * 
+	 *
 	 * Implementations should have valid {@link #hashCode()} and
 	 * {@link #equals(Object)} methods.
-	 * 
+	 *
 	 * @author xamde
 	 */
 	public static interface IRequestListener {
@@ -131,7 +131,7 @@ public class Restless extends HttpServlet {
 	/**
 	 * If true, unhandled requests (for which no mapping is found) are delegated
 	 * to the 'default' servlet of the container.
-	 * 
+	 *
 	 * Default is false.
 	 */
 	public static boolean DELEGATE_UNHANDLED_TO_DEFAULT = false;
@@ -151,7 +151,7 @@ public class Restless extends HttpServlet {
 	private static final long serialVersionUID = -1906300614203565189L;
 	/**
 	 * See http://en.wikipedia.org/wiki/X-Frame-Options#Frame-Options
-	 * 
+	 *
 	 * Legal values are: 'deny', 'sameorigin'
 	 */
 	public static String X_FRAME_OPTIONS_DEFAULT = "sameorigin";
@@ -197,7 +197,7 @@ public class Restless extends HttpServlet {
 
 	private ServletContext servletContext;
 
-	private Object serviceLock = new Object();
+	private final Object serviceLock = new Object();
 
 	private int serviceCounter = 0;
 
@@ -212,10 +212,10 @@ public class Restless extends HttpServlet {
 	/**
 	 * Register a handler that will receive exceptions thrown by the executed
 	 * REST methods.
-	 * 
+	 *
 	 * @param handler a non-null {@link RestlessExceptionHandler} @NeverNull
 	 */
-	public void addExceptionHandler(@NeverNull RestlessExceptionHandler handler) {
+	public void addExceptionHandler(@NeverNull final RestlessExceptionHandler handler) {
 		synchronized (this.exceptionHandlers) {
 			this.exceptionHandlers.add(handler);
 		}
@@ -224,10 +224,10 @@ public class Restless extends HttpServlet {
 	/**
 	 * Register a handler that will get called just before the Restless-servlet
 	 * is unloaded (e.g. on shut-down of the server).
-	 * 
+	 *
 	 * @param handler a non-null {@link RestlessUnloadHandler} @NeverNull
 	 */
-	public void addUnloadHandler(@NeverNull RestlessUnloadHandler handler) {
+	public void addUnloadHandler(@NeverNull final RestlessUnloadHandler handler) {
 		synchronized (this.unloadHandlers) {
 			this.unloadHandlers.add(handler);
 		}
@@ -235,7 +235,7 @@ public class Restless extends HttpServlet {
 
 	/**
 	 * Shortcut for adding addMethod( method = 'GET', admin-only = 'false' )
-	 * 
+	 *
 	 * @param pathTemplate see {@link PathTemplate} for syntax @NeverNull
 	 * @param instanceOrClass a Java instance or class @NeverNull
 	 * @param javaMethodName a method name like 'getName', see
@@ -244,8 +244,8 @@ public class Restless extends HttpServlet {
 	 * @param parameter
 	 * @NeverNull
 	 */
-	public void addGet(@NeverNull String pathTemplate, @NeverNull Object instanceOrClass,
-			@NeverNull String javaMethodName, @NeverNull RestlessParameter... parameter) {
+	public void addGet(@NeverNull final String pathTemplate, @NeverNull final Object instanceOrClass,
+			@NeverNull final String javaMethodName, @NeverNull final RestlessParameter... parameter) {
 		addMethod(pathTemplate, "GET", instanceOrClass, javaMethodName, false, parameter);
 	}
 
@@ -254,7 +254,7 @@ public class Restless extends HttpServlet {
 	 * Restless hands over the response object and ignores the method response,
 	 * if any. Otherwise the method return value is converted toString() and
 	 * returned as text/plain.
-	 * 
+	 *
 	 * @param pathTemplate see {@link PathTemplate} for syntax @NeverNull
 	 * @param httpMethod one of 'GET', 'PUT', 'POST', or 'DELETE' @NeverNull
 	 * @param instanceOrClass Java instance to be called or Java class to be
@@ -269,13 +269,13 @@ public class Restless extends HttpServlet {
 	 *            any position in the Java method. {@link HttpServletResponse}
 	 *            should be used to send a response. @NeverNull
 	 */
-	public void addMethod(@NeverNull String pathTemplate, @NeverNull String httpMethod,
-			@NeverNull Object instanceOrClass, @NeverNull String javaMethodName, boolean adminOnly,
-			@NeverNull RestlessParameter... parameter) {
-		PathTemplate pt = new PathTemplate(pathTemplate);
+	public void addMethod(@NeverNull final String pathTemplate, @NeverNull final String httpMethod,
+			@NeverNull final Object instanceOrClass, @NeverNull final String javaMethodName, final boolean adminOnly,
+			@NeverNull final RestlessParameter... parameter) {
+		final PathTemplate pt = new PathTemplate(pathTemplate);
 
 		synchronized (this.methods) {
-			RestlessMethod restlessMethod = new RestlessMethod(instanceOrClass, httpMethod,
+			final RestlessMethod restlessMethod = new RestlessMethod(instanceOrClass, httpMethod,
 					javaMethodName, pt, adminOnly, parameter);
 			this.methods.add(restlessMethod);
 			log.debug("Add method " + restlessMethod);
@@ -286,12 +286,12 @@ public class Restless extends HttpServlet {
 
 	/**
 	 * EXPERIMENTAL
-	 * 
+	 *
 	 * TODO promote to safe for use
-	 * 
+	 *
 	 * See
 	 * {@link #addMethod(String, String, Object, String, boolean, RestlessParameter...)}
-	 * 
+	 *
 	 * @param pathTemplate
 	 * @param httpMethod
 	 * @param instanceOrClass
@@ -299,15 +299,15 @@ public class Restless extends HttpServlet {
 	 * @param adminOnly
 	 * @param parameter must all be URL-parameters
 	 */
-	public void addPostMultipart(@NeverNull String pathTemplate, @NeverNull Object instanceOrClass,
-			@NeverNull String javaMethodName, boolean adminOnly,
-			@NeverNull RestlessParameter... parameter) {
-		PathTemplate pt = new PathTemplate(pathTemplate);
+	public void addPostMultipart(@NeverNull final String pathTemplate, @NeverNull final Object instanceOrClass,
+			@NeverNull final String javaMethodName, final boolean adminOnly,
+			@NeverNull final RestlessParameter... parameter) {
+		final PathTemplate pt = new PathTemplate(pathTemplate);
 
 		synchronized (this.methods) {
 			// TODO verify all parameters are URL parameters (inspect
 			// pathTemplate)
-			RestlessMethod restlessMethod = new RestlessMethod(instanceOrClass, "POST",
+			final RestlessMethod restlessMethod = new RestlessMethod(instanceOrClass, "POST",
 					javaMethodName, pt, adminOnly, parameter);
 			this.methods.add(restlessMethod);
 			log.debug("Add post/multipart method " + restlessMethod);
@@ -316,7 +316,7 @@ public class Restless extends HttpServlet {
 				+ javaMethodName + "' not found in " + instanceOrClass;
 	}
 
-	public void addRequestListener(IRequestListener requestListener) {
+	public void addRequestListener(final IRequestListener requestListener) {
 		synchronized (this.requestListeners) {
 			this.requestListeners.add(requestListener);
 		}
@@ -326,17 +326,17 @@ public class Restless extends HttpServlet {
 	 * Based on
 	 * http://stackoverflow.com/questions/132052/servlet-for-serving-static
 	 * -content
-	 * 
+	 *
 	 * @param req
 	 * @NeverNull
 	 * @param res
 	 * @NeverNull
 	 * @throws IOException
 	 */
-	public void delegateToDefaultServlet(@NeverNull HttpServletRequest req,
-			@NeverNull HttpServletResponse res) throws IOException {
+	public void delegateToDefaultServlet(@NeverNull final HttpServletRequest req,
+			@NeverNull final HttpServletResponse res) throws IOException {
 		try {
-			ServletContext sc = this.getServletContext();
+			final ServletContext sc = getServletContext();
 
 			synchronized (sc) {
 				RequestDispatcher rd = sc.getNamedDispatcher("default");
@@ -344,7 +344,7 @@ public class Restless extends HttpServlet {
 					// for newer Google AppEngine versions
 					rd = sc.getNamedDispatcher("_ah_default");
 				}
-				HttpServletRequest wrapped = new HttpServletRequestWrapper(req) {
+				final HttpServletRequest wrapped = new HttpServletRequestWrapper(req) {
 					@Override
 					public String getServletPath() {
 						return "";
@@ -353,7 +353,7 @@ public class Restless extends HttpServlet {
 
 				rd.forward(wrapped, res);
 			}
-		} catch (ServletException e) {
+		} catch (final ServletException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -365,7 +365,7 @@ public class Restless extends HttpServlet {
 	 * @NeverNull
 	 */
 	@Override
-	public void doDelete(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
+	public void doDelete(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse res) {
 		if (log.isDebugEnabled()) {
 			Thread.currentThread().setName("Restless DELETE " + req.getRequestURI());
 		}
@@ -399,15 +399,15 @@ public class Restless extends HttpServlet {
 	 * @NeverNull
 	 */
 	@Override
-	public void doHead(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
+	public void doHead(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse res) {
 		if (log.isDebugEnabled()) {
 			Thread.currentThread().setName("Restless HEAD " + req.getRequestURI());
 		}
 		try {
 			super.doHead(req, res);
-		} catch (ServletException e) {
+		} catch (final ServletException e) {
 			throw new RuntimeException(e);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -415,19 +415,19 @@ public class Restless extends HttpServlet {
 	/**
 	 * Print the current mapping from URL patterns to Java methods as a web
 	 * page.
-	 * 
+	 *
 	 * @param req
 	 * @NeverNull
 	 * @param res
 	 * @NeverNull
 	 */
-	private void doIntrospection(@NeverNull HttpServletRequest req,
-			@NeverNull HttpServletResponse res) {
-		String servletPath = RestlessStatic.getServletPath(req);
+	private void doIntrospection(@NeverNull final HttpServletRequest req,
+			@NeverNull final HttpServletResponse res) {
+		final String servletPath = RestlessStatic.getServletPath(req);
 
 		ServletUtils.headers(res, MIME_XHTML);
 		try {
-			Writer w = res.getWriter();
+			final Writer w = res.getWriter();
 			w.write(XHTML_DOCTYPE);
 
 			w.write("<html " + XHTML_NS + ">\n" +
@@ -451,9 +451,9 @@ public class Restless extends HttpServlet {
 			w.write("<ol>");
 
 			synchronized (this.methods) {
-				for (RestlessMethod rm : this.methods) {
+				for (final RestlessMethod rm : this.methods) {
 					w.write("<li>");
-					String url = servletPath + XmlUtils.xmlEncode(rm.getPathTemplate().getRegex());
+					final String url = servletPath + XmlUtils.xmlEncode(rm.getPathTemplate().getRegex());
 					w.write((rm.isAdminOnly() ? "ADMIN ONLY" : "PUBLIC")
 							+ " resource <b class='resource'>" + url + "</b>: "
 							+ rm.getHttpMethod() + " =&gt; ");
@@ -463,7 +463,7 @@ public class Restless extends HttpServlet {
 					/* list parameters */
 					w.write("<form action='" + url + "' method='"
 							+ rm.getHttpMethod().toLowerCase() + "'><div>");
-					for (RestlessParameter parameter : rm.getRequiredNamedParameter()) {
+					for (final RestlessParameter parameter : rm.getRequiredNamedParameter()) {
 						w.write(parameter.getName() + " <input type='text' name='"
 								+ parameter.getName() + "' value='" + parameter.getDefaultValue()
 								+ "' />");
@@ -475,16 +475,16 @@ public class Restless extends HttpServlet {
 			}
 			w.write("</ol>");
 			HtmlUtils.endHtmlPage(w);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	public String toConfigDebug() {
 		synchronized (this.methods) {
-			StringBuilder b = new StringBuilder();
-			for (RestlessMethod rm : this.methods) {
-				String url = XmlUtils.xmlEncode(rm.getPathTemplate().getRegex());
+			final StringBuilder b = new StringBuilder();
+			for (final RestlessMethod rm : this.methods) {
+				final String url = XmlUtils.xmlEncode(rm.getPathTemplate().getRegex());
 				b.append((rm.isAdminOnly() ? "ADMIN ONLY" : "PUBLIC") + " [" + url + "] "
 						+ rm.getHttpMethod() + " => ");
 				b.append(RestlessStatic.instanceOrClass_className(rm.getInstanceOrClass()) + "#"
@@ -492,7 +492,7 @@ public class Restless extends HttpServlet {
 
 				/* list parameters */
 				b.append("  ");
-				for (RestlessParameter parameter : rm.getRequiredNamedParameter()) {
+				for (final RestlessParameter parameter : rm.getRequiredNamedParameter()) {
 					b.append(parameter.getName() + "='" + parameter.getDefaultValue() + "' ");
 				}
 				b.append("\n");
@@ -508,7 +508,7 @@ public class Restless extends HttpServlet {
 	 * @NeverNull
 	 */
 	@Override
-	public void doPost(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
+	public void doPost(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse res) {
 		if (log.isDebugEnabled()) {
 			Thread.currentThread().setName("Restless POST " + req.getRequestURI());
 		}
@@ -522,7 +522,7 @@ public class Restless extends HttpServlet {
 	 * @NeverNull
 	 */
 	@Override
-	public void doPut(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
+	public void doPut(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse res) {
 		if (log.isDebugEnabled()) {
 			Thread.currentThread().setName("Restless PUT " + req.getRequestURI());
 		}
@@ -530,26 +530,26 @@ public class Restless extends HttpServlet {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param restlessContext
 	 * @NeverNull
 	 */
-	protected void fireRequestFinished(@NeverNull IRestlessContext restlessContext) {
+	protected void fireRequestFinished(@NeverNull final IRestlessContext restlessContext) {
 		synchronized (this.requestListeners) {
-			for (IRequestListener requestListener : this.requestListeners) {
+			for (final IRequestListener requestListener : this.requestListeners) {
 				requestListener.onRequestFinished(restlessContext);
 			}
 		}
 	}
 
 	/**
-	 * 
+	 *
 	 * @param restlessContext
 	 * @NeverNull
 	 */
-	protected void fireRequestStarted(@NeverNull IRestlessContext restlessContext) {
+	protected void fireRequestStarted(@NeverNull final IRestlessContext restlessContext) {
 		synchronized (this.requestListeners) {
-			for (IRequestListener requestListener : this.requestListeners) {
+			for (final IRequestListener requestListener : this.requestListeners) {
 				requestListener.onRequestStarted(restlessContext);
 			}
 		}
@@ -564,20 +564,20 @@ public class Restless extends HttpServlet {
 
 	/**
 	 * Helper method to make writing JUnit tests easier.
-	 * 
+	 *
 	 * @param key attribute name @CanBeNull
 	 * @return when run in a servlet container, this method is simply a
 	 *         short-cut for getServletContext().getAttribute(key,value).
 	 *         Otherwise a local hash-map is used that can be set via
 	 *         {@link #setServletContextAttribute(String, Object)}
 	 */
-	public Object getServletContextAttribute(@CanBeNull String key) {
+	public Object getServletContextAttribute(@CanBeNull final String key) {
 		try {
-			ServletContext sc = this.getServletContext();
+			final ServletContext sc = getServletContext();
 			synchronized (sc) {
 				return sc.getAttribute(key);
 			}
-		} catch (NullPointerException e) {
+		} catch (final NullPointerException e) {
 			// deal with lazy init
 			if (this.localContext == null) {
 				return null;
@@ -599,11 +599,11 @@ public class Restless extends HttpServlet {
 	 * Attention: Please always synchronize access on the returned
 	 * ServletContext on itself, to ensure that the access on it is always
 	 * correctly synchronized over all objects that share it.
-	 * 
+	 *
 	 * Note: This doesn't really return the servlectContext in the state it was
 	 * during init(), since there's only one context per servlet (as far as I
 	 * know), which might be changed by other methods.
-	 * 
+	 *
 	 * @return the context which was also filled with init params from web.xml
 	 */
 	public ServletContext getServletContextFromInit() {
@@ -618,23 +618,23 @@ public class Restless extends HttpServlet {
 	 * Called from the servlet environment if
 	 * &lt;load-on-startup&gt;1&lt;/load-on-startup&gt; is in web.xml set for
 	 * the Restless servlet.
-	 * 
+	 *
 	 * @see javax.servlet.GenericServlet#init()
 	 * @param servletConfig
 	 * @NeverNull
 	 */
 	@Override
-	public void init(@NeverNull ServletConfig servletConfig) {
+	public void init(@NeverNull final ServletConfig servletConfig) {
 		/*
 		 * this is only run once, so it doesn't need to be thread-safe!
 		 */
 
 		/* measure boot performance */
-		NanoClock clock = new NanoClock();
+		final NanoClock clock = new NanoClock();
 		clock.start();
 		try {
 			super.init(servletConfig);
-		} catch (ServletException e) {
+		} catch (final ServletException e) {
 			throw new RuntimeException("Could not initialise super servlet", e);
 		}
 		clock.stopAndStart("super.init");
@@ -657,10 +657,10 @@ public class Restless extends HttpServlet {
 		this.servletContext = servletConfig.getServletContext();
 
 		/** copy init parameters for others to use */
-		Enumeration<?> enumeration = servletConfig.getInitParameterNames();
+		final Enumeration<?> enumeration = servletConfig.getInitParameterNames();
 		while (enumeration.hasMoreElements()) {
-			String key = (String) enumeration.nextElement();
-			String value = servletConfig.getInitParameter(key);
+			final String key = (String) enumeration.nextElement();
+			final String value = servletConfig.getInitParameter(key);
 			this.initParams.put(key, value);
 		}
 		/** provide some synthetic properties */
@@ -678,17 +678,17 @@ public class Restless extends HttpServlet {
 
 		this.error404resourceClassname = this.initParams.get(INIT_PARAM_404RESOURCE);
 
-		List<String> appClassNames = RestlessStatic.parseToList(this.apps);
+		final List<String> appClassNames = RestlessStatic.parseToList(this.apps);
 		clock.stop("param-parsing");
-		for (String appClassName : appClassNames) {
+		for (final String appClassName : appClassNames) {
 			log.info("Restless: Loading restless app '" + appClassName + "'...");
 			try {
 				clock.start();
-				String stats = instatiateAndInit(appClassName);
+				final String stats = instatiateAndInit(appClassName);
 				clock.stop("init-app-" + appClassName);
 				clock.append(" { ").append(stats).append(" } ");
 				log.debug("Restless: ... done loading restless app '" + appClassName + "'.");
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				log.error("Failed to init Restless app '" + appClassName + "' ", e);
 			}
 		}
@@ -699,7 +699,7 @@ public class Restless extends HttpServlet {
 		clock.stop("add-built-in-services");
 
 		if (log.isDebugEnabled()) {
-			for (RestlessMethod rm : this.methods) {
+			for (final RestlessMethod rm : this.methods) {
 				log.debug("Mapping " + rm.getHttpMethod() + " " + rm.getPathTemplate().getRegex()
 						+ " --> "
 						+ RestlessStatic.instanceOrClass_className(rm.getInstanceOrClass()) + "#"
@@ -726,37 +726,37 @@ public class Restless extends HttpServlet {
 
 		// try to instantiate
 		try {
-			Class<?> loggerFactoryClass = Class.forName(this.loggerFactory);
+			final Class<?> loggerFactoryClass = Class.forName(this.loggerFactory);
 			try {
-				Constructor<?> constructor = loggerFactoryClass.getConstructor();
+				final Constructor<?> constructor = loggerFactoryClass.getConstructor();
 				try {
-					Object instance = constructor.newInstance();
+					final Object instance = constructor.newInstance();
 					try {
-						ILoggerFactorySPI spi = (ILoggerFactorySPI) instance;
+						final ILoggerFactorySPI spi = (ILoggerFactorySPI) instance;
 						LoggerFactory.setLoggerFactorySPI(spi, "Restless from web.xml/param:"
 								+ INIT_PARAM_XYDRA_LOG_BACKEND);
-					} catch (ClassCastException e) {
+					} catch (final ClassCastException e) {
 						throw new RuntimeException(
 								"Given loggerFactory class is not an implementation of ILoggerFactorySPI",
 								e);
 					}
-				} catch (IllegalArgumentException e) {
+				} catch (final IllegalArgumentException e) {
 					throw new RuntimeException("Could not instantiate loggerFactory class", e);
-				} catch (InstantiationException e) {
+				} catch (final InstantiationException e) {
 					throw new RuntimeException("Could not instantiate loggerFactory class", e);
-				} catch (IllegalAccessException e) {
+				} catch (final IllegalAccessException e) {
 					throw new RuntimeException("Could not instantiate loggerFactory class", e);
-				} catch (InvocationTargetException e) {
+				} catch (final InvocationTargetException e) {
 					throw new RuntimeException("Could not instantiate loggerFactory class", e);
 				}
-			} catch (SecurityException e) {
+			} catch (final SecurityException e) {
 				throw new RuntimeException("Could not get constructor of loggerFactory class", e);
-			} catch (NoSuchMethodException e) {
+			} catch (final NoSuchMethodException e) {
 				throw new RuntimeException(
 						"Found no parameterless constructor in loggerFactory class", e);
 			}
 
-		} catch (ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			throw new RuntimeException("Could not load loggerFactory class", e);
 		}
 	}
@@ -766,13 +766,13 @@ public class Restless extends HttpServlet {
 
 	/**
 	 * IMPROVE make this faster
-	 * 
+	 *
 	 * @param appClassName fully qualified java class name
 	 * @return a String with statistics
 	 * @throws RuntimeException for many reflection-related issues
 	 */
-	private String instatiateAndInit(String appClassName) throws RuntimeException {
-		NanoClock clock = new NanoClock();
+	private String instatiateAndInit(final String appClassName) throws RuntimeException {
+		final NanoClock clock = new NanoClock();
 		RestlessStatic.invokeStaticMethod(clock, appClassName, "restless",
 				RESTLESS_METHOD_PARAMETERS, new Object[] { this, "" });
 		return clock.getStats();
@@ -782,7 +782,7 @@ public class Restless extends HttpServlet {
 	 * @param requestListener
 	 * @CanBeNull
 	 */
-	public void removeRequestListener(@CanBeNull IRequestListener requestListener) {
+	public void removeRequestListener(@CanBeNull final IRequestListener requestListener) {
 		synchronized (this.requestListeners) {
 			this.requestListeners.remove(requestListener);
 		}
@@ -795,7 +795,7 @@ public class Restless extends HttpServlet {
 	 * currently executing a service on this servlet are finished.
 	 */
 	@Override
-	protected void service(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res)
+	protected void service(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse res)
 			throws ServletException, IOException {
 		enteringServiceMethod();
 		try {
@@ -833,7 +833,7 @@ public class Restless extends HttpServlet {
 	 * intervals to check whether the servlet is being shut down or not and act
 	 * accordingly (i.e. try to finish in a safe way as fast as possible when
 	 * it's shutting down).
-	 * 
+	 *
 	 * @return true, if the servlet is being shut down/destroyed.
 	 */
 	public boolean isShuttingDown() {
@@ -853,7 +853,7 @@ public class Restless extends HttpServlet {
 			while (numServices() > 0) {
 				try {
 					Thread.sleep(1000);
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 				}
 			}
 
@@ -864,7 +864,7 @@ public class Restless extends HttpServlet {
 
 			/* call unloadHandlers */
 			try {
-				for (RestlessUnloadHandler ruh : this.unloadHandlers) {
+				for (final RestlessUnloadHandler ruh : this.unloadHandlers) {
 					ruh.onBeforeUnload();
 				}
 			} finally {
@@ -876,7 +876,7 @@ public class Restless extends HttpServlet {
 	/**
 	 * Generic method to map incoming web requests to mapped
 	 * {@link RestlessMethod}. Match path and HTTP method.
-	 * 
+	 *
 	 * @param req
 	 * @NeverNull
 	 * @param res
@@ -885,10 +885,10 @@ public class Restless extends HttpServlet {
 	protected void restlessService(@NeverNull final HttpServletRequest req,
 			@NeverNull final HttpServletResponse res) {
 
-		NanoClock requestClock = new NanoClock().start();
+		final NanoClock requestClock = new NanoClock().start();
 
 		/* If running on localhost, we might tweak the host */
-		boolean runningOnLocalhost = TweakedRequest.isLocalhost(req.getServerName());
+		final boolean runningOnLocalhost = TweakedRequest.isLocalhost(req.getServerName());
 		final HttpServletRequest reqHandedDown = runningOnLocalhost ? new TweakedRequest(req) : req;
 
 		// find class mapped to path
@@ -921,13 +921,13 @@ public class Restless extends HttpServlet {
 		 * Searching and executing the correct method is split up in two
 		 * different synchronized blocks so that the list of methods is only
 		 * blocked during the search-process.
-		 * 
+		 *
 		 * Find the correct method, get the necessary parameters...
 		 */
 		RestlessMethodExecutionParameters params = null;
 		RestlessMethod restlessMethod = null;
 		synchronized (this.methods) {
-			for (RestlessMethod m : this.methods) {
+			for (final RestlessMethod m : this.methods) {
 				/*
 				 * if secure access, ignore all public methods. if insecure
 				 * access, ignore all secure methods: Skip all restlessMethods
@@ -943,7 +943,7 @@ public class Restless extends HttpServlet {
 								params = m.prepareMethodExecution(this, reqHandedDown, res,
 										requestClock);
 
-							} catch (IOException e) {
+							} catch (final IOException e) {
 								throw new RuntimeException(e);
 							}
 							if (params != null) {
@@ -969,7 +969,7 @@ public class Restless extends HttpServlet {
 			assert foundMethod == true;
 			try {
 				restlessMethod.execute(params, this, reqHandedDown, res);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -979,7 +979,7 @@ public class Restless extends HttpServlet {
 				log.info("Launching custom error404 handler: " + this.error404resourceClassname
 						+ " for request on path '" + path + "'");
 				// define context
-				IRestlessContext restlessContext = new RestlessContextImpl(this, req, res, "error-"
+				final IRestlessContext restlessContext = new RestlessContextImpl(this, req, res, "error-"
 						+ UUID.randomUUID());
 				RestlessStatic.invokeStaticMethod(this.error404resourceClassname, "error404",
 						new Class[] { IRestlessContext.class }, new Object[] { restlessContext });
@@ -987,12 +987,12 @@ public class Restless extends HttpServlet {
 				log.info("Delegateto default");
 				try {
 					delegateToDefaultServlet(reqHandedDown, res);
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					throw new RuntimeException(e);
 				}
 			} else {
 				// produce even better error message?
-				String msg = "No handler matched your "
+				final String msg = "No handler matched your "
 						+ reqHandedDown.getMethod()
 						+ "-request path '"
 						+ path
@@ -1002,7 +1002,7 @@ public class Restless extends HttpServlet {
 				log.warn(msg);
 				try {
 					res.sendError(404, msg);
-				} catch (IOException e) {
+				} catch (final IOException e) {
 				}
 			}
 		}
@@ -1010,10 +1010,10 @@ public class Restless extends HttpServlet {
 		// make super-sure all buffers are flushed
 		try {
 			res.flushBuffer();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 		}
 
-		long requestTime = requestClock.stop("done").getDurationSinceStart();
+		final long requestTime = requestClock.stop("done").getDurationSinceStart();
 		log.info("Took " + String.format("%5d", requestTime) + "ms for request to '"
 				+ req.getRequestURI() + "'");
 		log.debug("Timing stats for request to '" + req.getRequestURI() + "': "
@@ -1022,22 +1022,22 @@ public class Restless extends HttpServlet {
 
 	/**
 	 * Helper method to make writing JUnit tests easier.
-	 * 
+	 *
 	 * When run in a servlet container, this method is simply a short-cut for
 	 * getServletContext().setAttribute(key,value). Otherwise a local hash-map
 	 * is used.
-	 * 
+	 *
 	 * @param key attribute name @NeverNull
 	 * @param value attribute value @NeverNull
 	 */
 
-	public void setServletContextAttribute(@NeverNull String key, @NeverNull Object value) {
+	public void setServletContextAttribute(@NeverNull final String key, @NeverNull final Object value) {
 		try {
-			ServletContext sc = this.getServletContext();
+			final ServletContext sc = getServletContext();
 			synchronized (sc) {
 				sc.setAttribute(key, value);
 			}
-		} catch (NullPointerException e) {
+		} catch (final NullPointerException e) {
 			// lazy init
 			if (this.localContext == null) {
 				this.localContext = new HashMap<String, Object>();

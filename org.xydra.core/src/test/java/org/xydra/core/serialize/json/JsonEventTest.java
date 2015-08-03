@@ -6,15 +6,15 @@ import org.xydra.core.serialize.XydraSerializer;
 
 
 public class JsonEventTest extends AbstractSerializedEventTest {
-	
+
 	@Override
 	protected XydraParser getParser() {
 		return new JsonParser();
 	}
-	
+
 	@Override
 	protected XydraSerializer getSerializer() {
 		return new JsonSerializer();
 	}
-	
+
 }

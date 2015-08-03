@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.core.XX;
@@ -14,18 +15,18 @@ public class EntityTree {
 	HashSet<XId> openRepos = new HashSet<XId>();
 	HashMap<XAddress, Set<XAddress>> modelObjectMap = new HashMap<XAddress, Set<XAddress>>();
 
-	public void add(XAddress entityAddress) {
+	public void add(final XAddress entityAddress) {
 
 		/* assert repository is opened */
-		XId entityRepoId = entityAddress.getRepository();
+		final XId entityRepoId = entityAddress.getRepository();
 		this.openRepos.add(entityRepoId);
 
 		if (entityAddress.getModel() != null) {
 			/* find out if model is already opened */
-			XAddress entityModelAddress = XX.resolveModel(
-					XX.toAddress(entityRepoId, null, null, null), entityAddress.getModel());
+			final XAddress entityModelAddress = Base.resolveModel(
+					Base.toAddress(entityRepoId, null, null, null), entityAddress.getModel());
 
-			Set<XAddress> openModels = this.modelObjectMap.keySet();
+			final Set<XAddress> openModels = this.modelObjectMap.keySet();
 			if (openModels.contains(entityModelAddress)) {
 				// nothing: model is already opened
 			} else {
@@ -35,46 +36,46 @@ public class EntityTree {
 			if (entityAddress.getObject() != null) {
 
 				/* find out if object is already opened */
-				XAddress objectAddress = XX.resolveObject(
-						XX.toAddress(entityRepoId, null, null, null), entityAddress.getModel(),
+				final XAddress objectAddress = Base.resolveObject(
+						Base.toAddress(entityRepoId, null, null, null), entityAddress.getModel(),
 						entityAddress.getObject());
 
-				Set<XAddress> openObjectSet = this.modelObjectMap.get(entityModelAddress);
+				final Set<XAddress> openObjectSet = this.modelObjectMap.get(entityModelAddress);
 				openObjectSet.add(objectAddress);
 			}
 		}
 	}
 
-	public void remove(XAddress entityAddress) {
+	public void remove(final XAddress entityAddress) {
 
-		XId entityRepoId = entityAddress.getRepository();
-		XAddress entityModelAddress = XX.resolveModel(XX.toAddress(entityRepoId, null, null, null),
+		final XId entityRepoId = entityAddress.getRepository();
+		final XAddress entityModelAddress = Base.resolveModel(Base.toAddress(entityRepoId, null, null, null),
 				entityAddress.getModel());
 
 		if (entityAddress.getObject() != null) {
-			XAddress objectAddress = XX.resolveObject(XX.toAddress(entityRepoId, null, null, null),
+			final XAddress objectAddress = Base.resolveObject(Base.toAddress(entityRepoId, null, null, null),
 					entityAddress.getModel(), entityAddress.getObject());
-			Set<XAddress> openObjectSet = this.modelObjectMap.get(entityModelAddress);
+			final Set<XAddress> openObjectSet = this.modelObjectMap.get(entityModelAddress);
 			openObjectSet.remove(objectAddress);
 		} else {
 			if (entityAddress.getModel() != null) {
 				this.modelObjectMap.remove(entityModelAddress);
 			} else {
-				XId repoId = entityAddress.getRepository();
+				final XId repoId = entityAddress.getRepository();
 				this.openRepos.remove(repoId);
 
 				/* remove all models, which contain that repo */
-				Set<Entry<XAddress, Set<XAddress>>> modelObjectEntries = this.modelObjectMap
+				final Set<Entry<XAddress, Set<XAddress>>> modelObjectEntries = this.modelObjectMap
 						.entrySet();
 
-				Set<XAddress> modelToBeDeleted = new HashSet<XAddress>();
-				for (Entry<XAddress, Set<XAddress>> entry : modelObjectEntries) {
-					XAddress modelKey = entry.getKey();
+				final Set<XAddress> modelToBeDeleted = new HashSet<XAddress>();
+				for (final Entry<XAddress, Set<XAddress>> entry : modelObjectEntries) {
+					final XAddress modelKey = entry.getKey();
 					if (modelKey.getRepository().equals(repoId)) {
 						modelToBeDeleted.add(modelKey);
 					}
 				}
-				for (XAddress xAddress : modelToBeDeleted) {
+				for (final XAddress xAddress : modelToBeDeleted) {
 					this.modelObjectMap.remove(xAddress);
 				}
 			}
@@ -86,17 +87,17 @@ public class EntityTree {
 		String resultString = "";
 
 		resultString += "open Repos: \n";
-		for (XId repoId : this.openRepos) {
+		for (final XId repoId : this.openRepos) {
 			resultString += repoId.toString() + ", ";
 		}
 
 		resultString += "\n Models: \n";
-		for (XAddress modelAddress : this.modelObjectMap.keySet()) {
+		for (final XAddress modelAddress : this.modelObjectMap.keySet()) {
 			resultString += modelAddress.toString() + ", ";
 
-			Set<XAddress> objectSet = this.modelObjectMap.get(modelAddress);
+			final Set<XAddress> objectSet = this.modelObjectMap.get(modelAddress);
 			resultString += "objects in this model: \n";
-			for (XAddress xAddress : objectSet) {
+			for (final XAddress xAddress : objectSet) {
 				resultString += xAddress.toString() + ", ";
 			}
 			resultString += "\n";

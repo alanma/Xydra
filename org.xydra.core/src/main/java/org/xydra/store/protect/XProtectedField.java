@@ -18,25 +18,25 @@ import org.xydra.core.model.XLoggedField;
  * if a method is called and only executes the method, if the actor is allowed
  * to execute it (otherwise {@link AccessException XAccessExceptions} will be
  * thrown).
- * 
+ *
  * All change operations like manipulating the stored {@link XValue} executed on
  * an XProtectedField will directly affect the wrapped {@link XField}.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 public interface XProtectedField extends XLoggedField {
-	
+
 	/**
 	 * Executes the given {@link XCommand} if possible.
-	 * 
+	 *
 	 * This method will fail if,
 	 * <ul>
 	 * <li>the given {@link XCommand} cannot be executed
 	 * <li>the field-{@link XId} specified in the {@link XCommand} does not
 	 * concur with the {@link XId} of this field
 	 * </ul>
-	 * 
+	 *
 	 * @param command The {@link XCommand} which is to be executed
 	 * @return {@link XCommand#FAILED} if the {@link XCommand} failed,
 	 *         {@link XCommand#NOCHANGE} if the {@link XCommand} didn't change
@@ -48,12 +48,12 @@ public interface XProtectedField extends XLoggedField {
 	 */
 	@ModificationOperation
 	long executeFieldCommand(XFieldCommand command);
-	
+
 	/**
 	 * @return the actor that is represented by this interface. This is the
 	 *         actor that is recorded for change operations. Operations will
 	 *         only succeed if this actor has access.
 	 */
 	XId getActor();
-	
+
 }

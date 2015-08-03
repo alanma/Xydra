@@ -8,7 +8,7 @@ import org.xydra.base.XIdProvider;
 
 /**
  * An implementation of {@link XIdProvider}
- * 
+ *
  * @author xamde
  * @author kaidel
  */
@@ -16,10 +16,10 @@ import org.xydra.base.XIdProvider;
 @RunsInGWT(true)
 @RequiresAppEngine(false)
 public class MemoryStringIDProvider extends BaseStringIDProvider implements XIdProvider {
-    
+
     @Override
-    protected XId createInstance(String uriString) {
+    protected XId createInstance(final String uriString) {
         return new MemoryStringID(uriString);
     }
-    
+
 }

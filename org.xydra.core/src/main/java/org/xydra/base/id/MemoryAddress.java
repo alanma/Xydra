@@ -12,9 +12,9 @@ import org.xydra.sharedutils.XyAssert;
 
 /**
  * An implementation of {@link XAddress}
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 public class MemoryAddress implements XAddress, Serializable {
 
@@ -32,7 +32,7 @@ public class MemoryAddress implements XAddress, Serializable {
 
 	/**
 	 * Creates a new MemoryAddress.
-	 * 
+	 *
 	 * @param repository The {@link XId} of the repository which holds/is the
 	 *            element this address refers to (may be null)
 	 * @param model The {@link XId} of the model which holds/is the element this
@@ -41,14 +41,14 @@ public class MemoryAddress implements XAddress, Serializable {
 	 *            this address refers to (may be null)
 	 * @param field The {@link XId} of the field which is the element this
 	 *            address refers to (may be null)
-	 * 
+	 *
 	 * @throws IllegalArgumentException if the given tuple of {@link XId XIds}
 	 *             specify an illegal {@link XAddress}. Illegal {@link XAddress
 	 *             XAddresses} are of the form (null, null, null, null),
 	 *             (repoID, null, objectId, null or fieldId), (repoID, null,
 	 *             null, fieldId) or (repoID or null, modelId, null, fieldId)
 	 */
-	protected MemoryAddress(XId repository, XId model, XId object, XId field) {
+	protected MemoryAddress(final XId repository, final XId model, final XId object, final XId field) {
 
 		if ((repository != null || model != null) && object == null && field != null) {
 			throw new IllegalArgumentException(
@@ -73,9 +73,9 @@ public class MemoryAddress implements XAddress, Serializable {
 	}
 
 	@Override
-	public int compareTo(XAddress other) {
+	public int compareTo(final XAddress other) {
 		// compare repos
-		if (this.getRepository() == null) {
+		if (getRepository() == null) {
 			if (other.getRepository() != null) {
 				return 1;
 			}
@@ -83,13 +83,13 @@ public class MemoryAddress implements XAddress, Serializable {
 			if (other.getRepository() == null) {
 				return -1;
 			}
-			int comparison = this.getRepository().compareTo(other.getRepository());
+			final int comparison = getRepository().compareTo(other.getRepository());
 			if (comparison != 0) {
 				return comparison;
 			}
 		}
 		/* repos are either both null or equal => compare models */
-		if (this.getModel() == null) {
+		if (getModel() == null) {
 			if (other.getModel() != null) {
 				return 1;
 			}
@@ -97,13 +97,13 @@ public class MemoryAddress implements XAddress, Serializable {
 			if (other.getModel() == null) {
 				return -1;
 			}
-			int comparison = this.getModel().compareTo(other.getModel());
+			final int comparison = getModel().compareTo(other.getModel());
 			if (comparison != 0) {
 				return comparison;
 			}
 		}
 		/* models are either both null or equal => compare objects */
-		if (this.getObject() == null) {
+		if (getObject() == null) {
 			if (other.getObject() != null) {
 				return 1;
 			}
@@ -111,13 +111,13 @@ public class MemoryAddress implements XAddress, Serializable {
 			if (other.getObject() == null) {
 				return -1;
 			}
-			int comparison = this.getObject().compareTo(other.getObject());
+			final int comparison = getObject().compareTo(other.getObject());
 			if (comparison != 0) {
 				return comparison;
 			}
 		}
 		/* objects are either both null or equal => compare fields */
-		if (this.getField() == null) {
+		if (getField() == null) {
 			if (other.getField() != null) {
 				return 1;
 			}
@@ -125,7 +125,7 @@ public class MemoryAddress implements XAddress, Serializable {
 			if (other.getField() == null) {
 				return -1;
 			}
-			int comparison = this.getField().compareTo(other.getField());
+			final int comparison = getField().compareTo(other.getField());
 			if (comparison != 0) {
 				return comparison;
 			}
@@ -135,7 +135,7 @@ public class MemoryAddress implements XAddress, Serializable {
 	}
 
 	@Override
-	public boolean contains(XAddress descendant) {
+	public boolean contains(final XAddress descendant) {
 
 		if (!XI.equals(this.repository, descendant.getRepository())) {
 			return false;
@@ -160,12 +160,12 @@ public class MemoryAddress implements XAddress, Serializable {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 
 		if (!(obj instanceof XAddress)) {
 			return false;
 		}
-		XAddress other = (XAddress) obj;
+		final XAddress other = (XAddress) obj;
 		return XI.equals(this.repository, other.getRepository())
 				&& XI.equals(this.model, other.getModel())
 				&& XI.equals(this.object, other.getObject())
@@ -173,7 +173,7 @@ public class MemoryAddress implements XAddress, Serializable {
 	}
 
 	@Override
-	public boolean equalsOrContains(XAddress descendant) {
+	public boolean equalsOrContains(final XAddress descendant) {
 
 		if (!XI.equals(this.repository, descendant.getRepository())) {
 			return false;
@@ -194,7 +194,7 @@ public class MemoryAddress implements XAddress, Serializable {
 		// same repository, model and object (may be null)
 
 		return XI.equals(this.field, descendant.getField())
-				|| (this.object != null && this.field == null);
+				|| this.object != null && this.field == null;
 
 	}
 
@@ -302,7 +302,7 @@ public class MemoryAddress implements XAddress, Serializable {
 	}
 
 	@Override
-	public boolean isParentOf(XAddress child) {
+	public boolean isParentOf(final XAddress child) {
 
 		if (!XI.equals(this.repository, child.getRepository())) {
 			return false;
@@ -335,12 +335,12 @@ public class MemoryAddress implements XAddress, Serializable {
 	 * @return a unique, complete representation of this {@link XAddress} with
 	 *         the fixed format = '/' + repoID + '/' + modelId + '/' + objectId
 	 *         + '/' + fieldId. Empty {@link XId XIds} are represented by '-'.
-	 * 
+	 *
 	 *         Always starts with '/', never ends with '/'.
 	 */
 	@Override
 	public String toURI() {
-		StringBuffer uri = new StringBuffer();
+		final StringBuffer uri = new StringBuffer();
 
 		uri.append('/');
 		if (this.repository != null) {

@@ -5,30 +5,30 @@ import org.xydra.annotations.NeverNull;
 
 /**
  * A provider of {@link XId} objects.
- * 
+ *
  * @author xamde
  * @author kaidel
  */
 public interface XIdProvider {
-    
+
     /**
      * Maximal length of XIds. 100 characters long = maximal compatibility with
      * all back-ends such as Google AppEngine.
      */
     byte MAX_LENGTH = 100;
-    
+
     /**
      * @return a new random unique {@link XId}
      */
     XId createUniqueId();
-    
+
     /**
      * Creates an {@link XAddress} object from its string representation. Valid
      * string representations of {@link XAddress XAddresses} are
      * "modelId/objectId/fieldId", "modelId/objectId" and "modelId" where
      * modelId, objectId and fieldId are valid string representations of
      * {@link XId XIds} (ie: allowed parameters for the fromString() method).
-     * 
+     *
      * @param address A string with the described format, never null
      * @return an new {@link XAddress} object representing the specified address
      * @throws IllegalArgumentException if one of the given URI components is
@@ -39,18 +39,18 @@ public interface XIdProvider {
      */
     @NeverNull
     XAddress fromAddress(String address) throws IllegalArgumentException, URIFormatException;
-    
+
     /**
      * Creates a new {@link XAddress} from the given components. The
      * {@link XAddress} will have the following format:
      * repositoryId/modelId/objectId/fieldId
-     * 
+     *
      * Some parameters can be null. An {@link XAddress} can address an
      * repository (repositoryId set, the rest null) model (modelId set,
      * repositoryId may be set, rest null), a object (objectId not null, fieldId
      * null, rest is set), or an field (fieldId not null, rest may or may not be
      * null).
-     * 
+     *
      * @param repositoryId The {@link XId} for the repository field of the
      *            {@link XAddress}
      * @param modelId The {@link XId} for the model field of the
@@ -66,7 +66,7 @@ public interface XIdProvider {
      *             is set)
      */
     XAddress fromComponents(XId repositoryId, XId modelId, XId objectId, XId fieldId);
-    
+
     /**
      * Creates an {@link XId} from a given string. The string must be a valid
      * XML 1.0 (TR, Fifth Edition) name (@see
@@ -74,7 +74,7 @@ public interface XIdProvider {
      * contain any ':' characters. The string SHOULD be at most 100 characters
      * long for maximal compatibility with all back-ends such as Google
      * AppEngine.
-     * 
+     *
      * @param name the String which will be used to create the {@link XId}.
      * @return a new unique {@link XId} object calculated from the given name
      * @throws IllegalArgumentException if the given name is not a valid
@@ -82,5 +82,5 @@ public interface XIdProvider {
      * @see #MAX_LENGTH
      */
     XId fromString(String name) throws IllegalArgumentException;
-    
+
 }

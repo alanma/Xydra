@@ -7,6 +7,7 @@ import java.util.Set;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
@@ -67,13 +68,13 @@ XAuthorisationManager, XAuthorisationDatabaseWitListeners {
 	public void grantGroupAllAccessToRepository(final XId administratorGroupId, final XId repositoryId) {
 		// add built-in access rights
 		getAuthorisationDatabase().setAccess(administratorGroupId,
-				XX.toAddress(repositoryId, null, null, null), XA.ACCESS_WRITE, true);
+				Base.toAddress(repositoryId, null, null, null), XA.ACCESS_WRITE, true);
 		getAuthorisationDatabase().setAccess(administratorGroupId,
-				XX.toAddress(repositoryId, null, null, null), XA.ACCESS_READ, true);
+				Base.toAddress(repositoryId, null, null, null), XA.ACCESS_READ, true);
 		getAuthorisationDatabase().setAccess(administratorGroupId,
-				XX.toAddress(repositoryId, null, null, null), XA.ACCESS_DENY, true);
+				Base.toAddress(repositoryId, null, null, null), XA.ACCESS_DENY, true);
 		getAuthorisationDatabase().setAccess(administratorGroupId,
-				XX.toAddress(repositoryId, null, null, null), XA.ACCESS_ALLOW, true);
+				Base.toAddress(repositoryId, null, null, null), XA.ACCESS_ALLOW, true);
 	}
 
 	/**

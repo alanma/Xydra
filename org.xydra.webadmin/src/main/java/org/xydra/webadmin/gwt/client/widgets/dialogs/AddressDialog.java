@@ -37,7 +37,7 @@ public class AddressDialog extends DialogBox {
 	@UiField
 	Button closeButton;
 
-	public AddressDialog(String entityIdText, String addressText) {
+	public AddressDialog(final String entityIdText, final String addressText) {
 
 		super();
 
@@ -45,20 +45,21 @@ public class AddressDialog extends DialogBox {
 		this.textArea.addKeyDownHandler(new KeyDownHandler() {
 
 			@Override
-			public void onKeyDown(KeyDownEvent event) {
-				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER)
+			public void onKeyDown(final KeyDownEvent event) {
+				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
 					AddressDialog.this.close();
+				}
 			}
 
 		});
 
 		this.setStyleName("dialogStyle");
 
-		this.setText("address for " + entityIdText);
+		setText("address for " + entityIdText);
 		// this.textArea.setReadOnly(true);
 		this.textArea.setVisibleLines(1);
 		this.textArea.setText(addressText);
-		this.center();
+		center();
 	}
 
 	public void selectEverything() {
@@ -66,12 +67,12 @@ public class AddressDialog extends DialogBox {
 	}
 
 	@UiHandler("closeButton")
-	void onClickClose(ClickEvent event) {
+	void onClickClose(final ClickEvent event) {
 		close();
 	}
 
 	private void close() {
-		this.removeFromParent();
+		removeFromParent();
 	}
 
 }

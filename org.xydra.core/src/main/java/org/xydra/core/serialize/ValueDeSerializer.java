@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.value.ValueType;
@@ -19,15 +20,16 @@ import org.xydra.index.query.Pair;
 
 @RunsInGWT(true)
 public class ValueDeSerializer {
-    
+
     /**
      * @param value not null
      * @return a pair of type/value, both represented as strings
      */
-    public static Pair<String,String> toStringPair(@NeverNull XValue value) {
-        if(value == null)
-            throw new IllegalArgumentException("value was null");
-        String typeStr = value.getType().name();
+    public static Pair<String,String> toStringPair(@NeverNull final XValue value) {
+        if(value == null) {
+			throw new IllegalArgumentException("value was null");
+		}
+        final String typeStr = value.getType().name();
         String valueStr;
         if(value.getType() == ValueType.Binary) {
             valueStr = SerializedValue.serializeBinaryContent(((XBinaryValue)value).getValue());
@@ -36,55 +38,59 @@ public class ValueDeSerializer {
         }
         return new Pair<String,String>(typeStr, valueStr);
     }
-    
-    public static XValue fromStrings(String typeStr, String valueStr) {
-        if(typeStr == null)
-            throw new IllegalArgumentException("typeStr was null");
+
+    public static XValue fromStrings(final String typeStr, final String valueStr) {
+        if(typeStr == null) {
+			throw new IllegalArgumentException("typeStr was null");
+		}
         String val = valueStr;
-        if(val == null)
-            throw new IllegalArgumentException("valueStr was null");
+        if(val == null) {
+			throw new IllegalArgumentException("valueStr was null");
+		}
         if(val.equals("null")) {
             return null;
         }
         try {
-            ValueType type = ValueType.valueOf(typeStr);
-            
+            final ValueType type = ValueType.valueOf(typeStr);
+
             if(val.startsWith("=")) {
                 /* remove encoding trick to represent '123' as '="123"' */
                 val = val.substring(2, val.length() - 1);
             }
-            XValue value = toValue(type, val);
+            final XValue value = toValue(type, val);
             return value;
-        } catch(IllegalArgumentException e) {
+        } catch(final IllegalArgumentException e) {
             throw new IllegalArgumentException("Could not parse type '" + typeStr + "' for value '"
                     + val + "'", e);
         }
     }
-    
-    public static XValue fromStringPair(Pair<String,String> typeValue) {
-        if(typeValue == null)
-            throw new IllegalArgumentException("pair was null");
-        String typeStr = typeValue.getFirst();
-        String valueStr = typeValue.getSecond();
+
+    public static XValue fromStringPair(final Pair<String,String> typeValue) {
+        if(typeValue == null) {
+			throw new IllegalArgumentException("pair was null");
+		}
+        final String typeStr = typeValue.getFirst();
+        final String valueStr = typeValue.getSecond();
         return fromStrings(typeStr, valueStr);
     }
-    
+
     /**
      * @param type
      * @param valueStr can be null
      * @return a value or null
      */
     @SuppressWarnings("incomplete-switch")
-    public static XValue toValue(ValueType type, String valueStr) {
-        if(type == null)
-            throw new IllegalArgumentException("type was null");
+    public static XValue toValue(final ValueType type, final String valueStr) {
+        if(type == null) {
+			throw new IllegalArgumentException("type was null");
+		}
         if(valueStr == null) {
             throw new IllegalArgumentException("value was null");
         }
         if(valueStr.trim().equals("null")) {
             return null;
         }
-        
+
         if(type.isCollection()) {
             // parse '[' ... ',' ... ']'
             List<String> list;
@@ -101,30 +107,30 @@ public class ValueDeSerializer {
                 throw new IllegalArgumentException("list value of type " + type
                         + " does not end with ']'");
             }
-            String[] parts = values.split(",[ ]?");
+            final String[] parts = values.split(",[ ]?");
             list = Arrays.asList(parts);
-            XValue collectionValue = toCollectionValue(type, list);
+            final XValue collectionValue = toCollectionValue(type, list);
             return collectionValue;
         } else {
             switch(type) {
             case Address:
-                return XX.toAddress(valueStr.trim());
+                return Base.toAddress(valueStr.trim());
             case Boolean:
-                boolean b = Boolean.parseBoolean(valueStr.trim());
+                final boolean b = Boolean.parseBoolean(valueStr.trim());
                 return XV.toValue(b);
             case Binary:
-                byte[] bytes = SerializedValue.deserializeBinaryContent(valueStr);
+                final byte[] bytes = SerializedValue.deserializeBinaryContent(valueStr);
                 return XV.toValue(bytes);
             case Double:
-                double d = Double.parseDouble(valueStr.trim());
+                final double d = Double.parseDouble(valueStr.trim());
                 return XV.toValue(d);
             case Id:
-                return XX.toId(valueStr.trim());
+                return Base.toId(valueStr.trim());
             case Integer:
-                int i = ParseNumber.parseInt(valueStr.trim());
+                final int i = ParseNumber.parseInt(valueStr.trim());
                 return XV.toValue(i);
             case Long:
-                long l = Long.parseLong(valueStr.trim());
+                final long l = Long.parseLong(valueStr.trim());
                 return XV.toValue(l);
             case String:
                 return XV.toValue(valueStr);
@@ -133,21 +139,21 @@ public class ValueDeSerializer {
         throw new IllegalArgumentException("Could not parse " + type + " from string '" + valueStr
                 + "'");
     }
-    
+
     /**
      * @param primitiveType Xydra type
      * @param valueStrs
      * @return a list of corresponding Java type
      */
     @SuppressWarnings("unchecked")
-    private static <T> List<T> toListOfType(ValueType primitiveType, List<String> valueStrs) {
-        
-        List<T> list = new ArrayList<T>();
-        for(String s : valueStrs) {
+    private static <T> List<T> toListOfType(final ValueType primitiveType, final List<String> valueStrs) {
+
+        final List<T> list = new ArrayList<T>();
+        for(final String s : valueStrs) {
             switch(primitiveType) {
             case Address:
             case Id:
-                XValue value = toValue(primitiveType, s);
+                final XValue value = toValue(primitiveType, s);
                 list.add((T)value);
                 break;
             case Boolean:
@@ -166,56 +172,56 @@ public class ValueDeSerializer {
                 list.add((T)s);
                 break;
             case Binary:
-                
+
             default:
                 throw new RuntimeException("Could not convert list to type " + primitiveType);
             }
         }
         return list;
     }
-    
-    private static <T> XValue toCollectionValue(ValueType type, List<String> list) {
+
+    private static <T> XValue toCollectionValue(final ValueType type, final List<String> list) {
         switch(type) {
         case AddressList:
-            List<XAddress> al = toListOfType(ValueType.Address, list);
+            final List<XAddress> al = toListOfType(ValueType.Address, list);
             return XV.toAddressListValue(al);
         case AddressSet:
-            List<XAddress> as = toListOfType(ValueType.Address, list);
+            final List<XAddress> as = toListOfType(ValueType.Address, list);
             return XV.toAddressSetValue(as);
         case AddressSortedSet:
-            List<XAddress> ass = toListOfType(ValueType.Address, list);
+            final List<XAddress> ass = toListOfType(ValueType.Address, list);
             return XV.toAddressSortedSetValue(ass);
         case BooleanList:
-            List<Boolean> booll = toListOfType(ValueType.Boolean, list);
+            final List<Boolean> booll = toListOfType(ValueType.Boolean, list);
             return XV.toBooleanListValue(booll);
         case DoubleList:
-            List<Double> dl = toListOfType(ValueType.Double, list);
+            final List<Double> dl = toListOfType(ValueType.Double, list);
             return XV.toDoubleListValue(dl);
         case IdList:
-            List<XId> idl = toListOfType(ValueType.Id, list);
+            final List<XId> idl = toListOfType(ValueType.Id, list);
             return XV.toIdListValue(idl);
         case IdSet:
-            List<XId> ids = toListOfType(ValueType.Id, list);
+            final List<XId> ids = toListOfType(ValueType.Id, list);
             return XV.toIdSetValue(ids);
         case IdSortedSet:
-            List<XId> idss = toListOfType(ValueType.Id, list);
+            final List<XId> idss = toListOfType(ValueType.Id, list);
             return XV.toIdSortedSetValue(idss);
         case IntegerList:
-            List<Integer> intl = toListOfType(ValueType.Integer, list);
+            final List<Integer> intl = toListOfType(ValueType.Integer, list);
             return XV.toIntegerListValue(intl);
         case LongList:
-            List<Long> longl = toListOfType(ValueType.Long, list);
+            final List<Long> longl = toListOfType(ValueType.Long, list);
             return XV.toLongListValue(longl);
         case StringList:
-            List<String> sl = toListOfType(ValueType.String, list);
+            final List<String> sl = toListOfType(ValueType.String, list);
             return XV.toStringListValue(sl);
         case StringSet:
-            List<String> ss = toListOfType(ValueType.String, list);
+            final List<String> ss = toListOfType(ValueType.String, list);
             return XV.toStringSetValue(ss);
         default:
             throw new IllegalArgumentException("Could not parse " + type + " from strings '" + list
                     + "'");
         }
     }
-    
+
 }

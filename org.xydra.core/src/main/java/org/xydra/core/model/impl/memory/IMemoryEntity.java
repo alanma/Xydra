@@ -4,12 +4,12 @@ import org.xydra.base.rmof.XEntity;
 
 
 interface IMemoryEntity extends XEntity {
-    
+
     /**
      * @return the current revision number of this entity. Is 0 if the entity
      *         has been created. Can be -1 if this instance represents an entity
      *         that has not been created.
      */
     public long getRevisionNumber();
-    
+
 }

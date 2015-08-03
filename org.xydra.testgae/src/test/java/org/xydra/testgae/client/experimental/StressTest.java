@@ -16,13 +16,13 @@ public class StressTest {
 	@Test
 	public void testConcurrentRequests() {
 		long threads = 1;
-		long THREADS_PER_MINUTE_MAX = 1;
-		long start = System.currentTimeMillis();
+		final long THREADS_PER_MINUTE_MAX = 1;
+		final long start = System.currentTimeMillis();
 		while (true) {
-			long now = System.currentTimeMillis();
-			double threadsPerMinute = (now - start) / threads;
+			final long now = System.currentTimeMillis();
+			final double threadsPerMinute = (now - start) / threads;
 			if (threadsPerMinute < THREADS_PER_MINUTE_MAX) {
-				Worker worker = new Worker(threads++);
+				final Worker worker = new Worker(threads++);
 				worker.start();
 				log.info("Running threads: " + threads);
 			}
@@ -32,7 +32,7 @@ public class StressTest {
 
 	class Worker extends Thread {
 
-		public Worker(long id) {
+		public Worker(final long id) {
 			this.id = id;
 		}
 
@@ -47,7 +47,7 @@ public class StressTest {
 						"http://localhost:8787/test1");
 				try {
 					sleep((long) (Math.random() * 1000));
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					throw new RuntimeException(e);
 				}
 			}
@@ -55,19 +55,19 @@ public class StressTest {
 
 	}
 
-	public static void assertUrl(String logMsg, String absoluteUrl) {
+	public static void assertUrl(final String logMsg, final String absoluteUrl) {
 		log.info(logMsg + " trying url " + absoluteUrl);
 		try {
-			DefaultHttpClient httpclient = new DefaultHttpClient();
+			final DefaultHttpClient httpclient = new DefaultHttpClient();
 
-			HttpGet httpget = new HttpGet(absoluteUrl);
+			final HttpGet httpget = new HttpGet(absoluteUrl);
 
-			HttpResponse res = httpclient.execute(httpget);
+			final HttpResponse res = httpclient.execute(httpget);
 
-			int status = res.getStatusLine().getStatusCode();
+			final int status = res.getStatusLine().getStatusCode();
 
 			assertEquals(absoluteUrl, 200, status);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException("Failed on " + absoluteUrl, e);
 		}
 	}

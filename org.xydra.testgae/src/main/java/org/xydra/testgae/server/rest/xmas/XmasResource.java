@@ -15,20 +15,21 @@ import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
+import org.xydra.restless.utils.SharedHtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.testgae.server.model.xmas.Xmas;
 import org.xydra.xgae.gaeutils.GaeTestfixer;
 
 /**
  * Main resource for the Xmas sample application
- * 
+ *
  * @author xamde
  */
 public class XmasResource {
 
 	private static final Logger log = LoggerFactory.getLogger(XmasResource.class);
 
-	public static void restless(Restless r, String path) {
+	public static void restless(final Restless r, final String path) {
 		r.addGet(path + "/xmas/{repo}/add", XmasResource.class, "addData", // .
 				new RestlessParameter("repo", null),// .
 				new RestlessParameter("lists", "1"),// .
@@ -46,13 +47,13 @@ public class XmasResource {
 		WishlistResource.restless(r, path + "/xmas");
 	}
 
-	public void addData(String repoStr, String listsStr, String wishesStr, HttpServletRequest req,
-			HttpServletResponse res) throws IOException {
+	public void addData(final String repoStr, final String listsStr, final String wishesStr, final HttpServletRequest req,
+			final HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		ServletUtils.headers(res, "text/html");
-		int listCount = Integer.parseInt(listsStr);
-		int wishesCount = Integer.parseInt(wishesStr);
-		Writer w = HtmlUtils.startHtmlPage(res, "Xmas | Adding test data");
+		final int listCount = Integer.parseInt(listsStr);
+		final int wishesCount = Integer.parseInt(wishesStr);
+		final Writer w = HtmlUtils.startHtmlPage(res, "Xmas | Adding test data");
 		w.write("Adding test data ...?lists=" + listsStr + "&wishes=" + wishesStr
 				+ " wishes.<br />");
 		Xmas.addData(repoStr, listCount, wishesCount, w);
@@ -60,12 +61,12 @@ public class XmasResource {
 		HtmlUtils.endHtmlPage(w);
 	}
 
-	public void clearRepository(String repoStr, HttpServletRequest req, HttpServletResponse res)
+	public void clearRepository(final String repoStr, final HttpServletRequest req, final HttpServletResponse res)
 			throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		ServletUtils.headers(res, "text/html");
 
-		Writer w = HtmlUtils.startHtmlPage(res, "Xmas | Clearing repository");
+		final Writer w = HtmlUtils.startHtmlPage(res, "Xmas | Clearing repository");
 		w.write("Deleting all wishlists from repository '" + repoStr + "'.<br />");
 		Xmas.clearRepository(repoStr);
 		w.write("<a href='.'>Go back to repository '" + repoStr + "'</a>");
@@ -84,17 +85,17 @@ public class XmasResource {
 	 * @throws IOException
 	 *             ...
 	 */
-	public void get(String repoStr, String view, String format, HttpServletResponse res)
+	public void get(final String repoStr, final String view, final String format, final HttpServletResponse res)
 			throws IOException {
-		NanoClock c = new NanoClock().start();
+		final NanoClock c = new NanoClock().start();
 		log.info("Getting " + repoStr + "?view=" + view + "&format=" + format);
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		if (format.equals("urls")) {
 			ServletUtils.headers(res, "text/plain");
-			XWritableRepository repo = Xmas.getRepository(repoStr);
-			Writer w = res.getWriter();
-			for (XId modelId : repo) {
-				String url = WishlistResource.toRelativeUrl(repoStr, modelId);
+			final XWritableRepository repo = Xmas.getRepository(repoStr);
+			final Writer w = res.getWriter();
+			for (final XId modelId : repo) {
+				final String url = WishlistResource.toRelativeUrl(repoStr, modelId);
 				w.write(url + "\n");
 			}
 			// always write at least a single blank line
@@ -103,13 +104,13 @@ public class XmasResource {
 			w.close();
 		} else {
 			ServletUtils.headers(res, "text/html");
-			Writer w = HtmlUtils.startHtmlPage(res, "Xmas | Adding test data");
+			final Writer w = HtmlUtils.startHtmlPage(res, "Xmas | Adding test data");
 
 			Xmas.get(repoStr, view, w);
-			w.write(HtmlUtils.form(METHOD.GET, "/xmas/" + repoStr + "/add")
+			w.write(SharedHtmlUtils.form(METHOD.GET, "/xmas/" + repoStr + "/add")
 					.withInputText("lists", "1").withInputText("wishes", "1")
 					.withInputSubmit("Add lists with wishes").toString());
-			w.write(HtmlUtils.form(METHOD.GET, "/xmas/" + repoStr + "/clear")
+			w.write(SharedHtmlUtils.form(METHOD.GET, "/xmas/" + repoStr + "/clear")
 					.withInputSubmit("Delete all lists").toString());
 			HtmlUtils.endHtmlPage(w);
 		}

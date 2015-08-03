@@ -15,10 +15,10 @@ import com.google.common.cache.Cache;
 
 /**
  * A universal <em>cache</em> system for instanceCache, memcache and datastore.
- * 
- * 
+ *
+ *
  * @author xamde
- * 
+ *
  * @param <T>
  *            type
  */
@@ -45,8 +45,8 @@ public class UniCache<T> {
 		 * @return options objects
 		 */
 		@Deprecated
-		public static StorageOptions create(boolean instance, boolean memcache, boolean datastore) {
-			StorageOptions so = new StorageOptions();
+		public static StorageOptions create(final boolean instance, final boolean memcache, final boolean datastore) {
+			final StorageOptions so = new StorageOptions();
 			so.instanceSize = instance ? 10 : 0;
 			so.memcache = memcache;
 			so.datastore = datastore;
@@ -70,9 +70,9 @@ public class UniCache<T> {
 		 *            manages the configuration.
 		 * @return options objects
 		 */
-		public static StorageOptions create(int instanceSize, boolean memcache, boolean datastore,
-				boolean computeIfNull) {
-			StorageOptions so = new StorageOptions();
+		public static StorageOptions create(final int instanceSize, final boolean memcache, final boolean datastore,
+				final boolean computeIfNull) {
+			final StorageOptions so = new StorageOptions();
 			so.instanceSize = instanceSize;
 			so.memcache = memcache;
 			so.datastore = datastore;
@@ -97,10 +97,10 @@ public class UniCache<T> {
 
 	/**
 	 * Datastore entries are stored as kind "XCACHE", by default.
-	 * 
+	 *
 	 * @param entryHandler
 	 */
-	public UniCache(CacheEntryHandler<T> entryHandler) {
+	public UniCache(final CacheEntryHandler<T> entryHandler) {
 		this(entryHandler, "XCACHE");
 	}
 
@@ -109,7 +109,7 @@ public class UniCache<T> {
 	 * @param kindName
 	 *            the GAE KIND of datastore keys
 	 */
-	public UniCache(CacheEntryHandler<T> entryHandler, String kindName) {
+	public UniCache(final CacheEntryHandler<T> entryHandler, final String kindName) {
 		this.entryHandler = entryHandler;
 		this.kindName = kindName;
 	}
@@ -122,25 +122,25 @@ public class UniCache<T> {
 	 * @param storeOpts
 	 *            where to put
 	 */
-	public void put(String key, T value, StorageOptions storeOpts) {
+	public void put(final String key, final T value, final StorageOptions storeOpts) {
 		if (storeOpts.instanceSize > 0) {
-			Cache<String, Object> instanceCache = InstanceContext.getInstanceCache();
+			final Cache<String, Object> instanceCache = InstanceContext.getInstanceCache();
 			synchronized (instanceCache) {
 				instanceCache.put(key, value);
 			}
 		}
 		if (storeOpts.memcache) {
-			Serializable memcacheValue = this.entryHandler.toSerializable(value);
+			final Serializable memcacheValue = this.entryHandler.toSerializable(value);
 			XGae.get().memcache().put(key, memcacheValue);
 		}
 		if (storeOpts.datastore) {
-			SKey datastoreKey = createCacheKey(key);
+			final SKey datastoreKey = createCacheKey(key);
 			try {
-				SEntity entity = this.entryHandler.toEntity(datastoreKey, value);
+				final SEntity entity = this.entryHandler.toEntity(datastoreKey, value);
 				XGae.get().datastore().sync().putEntity(entity);
-			} catch (ConcurrentModificationException cme) {
+			} catch (final ConcurrentModificationException cme) {
 				// assume thats fine
-			} catch (DatastoreFailureException e) {
+			} catch (final DatastoreFailureException e) {
 				log.warn("Could not cache " + key, e);
 			}
 		}
@@ -156,9 +156,9 @@ public class UniCache<T> {
 	 * @return null or stored entity
 	 */
 	@SuppressWarnings("unchecked")
-	public T get(String key, StorageOptions storeOpts) {
+	public T get(final String key, final StorageOptions storeOpts) {
 		if (storeOpts.instanceSize > 0) {
-			Cache<String, Object> instanceCache = InstanceContext.getInstanceCache();
+			final Cache<String, Object> instanceCache = InstanceContext.getInstanceCache();
 			Object o = null;
 			synchronized (instanceCache) {
 				o = instanceCache.getIfPresent(key);
@@ -169,15 +169,15 @@ public class UniCache<T> {
 			}
 		}
 		if (storeOpts.memcache) {
-			Object o = XGae.get().memcache().get(key);
+			final Object o = XGae.get().memcache().get(key);
 			if (o != null) {
 				log.debug("Return '" + key + "' from memcache");
 				return this.entryHandler.fromSerializable((Serializable) o);
 			}
 		}
 		if (storeOpts.datastore) {
-			SKey datastoreKey = createCacheKey(key);
-			SEntity entity = XGae.get().datastore().sync().getEntity(datastoreKey);
+			final SKey datastoreKey = createCacheKey(key);
+			final SEntity entity = XGae.get().datastore().sync().getEntity(datastoreKey);
 			if (entity != null) {
 				log.debug("Return '" + key + "' from datastore entity");
 				return this.entryHandler.fromEntity(entity);
@@ -193,7 +193,7 @@ public class UniCache<T> {
 	 *            must be unique
 	 * @return a gae Key
 	 */
-	private SKey createCacheKey(String s) {
+	private SKey createCacheKey(final String s) {
 		return XGae.get().datastore().createKey(this.kindName, s);
 	}
 

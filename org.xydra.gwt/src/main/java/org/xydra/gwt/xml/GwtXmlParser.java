@@ -11,20 +11,20 @@ import com.google.gwt.xml.client.XMLParser;
 /**
  * {@link XydraParser} implementation that uses the GWT browser-supported
  * XMLParser
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 @RunsInGWT(true)
 public class GwtXmlParser implements XydraParser {
 
 	@Override
-	public XydraElement parse(String xml) throws IllegalArgumentException {
+	public XydraElement parse(final String xml) throws IllegalArgumentException {
 
 		Document document;
 		try {
 			document = XMLParser.parse(xml);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new IllegalArgumentException();
 		}
 
@@ -43,11 +43,11 @@ public class GwtXmlParser implements XydraParser {
 	 * @param blockSize e.g. 4KB = 4*1024
 	 * @return
 	 */
-	public static String toString(MiniReader miniReader, int blockSize) {
-		StringBuffer buf = new StringBuffer();
+	public static String toString(final MiniReader miniReader, final int blockSize) {
+		final StringBuffer buf = new StringBuffer();
 
-		int offset = 0;
-		char[] cbuf = new char[blockSize];
+		final int offset = 0;
+		final char[] cbuf = new char[blockSize];
 		int read = 0;
 		do {
 			read = miniReader.read(cbuf, offset, blockSize);
@@ -57,13 +57,13 @@ public class GwtXmlParser implements XydraParser {
 		return buf.toString();
 	}
 
-	public static String toString(MiniReader miniReader) {
+	public static String toString(final MiniReader miniReader) {
 		return toString(miniReader, DEFAULT_BLOCK_SIZE);
 	}
 
 	@Override
-	public XydraElement parse(MiniReader miniReader) throws IllegalArgumentException {
-		String data = toString(miniReader);
+	public XydraElement parse(final MiniReader miniReader) throws IllegalArgumentException {
+		final String data = toString(miniReader);
 		return parse(data);
 	}
 

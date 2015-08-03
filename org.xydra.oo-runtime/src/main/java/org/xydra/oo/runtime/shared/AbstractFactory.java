@@ -6,7 +6,7 @@ import org.xydra.base.rmof.XWritableModel;
 
 /**
  * Factory inherited by JavaFactory and GwtFactory
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(true)
@@ -14,15 +14,15 @@ public abstract class AbstractFactory {
 
 	protected XWritableModel model;
 
-	public AbstractFactory(XWritableModel model) {
+	public AbstractFactory(final XWritableModel model) {
 		this.model = model;
 	}
 
-	protected void createXObject(XId id) {
+	protected void createXObject(final XId id) {
 		this.model.createObject(id);
 	}
 
-	protected boolean hasXObject(XId id) {
+	protected boolean hasXObject(final XId id) {
 		return this.model.hasObject(id);
 	}
 

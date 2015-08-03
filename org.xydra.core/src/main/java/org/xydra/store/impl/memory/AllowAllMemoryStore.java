@@ -8,13 +8,13 @@ import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
 /**
  * A {@link XydraStore} implementation with in-memory persistence. Every actorId
  * is authorised and has access rights to perform any operation.
- * 
+ *
  * @author xamde
  */
 public class AllowAllMemoryStore extends DelegatingAllowAllStore {
-	
-	public AllowAllMemoryStore(XId repositoryId) {
+
+	public AllowAllMemoryStore(final XId repositoryId) {
 		super(new MemoryPersistence(repositoryId));
 	}
-	
+
 }

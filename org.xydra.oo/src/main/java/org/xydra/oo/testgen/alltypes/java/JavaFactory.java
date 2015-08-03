@@ -17,17 +17,17 @@ public class JavaFactory extends AbstractSharedFactory {
 
 	/**
 	 * [generated from: 'generateFactories-WaYjk']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'generateFactories-dctg4']
 	 */
-	public JavaFactory(XWritableModel model) {
+	public JavaFactory(final XWritableModel model) {
 		super(model);
 	}
 
 	/**
 	 * [generated from: 'generateFactories-Kus1F']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'generateFactories-PIZOa']
 	 * @param id
@@ -35,8 +35,8 @@ public class JavaFactory extends AbstractSharedFactory {
 	 * @return ...
 	 */
 	@Override
-	protected IHasAllType getHasAllTypeInternal(XWritableModel model, XId id) {
-		IHasAllType w = (IHasAllType) Proxy.newProxyInstance(IHasAllType.class.getClassLoader(),
+	protected IHasAllType getHasAllTypeInternal(final XWritableModel model, final XId id) {
+		final IHasAllType w = (IHasAllType) Proxy.newProxyInstance(IHasAllType.class.getClassLoader(),
 				new Class<?>[] { IHasAllType.class, org.xydra.oo.runtime.java.ICanDump.class },
 				new OOJavaOnlyProxy(model, id));
 		return w;
@@ -44,7 +44,7 @@ public class JavaFactory extends AbstractSharedFactory {
 
 	/**
 	 * [generated from: 'generateFactories-Kus1F']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'generateFactories-PIZOa']
 	 * @param id
@@ -52,8 +52,8 @@ public class JavaFactory extends AbstractSharedFactory {
 	 * @return ...
 	 */
 	@Override
-	protected IPerson getPersonInternal(XWritableModel model, XId id) {
-		IPerson w = (IPerson) Proxy.newProxyInstance(IPerson.class.getClassLoader(),
+	protected IPerson getPersonInternal(final XWritableModel model, final XId id) {
+		final IPerson w = (IPerson) Proxy.newProxyInstance(IPerson.class.getClassLoader(),
 				new Class<?>[] { IPerson.class, org.xydra.oo.runtime.java.ICanDump.class },
 				new OOJavaOnlyProxy(model, id));
 		return w;

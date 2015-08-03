@@ -8,9 +8,9 @@ import org.xydra.log.impl.log4j.Log4jLoggerFactory;
  * Helper class to initialize the logger for tests.
  */
 public class LoggerTestHelper {
-    
+
     private static boolean initialized;
-    
+
     /**
      * Set Log4j logger factory (once)
      */
@@ -20,5 +20,5 @@ public class LoggerTestHelper {
             initialized = true;
         }
     }
-    
+
 }

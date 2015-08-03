@@ -13,7 +13,7 @@ import org.xydra.xgae.datastore.api.SKey;
 /**
  * Helper class to convert from {@link GaeModelRevInfo} and different cache
  * formats
- * 
+ *
  * @author xamde
  */
 class UniCacheRevisionInfoEntryHandler implements UniCache.CacheEntryHandler<GaeModelRevInfo> {
@@ -38,31 +38,31 @@ class UniCacheRevisionInfoEntryHandler implements UniCache.CacheEntryHandler<Gae
 	}
 
 	@Override
-	public GaeModelRevInfo fromEntity(SEntity e) {
-		long timestamp = (Long) e.getAttribute(Timestamp);
-		boolean modelExists = (Boolean) e.getAttribute(ModelExists);
-		long lastStableSuccess = (Long) e.getAttribute(LastStableSuccess);
-		long lastStableCommitted = (Long) e.getAttribute(LastStableCommitted);
-		long lastSuccess = (Long) e.getAttribute(LastSuccess);
-		long lastTaken = (Long) e.getAttribute(LastTaken);
-		String precStr = (String) e.getAttribute(Precision);
-		org.xydra.store.impl.gae.ng.GaeModelRevInfo.Precision prec = org.xydra.store.impl.gae.ng.GaeModelRevInfo.Precision
+	public GaeModelRevInfo fromEntity(final SEntity e) {
+		final long timestamp = (Long) e.getAttribute(Timestamp);
+		final boolean modelExists = (Boolean) e.getAttribute(ModelExists);
+		final long lastStableSuccess = (Long) e.getAttribute(LastStableSuccess);
+		final long lastStableCommitted = (Long) e.getAttribute(LastStableCommitted);
+		final long lastSuccess = (Long) e.getAttribute(LastSuccess);
+		final long lastTaken = (Long) e.getAttribute(LastTaken);
+		final String precStr = (String) e.getAttribute(Precision);
+		final org.xydra.store.impl.gae.ng.GaeModelRevInfo.Precision prec = org.xydra.store.impl.gae.ng.GaeModelRevInfo.Precision
 				.valueOf(precStr);
-		GaeModelRevInfo ri = new GaeModelRevInfo(timestamp, modelExists, lastStableSuccess,
+		final GaeModelRevInfo ri = new GaeModelRevInfo(timestamp, modelExists, lastStableSuccess,
 				lastStableCommitted, lastSuccess, lastTaken, prec);
 		log.debug("loaded from entity " + ri);
 		return ri;
 	}
 
 	@Override
-	public GaeModelRevInfo fromSerializable(Serializable s) {
-		GaeModelRevInfo ri = (GaeModelRevInfo) s;
+	public GaeModelRevInfo fromSerializable(final Serializable s) {
+		final GaeModelRevInfo ri = (GaeModelRevInfo) s;
 		return ri;
 	}
 
 	@Override
-	public SEntity toEntity(SKey datastoreKey, GaeModelRevInfo revInfo) {
-		SEntity e = XGae.get().datastore().createEntity(datastoreKey);
+	public SEntity toEntity(final SKey datastoreKey, final GaeModelRevInfo revInfo) {
+		final SEntity e = XGae.get().datastore().createEntity(datastoreKey);
 		e.setAttribute(LastStableCommitted, revInfo.getLastStableCommitted());
 		e.setAttribute(LastStableSuccess, revInfo.getLastStableSuccessChange());
 		e.setAttribute(ModelExists, revInfo.isModelExists());
@@ -74,7 +74,7 @@ class UniCacheRevisionInfoEntryHandler implements UniCache.CacheEntryHandler<Gae
 	}
 
 	@Override
-	public Serializable toSerializable(GaeModelRevInfo entry) {
+	public Serializable toSerializable(final GaeModelRevInfo entry) {
 		return entry;
 	}
 

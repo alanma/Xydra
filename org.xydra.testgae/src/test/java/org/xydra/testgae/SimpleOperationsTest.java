@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XId;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.core.X;
@@ -15,7 +16,7 @@ import org.xydra.xgae.gaeutils.GaeTestfixer;
 
 /**
  * Test StatsGatheringPersistenceWrapper, Memcache, Init
- * 
+ *
  * @author xamde
  */
 public class SimpleOperationsTest {
@@ -47,15 +48,15 @@ public class SimpleOperationsTest {
 		XydraRuntime.getConfigMap().put(XydraRuntime.PROP_MEMCACHESTATS, "true");
 
 		// get persistence
-		XydraPersistence persistence = XydraRuntime.getPersistence(REPO_ID);
+		final XydraPersistence persistence = XydraRuntime.getPersistence(REPO_ID);
 		assertTrue(
 				"should be a StatsGatheringPersistenceWrapper, because we set the config flag to true",
 				persistence instanceof StatsGatheringPersistenceWrapper);
 
 		// do something
-		XRepositoryCommand command = X.getCommandFactory().createForcedAddModelCommand(REPO_ID,
+		final XRepositoryCommand command = BaseRuntime.getCommandFactory().createForcedAddModelCommand(REPO_ID,
 				MODEL1_ID);
-		long l = persistence.executeCommand(ACTOR_ID, command);
+		final long l = persistence.executeCommand(ACTOR_ID, command);
 		assertTrue("command should be successful" + l, l >= 0);
 
 		// get persistence stats, they are rather simple

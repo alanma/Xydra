@@ -21,9 +21,9 @@ import org.xydra.sharedutils.XyAssert;
 
 /**
  * A simple data container for {@link XWritableModel}/XRevWritableModel.
- * 
+ *
  * Minimal memory footprint, can be used as data transfer object.
- * 
+ *
  * @author xamde
  */
 public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSessionModel,
@@ -43,11 +43,11 @@ public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSes
 	protected SimpleModel() {
 	}
 
-	public SimpleModel(XAddress address) {
+	public SimpleModel(final XAddress address) {
 		this(address, XCommand.NEW);
 	}
 
-	public SimpleModel(XAddress address, long revisionNumber) {
+	public SimpleModel(final XAddress address, final long revisionNumber) {
 		assert address != null;
 		assert address.getAddressedType() == XType.XMODEL : address;
 		this.address = address;
@@ -55,7 +55,7 @@ public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSes
 		this.objects = new HashMap<XId, XRevWritableObject>(2);
 	}
 
-	public SimpleModel(XAddress address, long revisionNumber, Map<XId, XRevWritableObject> objects) {
+	public SimpleModel(final XAddress address, final long revisionNumber, final Map<XId, XRevWritableObject> objects) {
 		super();
 		this.address = address;
 		this.revisionNumber = revisionNumber;
@@ -63,19 +63,19 @@ public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSes
 	}
 
 	@Override
-	public void addObject(@NeverNull XRevWritableObject object) {
+	public void addObject(@NeverNull final XRevWritableObject object) {
 		XyAssert.xyAssert(object != null);
 		assert object != null;
 		this.objects.put(object.getId(), object);
 	}
 
 	@Override
-	public XRevWritableObject createObject(@NeverNull XId objectId) {
-		XRevWritableObject object = this.objects.get(objectId);
+	public XRevWritableObject createObject(@NeverNull final XId objectId) {
+		final XRevWritableObject object = this.objects.get(objectId);
 		if (object != null) {
 			return object;
 		}
-		XRevWritableObject newObject = new SimpleObject(Base.resolveObject(this.address, objectId));
+		final XRevWritableObject newObject = new SimpleObject(Base.resolveObject(this.address, objectId));
 		this.objects.put(objectId, newObject);
 		return newObject;
 	}
@@ -91,7 +91,7 @@ public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSes
 	}
 
 	@Override
-	public XRevWritableObject getObject(@NeverNull XId objectId) {
+	public XRevWritableObject getObject(@NeverNull final XId objectId) {
 		return this.objects.get(objectId);
 	}
 
@@ -101,7 +101,7 @@ public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSes
 	}
 
 	@Override
-	public boolean hasObject(@NeverNull XId objectId) {
+	public boolean hasObject(@NeverNull final XId objectId) {
 		return this.objects.containsKey(objectId);
 	}
 
@@ -116,13 +116,13 @@ public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSes
 	}
 
 	@Override
-	public boolean removeObject(@NeverNull XId objectId) {
-		XRevWritableObject oldObject = this.objects.remove(objectId);
+	public boolean removeObject(@NeverNull final XId objectId) {
+		final XRevWritableObject oldObject = this.objects.remove(objectId);
 		return oldObject != null;
 	}
 
 	@Override
-	public void setRevisionNumber(long rev) {
+	public void setRevisionNumber(final long rev) {
 		this.revisionNumber = rev;
 	}
 
@@ -141,16 +141,16 @@ public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSes
 	 * @return A copy of the model. Both model share the same objects and fields
 	 *         but not the same object list or revision number.
 	 */
-	public static XRevWritableModel shallowCopy(XRevWritableModel model) {
+	public static XRevWritableModel shallowCopy(final XRevWritableModel model) {
 		if (model == null) {
 			return null;
 		}
 
-		SimpleModel result = new SimpleModel(model.getAddress());
+		final SimpleModel result = new SimpleModel(model.getAddress());
 		if (model instanceof SimpleModel) {
 			result.objects.putAll(((SimpleModel) model).objects);
 		} else {
-			for (XId xid : model) {
+			for (final XId xid : model) {
 				result.addObject(model.getObject(xid));
 			}
 		}
@@ -158,7 +158,7 @@ public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSes
 	}
 
 	@Override
-	public XSessionModel loadObject(XId objectId) {
+	public XSessionModel loadObject(final XId objectId) {
 		/* A simpleModel neither can not needs to load anything after creation */
 		return this;
 	}
@@ -170,7 +170,7 @@ public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSes
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(final Object other) {
 		return other instanceof XReadableModel
 				&& XCompareUtils.equalState(this, (XReadableModel) other);
 	}

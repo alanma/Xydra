@@ -42,42 +42,42 @@ public class ModelControlPanel extends Composite {
 	@UiField
 	Button expandAllButton;
 
-	private EditorPanelPresenter presenter;
+	private final EditorPanelPresenter presenter;
 
-	public ModelControlPanel(EditorPanelPresenter presenter) {
+	public ModelControlPanel(final EditorPanelPresenter presenter) {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
 		this.presenter = presenter;
 	}
 
 	@UiHandler("loadAllIDsButton")
-	void onClickFetchIDs(ClickEvent event) {
+	void onClickFetchIDs(final ClickEvent event) {
 		this.presenter.handleFetchIDs();
 	}
 
 	@UiHandler("loadAllObjectsButton")
-	void onClickFetchObjects(ClickEvent event) {
+	void onClickFetchObjects(final ClickEvent event) {
 		this.presenter.loadModelsObjectsFromPersistence();
 
 	}
 
 	@UiHandler("commitModelChangesButton")
-	public void onClickCommit(ClickEvent event) {
+	public void onClickCommit(final ClickEvent event) {
 		this.presenter.openCommitDialog(this);
 
 	}
 
 	@UiHandler("discardModelChangesButton")
-	public void onClickDiscard(ClickEvent event) {
+	public void onClickDiscard(final ClickEvent event) {
 
 		this.presenter.openDiscardChangesDialog();
 
 	}
 
 	@UiHandler("expandAllButton")
-	public void onClickExpand(ClickEvent event) {
+	public void onClickExpand(final ClickEvent event) {
 
-		String expandButtonText = this.expandAllButton.getText();
+		final String expandButtonText = this.expandAllButton.getText();
 		if (expandButtonText.equals("expand all objects")) {
 
 			this.expandAllButton.setText("close all objects");

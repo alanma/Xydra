@@ -13,27 +13,27 @@ import org.xydra.base.rmof.impl.XExistsReadableObject;
  */
 public interface XRevWritableObject extends XWritableObject, XRevisionWritable,
         XExistsReadableObject, ISyncableState {
-    
+
     /**
      * Add an existing field to this object. Fields created using
      * {@link #createField(XId)} are automatically added.
-     * 
+     *
      * This overwrites any existing field in this object with the same
      * {@link XId}.
-     * 
+     *
      * @param field
      */
     @ModificationOperation
     void addField(XRevWritableField field);
-    
+
     /* More specific return type */
     @Override
     @ModificationOperation
     XRevWritableField createField(XId fieldId);
-    
+
     /* More specific return type */
     @Override
     @ReadOperation
     XRevWritableField getField(XId fieldId);
-    
+
 }

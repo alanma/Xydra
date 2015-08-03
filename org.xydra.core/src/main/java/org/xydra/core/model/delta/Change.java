@@ -4,7 +4,7 @@ import org.xydra.base.change.ChangeType;
 
 /**
  * State: added, changed, removed
- * 
+ *
  * @author xamde
  */
 public class Change {
@@ -16,7 +16,7 @@ public class Change {
 
 	private int changeEvents = 0;
 
-	void apply(ChangeType changeType) {
+	void apply(final ChangeType changeType) {
 		switch (changeType) {
 		case ADD:
 			switch (this.state) {

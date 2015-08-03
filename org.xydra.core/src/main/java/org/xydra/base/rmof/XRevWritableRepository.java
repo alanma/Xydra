@@ -10,15 +10,15 @@ import org.xydra.base.XId;
  * XRevWritableModels} can be added.
  */
 public interface XRevWritableRepository extends XWritableRepository {
-    
+
     /* More specific return type */
     @Override
     @ModificationOperation
     XRevWritableModel createModel(XId modelId);
-    
+
     /* More specific return type */
     @Override
     @ReadOperation
     XRevWritableModel getModel(XId modelId);
-    
+
 }

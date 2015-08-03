@@ -11,7 +11,7 @@ public class XIntegerEditor extends AtomicXValueEditor<XIntegerValue> implements
 
 	private final TextBox editor = new TextBox();
 
-	public XIntegerEditor(int oldValue, EditListener listener) {
+	public XIntegerEditor(final int oldValue, final EditListener listener) {
 		super(listener);
 
 		this.editor.setText(Integer.toString(oldValue));
@@ -28,7 +28,7 @@ public class XIntegerEditor extends AtomicXValueEditor<XIntegerValue> implements
 		/*
 		 * work around Blackberry bug
 		 * http://code.google.com/p/google-web-toolkit/issues/detail?id=7291
-		 * 
+		 *
 		 * use Long.parseLong instead
 		 */
 		v = Integer.parseInt(this.editor.getText());
@@ -40,7 +40,7 @@ public class XIntegerEditor extends AtomicXValueEditor<XIntegerValue> implements
 	}
 
 	@Override
-	public void onKeyPress(KeyPressEvent e) {
+	public void onKeyPress(final KeyPressEvent e) {
 
 		// char cc = e.getCharCode();
 		//

@@ -14,17 +14,17 @@ import org.xydra.base.value.XValue;
  * An {@link XObject} is a collection of {@link XField XFields}. {@link XField
  * XFields} may be added, removed or changed dynamically to an XObject at
  * runtime. An XObject may be stored in an {@link XModel} or live independently.
- * 
+ *
  * For example an XObject might be used to model a person if we'd write a
  * phonebook application.
- * 
+ *
  * Implementations of XObject should use an {@link XRevWritableObject} for
  * storing and representing the inner state of the XObject to allow maximum
  * persistence management flexibility.
- * 
+ *
  * @author xamde
  * @author kaidel
- * 
+ *
  */
 public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesChanges {
 
@@ -32,10 +32,10 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	 * FORCED Creates a new {@link XField} and adds it to this {@link XObject}
 	 * or returns the already existing {@link XField} if the given {@link XId}
 	 * was already taken.
-	 * 
+	 *
 	 * @param fieldId The {@link XId} for the {@link XField} which is to be
 	 *            created.
-	 * 
+	 *
 	 * @return the newly created {@link XField} or the already existing
 	 *         {@link XField} with this {@link XId}
 	 * @throws IllegalStateException if this object has already been removed
@@ -46,7 +46,7 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 
 	/**
 	 * Executes the given {@link XObjectCommand} if possible.
-	 * 
+	 *
 	 * This method will fail if, the given {@link XObjectCommand} cannot be
 	 * executed which may occur in the following cases:
 	 * <ul>
@@ -58,9 +58,9 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	 * <li>the object-{@link XId} in the {@link XObjectCommand} does not concur
 	 * with the {@link XId} of this XObject
 	 * </ul>
-	 * 
+	 *
 	 * @param command The {@link XObjectCommand} which is to be executed
-	 * 
+	 *
 	 * @return {@link XCommand#FAILED} if executing the {@link XObjectCommand}
 	 *         failed, {@link XCommand#NOCHANGE} if executing the
 	 *         {@link XObjectCommand} didn't change anything or if executing the
@@ -74,7 +74,7 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	/**
 	 * Returns the {@link XField} with the given {@link XId} contained in this
 	 * object.
-	 * 
+	 *
 	 * @param fieldId The {@link XId} of the {@link XField} which is to be
 	 *            returned
 	 * @return The {@link XField} with the given {@link XId} or null, if no
@@ -88,10 +88,10 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	/**
 	 * FORCED Removes the {@link XField} with the given {@link XId} from this
 	 * XObject
-	 * 
+	 *
 	 * @param fieldId The {@link XId} of the {@link XField} which is to be
 	 *            removed
-	 * 
+	 *
 	 * @return true, if the specified {@link XField} did exist and could be
 	 *         removed
 	 * @throws IllegalStateException if this object has already been removed
@@ -103,7 +103,7 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 
 	/**
 	 * Create a consistent snapshot of this object and all contained fields.
-	 * 
+	 *
 	 * @return null if this object has been removed, a consistent snapshot
 	 *         otherwise.
 	 */
@@ -112,7 +112,7 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	/**
 	 * Shortcut for createField, setValue. If value is null, this command does a
 	 * removeField.
-	 * 
+	 *
 	 * @param fieldId
 	 * @param value @CanBeNull
 	 * @return
@@ -121,7 +121,7 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 
 	/**
 	 * Shortcut for getField, and if not null, getValue.
-	 * 
+	 *
 	 * @param fieldId
 	 * @return
 	 */

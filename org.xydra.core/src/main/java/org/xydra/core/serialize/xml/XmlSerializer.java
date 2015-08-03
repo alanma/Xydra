@@ -11,32 +11,32 @@ import org.xydra.core.serialize.XydraSerializer;
 /**
  * {@link XydraSerializer} implementations that creates {@link XmlOut}
  * instances.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
 public class XmlSerializer implements XydraSerializer {
-	
+
 	@Override
 	public XydraOut create() {
 		return new XmlOut();
 	}
-	
+
 	@Override
-	public XydraOut create(MiniWriter writer) {
+	public XydraOut create(final MiniWriter writer) {
 		return new XmlOut(writer);
 	}
-	
-	public XydraOut create(MiniWriter writer, boolean writeHeader) {
+
+	public XydraOut create(final MiniWriter writer, final boolean writeHeader) {
 		return new XmlOut(writer, writeHeader);
 	}
-	
+
 	@Override
 	public String getContentType() {
 		return XmlOut.CONTENT_TYPE_XML;
 	}
-	
+
 }

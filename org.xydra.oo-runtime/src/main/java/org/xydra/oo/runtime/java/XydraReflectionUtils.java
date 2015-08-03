@@ -13,10 +13,10 @@ import org.xydra.oo.runtime.shared.SharedTypeMapping;
 
 /**
  * Reflection helpers for Xydra. Specific to Xydras type system.
- * 
+ *
  * Knows nothing about wrapped proxy types. See {@link OOReflectionUtils} for
  * that.
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(false)
@@ -38,14 +38,14 @@ public class XydraReflectionUtils {
 	/* create indexes on the type system */
 	static {
 		log.trace("Init type system indexes");
-		for (ValueType v : ValueType.values()) {
+		for (final ValueType v : ValueType.values()) {
 			xydraTypes.add(v.getXydraInterface());
-			Class<?> javaClass = v.getJavaClass();
+			final Class<?> javaClass = v.getJavaClass();
 			if (v.isCollection()) {
 				javaMappedCollectionTypes.add(javaClass);
 			} else {
 				javaMappedSingleObjectTypes.add(javaClass);
-				Class<?> primitive = JavaReflectionUtils.getPrimitiveClass(javaClass);
+				final Class<?> primitive = JavaReflectionUtils.getPrimitiveClass(javaClass);
 				if (primitive != null) {
 					javaMappedPrimitiveTypes.add(primitive);
 				}
@@ -58,7 +58,7 @@ public class XydraReflectionUtils {
 	 * @return true for all Java collection classes used in OOTypeMappings AND
 	 *         true for all Array types
 	 */
-	public static boolean isCollectionType(Class<?> type) {
+	public static boolean isCollectionType(final Class<?> type) {
 		return javaMappedCollectionTypes.contains(type) || type.isArray();
 	}
 
@@ -67,12 +67,12 @@ public class XydraReflectionUtils {
 	 * @return true iff the given BaseTypeSpec represents a Xydra interface that
 	 *         is a known Xydra value type, i.e. a subclass of XValue.
 	 */
-	public static boolean isXydraValueType(IBaseType type) {
+	public static boolean isXydraValueType(final IBaseType type) {
 		Class<?> c;
 		try {
 			c = Class.forName(type.getCanonicalName());
 			return xydraTypes.contains(c);
-		} catch (ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			return false;
 		}
 	}
@@ -82,7 +82,7 @@ public class XydraReflectionUtils {
 	 * @return true iff the given type is a known type that maps natively to a
 	 *         Xydra type.
 	 */
-	public static boolean isTranslatableSingleType(Class<?> type) {
+	public static boolean isTranslatableSingleType(final Class<?> type) {
 		return // trivially translatable 1:!
 		XydraReflectionUtils.xydraTypes.contains(type)
 
@@ -91,11 +91,11 @@ public class XydraReflectionUtils {
 		|| XydraReflectionUtils.javaMappedSingleObjectTypes.contains(type);
 	}
 
-	public static ValueType getValueType(IType typeSpec) {
+	public static ValueType getValueType(final IType typeSpec) {
 		return SharedTypeMapping.getValueType(typeSpec.getBaseType(), typeSpec.getComponentType());
 	}
 
-	public static ValueType getValueType(IBaseType baseType) {
+	public static ValueType getValueType(final IBaseType baseType) {
 		return SharedTypeMapping.getValueType(baseType, null);
 	}
 

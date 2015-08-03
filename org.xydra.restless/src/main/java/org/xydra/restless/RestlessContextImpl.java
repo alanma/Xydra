@@ -9,16 +9,16 @@ import org.xydra.annotations.ThreadSafe;
 @ThreadSafe
 public class RestlessContextImpl implements IRestlessContext {
 
-	private HttpServletRequest req;
+	private final HttpServletRequest req;
 
-	private String requestIdentifier;
+	private final String requestIdentifier;
 
-	private HttpServletResponse res;
+	private final HttpServletResponse res;
 
-	private Restless restless;
+	private final Restless restless;
 
 	/**
-	 * 
+	 *
 	 * @param restless
 	 * @NeverNull
 	 * @param req
@@ -28,8 +28,8 @@ public class RestlessContextImpl implements IRestlessContext {
 	 * @param requestIdentifier
 	 * @NeverNull
 	 */
-	public RestlessContextImpl(@NeverNull Restless restless, @NeverNull HttpServletRequest req,
-			@NeverNull HttpServletResponse res, @NeverNull String requestIdentifier) {
+	public RestlessContextImpl(@NeverNull final Restless restless, @NeverNull final HttpServletRequest req,
+			@NeverNull final HttpServletResponse res, @NeverNull final String requestIdentifier) {
 		this.restless = restless;
 		this.req = req;
 		this.res = res;

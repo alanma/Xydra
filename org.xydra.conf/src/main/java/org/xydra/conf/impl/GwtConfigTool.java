@@ -14,15 +14,15 @@ public class GwtConfigTool {
 
 	public static final String DICT_NAME = "XydraConf";
 
-	public static void initFromHostPage(IConfig conf) {
-		Dictionary dict = Dictionary.getDictionary(DICT_NAME);
+	public static void initFromHostPage(final IConfig conf) {
+		final Dictionary dict = Dictionary.getDictionary(DICT_NAME);
 		if (dict == null) {
 			log.info("No dictionary named '" + DICT_NAME + "' found in hostpage.");
 			return;
 		}
 
-		for (String key : dict.keySet()) {
-			String value = dict.get(key);
+		for (final String key : dict.keySet()) {
+			final String value = dict.get(key);
 			conf.set(key, value);
 			log.debug("Conf: '" + key + "' = '" + value + "'");
 		}

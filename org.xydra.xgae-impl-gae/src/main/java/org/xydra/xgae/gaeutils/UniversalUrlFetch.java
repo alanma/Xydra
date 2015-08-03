@@ -25,7 +25,7 @@ import com.google.appengine.repackaged.org.apache.http.impl.client.DefaultHttpCl
 
 /**
  * TODO run in GWT as well? requires a custom http response wrapper
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(false)
@@ -48,44 +48,44 @@ public class UniversalUrlFetch {
 	 * @throws IOException
 	 *             ...
 	 */
-	public static int callUrl(String urlStr, String username, String password, boolean async)
+	public static int callUrl(final String urlStr, final String username, final String password, final boolean async)
 			throws IOException {
 		log.info("Calling URL '" + urlStr + "'");
-		boolean doBasicAuth = username != null && password != null;
+		final boolean doBasicAuth = username != null && password != null;
 		String encodedAuth = null;
 		if (doBasicAuth) {
-			byte[] auth = Base64.utf8(username + ":" + password);
+			final byte[] auth = Base64.utf8(username + ":" + password);
 			encodedAuth = Base64.encode(auth);
 		}
 		if (AboutAppEngine.onAppEngine()) {
-			URLFetchService service = URLFetchServiceFactory.getURLFetchService();
-			URL u = new URL(urlStr);
-			HTTPRequest request = new HTTPRequest(u, HTTPMethod.GET);
+			final URLFetchService service = URLFetchServiceFactory.getURLFetchService();
+			final URL u = new URL(urlStr);
+			final HTTPRequest request = new HTTPRequest(u, HTTPMethod.GET);
 			if (doBasicAuth) {
 				request.addHeader(new HTTPHeader("Authorization", "Basic " + encodedAuth));
 			}
-			Future<HTTPResponse> future = service.fetchAsync(new URL(urlStr));
+			final Future<HTTPResponse> future = service.fetchAsync(new URL(urlStr));
 			try {
 				return future.get().getResponseCode();
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				throw new RuntimeException(e);
-			} catch (ExecutionException e) {
+			} catch (final ExecutionException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
 
 			// TODO dont keep connections open (maybe we do that here)
-			DefaultHttpClient httpClient = new DefaultHttpClient();
-			HttpGet request = new HttpGet(urlStr);
+			final DefaultHttpClient httpClient = new DefaultHttpClient();
+			final HttpGet request = new HttpGet(urlStr);
 			if (doBasicAuth) {
 				request.setHeader("Authorization", "Basic " + encodedAuth);
 			}
 			try {
-				HttpResponse response = httpClient.execute(request);
-				int responseCode = response.getStatusLine().getStatusCode();
+				final HttpResponse response = httpClient.execute(request);
+				final int responseCode = response.getStatusLine().getStatusCode();
 				request.abort();
 				return responseCode;
-			} catch (ClientProtocolException e) {
+			} catch (final ClientProtocolException e) {
 				throw new RuntimeException(e);
 			}
 		}

@@ -3,6 +3,7 @@ package org.xydra.store.base;
 import java.io.Serializable;
 
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableField;
@@ -16,34 +17,34 @@ import org.xydra.store.XydraStore;
 /**
  * Uses an internal {@link XReadableField} snapshot or -- after write access --
  * an internal {@link SimpleField}.
- * 
+ *
  * This class is mostly useful for testing purposes. For production use it has
  * not been tested enough and performance is expected to be rather bad.
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(false)
 public class WritableFieldOnStore extends ReadableFieldOnStore implements XWritableField,
         Serializable {
-    
+
     private static final long serialVersionUID = -4510683969960714307L;
-    
-    public WritableFieldOnStore(Credentials credentials, XydraStore store, XAddress address) {
+
+    public WritableFieldOnStore(final Credentials credentials, final XydraStore store, final XAddress address) {
         super(credentials, store, address);
     }
-    
+
     @Override
-    public boolean setValue(XValue value) {
+    public boolean setValue(final XValue value) {
         // send change command
         XCommand command;
         if(value != null) {
-            command = X.getCommandFactory().createAddValueCommand(this.address,
-                    this.getRevisionNumber(), value, true);
+            command = BaseRuntime.getCommandFactory().createAddValueCommand(this.address,
+                    getRevisionNumber(), value, true);
         } else {
-            command = X.getCommandFactory().createRemoveValueCommand(this.address,
-                    this.getRevisionNumber(), true);
+            command = BaseRuntime.getCommandFactory().createRemoveValueCommand(this.address,
+                    getRevisionNumber(), true);
         }
-        long result = ExecuteCommandsUtils.executeCommand(this.credentials, this.store, command);
+        final long result = ExecuteCommandsUtils.executeCommand(this.credentials, this.store, command);
         if(result >= 0) {
             this.baseField = new SimpleField(this.address, result, value);
             return true;
@@ -58,5 +59,5 @@ public class WritableFieldOnStore extends ReadableFieldOnStore implements XWrita
             }
         }
     }
-    
+
 }

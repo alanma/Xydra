@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XAtomicEvent;
@@ -28,22 +29,22 @@ import org.xydra.xgae.datastore.api.STransaction;
 /**
  * Internal helper class to track information of a change that is being
  * executed.
- * 
+ *
  * This class manages GAE entities of kind XCHANGE
- * 
+ *
  * These represent a change to the model resulting from a single
  * {@link XCommand} (which may be a {@link XTransaction}). These entities
  * represent both an entry into the {@link XChangeLog} as well as a change that
  * is currently in progress.
- * 
+ *
  * Keys are encoded according to
  * {@link KeyStructure#createChangeKey(XAddress, long)}
- * 
+ *
  * Manages revision, startTime, the GAE entity of the change, and a Set of
  * {@link XAddress} (the locks)
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 public class GaeChange {
 
@@ -61,7 +62,7 @@ public class GaeChange {
 	 * GAE Property key for the locks held by a change. The locks are stored as
 	 * a {@link List} of the {@link String} representations of the locked
 	 * {@link XAddress XAddresses}.
-	 * 
+	 *
 	 * Locks are set when entering {@link STATUS_CREATING}, removed when
 	 * entering {@link STATUS_SUCCESS_EXECUTED}, {@link STATUS_SUCCESS_NOCHANGE}
 	 * , {@link STATUS_FAILED_TIMEOUT} or {@link STATUS_FAILED_PRECONDITIONS}.
@@ -77,22 +78,22 @@ public class GaeChange {
 	/**
 	 * GAE Property key for the actor that is responsible for the change. The
 	 * actor's {@link XId} is stored as a {@link String}.
-	 * 
+	 *
 	 * Set when entering {@link STATUS_CREATING}, never removed.
 	 */
 	private static final String PROP_ACTOR = "actor";
 
 	/**
 	 * The status of a change entity.
-	 * 
+	 *
 	 * These are stored as integers in the {@link GaeChange#PROP_STATUS}
 	 * property.
-	 * 
+	 *
 	 * Possible {@link Status} progression for XCHANGE Entities:
-	 * 
+	 *
 	 * <pre>
-	 * 
-	 *  Creating 
+	 *
+	 *  Creating
 	 *     |
 	 *     |----> SucessExecuted --->  SucessExecutedApplied
 	 *     |
@@ -101,19 +102,19 @@ public class GaeChange {
 	 *     |----> FailedTimeout (might also be set by another process)
 	 *     |
 	 *     \----> FailedPreconditions
-	 * 
+	 *
 	 * </pre>
-	 * 
+	 *
 	 * @author dscharrer
-	 * 
+	 *
 	 */
 	static public enum Status {
 
 		/**
 		 * assigned revision
-		 * 
+		 *
 		 * => waiting for locks / checking preconditions / writing events
-		 * 
+		 *
 		 * Other thread should check age of the status and either wait for
 		 * anything OR if too old: Mark as FailedTimeout
 		 */
@@ -124,7 +125,7 @@ public class GaeChange {
 
 		/**
 		 * Temporary object states updated
-		 * 
+		 *
 		 * @since 2012-05
 		 */
 		SuccessExecutedApplied(5),
@@ -143,7 +144,7 @@ public class GaeChange {
 
 		private final int value;
 
-		Status(int value) {
+		Status(final int value) {
 			this.value = value;
 		}
 
@@ -152,7 +153,7 @@ public class GaeChange {
 		 *         to execute.
 		 */
 		public boolean isFailure() {
-			return (this == FailedPreconditions || this == FailedTimeout);
+			return this == FailedPreconditions || this == FailedTimeout;
 		}
 
 		/**
@@ -160,7 +161,7 @@ public class GaeChange {
 		 *         successfully executed - even if that changed nothing.
 		 */
 		public boolean isSuccess() {
-			return (this == SuccessExecuted || this == SuccessNochange || this == SuccessExecutedApplied);
+			return this == SuccessExecuted || this == SuccessNochange || this == SuccessExecutedApplied;
 		}
 
 		/**
@@ -168,15 +169,15 @@ public class GaeChange {
 		 *         terminal state.
 		 */
 		public boolean isCommitted() {
-			return (isSuccess() || isFailure());
+			return isSuccess() || isFailure();
 		}
 
 		/**
 		 * @return true if the given status indicates that events are stored in
 		 *         the change entity.
-		 * 
+		 *
 		 *         Events are saved after preconditions have been checked.
-		 * 
+		 *
 		 *         Thus, events are guaranteed to exist in
 		 *         {@link #SuccessExecuted} stages.
 		 */
@@ -184,7 +185,7 @@ public class GaeChange {
 			return this == SuccessExecuted || this == SuccessExecutedApplied;
 		}
 
-		public static Status get(int value) {
+		public static Status get(final int value) {
 			Status status = null;
 			switch (value) {
 			case 0:
@@ -227,7 +228,7 @@ public class GaeChange {
 
 	/**
 	 * timeout for changes in milliseconds
-	 * 
+	 *
 	 * If this is set too low, longer commands may not be executed successfully.
 	 * A too long timeout however might cause the model to "starve" as processes
 	 * are be aborted by GAE while waiting for other changes.
@@ -239,14 +240,14 @@ public class GaeChange {
 	 * critical time (in milliseconds) after which a process will voluntarily
 	 * give up it's change to prevent another process from rolling it forward
 	 * while the change is still active
-	 * 
+	 *
 	 * To prevent unnecessary timeouts, this should be set close enough to the
 	 * GAE timeout.
-	 * 
+	 *
 	 * However, setting this too close to TIMEOUT might result in two processes
 	 * executing the same change.
 	 */
-	private static final long TIME_CRITICAL = TIMEOUT - (3 * 1000);
+	private static final long TIME_CRITICAL = TIMEOUT - 3 * 1000;
 
 	{
 		assert TIME_CRITICAL < TIMEOUT;
@@ -267,13 +268,13 @@ public class GaeChange {
 	/**
 	 * Construct a new change entity with the given properties. The entity is
 	 * created but not put into the datastore.
-	 * 
+	 *
 	 * @param modelAddr
 	 * @param rev
 	 * @param locks
 	 * @param actorId
 	 */
-	public GaeChange(XAddress modelAddr, long rev, GaeLocks locks, XId actorId) {
+	public GaeChange(final XAddress modelAddr, final long rev, final GaeLocks locks, final XId actorId) {
 
 		this.rev = rev;
 		this.locks = locks;
@@ -307,12 +308,12 @@ public class GaeChange {
 	/**
 	 * Take over the given change entity. The entity is updated but the updated
 	 * version is not put back into the datastore.
-	 * 
+	 *
 	 * @param modelAddr
 	 * @param rev
 	 * @param entity
 	 */
-	public GaeChange(XAddress modelAddr, long rev, SEntity entity) {
+	public GaeChange(final XAddress modelAddr, final long rev, final SEntity entity) {
 		if (entity == null) {
 			throw new IllegalArgumentException("entity is null");
 		}
@@ -324,7 +325,7 @@ public class GaeChange {
 		clearCache();
 	}
 
-	public void reload(STransaction trans) {
+	public void reload(final STransaction trans) {
 		XyAssert.xyAssert(getStatus().canChange());
 		this.entity = XGae.get().datastore().sync().getEntity(this.entity.getKey(), trans);
 		assert this.entity != null : "change entities should not vanish";
@@ -341,11 +342,11 @@ public class GaeChange {
 	private XId getActor() {
 		if (this.actor == null) {
 			synchronized (this) {
-				String actorStr = (String) this.entity.getAttribute(PROP_ACTOR);
+				final String actorStr = (String) this.entity.getAttribute(PROP_ACTOR);
 				if (actorStr == null) {
 					return null;
 				}
-				this.actor = XX.toId(actorStr);
+				this.actor = Base.toId(actorStr);
 			}
 		}
 		return this.actor;
@@ -357,8 +358,9 @@ public class GaeChange {
 	 *         given change entity
 	 */
 	public boolean isTimedOut() {
-		if (!getStatus().canChange())
+		if (!getStatus().canChange()) {
 			return false;
+		}
 		if (this.lastActivity < 0) {
 			this.lastActivity = (Long) this.entity.getAttribute(PROP_LAST_ACTIVITY);
 		}
@@ -367,11 +369,11 @@ public class GaeChange {
 
 	/**
 	 * Remove locks owned by the given change entity.
-	 * 
+	 *
 	 * @param status
 	 *            The new status of the entity.
 	 */
-	public void commitAndClearLocks(Status status) {
+	public void commitAndClearLocks(final Status status) {
 		assert getStatus().canChange();
 		this.locks = null;
 		this.entity.removeAttribute(PROP_LOCKS);
@@ -381,10 +383,10 @@ public class GaeChange {
 
 	/**
 	 * Update the status of this change.
-	 * 
+	 *
 	 * @param status
 	 */
-	public void setStatus(Status status) {
+	public void setStatus(final Status status) {
 		XyAssert.xyAssert(getStatus().canChange(), "A commited change cannot change its status");
 		this.status = status;
 		this.entity.setAttribute(PROP_STATUS, status.value);
@@ -397,6 +399,7 @@ public class GaeChange {
 		XyAssert.xyAssert(getStatus().canChange());
 		if (this.locks == null) {
 			@SuppressWarnings("unchecked")
+			final
 			List<String> lockStrs = (List<String>) this.entity.getAttribute(PROP_LOCKS);
 			if (lockStrs == null) {
 				return null;
@@ -412,18 +415,18 @@ public class GaeChange {
 	 */
 	synchronized public Status getStatus() {
 		if (this.status == null) {
-			Object o = this.entity.getAttribute(PROP_STATUS);
+			final Object o = this.entity.getAttribute(PROP_STATUS);
 			// trying to find the NPE bug here...
 			if (o == null) {
 				try {
 					throw new RuntimeException("Tracing caller of getStatus()");
-				} catch (RuntimeException e) {
+				} catch (final RuntimeException e) {
 					log.error("Accessing a change entity without status", e);
 				}
 			}
-			Number n = (Number) o;
+			final Number n = (Number) o;
 			assert n != null : "All change entities should have a status";
-			int index = n.intValue();
+			final int index = n.intValue();
 			this.status = Status.get(index);
 		}
 		return this.status;
@@ -433,7 +436,7 @@ public class GaeChange {
 	 * @return true if the given change entity has any locks set.
 	 */
 	public boolean hasLocks() {
-		return (this.locks != null || this.entity.getAttribute(PROP_LOCKS) != null);
+		return this.locks != null || this.entity.getAttribute(PROP_LOCKS) != null;
 	}
 
 	private void registerActivity() {
@@ -456,7 +459,7 @@ public class GaeChange {
 	 * {@link #TIME_CRITICAL} milliseconds. This is done before writing to
 	 * prevent another process rolling forward our change while we are still
 	 * working on it.
-	 * 
+	 *
 	 * @throws VoluntaryTimeoutException
 	 *             to abort the current change
 	 */
@@ -476,7 +479,7 @@ public class GaeChange {
 			return;
 		}
 		XyAssert.xyAssert(getStatus().canChange());
-		long now = now();
+		final long now = now();
 		// IMPROVE Use new API since AppEngine 1.6.5 to get time left
 		if (now - this.lastActivity > TIME_CRITICAL) {
 			// IMPROVE use a better exception type?
@@ -486,10 +489,10 @@ public class GaeChange {
 		}
 	}
 
-	public Pair<int[], List<Future<SKey>>> setEvents(List<XAtomicEvent> events) {
+	public Pair<int[], List<Future<SKey>>> setEvents(final List<XAtomicEvent> events) {
 		XyAssert.xyAssert(getStatus().canChange());
 		XyAssert.xyAssert(events.size() >= 1);
-		Pair<int[], List<Future<SKey>>> res = GaeEvents.saveEvents(this.modelAddr, this.entity,
+		final Pair<int[], List<Future<SKey>>> res = GaeEvents.saveEvents(this.modelAddr, this.entity,
 				events);
 		this.events = new Pair<List<XAtomicEvent>, int[]>(events, res.getFirst());
 		return res;
@@ -498,11 +501,11 @@ public class GaeChange {
 	/**
 	 * Asynchronously put this change entity into datastore within the given
 	 * transaction.
-	 * 
+	 *
 	 * @param trans
 	 */
 	@XGaeOperation(datastoreWrite = true, memcacheWrite = true)
-	public void save(STransaction trans) {
+	public void save(final STransaction trans) {
 		XyAssert.xyAssert(getStatus().canChange());
 
 		registerActivity();
@@ -513,7 +516,7 @@ public class GaeChange {
 
 	/**
 	 * Put this change entity in the datastore.
-	 * 
+	 *
 	 * @return a future that returns the putted key on success
 	 */
 	public Future<SKey> save() {
@@ -529,7 +532,7 @@ public class GaeChange {
 
 	/**
 	 * Load the individual events associated with this change.
-	 * 
+	 *
 	 * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
 	 *         entities
 	 */
@@ -538,7 +541,7 @@ public class GaeChange {
 		XyAssert.xyAssert(getStatus().hasEvents());
 
 		if (this.events == null) {
-			Pair<XAtomicEvent[], int[]> res = GaeEvents.loadAtomicEvents(this.modelAddr, this.rev,
+			final Pair<XAtomicEvent[], int[]> res = GaeEvents.loadAtomicEvents(this.modelAddr, this.rev,
 					getActor(), this.entity);
 
 			this.events = new Pair<List<XAtomicEvent>, int[]>(Arrays.asList(res.getFirst()),
@@ -547,9 +550,9 @@ public class GaeChange {
 		return this.events;
 	}
 
-	public boolean isConflicting(GaeChange otherChange) {
-		GaeLocks ourLocks = getLocks();
-		GaeLocks otherLocks = otherChange.getLocks();
+	public boolean isConflicting(final GaeChange otherChange) {
+		final GaeLocks ourLocks = getLocks();
+		final GaeLocks otherLocks = otherChange.getLocks();
 		assert ourLocks != null : "our locks should not be removed before change is commited";
 		assert otherLocks != null : "locks should not be removed before change is commited";
 		return ourLocks.isConflicting(otherLocks);
@@ -558,7 +561,7 @@ public class GaeChange {
 	/**
 	 * This method should only be called if the change entity actually contains
 	 * events.
-	 * 
+	 *
 	 * @return the XEvent represented by this change.
 	 */
 	synchronized public XEvent getEvent() {
@@ -569,7 +572,7 @@ public class GaeChange {
 				return null;
 			}
 
-			List<XAtomicEvent> events = getAtomicEvents().getFirst();
+			final List<XAtomicEvent> events = getAtomicEvents().getFirst();
 			XyAssert.xyAssert(events.size() > 0);
 
 			if (events.size() == 1) {

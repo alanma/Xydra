@@ -2,12 +2,12 @@ package org.xydra.restless;
 
 /**
  * A boolean flag, for call by reference
- * 
+ *
  * @author xamde
  */
 public class Flag {
 
-	public Flag(boolean value) {
+	public Flag(final boolean value) {
 		this.value = value;
 	}
 

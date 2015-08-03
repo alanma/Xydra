@@ -10,12 +10,12 @@ import com.google.gwt.regexp.shared.RegExp;
  * doesn't support that class. Instead the {@link RegExp} class could be used.
  */
 public class MemoryStringIdRegexGwtEmul {
-    
+
     private static final Pattern p = Pattern.compile(MemoryStringIDProvider.nameRegex);
-    
-    public static boolean matchesXydraId(String uriString) {
-        boolean res = p.matcher(uriString).matches();
+
+    public static boolean matchesXydraId(final String uriString) {
+        final boolean res = p.matcher(uriString).matches();
         return res;
     }
-    
+
 }

@@ -15,23 +15,23 @@ import org.xydra.csv.ICsvTable;
 
 public class CsvTableImplTest {
 
-	static byte[] toBytes(ICsvTable table) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		OutputStreamWriter osw = new OutputStreamWriter(bos);
+	static byte[] toBytes(final ICsvTable table) throws IOException {
+		final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		final OutputStreamWriter osw = new OutputStreamWriter(bos);
 		table.writeTo(osw);
 		osw.flush();
 		return bos.toByteArray();
 	}
 
-	static Reader toReader(byte[] csvContent) {
-		ByteArrayInputStream bin = new ByteArrayInputStream(csvContent);
-		InputStreamReader isr = new InputStreamReader(bin);
+	static Reader toReader(final byte[] csvContent) {
+		final ByteArrayInputStream bin = new ByteArrayInputStream(csvContent);
+		final InputStreamReader isr = new InputStreamReader(bin);
 		return isr;
 	}
 
 	@Test
 	public void testBasicUsage() {
-		CsvTable ct = new CsvTable();
+		final CsvTable ct = new CsvTable();
 		ct.incrementValue("a", "1", 1);
 		ct.incrementValue("a", "1", 1);
 		Assert.assertEquals("2", ct.getValue("a", "1"));
@@ -51,37 +51,37 @@ public class CsvTableImplTest {
 
 	@Test
 	public void testReadMany() throws IOException {
-		CsvTable ctA = new CsvTable();
+		final CsvTable ctA = new CsvTable();
 		ctA.appendString("a1", "x", "a1x", 1000);
 		ctA.appendString("a1", "y", "a1y", 1000);
 		ctA.appendString("a2", "x", "a2x", 1000);
 		ctA.appendString("a2", "y", "a2y", 1000);
-		byte[] contentA = toBytes(ctA);
+		final byte[] contentA = toBytes(ctA);
 
-		CsvTable ctB = new CsvTable();
+		final CsvTable ctB = new CsvTable();
 		ctB.appendString("b1", "x", "b1x", 1000);
 		ctB.appendString("b1", "y", "b1y", 1000);
 		ctB.appendString("b2", "x", "b2x", 1000);
 		ctB.appendString("b2", "y", "b2y", 1000);
-		byte[] contentB = toBytes(ctB);
+		final byte[] contentB = toBytes(ctB);
 
-		ICsvTable ctAB = new CsvTable();
-		Reader readerA = toReader(contentA);
+		final ICsvTable ctAB = new CsvTable();
+		final Reader readerA = toReader(contentA);
 		ctAB.readFrom(readerA, true);
 		readerA.close();
-		Reader readerB = toReader(contentB);
+		final Reader readerB = toReader(contentB);
 		ctAB.readFrom(readerB, true);
 		readerB.close();
 
 		System.out.println("ct2:");
-		Writer w = new PrintWriter(System.out);
+		final Writer w = new PrintWriter(System.out);
 		ctAB.writeTo(w);
 		w.flush();
 	}
 
 	@Test
 	public void testWriting() throws IOException {
-		CsvTable ct = new CsvTable();
+		final CsvTable ct = new CsvTable();
 		ct.appendString("b", "1", "fil\"ex", 1000);
 		ct.appendString("b", "2", "awerfasd", 1000);
 		ct.appendString("b", "3", "waeraer,asdfsadf,asdfsadf,asdfsafd", 1000);
@@ -93,7 +93,7 @@ public class CsvTableImplTest {
 
 	@Test
 	public void testWritingAndRead() throws IOException {
-		CsvTable ct = new CsvTable();
+		final CsvTable ct = new CsvTable();
 		ct.appendString("b", "1", "fil\"ex", 1000);
 		ct.appendString("b", "2", "awerfasd", 1000);
 		ct.appendString("b", "3", "waeraer,asdfsadf,asdfsadf,asdfsafd", 1000);
@@ -101,14 +101,14 @@ public class CsvTableImplTest {
 		ct.appendString("a", "2", "awerfasd", 1000);
 		ct.appendString("a", "3", "waeraer,asdfsadf,asdfsadf,asdfsafd", 1000);
 
-		byte[] content = toBytes(ct);
-		ByteArrayInputStream bin = new ByteArrayInputStream(content);
-		InputStreamReader isr = new InputStreamReader(bin);
-		ICsvTable ct2 = new CsvTable();
+		final byte[] content = toBytes(ct);
+		final ByteArrayInputStream bin = new ByteArrayInputStream(content);
+		final InputStreamReader isr = new InputStreamReader(bin);
+		final ICsvTable ct2 = new CsvTable();
 		ct2.readFrom(isr, true);
 
 		System.out.println("ct2:");
-		Writer w = new PrintWriter(System.out);
+		final Writer w = new PrintWriter(System.out);
 		ct2.writeTo(w);
 		w.flush();
 	}

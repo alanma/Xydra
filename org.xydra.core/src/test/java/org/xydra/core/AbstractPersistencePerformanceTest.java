@@ -8,6 +8,8 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.xydra.base.Base;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
@@ -23,93 +25,93 @@ import org.xydra.store.XydraRuntime;
 
 
 public abstract class AbstractPersistencePerformanceTest {
-    
+
     private static final Logger log = LoggerFactory
             .getLogger(AbstractPersistencePerformanceTest.class);
-    
+
     private static XId actorId = XX.toId("actor1");
     private static int x = 3;
-    
+
     @Before
     public void setUp() {
         log.info("Creating fresh persistence");
     }
-    
+
     @After
     public void after() {
         XydraRuntime.finishRequest();
     }
-    
+
     public abstract XydraPersistence createPersistence(XId repositoryId);
-    
+
     @Test
     public void testPerformanceDirect() {
         log.info("TEST testPerformanceDirect");
-        XId repositoryId = XX.toId("testPerformanceDirect");
-        XydraPersistence persistence = createPersistence(repositoryId);
-        NanoClock c = new NanoClock().start();
-        XId modelId = XX.toId("model1");
+        final XId repositoryId = Base.toId("testPerformanceDirect");
+        final XydraPersistence persistence = createPersistence(repositoryId);
+        final NanoClock c = new NanoClock().start();
+        final XId modelId = Base.toId("model1");
         /* Add model1 */
-        XRepositoryCommand addModelCmd = X.getCommandFactory().createForcedAddModelCommand(
+        final XRepositoryCommand addModelCmd = BaseRuntime.getCommandFactory().createForcedAddModelCommand(
                 repositoryId, modelId);
         c.stopAndStart("create-cmd");
         long l = persistence.executeCommand(actorId, addModelCmd);
         assertTrue("" + l, l == 0);
         c.stopAndStart("add-model");
-        
+
         /* Add same model again */
         l = persistence.executeCommand(actorId, addModelCmd);
         assertTrue("" + l, l == XCommand.NOCHANGE);
         c.stopAndStart("add-model-again");
-        
+
         /* Add objects */
         createObjects(persistence, repositoryId, modelId, x);
         c.stopAndStart("add-" + x + "-objects");
-        
-        GetWithAddressRequest getRequest = new GetWithAddressRequest(XX.toAddress(repositoryId,
+
+        final GetWithAddressRequest getRequest = new GetWithAddressRequest(Base.toAddress(repositoryId,
                 modelId, null, null));
-        
-        long modelRev = persistence.getModelRevision(getRequest).revision();
+
+        final long modelRev = persistence.getModelRevision(getRequest).revision();
         assertTrue("modelRev=" + modelRev + " x=" + x, modelRev >= x);
-        
+
         /* Get snapshot */
         XWritableModel snap = persistence.getModelSnapshot(getRequest);
         c.stopAndStart("get-modelsnapshot");
         assertEquals(modelRev, snap.getRevisionNumber());
-        
+
         /* Get snapshot again */
         snap = persistence.getModelSnapshot(getRequest);
         c.stopAndStart("get-modelsnapshot2");
         assertEquals(modelRev, snap.getRevisionNumber());
-        
-        Set<XId> set = org.xydra.index.IndexUtils.toSet(snap.iterator());
+
+        final Set<XId> set = org.xydra.index.IndexUtils.toSet(snap.iterator());
         assertEquals(x, set.size());
         log.info(c.getStats());
     }
-    
-    private static void createObjects(XydraPersistence persistence, XId repositoryId, XId modelId,
-            int ocount) {
+
+    private static void createObjects(final XydraPersistence persistence, final XId repositoryId, final XId modelId,
+            final int ocount) {
         for(int i = 0; i < ocount; i++) {
-            XId objectId = XX.toId("object" + i);
-            long l = persistence
+            final XId objectId = Base.toId("object" + i);
+            final long l = persistence
                     .executeCommand(
                             actorId,
-                            X.getCommandFactory().createForcedAddObjectCommand(
-                                    XX.resolveModel(repositoryId, modelId), objectId));
+                            BaseRuntime.getCommandFactory().createForcedAddObjectCommand(
+                                    Base.resolveModel(repositoryId, modelId), objectId));
             assertTrue(l >= 0);
         }
     }
-    
+
     @SuppressWarnings("unused")
-    private static void createObjects(XWritableModel model, int ocount) {
+    private static void createObjects(final XWritableModel model, final int ocount) {
         for(int i = 0; i < ocount; i++) {
-            XId objectId = XX.toId("object" + i);
-            XWritableObject object = model.createObject(objectId);
+            final XId objectId = Base.toId("object" + i);
+            final XWritableObject object = model.createObject(objectId);
             XyAssert.xyAssert(objectId.equals(object.getId()));
             XyAssert.xyAssert(model.hasObject(objectId));
         }
     }
-    
+
     @Test
     // TODO rewrite with sessions
     public void testPerformanceIndirect() {
@@ -162,5 +164,5 @@ public abstract class AbstractPersistencePerformanceTest {
         // assertEquals(x, set.size());
         // log.info(c.getStats());
     }
-    
+
 }

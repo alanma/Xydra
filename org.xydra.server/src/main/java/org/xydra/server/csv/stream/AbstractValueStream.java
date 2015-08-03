@@ -9,9 +9,9 @@ import org.xydra.log.api.LoggerFactory;
 
 /**
  * Common parts for serialising XValues.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 @RunsInGWT(true)
 @RequiresAppEngine(false)
@@ -34,7 +34,7 @@ public abstract class AbstractValueStream implements XValueStreamHandler {
 	}
 
 	@Override
-	public void startCollection(ValueType type) {
+	public void startCollection(final ValueType type) {
 		this.buf.append("[");
 	}
 
@@ -44,12 +44,12 @@ public abstract class AbstractValueStream implements XValueStreamHandler {
 	}
 
 	@Override
-	public void javaBoolean(Boolean a) {
+	public void javaBoolean(final Boolean a) {
 		this.buf.append(a);
 	}
 
 	@Override
-	public void javaDouble(Double a) {
+	public void javaDouble(final Double a) {
 		if (a == null) {
 			javaNull();
 		} else if (a.isInfinite() || a.isNaN()) {
@@ -71,17 +71,17 @@ public abstract class AbstractValueStream implements XValueStreamHandler {
 	}
 
 	@Override
-	public void javaInteger(Integer a) {
+	public void javaInteger(final Integer a) {
 		this.buf.append(a.toString());
 	}
 
 	@Override
-	public void javaLong(Long a) {
+	public void javaLong(final Long a) {
 		this.buf.append(a.toString());
 	}
 
 	@Override
-	public void javaString(String a) {
+	public void javaString(final String a) {
 		this.buf.append(encode(a.toString()));
 	}
 

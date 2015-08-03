@@ -11,17 +11,17 @@ import org.xydra.log.spi.ILoggerFactorySPI;
 
 /**
  * Using log4j internally.
- * 
+ *
  * @author xamde
  */
 @ThreadSafe
 public class Log4jLoggerFactory implements ILoggerFactorySPI {
 
 	@Override
-	public Logger getLogger(String name, Collection<ILogListener> logListeners) {
-		org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(name);
+	public Logger getLogger(final String name, final Collection<ILogListener> logListeners) {
+		final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(name);
 		if (logListeners != null) {
-			Logger xydraLog4j = new Log4jLogger(LoggerWithListeners.class.getName(), logger);
+			final Logger xydraLog4j = new Log4jLogger(LoggerWithListeners.class.getName(), logger);
 			return new LoggerWithListeners(xydraLog4j, logListeners);
 		} else {
 			return new Log4jLogger(Log4jLogger.class.getName(), logger);
@@ -29,16 +29,16 @@ public class Log4jLoggerFactory implements ILoggerFactorySPI {
 	}
 
 	@Override
-	public Logger getWrappedLogger(String name, String fullyQualifiedNameOfDelegatingLoggerClass) {
-		org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(name);
+	public Logger getWrappedLogger(final String name, final String fullyQualifiedNameOfDelegatingLoggerClass) {
+		final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(name);
 		return new Log4jLogger(fullyQualifiedNameOfDelegatingLoggerClass, logger);
 	}
 
 	@Override
-	public Logger getThreadSafeLogger(String name, Collection<ILogListener> logListeners) {
-		org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(name);
+	public Logger getThreadSafeLogger(final String name, final Collection<ILogListener> logListeners) {
+		final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(name);
 		if (logListeners != null) {
-			Logger xydraLog4j = new Log4jLogger(ThreadSafeLoggerWithListeners.class.getName(),
+			final Logger xydraLog4j = new Log4jLogger(ThreadSafeLoggerWithListeners.class.getName(),
 					logger);
 			return new ThreadSafeLoggerWithListeners(xydraLog4j, logListeners);
 		} else {
@@ -47,10 +47,10 @@ public class Log4jLoggerFactory implements ILoggerFactorySPI {
 	}
 
 	@Override
-	public Logger getThreadSafeWrappedLogger(String name,
-			String fullyQualifiedNameOfDelegatingLoggerClass) {
+	public Logger getThreadSafeWrappedLogger(final String name,
+			final String fullyQualifiedNameOfDelegatingLoggerClass) {
 		// getWrappedLogger already returns a thread-safe logger
-		return this.getWrappedLogger(name, fullyQualifiedNameOfDelegatingLoggerClass);
+		return getWrappedLogger(name, fullyQualifiedNameOfDelegatingLoggerClass);
 	}
 
 }

@@ -2,11 +2,11 @@ package org.xydra.log.util;
 
 public class SharedExceptionUtils {
 
-	public static String toString(Throwable throwable) {
+	public static String toString(final Throwable throwable) {
 		Throwable t = throwable;
-		StringBuffer buf = new StringBuffer();
+		final StringBuffer buf = new StringBuffer();
 		while (t != null) {
-			StackTraceElement[] stackTraceElements = t.getStackTrace();
+			final StackTraceElement[] stackTraceElements = t.getStackTrace();
 			buf.append(t.toString() + "\n");
 			for (int i = 0; i < stackTraceElements.length; i++) {
 				buf.append("    at " + stackTraceElements[i] + "\n");

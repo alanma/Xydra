@@ -28,7 +28,7 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * Collection of methods to (de-)serialize variants of {@link XCommand} to and
  * from their XML/JSON representation.
- * 
+ *
  * @author dscharrer
  */
 @RunsInGWT(true)
@@ -49,10 +49,10 @@ public class SerializedCommand {
 	private static final String REVISION_RELATIVE_ATTRIBUTE = "relative";
 	private static final String XCOMMANDLIST_ELEMENT = "xcommands";
 
-	private static long getRevision(XydraElement element, boolean revisioned) {
+	private static long getRevision(final XydraElement element, final boolean revisioned) {
 
-		Object forcedString = element.getAttribute(FORCED_ATTRIBUTE);
-		Object revisionString = element.getAttribute(REVISION_ATTRIBUTE);
+		final Object forcedString = element.getAttribute(FORCED_ATTRIBUTE);
+		final Object revisionString = element.getAttribute(REVISION_ATTRIBUTE);
 
 		boolean forced;
 		if (forcedString == null) {
@@ -62,16 +62,18 @@ public class SerializedCommand {
 		}
 
 		if (forced) {
-			if (revisionString != null)
+			if (revisionString != null) {
 				throw new ParsingException(element, "Attribute " + REVISION_ATTRIBUTE
 						+ " not allowed for forced changes");
+			}
 			return XCommand.FORCED;
 		}
 
 		if (!revisioned) {
-			if (revisionString != null)
+			if (revisionString != null) {
 				throw new ParsingException(element, "Attribute " + REVISION_ATTRIBUTE
 						+ " not allowed for non-field-changes of type ADD");
+			}
 			return XCommand.SAFE_STATE_BOUND;
 		}
 
@@ -82,7 +84,7 @@ public class SerializedCommand {
 
 		long rev = SerializingUtils.toLong(revisionString);
 
-		Object relativeString = element.getAttribute(REVISION_RELATIVE_ATTRIBUTE);
+		final Object relativeString = element.getAttribute(REVISION_RELATIVE_ATTRIBUTE);
 		if (relativeString != null) {
 			XyAssert.xyAssert(rev < XCommand.RELATIVE_REV);
 			if (SerializingUtils.toBoolean(relativeString)) {
@@ -95,14 +97,14 @@ public class SerializedCommand {
 
 	/**
 	 * Encode the given {@link XAtomicCommand} as an XML element.
-	 * 
+	 *
 	 * @param event The command to encode.
 	 * @param out The XML encoder to write to.
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
 	 */
-	private static void setAtomicCommandAttributes(XAtomicCommand command, XydraOut out,
-			XAddress context, boolean saveRevision) {
+	private static void setAtomicCommandAttributes(final XAtomicCommand command, final XydraOut out,
+			final XAddress context, final boolean saveRevision) {
 
 		out.attribute(SerializingUtils.TYPE_ATTRIBUTE, command.getChangeType());
 
@@ -124,9 +126,9 @@ public class SerializedCommand {
 
 	}
 
-	private static XAtomicCommand toAtomicCommand(XydraElement element, XAddress context)
+	private static XAtomicCommand toAtomicCommand(final XydraElement element, final XAddress context)
 			throws ParsingException {
-		String name = element.getType();
+		final String name = element.getType();
 		if (name.equals(XFIELDCOMMAND_ELEMENT)) {
 			return toFieldCommand(element, context);
 		} else if (name.equals(XOBJECTCOMMAND_ELEMENT)) {
@@ -142,9 +144,9 @@ public class SerializedCommand {
 
 	/**
 	 * Get the {@link XCommand} represented by the given XML/JSON element.
-	 * 
+	 *
 	 * @param element
-	 * 
+	 *
 	 * @param context The {@link XId XIds} of the repository, model, object and
 	 *            field to fill in if not specified in the XML/JSON. If the
 	 *            given element represents a transaction, the context for the
@@ -152,11 +154,11 @@ public class SerializedCommand {
 	 * @return The {@link XCommand} represented by the given XML/JSON element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid command.
-	 * 
+	 *
 	 */
-	public static XCommand toCommand(XydraElement element, XAddress context)
+	public static XCommand toCommand(final XydraElement element, final XAddress context)
 			throws IllegalArgumentException {
-		String name = element.getType();
+		final String name = element.getType();
 		if (name.equals(XTRANSACTION_ELEMENT)) {
 			return toTransaction(element, context);
 		} else {
@@ -164,14 +166,14 @@ public class SerializedCommand {
 		}
 	}
 
-	private static XFieldCommand toFieldCommand(XydraElement element, XAddress context) {
+	private static XFieldCommand toFieldCommand(final XydraElement element, final XAddress context) {
 
 		SerializingUtils.checkElementType(element, XFIELDCOMMAND_ELEMENT);
 
-		XAddress target = SerializingUtils.getAddress(element, context);
+		final XAddress target = SerializingUtils.getAddress(element, context);
 
-		ChangeType type = SerializingUtils.getChangeType(element);
-		long rev = getRevision(element, true);
+		final ChangeType type = SerializingUtils.getChangeType(element);
+		final long rev = getRevision(element, true);
 
 		XValue value = null;
 		if (type != ChangeType.REMOVE) {
@@ -193,7 +195,7 @@ public class SerializedCommand {
 		}
 	}
 
-	private static XModelCommand toModelCommand(XydraElement element, XAddress context) {
+	private static XModelCommand toModelCommand(final XydraElement element, final XAddress context) {
 
 		SerializingUtils.checkElementType(element, XMODELCOMMAND_ELEMENT);
 
@@ -201,22 +203,23 @@ public class SerializedCommand {
 			throw new IllegalArgumentException("invalid context for model commands: " + context);
 		}
 
-		XAddress address = SerializingUtils.getAddress(element, context);
+		final XAddress address = SerializingUtils.getAddress(element, context);
 
 		if (address.getModel() == null) {
 			throw new ParsingException(element, "Missing attribute "
 					+ SerializingUtils.MODELID_ATTRIBUTE);
 		}
 
-		if (address.getObject() == null)
+		if (address.getObject() == null) {
 			throw new ParsingException(element, "Missing attribute "
 					+ SerializingUtils.OBJECTID_ATTRIBUTE);
+		}
 
-		ChangeType type = SerializingUtils.getChangeType(element);
-		long rev = getRevision(element, type != ChangeType.ADD);
+		final ChangeType type = SerializingUtils.getChangeType(element);
+		final long rev = getRevision(element, type != ChangeType.ADD);
 
-		XAddress target = address.getParent();
-		XId objectId = address.getObject();
+		final XAddress target = address.getParent();
+		final XId objectId = address.getObject();
 
 		if (type == ChangeType.ADD) {
 			return MemoryModelCommand.createAddCommand(target, rev, objectId);
@@ -228,7 +231,7 @@ public class SerializedCommand {
 		}
 	}
 
-	private static XObjectCommand toObjectCommand(XydraElement element, XAddress context) {
+	private static XObjectCommand toObjectCommand(final XydraElement element, final XAddress context) {
 
 		SerializingUtils.checkElementType(element, XOBJECTCOMMAND_ELEMENT);
 
@@ -236,7 +239,7 @@ public class SerializedCommand {
 			throw new IllegalArgumentException("invalid context for object commands: " + context);
 		}
 
-		XAddress address = SerializingUtils.getAddress(element, context);
+		final XAddress address = SerializingUtils.getAddress(element, context);
 
 		if (address.getObject() == null) {
 			throw new ParsingException(element, "Missing attribute "
@@ -248,11 +251,11 @@ public class SerializedCommand {
 					+ SerializingUtils.FIELDID_ATTRIBUTE);
 		}
 
-		ChangeType type = SerializingUtils.getChangeType(element);
-		long rev = getRevision(element, type != ChangeType.ADD);
+		final ChangeType type = SerializingUtils.getChangeType(element);
+		final long rev = getRevision(element, type != ChangeType.ADD);
 
-		XAddress target = address.getParent();
-		XId fieldId = address.getField();
+		final XAddress target = address.getParent();
+		final XId fieldId = address.getField();
 
 		if (type == ChangeType.ADD) {
 			return MemoryObjectCommand.createAddCommand(target, rev, fieldId);
@@ -264,7 +267,7 @@ public class SerializedCommand {
 		}
 	}
 
-	private static XRepositoryCommand toRepositoryCommand(XydraElement element, XAddress context) {
+	private static XRepositoryCommand toRepositoryCommand(final XydraElement element, final XAddress context) {
 
 		SerializingUtils.checkElementType(element, XREPOSITORYCOMMAND_ELEMENT);
 
@@ -277,7 +280,7 @@ public class SerializedCommand {
 		// + context);
 		// }
 
-		XAddress address = SerializingUtils.getAddress(element, context);
+		final XAddress address = SerializingUtils.getAddress(element, context);
 
 		if (address.getRepository() == null) {
 			throw new ParsingException(element, "Missing attribute "
@@ -289,11 +292,11 @@ public class SerializedCommand {
 					+ SerializingUtils.MODELID_ATTRIBUTE);
 		}
 
-		ChangeType type = SerializingUtils.getChangeType(element);
-		long rev = getRevision(element, type != ChangeType.ADD);
+		final ChangeType type = SerializingUtils.getChangeType(element);
+		final long rev = getRevision(element, type != ChangeType.ADD);
 
-		XAddress target = address.getParent();
-		XId modelId = address.getModel();
+		final XAddress target = address.getParent();
+		final XId modelId = address.getModel();
 
 		if (type == ChangeType.ADD) {
 			return MemoryRepositoryCommand.createAddCommand(target, rev, modelId);
@@ -305,21 +308,21 @@ public class SerializedCommand {
 		}
 	}
 
-	private static XTransaction toTransaction(XydraElement element, XAddress context) {
+	private static XTransaction toTransaction(final XydraElement element, final XAddress context) {
 
 		SerializingUtils.checkElementType(element, XTRANSACTION_ELEMENT);
 
-		XAddress target = SerializingUtils.getAddress(element, context);
+		final XAddress target = SerializingUtils.getAddress(element, context);
 
-		if (target.getField() != null || (target.getModel() == null && target.getObject() == null)) {
+		if (target.getField() != null || target.getModel() == null && target.getObject() == null) {
 			throw new IllegalArgumentException("Transaction element " + element
 					+ " does not specify a model or object target.");
 		}
 
-		List<XAtomicCommand> commands = new ArrayList<XAtomicCommand>();
-		Iterator<XydraElement> it = element.getChildrenByName(NAME_COMMANDS);
+		final List<XAtomicCommand> commands = new ArrayList<XAtomicCommand>();
+		final Iterator<XydraElement> it = element.getChildrenByName(NAME_COMMANDS);
 		while (it.hasNext()) {
-			XydraElement command = it.next();
+			final XydraElement command = it.next();
 			commands.add(toAtomicCommand(command, target));
 		}
 
@@ -328,14 +331,14 @@ public class SerializedCommand {
 
 	/**
 	 * Encode the given {@link XCommand} as an XML/JSON element.
-	 * 
+	 *
 	 * @param command The command to encode.
 	 * @param out The XML/JSON encoder to write to.
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
 	 * @throws IllegalArgumentException
 	 */
-	public static void serialize(XCommand command, XydraOut out, XAddress context)
+	public static void serialize(final XCommand command, final XydraOut out, final XAddress context)
 			throws IllegalArgumentException {
 		assert command != null : "cannot serialize null-commands";
 		if (command instanceof XTransaction) {
@@ -354,7 +357,7 @@ public class SerializedCommand {
 		}
 	}
 
-	private static void serialize(XFieldCommand command, XydraOut out, XAddress context)
+	private static void serialize(final XFieldCommand command, final XydraOut out, final XAddress context)
 			throws IllegalArgumentException {
 
 		out.open(XFIELDCOMMAND_ELEMENT);
@@ -370,7 +373,7 @@ public class SerializedCommand {
 
 	}
 
-	private static void serialize(XModelCommand command, XydraOut out, XAddress context)
+	private static void serialize(final XModelCommand command, final XydraOut out, final XAddress context)
 			throws IllegalArgumentException {
 
 		if (context != null && (context.getObject() != null || context.getField() != null)) {
@@ -383,7 +386,7 @@ public class SerializedCommand {
 
 	}
 
-	private static void serialize(XObjectCommand command, XydraOut out, XAddress context)
+	private static void serialize(final XObjectCommand command, final XydraOut out, final XAddress context)
 			throws IllegalArgumentException {
 
 		if (context != null && context.getField() != null) {
@@ -396,7 +399,7 @@ public class SerializedCommand {
 
 	}
 
-	private static void serialize(XRepositoryCommand command, XydraOut out, XAddress context)
+	private static void serialize(final XRepositoryCommand command, final XydraOut out, final XAddress context)
 			throws IllegalArgumentException {
 
 		// FIXME BIG MONKEY
@@ -413,18 +416,18 @@ public class SerializedCommand {
 
 	}
 
-	private static void serialize(XTransaction trans, XydraOut out, XAddress context)
+	private static void serialize(final XTransaction trans, final XydraOut out, final XAddress context)
 			throws IllegalArgumentException {
 
 		out.open(XTRANSACTION_ELEMENT);
 
 		SerializingUtils.setAddress(trans.getTarget(), out, context);
 
-		XAddress newContext = trans.getTarget();
+		final XAddress newContext = trans.getTarget();
 
 		out.child(NAME_COMMANDS);
 		out.beginArray();
-		for (XAtomicCommand command : trans) {
+		for (final XAtomicCommand command : trans) {
 			serialize(command, out, newContext);
 		}
 		out.endArray();
@@ -435,15 +438,15 @@ public class SerializedCommand {
 
 	/**
 	 * Encode the given {@link XCommand} list as an XML/JSON element.
-	 * 
+	 *
 	 * @param commands The commands to encode.
 	 * @param out The XML/JSON encoder to write to.
 	 * @param context The part of this event's target address that doesn't need
 	 *            to be encoded in the element.
 	 * @throws IllegalArgumentException
 	 */
-	public static void serialize(Iterator<? extends XCommand> commands, XydraOut out,
-			XAddress context) throws IllegalArgumentException {
+	public static void serialize(final Iterator<? extends XCommand> commands, final XydraOut out,
+			final XAddress context) throws IllegalArgumentException {
 
 		out.open(XCOMMANDLIST_ELEMENT);
 
@@ -459,9 +462,9 @@ public class SerializedCommand {
 
 	/**
 	 * Get the {@link XCommand} list represented by the given XML/JSON element.
-	 * 
+	 *
 	 * @param element
-	 * 
+	 *
 	 * @param context The {@link XId XIds} of the repository, model, object and
 	 *            field to fill in if not specified in the XML/JSON. The context
 	 *            for the commands contained in a transaction will be given by
@@ -470,16 +473,16 @@ public class SerializedCommand {
 	 *         XML/JSON element.
 	 * @throws IllegalArgumentException if the XML/JSON element does not
 	 *             represent a valid command list.
-	 * 
+	 *
 	 */
-	public static List<XCommand> toCommandList(XydraElement element, XAddress context) {
+	public static List<XCommand> toCommandList(final XydraElement element, final XAddress context) {
 
 		SerializingUtils.checkElementType(element, XCOMMANDLIST_ELEMENT);
 
-		List<XCommand> events = new ArrayList<XCommand>();
-		Iterator<XydraElement> it = element.getChildrenByName(NAME_COMMANDS);
+		final List<XCommand> events = new ArrayList<XCommand>();
+		final Iterator<XydraElement> it = element.getChildrenByName(NAME_COMMANDS);
 		while (it.hasNext()) {
-			XydraElement command = it.next();
+			final XydraElement command = it.next();
 			events.add(toCommand(command, context));
 		}
 

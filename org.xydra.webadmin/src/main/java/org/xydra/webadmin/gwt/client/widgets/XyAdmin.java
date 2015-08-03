@@ -1,5 +1,6 @@
 package org.xydra.webadmin.gwt.client.widgets;
 
+import org.xydra.base.Base;
 import org.xydra.core.XX;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
@@ -22,28 +23,28 @@ import com.google.web.bindery.event.shared.SimpleEventBus;
 /**
  * Main Class. Singleton, that holds references to the most important global
  * objects:
- * 
+ *
  * <ul>
  * <li> {@link Controller}
  * <li> {@link DataModel}
- * 
+ *
  * </ul>
  * from this entity on the UI gets built. It builds the
- * 
+ *
  * <ul>
  * <li> {@link SelectionTree} and instantiates its presenter, the
  * <li> {@link EditorPanel} and instantiates its presenter, and the
  * <li> {@link AddressWidget} and instantiates its presenter.
  * </ul>
- * 
+ *
  * Starts the presenters.
- * 
+ *
  * Puts some default-repository-id-widgets to the UI.
- * 
- * 
- * 
+ *
+ *
+ *
  * @author kahmann
- * 
+ *
  */
 public class XyAdmin extends Composite {
 
@@ -52,7 +53,7 @@ public class XyAdmin extends Composite {
 
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
 
-	private Controller controller;
+	private final Controller controller;
 	private DataModel model;
 
 	private EventBus eventbus;
@@ -71,29 +72,30 @@ public class XyAdmin extends Composite {
 
 	private static XyAdmin instance;
 
-	public XyAdmin(XyAdminServiceAsync service) {
+	public XyAdmin(final XyAdminServiceAsync service) {
 		instance = this;
 
-		this.getModel().addRepoID(XX.toId("repo1"));
-		this.getModel().addRepoID(XX.toId("gae-repo"));
+		getModel().addRepoID(Base.toId("repo1"));
+		getModel().addRepoID(Base.toId("gae-repo"));
 		initWidget(uiBinder.createAndBindUi(this));
 
-		SelectionTreePresenter selectionTreePresenter = new SelectionTreePresenter(
+		final SelectionTreePresenter selectionTreePresenter = new SelectionTreePresenter(
 				this.selectionTree);
-		EditorPanelPresenter editorPanelPresenter = new EditorPanelPresenter(this.editorPanel);
-		AddressWidgetPresenter addressWidgetPresenter = new AddressWidgetPresenter(
+		final EditorPanelPresenter editorPanelPresenter = new EditorPanelPresenter(this.editorPanel);
+		final AddressWidgetPresenter addressWidgetPresenter = new AddressWidgetPresenter(
 				this.addressWidget);
 
 		this.controller = new Controller(service, selectionTreePresenter, editorPanelPresenter,
 				addressWidgetPresenter);
 
-		this.getController().startPresenting();
+		getController().startPresenting();
 
 	}
 
 	public static XyAdmin getInstance() {
-		if (instance == null)
+		if (instance == null) {
 			throw new IllegalStateException("Please init first with a service");
+		}
 		return instance;
 	}
 

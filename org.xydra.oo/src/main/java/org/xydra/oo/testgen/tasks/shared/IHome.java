@@ -13,7 +13,7 @@ public interface IHome extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Home']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("inbox")
@@ -21,7 +21,7 @@ public interface IHome extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Home']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("starred")
@@ -29,7 +29,7 @@ public interface IHome extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Home']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("today")
@@ -37,7 +37,7 @@ public interface IHome extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Home']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("week")
@@ -45,7 +45,7 @@ public interface IHome extends IHasXId {
 
 	/**
 	 * For GWT-internal use only [generated from: 'toClassSpec 1']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'toClassSpec 2']
 	 * @param id
@@ -56,7 +56,7 @@ public interface IHome extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Home']
-	 * 
+	 *
 	 * @param inbox
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Home']
@@ -68,7 +68,7 @@ public interface IHome extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Home']
-	 * 
+	 *
 	 * @param starred
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Home']
@@ -80,7 +80,7 @@ public interface IHome extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Home']
-	 * 
+	 *
 	 * @param today
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Home']
@@ -92,7 +92,7 @@ public interface IHome extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Home']
-	 * 
+	 *
 	 * @param week
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Home']

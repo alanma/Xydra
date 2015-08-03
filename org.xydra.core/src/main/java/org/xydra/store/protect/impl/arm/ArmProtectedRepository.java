@@ -12,24 +12,24 @@ import org.xydra.store.protect.XProtectedRepository;
  * An abstract {@link XProtectedRepository} that wraps an {@link XRepository}
  * for a specific actor and checks all access against an
  * {@link XAuthorisationManager}.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 public class ArmProtectedRepository extends AbstractArmProtectedRepository {
-	
-	public ArmProtectedRepository(XRepository repo, XAuthorisationManager arm, XId actor) {
+
+	public ArmProtectedRepository(final XRepository repo, final XAuthorisationManager arm, final XId actor) {
 		super(repo, arm, actor);
 	}
-	
+
 	@Override
-	protected XAuthorisationManager getArmForModel(XId modelId) {
+	protected XAuthorisationManager getArmForModel(final XId modelId) {
 		return getArm();
 	}
-	
+
 	@Override
 	public XType getType() {
 		return XType.XREPOSITORY;
 	}
-	
+
 }

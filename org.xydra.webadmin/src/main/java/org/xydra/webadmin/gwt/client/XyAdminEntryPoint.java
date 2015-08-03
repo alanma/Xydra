@@ -20,15 +20,15 @@ public class XyAdminEntryPoint implements EntryPoint {
 	public void onModuleLoad() {
 		log.info("Starting XyAdminEntryPoint");
 
-		XyAdminServiceAsync service = (XyAdminServiceAsync) GWT.create(XyAdminService.class);
+		final XyAdminServiceAsync service = (XyAdminServiceAsync) GWT.create(XyAdminService.class);
 		/* set endpoint to absolute path */
-		ServiceDefTarget endpoint = (ServiceDefTarget) service;
+		final ServiceDefTarget endpoint = (ServiceDefTarget) service;
 		endpoint.setServiceEntryPoint("/xyadmin/ajax");
 
-		Panel main = RootPanel.get("main");
+		final Panel main = RootPanel.get("main");
 		main.add(new XyAdmin(service));
 
-		Panel loading = RootPanel.get("loading");
+		final Panel loading = RootPanel.get("loading");
 		loading.setVisible(false);
 	}
 

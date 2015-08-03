@@ -2,7 +2,7 @@ package org.xydra.server;
 
 /**
  * Implementations must have a zero-arg constructor.
- * 
+ *
  * @author xamde
  */
 public interface XydraServerApp {

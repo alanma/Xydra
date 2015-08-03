@@ -11,17 +11,17 @@ import org.xydra.testgae.server.rest.xmas.XmasResource;
 
 /**
  * This is the main Restless app for the TestGae project.
- * 
+ *
  * @author xamde
  */
 public class XmasApp {
 
-	public void restless(Restless r, String path) {
+	public void restless(final Restless r, final String path) {
 		/** a trivial exception handler */
 		r.addExceptionHandler(new RestlessExceptionHandler() {
 
 			@Override
-			public boolean handleException(Throwable t, IRestlessContext context) {
+			public boolean handleException(final Throwable t, final IRestlessContext context) {
 				System.err.println("Restless error");
 				throw new RuntimeException("" + context.getRequest(), t);
 			}

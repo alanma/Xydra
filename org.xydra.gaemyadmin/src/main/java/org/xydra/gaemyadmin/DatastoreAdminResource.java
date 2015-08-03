@@ -19,6 +19,7 @@ import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
+import org.xydra.restless.utils.SharedHtmlUtils;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceConfig;
@@ -38,10 +39,10 @@ import com.google.apphosting.api.ApiProxy;
 
 /**
  * Status: First proof of concept for a web app that can read the stats entites.
- * 
+ *
  * Next steps: Compute a zip file with all data an send it to Amazon S3 on
  * request or periodically.
- * 
+ *
  * @author xamde
  */
 public class DatastoreAdminResource {
@@ -50,7 +51,7 @@ public class DatastoreAdminResource {
 	static final String PAGE_NAME = "Datastore Admin";
 	public static String URL;
 
-	public static void restless(Restless restless, String prefix) {
+	public static void restless(final Restless restless, final String prefix) {
 		URL = prefix + "/datastore";
 		restless.addMethod(URL, "GET", DatastoreAdminResource.class, "index", true);
 		restless.addMethod(URL + "/stats", "GET", DatastoreAdminResource.class, "stats", true,
@@ -69,19 +70,19 @@ public class DatastoreAdminResource {
 		);
 	}
 
-	public void index(HttpServletResponse res, HttpServletRequest req) throws IOException {
+	public void index(final HttpServletResponse res, final HttpServletRequest req) throws IOException {
 		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "");
+		final Writer w = AppConstants.startPage(res, PAGE_NAME, "");
 
-		w.write(HtmlUtils.toOrderedList(Arrays.asList(
+		w.write(SharedHtmlUtils.toOrderedList(Arrays.asList(
 
-				HtmlUtils.link("/admin" + URL + "/stats", "Statistics"),
+				SharedHtmlUtils.link("/admin" + URL + "/stats", "Statistics"),
 
-				HtmlUtils
+				SharedHtmlUtils
 						.link("/admin" + URL + "/deleteKind?kind=",
 								"Page to delete data of a certain kind - clicking this link just lists stats about data"),
 
-				HtmlUtils.link("/admin" + URL + "/deleteAll",
+				SharedHtmlUtils.link("/admin" + URL + "/deleteAll",
 						"Page to delete all data - clicking this link just lists stats about data")
 
 		)));
@@ -93,53 +94,53 @@ public class DatastoreAdminResource {
 
 	/**
 	 * Delete all data in the data store
-	 * 
+	 *
 	 * @param context
 	 * @param res
 	 * @param confirmParam
-	 * 
+	 *
 	 * @throws IOException
 	 *             from underlying http streams or datastore
 	 */
-	public void deleteAll(IRestlessContext context, HttpServletResponse res, String confirmParam)
+	public void deleteAll(final IRestlessContext context, final HttpServletResponse res, final String confirmParam)
 			throws IOException {
 		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 
 		AdminAuthUtils.setTempAuthCookie(context, passwordPropertyNameInWebXml);
 
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "Delete All");
+		final Writer w = AppConstants.startPage(res, PAGE_NAME, "Delete All");
 
 		// Get a handle on the datastore itself
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		List<String> kinds = GaeMyUtils.getAllKinds();
-		for (String kind : kinds) {
+		final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		final List<String> kinds = GaeMyUtils.getAllKinds();
+		for (final String kind : kinds) {
 			w.write("Kind '" + kind + "'. Counting ... ");
-			Query q = new Query(kind).setKeysOnly();
-			PreparedQuery pq = datastore.prepare(q);
-			int count = pq.countEntities(FetchOptions.Builder.withDefaults());
+			final Query q = new Query(kind).setKeysOnly();
+			final PreparedQuery pq = datastore.prepare(q);
+			final int count = pq.countEntities(FetchOptions.Builder.withDefaults());
 			w.write(count + "\n");
 		}
 
-		String password = context.getRestless().getInitParameter(passwordPropertyNameInWebXml);
+		final String password = context.getRestless().getInitParameter(passwordPropertyNameInWebXml);
 		w.write("Password is '"
 				+ password
 				+ "' it must match the URL param 'confirm' and the cookie. Setting cookie for 120 seconds ..."
 				+ "<br/>\n");
 		try {
 			AdminAuthUtils.checkIfAuthorised(context, passwordPropertyNameInWebXml, confirmParam);
-			for (String kind : kinds) {
+			for (final String kind : kinds) {
 				w.write("Deleting kind " + kind + ". Getting keys ... ");
 				w.flush();
-				List<Key> keys = new LinkedList<Key>();
-				Query q = new Query(kind).setKeysOnly();
-				PreparedQuery pq = datastore.prepare(q);
-				for (Entity entity : pq.asIterable()) {
+				final List<Key> keys = new LinkedList<Key>();
+				final Query q = new Query(kind).setKeysOnly();
+				final PreparedQuery pq = datastore.prepare(q);
+				for (final Entity entity : pq.asIterable()) {
 					keys.add(entity.getKey());
 				}
 				w.write("Bulk delete ... ");
 				try {
 					datastore.delete(keys);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					log.warn("Could not delete kind '" + kind + "'", e);
 					w.write("Could not delete kind '" + kind + "'.");
 
@@ -147,7 +148,7 @@ public class DatastoreAdminResource {
 				w.write("Deleted all '" + kind + "'.\n");
 			}
 			w.write("Done with delete all.\n");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			w.write("Ok, did not delete anything. If you are really sure, add '?confirm=....' to this url.");
 		}
 
@@ -156,33 +157,33 @@ public class DatastoreAdminResource {
 
 	/**
 	 * Delete all data of a certain KIND in the data store
-	 * 
+	 *
 	 * @param context
 	 * @param res
 	 * @param kind
 	 *            to be deleted
 	 * @param confirmParam
-	 * 
+	 *
 	 * @throws IOException
 	 *             from underlying http streams or datastore
 	 */
-	public void deleteKind(IRestlessContext context, HttpServletResponse res, String kind,
-			String confirmParam) throws IOException {
+	public void deleteKind(final IRestlessContext context, final HttpServletResponse res, final String kind,
+			final String confirmParam) throws IOException {
 		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "Delete Kind '" + kind + "'");
+		final Writer w = AppConstants.startPage(res, PAGE_NAME, "Delete Kind '" + kind + "'");
 
 		AdminAuthUtils.setTempAuthCookie(context, passwordPropertyNameInWebXml);
 
 		// Get a handle on the datastore itself
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 		w.write("Kind '" + kind + "'. Counting ... ");
 		Query q = new Query(kind).setKeysOnly();
 		PreparedQuery pq = datastore.prepare(q);
-		int count = pq.countEntities(FetchOptions.Builder.withDefaults());
+		final int count = pq.countEntities(FetchOptions.Builder.withDefaults());
 		w.write(count + "\n");
 
-		String password = context.getRestless().getInitParameter(passwordPropertyNameInWebXml);
+		final String password = context.getRestless().getInitParameter(passwordPropertyNameInWebXml);
 		w.write("Password is '"
 				+ password
 				+ "' it must match the URL param 'confirm' and the cookie. Setting cookie for 120 seconds ..."
@@ -190,41 +191,41 @@ public class DatastoreAdminResource {
 		try {
 			AdminAuthUtils.checkIfAuthorised(context, passwordPropertyNameInWebXml, confirmParam);
 			w.write("Deleting kind " + kind + ". Getting keys ... ");
-			List<Key> keys = new LinkedList<Key>();
+			final List<Key> keys = new LinkedList<Key>();
 			q = new Query(kind).setKeysOnly();
 			pq = datastore.prepare(q);
-			for (Entity entity : pq.asIterable()) {
+			for (final Entity entity : pq.asIterable()) {
 				keys.add(entity.getKey());
 			}
 			w.write("Bulk delete ... ");
 			try {
 				datastore.delete(keys);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				log.warn("Could not delete kind '" + kind + "'", e);
 				w.write("Could not delete kind '" + kind + "'.");
 
 			}
 			w.write("Deleted all '" + kind + "'.\n");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			w.write("Ok, did not delete anything. If you are really sure, add '?confirm=....' to this url.");
 		}
 
 		AppConstants.endPage(w);
 	}
 
-	public void stats(HttpServletRequest req, String resultFormat, HttpServletResponse res)
+	public void stats(final HttpServletRequest req, final String resultFormat, final HttpServletResponse res)
 			throws IOException {
 		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "Stats");
+		final Writer w = AppConstants.startPage(res, PAGE_NAME, "Stats");
 
-		long start = System.currentTimeMillis();
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		final long start = System.currentTimeMillis();
+		final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 		w.write("<code><pre>");
 
 		w.write("=== Version 2010-11-10 $Revision: 8152 $\n");
 
-		DatastoreServiceConfig defaultConfig = DatastoreServiceConfig.Builder.withDefaults();
+		final DatastoreServiceConfig defaultConfig = DatastoreServiceConfig.Builder.withDefaults();
 		w.write("Default datastore config\n"
 
 		+ "* deadline: " + defaultConfig.getDeadline() + "\n"
@@ -237,30 +238,30 @@ public class DatastoreAdminResource {
 		);
 
 		// put dummy entity to test datastore health
-		Key key = KeyFactory.createKey("dummy", "dummyEntity");
-		Entity dummyEntity = new Entity(key);
+		final Key key = KeyFactory.createKey("dummy", "dummyEntity");
+		final Entity dummyEntity = new Entity(key);
 		try {
 			datastore.put(dummyEntity);
 			w.write("Datastore health: Fully functional and writeable\n");
-		} catch (ApiProxy.CapabilityDisabledException e) {
+		} catch (final ApiProxy.CapabilityDisabledException e) {
 			w.write("Datastore health: /!\\ READ-ONLY MODE /!\\ \n");
 		}
 
-		MemcacheService ms = MemcacheServiceFactory.getMemcacheService();
+		final MemcacheService ms = MemcacheServiceFactory.getMemcacheService();
 		ms.setErrorHandler(new StrictErrorHandler());
 
 		try {
 			ms.put("dummy", "dummy");
 			w.write("Memcache health:  Fully functional and writeable\n");
-		} catch (com.google.appengine.api.memcache.MemcacheServiceException e) {
+		} catch (final com.google.appengine.api.memcache.MemcacheServiceException e) {
 			// Memcache is down, degrade gracefully
 			w.write("Memcache health:  /!\\ READ-ONLY MODE /!\\ Will return no hits\n");
 		}
 
-		Collection<Transaction> txns = datastore.getActiveTransactions();
+		final Collection<Transaction> txns = datastore.getActiveTransactions();
 		w.write("Active transactions: " + txns.size() + "\n");
 
-		FetchOptions defaultFetchOptions = FetchOptions.Builder.withDefaults();
+		final FetchOptions defaultFetchOptions = FetchOptions.Builder.withDefaults();
 		w.write("Default fetchOptions\n"
 
 		+ "* chunkSize: " + defaultFetchOptions.getChunkSize() + "\n"
@@ -287,29 +288,29 @@ public class DatastoreAdminResource {
 
 		if (resultFormat.equals("text")) {
 			w.write("All kinds of entities\n");
-			for (String kind : GaeMyUtils.getAllKinds()) {
+			for (final String kind : GaeMyUtils.getAllKinds()) {
 				w.write("* Kind: " + kind + "\n");
 
-				for (Entity e : GaeMyUtils.getEntitiesOfKind(kind)) {
+				for (final Entity e : GaeMyUtils.getEntitiesOfKind(kind)) {
 					// handle entity
 					w.write("** appid:" + e.getAppId() + " namespace:" + e.getNamespace()
 							+ " props:" + e.getProperties().keySet() + "\n");
 
 					// handle properties
-					Map<String, Object> props = e.getProperties();
-					for (Map.Entry<String, Object> me : props.entrySet()) {
+					final Map<String, Object> props = e.getProperties();
+					for (final Map.Entry<String, Object> me : props.entrySet()) {
 						w.write("*** " + me.getKey() + " = " + me.getValue() + "\n");
 					}
 				}
 			}
 		} else {
-			CsvTable csv = new CsvTable();
+			final CsvTable csv = new CsvTable();
 			w.write("Fetching kind names...\n");
-			for (String kind : GaeMyUtils.getAllKinds()) {
+			for (final String kind : GaeMyUtils.getAllKinds()) {
 				w.write("Processing all elements of kind: " + kind + "\n");
-				for (Entity e : GaeMyUtils.getEntitiesOfKind(kind)) {
+				for (final Entity e : GaeMyUtils.getEntitiesOfKind(kind)) {
 					// handle entity
-					Row row = csv.getOrCreateRow(e.getKey().toString(), true);
+					final Row row = csv.getOrCreateRow(e.getKey().toString(), true);
 					row.setValue("appid", e.getAppId(), true);
 					row.setValue("namespace", e.getNamespace(), true);
 					row.setValue("kind", e.getKind(), true);
@@ -318,9 +319,9 @@ public class DatastoreAdminResource {
 					}
 
 					// handle properties
-					Map<String, Object> props = e.getProperties();
-					for (Map.Entry<String, Object> me : props.entrySet()) {
-						Object o = me.getValue();
+					final Map<String, Object> props = e.getProperties();
+					for (final Map.Entry<String, Object> me : props.entrySet()) {
+						final Object o = me.getValue();
 						String value = null;
 						if (o == null) {
 							// keep null
@@ -410,17 +411,17 @@ public class DatastoreAdminResource {
 		// * "Text"
 		// * "User"
 
-		Entity statTotal = datastore.prepare(new Query("__Stat_Total__")).asSingleEntity();
+		final Entity statTotal = datastore.prepare(new Query("__Stat_Total__")).asSingleEntity();
 		if (statTotal != null) {
-			Long totalBytes = (Long) statTotal.getProperty("bytes");
-			Long totalEntities = (Long) statTotal.getProperty("count");
+			final Long totalBytes = (Long) statTotal.getProperty("bytes");
+			final Long totalEntities = (Long) statTotal.getProperty("count");
 			w.write("Datastore contains " + totalBytes + " bytes in " + totalEntities + " entities");
 		} else {
 			w.write("No entity named '__Stat_Total__' found. Works maybe only in production. Stats are computed only once a day.");
 		}
 
-		long stop = System.currentTimeMillis();
-		w.write("Done processing in " + ((stop - start) / 1000) + " seconds");
+		final long stop = System.currentTimeMillis();
+		w.write("Done processing in " + (stop - start) / 1000 + " seconds");
 
 		w.write("</pre></code>");
 		AppConstants.endPage(w);

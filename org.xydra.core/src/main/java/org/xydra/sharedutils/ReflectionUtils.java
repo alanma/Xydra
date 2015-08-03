@@ -18,85 +18,86 @@ import org.xydra.log.api.LoggerFactory;
  * A set of the most essential reflection capabilities of Java. The
  * corresponding GWT version in org.xydra.gwt project simply does nothing, but
  * provides the same method signatures.
- * 
+ *
  * Runs in GWT via supersource
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(false)
 public class ReflectionUtils {
-    
+
     private static final Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
-    
-    public static String getCanonicalName(Class<?> clazz) {
+
+    public static String getCanonicalName(final Class<?> clazz) {
         return clazz.getCanonicalName();
     }
-    
+
     /**
      * @param className fully qualified name
      * @return an instance or throw an Exception
      * @throws Exception containing more info
      */
-    public static Object createInstanceOfClass(String className) throws Exception {
+    public static Object createInstanceOfClass(final String className) throws Exception {
         try {
-            Class<?> clazz = Class.forName(className);
+            final Class<?> clazz = Class.forName(className);
             return createInstanceOfClass(clazz);
-        } catch(ClassNotFoundException e) {
+        } catch(final ClassNotFoundException e) {
             throw new Exception(e);
         }
     }
-    
+
     /**
      * @param clazz @NeverNull
      * @return an instance or throw an Exception
      * @throws Exception containing more info
      */
     @SuppressWarnings("unchecked")
-    public static <T> T createInstanceOfClass(Class<T> clazz) throws Exception {
-        if(log.isDebugEnabled())
-            log.debug("Instantiated. Now casting...");
+    public static <T> T createInstanceOfClass(final Class<T> clazz) throws Exception {
+        if(log.isDebugEnabled()) {
+			log.debug("Instantiated. Now casting...");
+		}
         try {
-            Object instance = clazz.newInstance();
+            final Object instance = clazz.newInstance();
             return (T)instance;
-        } catch(InstantiationException e) {
+        } catch(final InstantiationException e) {
             throw new Exception("Found the class with name " + clazz.getCanonicalName()
                     + " but could not instantiate it", e);
-        } catch(IllegalAccessException e) {
+        } catch(final IllegalAccessException e) {
             throw new Exception("Found the class with name " + clazz.getCanonicalName()
                     + " but could not instantiate it", e);
         }
     }
-    
+
     /**
      * @param obj to be estimated in size
      * @return estimated size by serialising to ObjectStream and counting bytes
      */
-    public static long sizeOf(Serializable obj) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    public static long sizeOf(final Serializable obj) {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos;
         try {
             oos = new ObjectOutputStream(bos);
             oos.writeObject(obj);
             oos.close();
             return bos.toByteArray().length;
-        } catch(IOException e) {
+        } catch(final IOException e) {
             log.warn("Could not estimate size of object with type "
                     + obj.getClass().getCanonicalName());
             return 0;
         }
     }
-    
+
     /**
      * @param t the {@link Throwable} to inspect
      * @param n number of lines, if larger than available input: no problem
      * @return the first n lines of the given {@link Throwable} t, separated by
      *         new line characters + br tags
      */
-    public static String firstNLines(Throwable t, int n) {
+    public static String firstNLines(final Throwable t, final int n) {
         BufferedReader br = toBufferedReader(t);
         int lines = 0;
         try {
-            StringBuffer buf = new StringBuffer();
+            final StringBuffer buf = new StringBuffer();
             lines += append(br, buf, n);
             Throwable cause = t.getCause();
             while(lines < n && cause != null) {
@@ -106,26 +107,26 @@ public class ReflectionUtils {
                 cause = t.getCause();
             }
             return buf.toString();
-        } catch(IOException e) {
+        } catch(final IOException e) {
             throw new RuntimeException(e);
         }
     }
-    
+
     /**
      * Not even emulated in GWT!
-     * 
+     *
      * @param t
      * @return ...
      */
     @RunsInGWT(false)
-    public static BufferedReader toBufferedReader(Throwable t) {
-        StringWriter sw = new StringWriter();
+    public static BufferedReader toBufferedReader(final Throwable t) {
+        final StringWriter sw = new StringWriter();
         t.printStackTrace(new PrintWriter(sw));
-        StringReader sr = new StringReader(sw.getBuffer().toString());
-        BufferedReader br = new BufferedReader(sr);
+        final StringReader sr = new StringReader(sw.getBuffer().toString());
+        final BufferedReader br = new BufferedReader(sr);
         return br;
     }
-    
+
     /**
      * @param br
      * @param buf
@@ -133,7 +134,7 @@ public class ReflectionUtils {
      * @return number of output lines generated
      * @throws IOException
      */
-    private static int append(BufferedReader br, StringBuffer buf, int remainingMaxLines)
+    private static int append(final BufferedReader br, final StringBuffer buf, final int remainingMaxLines)
             throws IOException {
         String line = br.readLine();
         int lines;
@@ -143,5 +144,5 @@ public class ReflectionUtils {
         }
         return lines;
     }
-    
+
 }

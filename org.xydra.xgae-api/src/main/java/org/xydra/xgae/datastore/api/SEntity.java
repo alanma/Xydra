@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  * An entity in an key value store. I.e. the 'value' of a key-value store.
- * 
+ *
  * @author xamde
  */
 public interface SEntity extends SWrapper {
@@ -36,7 +36,7 @@ public interface SEntity extends SWrapper {
 
 	/**
 	 * E.g. for GAE: setUnindexedProperty
-	 * 
+	 *
 	 * @param name
 	 * @param value
 	 */
@@ -52,7 +52,7 @@ public interface SEntity extends SWrapper {
 
 	/**
 	 * E.g. for GAE: setUnindexedProperty
-	 * 
+	 *
 	 * @param name
 	 * @param value
 	 */
@@ -66,7 +66,7 @@ public interface SEntity extends SWrapper {
 
 	/**
 	 * E.g. for GAE: setUnindexedProperty
-	 * 
+	 *
 	 * @param name
 	 * @param value
 	 */
@@ -74,7 +74,7 @@ public interface SEntity extends SWrapper {
 
 	/**
 	 * E.g. for GAE: setUnindexedProperty
-	 * 
+	 *
 	 * @param name
 	 * @param value
 	 */

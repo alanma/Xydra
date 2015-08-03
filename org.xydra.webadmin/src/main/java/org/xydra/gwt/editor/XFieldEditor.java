@@ -1,5 +1,6 @@
 package org.xydra.gwt.editor;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -107,10 +108,10 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	private final Button showAddressButton = new Button();
 	private final VerticalPanel contentTable = new VerticalPanel();
 
-	private HTMLPanel controlPanel = new HTMLPanel("");
-	private HorizontalPanel middlePanel = new HorizontalPanel();
-	private VerticalPanel lowerPanel = new VerticalPanel();
-	private VerticalPanel editorPanel = new VerticalPanel();
+	private final HTMLPanel controlPanel = new HTMLPanel("");
+	private final HorizontalPanel middlePanel = new HorizontalPanel();
+	private final VerticalPanel lowerPanel = new VerticalPanel();
+	private final VerticalPanel editorPanel = new VerticalPanel();
 
 	private ListBox type;
 	private Button add;
@@ -125,7 +126,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 
 	private XId id;
 
-	public XFieldEditor(RowPresenter rowPresenter, final XId fieldId) {
+	public XFieldEditor(final RowPresenter rowPresenter, final XId fieldId) {
 
 		this.presenter = rowPresenter;
 		this.id = fieldId;
@@ -149,7 +150,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.controlPanel.add(this.delete);
 		this.delete.getElement().setAttribute("style", "float: right");
 		this.edit.getElement().setAttribute("style", "float: left");
-		Image textImage = new Image(BundledRes.INSTANCE.images().list());
+		final Image textImage = new Image(BundledRes.INSTANCE.images().list());
 		this.showAddressButton.getElement().appendChild(textImage.getElement());
 		this.showAddressButton.setStyleName("imageButtonStyle");
 		this.showAddressButton.getElement().setAttribute("style",
@@ -161,10 +162,10 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.contentTable.setCellHorizontalAlignment(this.contents,
 				HasHorizontalAlignment.ALIGN_CENTER);
 
-		Image editImg = new Image(BundledRes.INSTANCE.images().edit());
+		final Image editImg = new Image(BundledRes.INSTANCE.images().edit());
 		this.edit.getElement().appendChild(editImg.getElement());
 		this.edit.setStyleName("imageButtonStyle");
-		Image deleteImg = new Image(BundledRes.INSTANCE.images().delete());
+		final Image deleteImg = new Image(BundledRes.INSTANCE.images().delete());
 		this.delete.getElement().appendChild(deleteImg.getElement());
 		this.delete.setStyleName("imageButtonStyle");
 
@@ -179,14 +180,14 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 
 		this.edit.addClickHandler(new ClickHandler() {
 			@Override
-			public void onClick(ClickEvent e) {
+			public void onClick(final ClickEvent e) {
 				showEditor();
 			}
 		});
 
 		this.delete.addClickHandler(new ClickHandler() {
 			@Override
-			public void onClick(ClickEvent e) {
+			public void onClick(final ClickEvent e) {
 				delete();
 			}
 		});
@@ -194,9 +195,9 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.showAddressButton.addClickHandler(new ClickHandler() {
 
 			@Override
-			public void onClick(ClickEvent event) {
+			public void onClick(final ClickEvent event) {
 				String entityIdString = "";
-				XType entitysType = XFieldEditor.this.presenter.getAddress().getAddressedType();
+				final XType entitysType = XFieldEditor.this.presenter.getAddress().getAddressedType();
 				switch (entitysType) {
 				case XFIELD:
 					entityIdString = " field " + fieldId.toString();
@@ -212,7 +213,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 				default:
 					break;
 				}
-				AddressDialog addressDialog = new AddressDialog(entityIdString, XX.resolveField(
+				final AddressDialog addressDialog = new AddressDialog(entityIdString, Base.resolveField(
 						XFieldEditor.this.presenter.getAddress(), fieldId).toString());
 				addressDialog.show();
 				addressDialog.selectEverything();
@@ -228,7 +229,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.edit.setTitle("edit this field");
 	}
 
-	public XFieldEditor(XField field) {
+	public XFieldEditor(final XField field) {
 		// TODO Auto-generated constructor stub
 	}
 
@@ -236,7 +237,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.presenter.deleteField(this.id);
 	}
 
-	protected void changeValue(XValue value) {
+	protected void changeValue(final XValue value) {
 
 		String str;
 		if (value == null) {
@@ -303,16 +304,16 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 			}
 
 		}
-		SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+		final SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
 		safeHtmlBuilder.appendEscapedLines(str);
 		this.contents.setHTML(safeHtmlBuilder.toSafeHtml());
 
 	}
 
 	@Override
-	public void onChangeEvent(XFieldEvent event) {
+	public void onChangeEvent(final XFieldEvent event) {
 		log.info("editor: got " + event);
-		XValue value = event.getNewValue();
+		final XValue value = event.getNewValue();
 		changeValue(value);
 		this.revision.setText(Long.toString(event.getOldFieldRevision()));
 	}
@@ -371,7 +372,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.controlPanel.add(this.cancel);
 		this.cancel.addClickHandler(new ClickHandler() {
 			@Override
-			public void onClick(ClickEvent arg0) {
+			public void onClick(final ClickEvent arg0) {
 				removeEditor();
 			}
 		});
@@ -381,7 +382,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.save.setTitle("save");
 		this.save.addClickHandler(new ClickHandler() {
 			@Override
-			public void onClick(ClickEvent arg0) {
+			public void onClick(final ClickEvent arg0) {
 				saveValue();
 			}
 		});
@@ -392,18 +393,18 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.controlPanel.add(this.add);
 		this.add.addClickHandler(new ClickHandler() {
 			@Override
-			public void onClick(ClickEvent e) {
+			public void onClick(final ClickEvent e) {
 				((XCollectionEditor<?, ?>) XFieldEditor.this.editor).add();
 			}
 		});
 
-		Image cancelImage = new Image(BundledRes.INSTANCE.images().cancel());
+		final Image cancelImage = new Image(BundledRes.INSTANCE.images().cancel());
 		this.cancel.getElement().appendChild(cancelImage.getElement());
 		this.cancel.setStyleName("imageButtonStyle");
-		Image saveImg = new Image(BundledRes.INSTANCE.images().save());
+		final Image saveImg = new Image(BundledRes.INSTANCE.images().save());
 		this.save.getElement().appendChild(saveImg.getElement());
 		this.save.setStyleName("imageButtonStyle");
-		Image addImg = new Image(BundledRes.INSTANCE.images().add());
+		final Image addImg = new Image(BundledRes.INSTANCE.images().add());
 		this.add.getElement().appendChild(addImg.getElement());
 		this.add.setStyleName("imageButtonStyle");
 
@@ -433,12 +434,12 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.middlePanel.insert(this.type, 0);
 		this.type.addChangeHandler(new ChangeHandler() {
 			@Override
-			public void onChange(ChangeEvent e) {
+			public void onChange(final ChangeEvent e) {
 				typeChanged();
 			}
 		});
 
-		XValue value = this.presenter.getFieldValue(this.id);
+		final XValue value = this.presenter.getFieldValue(this.id);
 		if (value == null) {
 			this.type.setSelectedIndex(IDX_NOVALUE);
 			this.add.setVisible(false);
@@ -510,7 +511,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 
 	protected void saveValue() {
 		removeErrorLabel();
-		XValue newValue = getEditorValue();
+		final XValue newValue = getEditorValue();
 
 		if (this.editor != null && newValue == null) {
 			// invalid editor contents
@@ -627,7 +628,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		try {
 
 			newValue = this.editor == null ? null : this.editor.getValue();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			showErrorLabel(e.getMessage());
 		}
 		return newValue;
@@ -644,7 +645,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		}
 	}
 
-	private void showErrorLabel(String errorMsg) {
+	private void showErrorLabel(final String errorMsg) {
 		this.errorLabel = new Label(errorMsg);
 		this.errorLabel.setStyleName("errorLabelStyle");
 		this.add(this.errorLabel);

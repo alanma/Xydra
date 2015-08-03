@@ -14,7 +14,7 @@ import org.xydra.log.api.LoggerFactory;
 
 /**
  * Can render exceptions as a nicely readable HTML.
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(true)
@@ -26,7 +26,7 @@ public class SharedExceptionUtils_GwtEmul {
 	 * Assume a and b come from the same program and have a common caller
 	 * hierarchy. Display the stack traces in three parts: Just A, just B, and
 	 * the common ancestor of both A and B.
-	 * 
+	 *
 	 * @param aname
 	 *            headline for a
 	 * @param a
@@ -38,13 +38,13 @@ public class SharedExceptionUtils_GwtEmul {
 	 * @param linesToSkip
 	 *            how many lines in the beginning to skip
 	 */
-	public static void dumpWhereStacktracesAreDifferent(String aname, String a, String bname,
-			String b, int linesToSkip) {
+	public static void dumpWhereStacktracesAreDifferent(final String aname, final String a, final String bname,
+			final String b, final int linesToSkip) {
 		List<String> alist = linesAsList(a);
 		alist = alist.subList(linesToSkip, alist.size());
 		List<String> blist = linesAsList(b);
 		blist = blist.subList(linesToSkip, blist.size());
-		List<String> common = new ArrayList<String>();
+		final List<String> common = new ArrayList<String>();
 		/* list have not always the same length */
 		String commonLine = "none";
 		while (alist.size() > 0 && blist.size() > 0
@@ -55,30 +55,30 @@ public class SharedExceptionUtils_GwtEmul {
 			blist = blist.subList(0, blist.size() - 1);
 		}
 		log.warn(" " + aname + " ==== ");
-		for (String s : alist) {
+		for (final String s : alist) {
 			log.warn(s);
 		}
 		log.warn(" " + bname + " ==== ");
-		for (String s : blist) {
+		for (final String s : blist) {
 			log.warn(s);
 		}
 		log.warn(" Common start of both stack traces ==== ");
-		for (String s : common) {
+		for (final String s : common) {
 			log.warn(s);
 		}
 	}
 
 	/**
 	 * See also DebugUtils#dumpStacktrace() in Xydra.Core
-	 * 
+	 *
 	 * @return the stack trace as a multi-line StringBuffer
 	 */
 	public static StringBuffer getStacktraceAsString() {
 		try {
 			throw new RuntimeException("CALLER");
-		} catch (Exception e) {
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
+		} catch (final Exception e) {
+			final StringWriter sw = new StringWriter();
+			final PrintWriter pw = new PrintWriter(sw);
 			e.printStackTrace(pw);
 			pw.flush();
 			pw.close();
@@ -87,15 +87,15 @@ public class SharedExceptionUtils_GwtEmul {
 		}
 	}
 
-	private static List<String> linesAsList(String s) {
-		StringReader sr = new StringReader(s);
-		BufferedReader br = new BufferedReader(sr);
-		List<String> list = new ArrayList<String>();
+	private static List<String> linesAsList(final String s) {
+		final StringReader sr = new StringReader(s);
+		final BufferedReader br = new BufferedReader(sr);
+		final List<String> list = new ArrayList<String>();
 		try {
 			for (String line = br.readLine(); line != null; line = br.readLine()) {
 				list.add(line);
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			assert false;
 		}
 		return list;

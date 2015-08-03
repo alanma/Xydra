@@ -7,6 +7,7 @@ import java.util.Set;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
@@ -25,32 +26,32 @@ import org.xydra.sharedutils.XyAssert;
  * Index any number of objects by a given fieldId. The value of the field is
  * converted to an internal XId key which is used as the field-ID in another
  * {@link XObject}.
- * 
+ *
  * @author xamde
  */
 @RunsInAppEngine(true)
 @RunsInGWT(true)
 @RequiresAppEngine(false)
 public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
-	
-	public ObjectIndex(XId fieldId, XWritableObject indexObject) {
+
+	public ObjectIndex(final XId fieldId, final XWritableObject indexObject) {
 		super(fieldId, indexObject);
 	}
-	
+
 	@Override
-    public void deindex(XReadableObject xo) {
-		XReadableField field = xo.getField(this.fieldId);
-		XValue keyValue = field.getValue();
+    public void deindex(final XReadableObject xo) {
+		final XReadableField field = xo.getField(this.fieldId);
+		final XValue keyValue = field.getValue();
 		deindex(keyValue, xo.getId());
 	}
-	
-	public void deindex(XValue key, XId value) {
-		XId xid = valueToXId(key);
-		XWritableField indexField = this.indexObject.createField(xid);
-		XValue indexValue = indexField.getValue();
+
+	public void deindex(final XValue key, final XId value) {
+		final XId xid = valueToXId(key);
+		final XWritableField indexField = this.indexObject.createField(xid);
+		final XValue indexValue = indexField.getValue();
 		XIdSetValue indexedIds;
 		XyAssert.xyAssert(indexValue != null); assert indexValue != null;
-		XIdSetValue currentIndexedIds = (XIdSetValue)indexValue;
+		final XIdSetValue currentIndexedIds = (XIdSetValue)indexValue;
 		indexedIds = currentIndexedIds.remove(value);
 		if(indexedIds.size() == 0) {
 			// remove empty field
@@ -60,51 +61,51 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 			indexField.setValue(indexedIds);
 		}
 	}
-	
+
 	@Override
-    public void index(XReadableObject xo) {
-		XReadableField field = xo.getField(this.fieldId);
-		XValue keyValue = field.getValue();
+    public void index(final XReadableObject xo) {
+		final XReadableField field = xo.getField(this.fieldId);
+		final XValue keyValue = field.getValue();
 		index(keyValue, xo.getId());
 	}
-	
-	public void index(XValue key, XId value) {
-		XId xid = valueToXId(key);
-		XWritableField indexField = this.indexObject.createField(xid);
-		XValue indexValue = indexField.getValue();
+
+	public void index(final XValue key, final XId value) {
+		final XId xid = valueToXId(key);
+		final XWritableField indexField = this.indexObject.createField(xid);
+		final XValue indexValue = indexField.getValue();
 		XIdSetValue indexedIds;
 		if(indexValue == null) {
-			indexedIds = X.getValueFactory().createIdSetValue(new XId[] { value });
+			indexedIds = BaseRuntime.getValueFactory().createIdSetValue(new XId[] { value });
 		} else {
-			XIdSetValue currentIndexedIds = (XIdSetValue)indexValue;
+			final XIdSetValue currentIndexedIds = (XIdSetValue)indexValue;
 			indexedIds = currentIndexedIds.add(value);
 		}
 		indexField.setValue(indexedIds);
 	}
-	
-	
+
+
 	@Override
-    public Set<XWritableObject> lookup(XWritableModel model, XValue indexKey) {
-		Set<XId> ids = lookupIDs(indexKey);
-		Set<XWritableObject> objects = new HashSet<XWritableObject>();
-		for(XId id : ids) {
-			XWritableObject object = model.getObject(id);
+    public Set<XWritableObject> lookup(final XWritableModel model, final XValue indexKey) {
+		final Set<XId> ids = lookupIDs(indexKey);
+		final Set<XWritableObject> objects = new HashSet<XWritableObject>();
+		for(final XId id : ids) {
+			final XWritableObject object = model.getObject(id);
 			objects.add(object);
 		}
 		return objects;
 	}
-	
-	public Set<XId> lookupIDs(XValue indexKey) {
-		XId key = valueToXId(indexKey);
-		XWritableField indexField = this.indexObject.getField(key);
+
+	public Set<XId> lookupIDs(final XValue indexKey) {
+		final XId key = valueToXId(indexKey);
+		final XWritableField indexField = this.indexObject.getField(key);
 		if(indexField == null) {
 			// nothing indexed
 			return Collections.emptySet();
 		}
-		XValue indexValue = indexField.getValue();
+		final XValue indexValue = indexField.getValue();
 		assert indexValue != null : "otherwise field should have been removed";
-		XIdSetValue indexedIds = (XIdSetValue)indexValue;
+		final XIdSetValue indexedIds = (XIdSetValue)indexValue;
 		return indexedIds.toSet();
 	}
-	
+
 }

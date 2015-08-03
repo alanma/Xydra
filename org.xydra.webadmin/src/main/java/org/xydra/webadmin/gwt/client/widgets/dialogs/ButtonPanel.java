@@ -35,21 +35,21 @@ public class ButtonPanel extends Composite {
 	@UiField
 	Button cancelButton;
 
-	private Widget parentWidget;
+	private final Widget parentWidget;
 
-	public ButtonPanel(ClickHandler handler, Widget parentWidget) {
+	public ButtonPanel(final ClickHandler handler, final Widget parentWidget) {
 
 		super();
 
 		this.parentWidget = parentWidget;
 
-		this.initWidget(uiBinder.createAndBindUi(this));
+		initWidget(uiBinder.createAndBindUi(this));
 
 		this.okButton.addClickHandler(handler);
 	}
 
 	@UiHandler("cancelButton")
-	void onClickRemove(ClickEvent event) {
+	void onClickRemove(final ClickEvent event) {
 		this.parentWidget.removeFromParent();
 	}
 

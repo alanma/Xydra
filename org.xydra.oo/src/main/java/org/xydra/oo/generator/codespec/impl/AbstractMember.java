@@ -13,9 +13,9 @@ public abstract class AbstractMember extends NamedElement implements IMember {
 
 	private String comment;
 
-	private String generatedFrom;
+	private final String generatedFrom;
 
-	protected AbstractMember(String name, String generatedFrom) {
+	protected AbstractMember(final String name, final String generatedFrom) {
 		super(name);
 		this.generatedFrom = generatedFrom;
 	}
@@ -40,14 +40,14 @@ public abstract class AbstractMember extends NamedElement implements IMember {
 
 	@Override
 	public Set<String> getRequiredImports() {
-		HashSet<String> req = new HashSet<String>();
-		for (AnnotationSpec<?> ann : this.annotations) {
+		final HashSet<String> req = new HashSet<String>();
+		for (final AnnotationSpec<?> ann : this.annotations) {
 			req.add(ann.annot.getCanonicalName());
 		}
 		return req;
 	}
 
-	public void setComment(String comment) {
+	public void setComment(final String comment) {
 		this.comment = comment;
 	}
 

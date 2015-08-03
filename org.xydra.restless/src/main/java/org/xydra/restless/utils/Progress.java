@@ -5,15 +5,15 @@ import org.xydra.common.NanoClock;
 
 /**
  * Count for a given operation the throughput per time unit.
- * 
+ *
  * Make sure to call {@link #startTime()}.
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(true)
 public class Progress {
 
-	private NanoClock clock = new NanoClock();
+	private final NanoClock clock = new NanoClock();
 
 	private long count = 0;
 
@@ -27,7 +27,7 @@ public class Progress {
 	/**
 	 * @param howMuch number of operations done since last call
 	 */
-	public void makeProgress(long howMuch) {
+	public void makeProgress(final long howMuch) {
 		this.count += howMuch;
 	}
 
@@ -35,7 +35,7 @@ public class Progress {
 	 * @return number of ms it takes to make 1 operation on average since start
 	 */
 	public double getMsPerProgress() {
-		return ((double) this.clock.getDurationSinceStart()) / ((double) this.count);
+		return (double) this.clock.getDurationSinceStart() / (double) this.count;
 	}
 
 	/**
@@ -43,7 +43,7 @@ public class Progress {
 	 * @return an estimate in ms when the given number of operations will be
 	 *         done
 	 */
-	public long willTakeMsUntilProgressIs(long howMuchTotal) {
+	public long willTakeMsUntilProgressIs(final long howMuchTotal) {
 		return (long) (howMuchTotal * getMsPerProgress()) - getMsSinceStart();
 	}
 
@@ -68,9 +68,9 @@ public class Progress {
 
 	}
 
-	public String info(long totalCount) {
+	public String info(final long totalCount) {
 		return "Running for " + getMsSinceStart() + "ms. " + getMsPerProgress() + "ms for each. "
 				+ willTakeMsUntilProgressIs(totalCount) + " ms ("
-				+ (willTakeMsUntilProgressIs(totalCount) / 60000) + "min) until finished.";
+				+ willTakeMsUntilProgressIs(totalCount) / 60000 + "min) until finished.";
 	}
 }

@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * Methods annotated with this annotation are accessed from (e.g. Apache
  * Velocity) templates. Rename and change them with care. They might also be
  * used for auto-generated documentation for templates.
- * 
+ *
  * @author xamde
  */
 @Retention(RetentionPolicy.RUNTIME)

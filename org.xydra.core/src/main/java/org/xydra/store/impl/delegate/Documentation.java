@@ -3,7 +3,7 @@ package org.xydra.store.impl.delegate;
 /**
  * Note: The package-info comment doesn't render nicely in Eclipse. Therefore
  * this helper interface is used.
- * 
+ *
  * <table>
  * <tr>
  * <th>Batch operations</th>
@@ -13,7 +13,7 @@ package org.xydra.store.impl.delegate;
  * <th>Interface</th>
  * <th>Implementation</th>
  * </tr>
- * 
+ *
  * <tr>
  * <td>Yes</td>
  * <td>Asynchronous</td>
@@ -22,7 +22,7 @@ package org.xydra.store.impl.delegate;
  * <td> {@link org.xydra.store.XydraStore XydraStore}</td>
  * <td> {@link DelegateToSingleOperationStore}</td>
  * </tr>
- * 
+ *
  * <tr>
  * <td>No</td>
  * <td>Asynchronous</td>
@@ -33,7 +33,7 @@ package org.xydra.store.impl.delegate;
  * <td> {@link org.xydra.store.impl.delegate.DelegateToBlockingStore
  * DelegateToBlockingStore}</td>
  * </tr>
- * 
+ *
  * <tr>
  * <td>No</td>
  * <td>Blocking (synchronous)</td>
@@ -44,7 +44,7 @@ package org.xydra.store.impl.delegate;
  * <td> {@link org.xydra.store.impl.delegate.DelegateToPersistenceAndAcm
  * DelegateToPersistenceAndArm}</td>
  * </tr>
- * 
+ *
  * <tr>
  * <td>No</td>
  * <td>Blocking (synchronous)</td>
@@ -53,12 +53,12 @@ package org.xydra.store.impl.delegate;
  * <td> {@link org.xydra.persistence.XydraPersistence XydraPersistence}</td>
  * <td>in-memory and on GAE</td>
  * </tr>
- * 
+ *
  * </table>
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public interface Documentation {
-	
+
 }

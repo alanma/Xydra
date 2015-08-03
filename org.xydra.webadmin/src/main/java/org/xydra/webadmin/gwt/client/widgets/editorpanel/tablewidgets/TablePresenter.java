@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableObject;
@@ -39,20 +40,20 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
  * Performs logic for table. So it:
- * 
+ *
  * <ul>
  * <li>controls the table representing the model
  * <li>fulfills requests given via the {@link RowHeaderWidget}
  * <li>has Listeners to {@link ModelChangedEvent}
  * </ul>
- * 
+ *
  * The listeners react, when
  * <ul>
  * <li>a model is extended by an object: A new row gets added
  * </ul>
- * 
+ *
  * @author kahmann
- * 
+ *
  */
 public class TablePresenter {
 
@@ -71,11 +72,11 @@ public class TablePresenter {
 
 	private int amountColumns;
 
-	private String[] backgroundStyles = { "evenRow", "oddRow" };
+	private final String[] backgroundStyles = { "evenRow", "oddRow" };
 
-	private List<XId> columnIDs = new ArrayList<XId>();
+	private final List<XId> columnIDs = new ArrayList<XId>();
 
-	private EditorPanelPresenter presenter;
+	private final EditorPanelPresenter presenter;
 
 	List<XId> rowList = new ArrayList<XId>();
 
@@ -87,14 +88,14 @@ public class TablePresenter {
 
 	private VerticalPanel tablePanel;
 
-	private ModelInformationPanel panel;
+	private final ModelInformationPanel panel;
 
-	private HashMap<XAddress, RowPresenter> rowsMap = new HashMap<XAddress, RowPresenter>();
+	private final HashMap<XAddress, RowPresenter> rowsMap = new HashMap<XAddress, RowPresenter>();
 
 	private HandlerRegistration handlerRegistration;
 
-	public TablePresenter(EditorPanelPresenter editorPanelPresenter,
-			ModelInformationPanel modelInformationPanel) {
+	public TablePresenter(final EditorPanelPresenter editorPanelPresenter,
+			final ModelInformationPanel modelInformationPanel) {
 		this.presenter = editorPanelPresenter;
 		this.panel = modelInformationPanel;
 
@@ -108,9 +109,9 @@ public class TablePresenter {
 
 		this.panel.clear();
 
-		SessionCachedModel model = this.presenter.getCurrentModel();
+		final SessionCachedModel model = this.presenter.getCurrentModel();
 		if (!model.isEmpty()) {
-			VerticalPanel tableWidget = createTable(model);
+			final VerticalPanel tableWidget = createTable(model);
 			this.panel.setData(tableWidget);
 			log.info("table for model " + this.presenter.getCurrentModelAddress().toString()
 					+ " built, now firing ViewBuiltEvent!");
@@ -131,8 +132,8 @@ public class TablePresenter {
 			} else {
 				problemText = "No objects existing at all!";
 			}
-			Label noObjectsLabel = new Label(problemText);
-			VerticalPanel dummyPanel = new VerticalPanel();
+			final Label noObjectsLabel = new Label(problemText);
+			final VerticalPanel dummyPanel = new VerticalPanel();
 			dummyPanel.setStyleName("noData");
 			dummyPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 			dummyPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -144,7 +145,7 @@ public class TablePresenter {
 				this.presenter.getCurrentModelAddress(), new IModelChangedEventHandler() {
 
 					@Override
-					public void onModelChange(ModelChangedEvent event) {
+					public void onModelChange(final ModelChangedEvent event) {
 						handleModelChanges(event.getStatus(), event.getMoreInfos());
 					}
 
@@ -154,16 +155,16 @@ public class TablePresenter {
 
 	}
 
-	private VerticalPanel createTable(SessionCachedModel model) {
+	private VerticalPanel createTable(final SessionCachedModel model) {
 
-		int maxColumnsWithRowHeader = determineColumnHeadersAndBuildPanel(model) + 1;
+		final int maxColumnsWithRowHeader = determineColumnHeadersAndBuildPanel(model) + 1;
 
 		buildTableContent(model, maxColumnsWithRowHeader);
 
 		Window.addResizeHandler(new ResizeHandler() {
 
 			@Override
-			public void onResize(ResizeEvent event) {
+			public void onResize(final ResizeEvent event) {
 				setScrollTableHeight();
 			}
 
@@ -172,10 +173,10 @@ public class TablePresenter {
 		return this.tablePanel;
 	}
 
-	private int determineColumnHeadersAndBuildPanel(SessionCachedModel model) {
-		for (XId objectId : model) {
-			XWritableObject object = model.getObject(objectId);
-			for (XId xid : object) {
+	private int determineColumnHeadersAndBuildPanel(final SessionCachedModel model) {
+		for (final XId objectId : model) {
+			final XWritableObject object = model.getObject(objectId);
+			for (final XId xid : object) {
 				if (!this.columnIDs.contains(xid)) {
 					this.columnIDs.add(xid);
 				}
@@ -184,17 +185,17 @@ public class TablePresenter {
 		}
 
 		this.amountColumns = this.columnIDs.size();
-		int maxColumnsWithRowHeader = this.amountColumns + 1;
+		final int maxColumnsWithRowHeader = this.amountColumns + 1;
 
 		this.tableHeader = new Grid(1, maxColumnsWithRowHeader);
-		ColumnHeaderWidget idWidget = new ColumnHeaderWidget(XX.toId("ID"));
+		final ColumnHeaderWidget idWidget = new ColumnHeaderWidget(Base.toId("ID"));
 		idWidget.setStyleName("fieldIDWidget rowHeaderWidth");
 		this.tableHeader.setWidget(0, 0, idWidget);
 		this.tableHeader.setStyleName("compactTable");
 		this.tableHeader.getRowFormatter().setStyleName(0, "oddRow");
 
 		int count = 1;
-		for (XId columnsID : this.columnIDs) {
+		for (final XId columnsID : this.columnIDs) {
 			this.tableHeader.setWidget(0, count, new ColumnHeaderWidget(columnsID));
 			count++;
 		}
@@ -202,12 +203,12 @@ public class TablePresenter {
 		return maxColumnsWithRowHeader;
 	}
 
-	private void buildTableContent(SessionCachedModel model, int maxColumnsWithRowHeader) {
+	private void buildTableContent(final SessionCachedModel model, final int maxColumnsWithRowHeader) {
 
 		this.rowList.clear();
 		int rowCount = 0;
 
-		for (XId objectID : model) {
+		for (final XId objectID : model) {
 			this.rowList.add(objectID);
 			rowCount++;
 		}
@@ -217,7 +218,7 @@ public class TablePresenter {
 		initUIComponents(maxColumnsWithRowHeader, rowCount);
 
 		int count = 0;
-		for (XId objectId : model) {
+		for (final XId objectId : model) {
 
 			addRow(model, count, objectId);
 
@@ -225,38 +226,38 @@ public class TablePresenter {
 		}
 	}
 
-	private int addRow(SessionCachedModel model, int verticalRowPosition, XId objectId) {
-		XReadableObject currentObject = model.getObject(objectId);
-		String backgroundStyle = this.backgroundStyles[verticalRowPosition % 2];
+	private int addRow(final SessionCachedModel model, final int verticalRowPosition, final XId objectId) {
+		final XReadableObject currentObject = model.getObject(objectId);
+		final String backgroundStyle = this.backgroundStyles[verticalRowPosition % 2];
 
-		RowPresenter rowPresenter = new RowPresenter(verticalRowPosition, backgroundStyle,
+		final RowPresenter rowPresenter = new RowPresenter(verticalRowPosition, backgroundStyle,
 				currentObject, this);
 		rowPresenter.presentRow(currentObject);
-		XAddress currentModelAddress = this.presenter.getCurrentModelAddress();
-		XAddress objectAddress = XX.resolveObject(currentModelAddress, objectId);
+		final XAddress currentModelAddress = this.presenter.getCurrentModelAddress();
+		final XAddress objectAddress = Base.resolveObject(currentModelAddress, objectId);
 		this.rowsMap.put(objectAddress, rowPresenter);
 		return verticalRowPosition;
 	}
 
-	private void handleModelChanges(EntityStatus status, XId moreInfos) {
+	private void handleModelChanges(final EntityStatus status, final XId moreInfos) {
 		if (status.equals(EntityStatus.EXTENDED)) {
 			if (this.contentTable == null) {
-				this.generateTableOrShowInformation();
+				generateTableOrShowInformation();
 
 			} else {
-				this.extendByRow(XX.resolveObject(this.presenter.getCurrentModelAddress(),
+				extendByRow(Base.resolveObject(this.presenter.getCurrentModelAddress(),
 						moreInfos));
 			}
 		}
 
 	}
 
-	private void extendByRow(XAddress newObjectsAddress) {
+	private void extendByRow(final XAddress newObjectsAddress) {
 		this.rowList.add(newObjectsAddress.getObject());
-		int position = this.rowList.size() - 1;
+		final int position = this.rowList.size() - 1;
 		log.info("rowListSize: " + this.rowList.size() + ", position: " + position);
 		this.contentTable.insertRow(position);
-		SessionCachedModel model = this.presenter.getCurrentModel();
+		final SessionCachedModel model = this.presenter.getCurrentModel();
 		log.info("adding row for object " + newObjectsAddress.toString());
 
 		addRow(model, position, newObjectsAddress.getObject());
@@ -268,12 +269,12 @@ public class TablePresenter {
 	// }
 
 	private void setScrollTableHeight() {
-		String scrollTableHeight = "" + (Window.getClientHeight() - 93) + "px";
+		final String scrollTableHeight = "" + (Window.getClientHeight() - 93) + "px";
 		TablePresenter.this.scrollPanel.getElement().setAttribute("style",
 				"overflow-y:overlay; position:relative; zoom:1; height: " + scrollTableHeight);
 	}
 
-	private void initUIComponents(int maxColumnsWithRowHeader, int rowCount) {
+	private void initUIComponents(final int maxColumnsWithRowHeader, final int rowCount) {
 		this.contentTable = new Grid(rowCount, maxColumnsWithRowHeader - 1);
 		this.contentTable.setStyleName("compactTable");
 		this.scrollPanel = new ScrollPanel();
@@ -297,10 +298,10 @@ public class TablePresenter {
 		return this.presenter.getCurrentModel();
 	}
 
-	public void checkAndResizeColumns(XAddress objectAddress, XId newFieldId) {
+	public void checkAndResizeColumns(final XAddress objectAddress, final XId newFieldId) {
 		if (!this.columnIDs.contains(newFieldId)) {
 			this.columnIDs.add(newFieldId);
-			int newAmountOfColumns = this.tableHeader.getColumnCount() + 1;
+			final int newAmountOfColumns = this.tableHeader.getColumnCount() + 1;
 			this.tableHeader.resizeColumns(newAmountOfColumns);
 			this.tableHeader.setWidget(0, newAmountOfColumns - 1,
 					new ColumnHeaderWidget(newFieldId));
@@ -308,8 +309,8 @@ public class TablePresenter {
 					+ newAmountOfColumns + " columns");
 
 			this.contentTable.resizeColumns(newAmountOfColumns);
-			Set<Entry<XAddress, RowPresenter>> rows = this.rowsMap.entrySet();
-			for (Entry<XAddress, RowPresenter> row : rows) {
+			final Set<Entry<XAddress, RowPresenter>> rows = this.rowsMap.entrySet();
+			for (final Entry<XAddress, RowPresenter> row : rows) {
 				if (row.getKey().equals(objectAddress)) {
 					// nothing
 				} else {
@@ -322,28 +323,28 @@ public class TablePresenter {
 
 	}
 
-	public void expandAll(String expandButtonText) {
+	public void expandAll(final String expandButtonText) {
 
 		Status status = Status.Present;
 		if (expandButtonText.equals("expand all objects")) {
 		} else {
 			status = Status.Opened;
 		}
-		Set<Entry<XAddress, RowPresenter>> rows = this.rowsMap.entrySet();
-		for (Entry<XAddress, RowPresenter> row : rows) {
+		final Set<Entry<XAddress, RowPresenter>> rows = this.rowsMap.entrySet();
+		for (final Entry<XAddress, RowPresenter> row : rows) {
 			row.getValue().handleExpandOrCollapse(status);
 		}
 
 	}
 
-	public void showObjectAndField(XAddress desiredAddress) {
-		RowPresenter rowPresenter = this.rowsMap.get(XX.resolveObject(desiredAddress));
+	public void showObjectAndField(final XAddress desiredAddress) {
+		final RowPresenter rowPresenter = this.rowsMap.get(Base.resolveObject(desiredAddress));
 		rowPresenter.handleExpandOrCollapse(Status.Opened);
-		XId fieldId = desiredAddress.getField();
+		final XId fieldId = desiredAddress.getField();
 		if (fieldId != null) {
 			rowPresenter.scrollToField(fieldId);
 		}
-		EventHelper.fireViewBuiltEvent(XX.toAddress(desiredAddress.getRepository(),
+		EventHelper.fireViewBuiltEvent(Base.toAddress(desiredAddress.getRepository(),
 				desiredAddress.getModel(), desiredAddress.getObject(), null));
 
 	}

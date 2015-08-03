@@ -8,18 +8,18 @@ import org.xydra.annotations.RunsInGWT;
  * Syntax defined in <a
  * href="http://www.w3.org/TR/xpath-functions/#regex-syntax">here</a> and most
  * is taken from <a href="http://www.w3.org/TR/xmlschema-2/#regexs">here</a>.
- * 
+ *
  * Note on ECMA script regex: Always escape '/' as '\/' (in Java: '\\/') to
  * avoid it being interpreted as a regex delimiter.
- * 
+ *
  * Take care of these characters in character classes: ']' can only be the first
  * char; '-' should be the last char; '^' may not be the first char, put in
  * middle.
- * 
+ *
  * TODO add support for string negation via negative lookaheads, see
  * http://stackoverflow.com/questions/1153856/string-negation-using-regular-
  * expressions
- * 
+ *
  */
 @RunsInGWT(true)
 public class RegExUtil {
@@ -31,17 +31,17 @@ public class RegExUtil {
 
 	/**
 	 * Checks for partial matches.
-	 * 
+	 *
 	 * @param s string in which to search
 	 * @param regex regular expression
 	 * @param caseSensitive if false, flag "i" for case-insensitive matching is
 	 *            turned on and performed in a Unicode standard way.
 	 * @return true if a match of regex is found in s.
 	 */
-	public static boolean isFound(String s, String regex, boolean caseSensitive) {
-		boolean result = Pattern
+	public static boolean isFound(final String s, final String regex, final boolean caseSensitive) {
+		final boolean result = Pattern
 				.compile(regex,
-						caseSensitive ? 0 : (Pattern.CASE_INSENSITIVE + Pattern.UNICODE_CASE))
+						caseSensitive ? 0 : Pattern.CASE_INSENSITIVE + Pattern.UNICODE_CASE)
 				.matcher(s).matches(); // we used 'find()' in earlier versions
 		return result;
 	}
@@ -50,14 +50,15 @@ public class RegExUtil {
 	 * @param raw a regular expression (syntax see class comment) , never null
 	 * @return an encoded regular expression
 	 */
-	public static String regexEncode(String raw) {
-		if (raw == null)
+	public static String regexEncode(final String raw) {
+		if (raw == null) {
 			throw new IllegalArgumentException("raw may not be null");
+		}
 
 		String result = raw;
 		// escape all meta characters
 		for (int i = 0; i < METACHARS.length(); i++) {
-			char c = METACHARS.charAt(i);
+			final char c = METACHARS.charAt(i);
 			result = result.replace("" + c, "" + '\\' + c);
 		}
 		return result;
@@ -190,17 +191,18 @@ public class RegExUtil {
 
 	/**
 	 * Create a regular expression string, using OR
-	 * 
+	 *
 	 * @param parts
 	 * @return non-capturing group
 	 */
-	public static String choice(String... parts) {
-		StringBuilder b = new StringBuilder();
+	public static String choice(final String... parts) {
+		final StringBuilder b = new StringBuilder();
 		b.append("(?:");
 		boolean first = true;
-		for (String p : parts) {
-			if (!first)
+		for (final String p : parts) {
+			if (!first) {
 				b.append("|");
+			}
 			b.append(p);
 			first = false;
 		}
@@ -215,10 +217,10 @@ public class RegExUtil {
 	 * @param parts
 	 * @return
 	 */
-	public static String group(String... parts) {
-		StringBuilder b = new StringBuilder();
+	public static String group(final String... parts) {
+		final StringBuilder b = new StringBuilder();
 		b.append("(?:");
-		for (String p : parts) {
+		for (final String p : parts) {
 			b.append(p);
 		}
 		b.append(")");
@@ -230,10 +232,10 @@ public class RegExUtil {
 	 * @param parts
 	 * @return
 	 */
-	public static String characterGroup(String... parts) {
-		StringBuilder b = new StringBuilder();
+	public static String characterGroup(final String... parts) {
+		final StringBuilder b = new StringBuilder();
 		b.append("[");
-		for (String p : parts) {
+		for (final String p : parts) {
 			b.append(p);
 		}
 		b.append("]");
@@ -242,13 +244,13 @@ public class RegExUtil {
 
 	/**
 	 * Example: You give 'a', 'b', 'c'; this method returns "[abc]"
-	 * 
+	 *
 	 * @param codePoints can contain duplicates which are removed
 	 * @return a string to be used as a character class in regex.
 	 */
-	public static String toCharClass(int... codePoints) {
+	public static String toCharClass(final int... codePoints) {
 		// first, we need to scan for '-', which must be first
-		StringBuffer s = new StringBuffer();
+		final StringBuffer s = new StringBuffer();
 
 		boolean minus = false;
 		for (int i = 0; i < codePoints.length; i++) {
@@ -261,7 +263,7 @@ public class RegExUtil {
 		}
 
 		for (int i = 0; i < codePoints.length; i++) {
-			int c = codePoints[i];
+			final int c = codePoints[i];
 			if (!containsCodepoint(s, c)) {
 				s.appendCodePoint(c);
 			}
@@ -275,9 +277,10 @@ public class RegExUtil {
 	 * @param codepoint
 	 * @return true if the stringBuffer contains the given codepoint
 	 */
-	public static boolean containsCodepoint(StringBuffer s, int codepoint) {
-		if (s.length() == 0)
+	public static boolean containsCodepoint(final StringBuffer s, final int codepoint) {
+		if (s.length() == 0) {
 			return false;
+		}
 
 		int i = 0;
 		int c;

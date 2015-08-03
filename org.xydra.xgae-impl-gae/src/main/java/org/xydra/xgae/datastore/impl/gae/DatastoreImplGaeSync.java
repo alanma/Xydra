@@ -36,7 +36,7 @@ import com.google.appengine.api.datastore.TransactionOptions;
 
 /**
  * Utility to use synchronous datastore
- * 
+ *
  * @author xamde
  */
 public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatastoreSync {
@@ -60,7 +60,7 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 	 */
 	@Override
 	@XGaeOperation(datastoreRead = true)
-	public SEntity getEntity(@NeverNull SKey key) {
+	public SEntity getEntity(@NeverNull final SKey key) {
 		return getEntity(key, null);
 	}
 
@@ -68,13 +68,13 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		if (this.syncDatastore == null) {
 			this.log.debug(XGaeDebugHelper.init(DATASTORE_NAME));
-			DatastoreServiceConfig config = DatastoreServiceConfig.Builder
+			final DatastoreServiceConfig config = DatastoreServiceConfig.Builder
 					.withImplicitTransactionManagementPolicy(
 							ImplicitTransactionManagementPolicy.NONE).maxEntityGroupsPerRpc(1);
 
 			/*
 			 * Not allowed in a txn context:
-			 * 
+			 *
 			 * ReadPolicy(Consistency.EVENTUAL))
 			 */
 
@@ -84,12 +84,12 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 
 	/**
 	 * Stores a GAE {@link Entity} asynchronously in the GAE back-end
-	 * 
+	 *
 	 * @param entity
 	 *            The entity to write to the datastore.
 	 */
 	@Override
-	public void putEntity(SEntity entity) {
+	public void putEntity(final SEntity entity) {
 		putEntity(entity, null);
 	}
 
@@ -98,17 +98,17 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 	 *            must be 2 - 5
 	 */
 	@XGaeOperation(datastoreWrite = true)
-	public void putEntitiesInCrossGroupTransaction(GEntity... entities) {
+	public void putEntitiesInCrossGroupTransaction(final GEntity... entities) {
 		this.log.debug("-- begin XG Transaction --");
 		makeSureDatestoreServiceIsInitialised();
 		XyAssert.xyAssert(entities.length >= 2);
 		XyAssert.xyAssert(entities.length <= 5);
 
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		TransactionOptions options = TransactionOptions.Builder.withXG(true);
-		Transaction txn = datastore.beginTransaction(options);
+		final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		final TransactionOptions options = TransactionOptions.Builder.withXG(true);
+		final Transaction txn = datastore.beginTransaction(options);
 
-		for (GEntity e : entities) {
+		for (final GEntity e : entities) {
 			datastore.put(txn, e.raw());
 		}
 
@@ -117,14 +117,14 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 
 	/**
 	 * Stores a GAE {@link Entity} asynchronously in the GAE back-end
-	 * 
+	 *
 	 * @param entity
 	 *            The entity to write to the datastore.
 	 * @param txn
 	 */
 	@Override
 	@XGaeOperation(datastoreWrite = true)
-	public void putEntity(SEntity entity, STransaction txn) {
+	public void putEntity(final SEntity entity, final STransaction txn) {
 		XyAssert.xyAssert(entity != null, "entity is null");
 		assert entity != null;
 		this.log.debug(XGaeDebugHelper.dataPut(DATASTORE_NAME,
@@ -136,12 +136,12 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 
 	/**
 	 * Batch put
-	 * 
+	 *
 	 * @param it
 	 */
 	@Override
 	@XGaeOperation(datastoreWrite = true)
-	public void putEntities(Iterable<SEntity> it) {
+	public void putEntities(final Iterable<SEntity> it) {
 		XyAssert.xyAssert(it != null, "iterable is null");
 		assert it != null;
 		this.log.debug(XGaeDebugHelper.dataPut(DATASTORE_NAME, "entities", "many", Timing.Now));
@@ -151,7 +151,7 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 
 	/**
 	 * Begin a synchronous GAE Transaction.
-	 * 
+	 *
 	 * @return The started Transaction.
 	 */
 	@Override
@@ -164,14 +164,14 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 
 	/**
 	 * Commit the given GAE Transaction.
-	 * 
+	 *
 	 * @param txn
 	 *            The Transaction to commit.
 	 * @throws ConcurrentModificationException
 	 */
 	@Override
 	@XGaeOperation(datastoreWrite = true)
-	public void endTransaction(STransaction txn) throws ConcurrentModificationException {
+	public void endTransaction(final STransaction txn) throws ConcurrentModificationException {
 		this.log.debug("-- end Transaction --");
 		makeSureDatestoreServiceIsInitialised();
 		((Transaction) txn.raw()).commit();
@@ -179,27 +179,27 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 
 	/**
 	 * Deletes the {@link Entity} with the given {@link Key} from GAE
-	 * 
+	 *
 	 * @param key
 	 *            The entity to remove from the datastore.
 	 */
 	@Override
 	@XGaeOperation(datastoreWrite = true)
-	public void deleteEntity(SKey key) {
+	public void deleteEntity(final SKey key) {
 		deleteEntity(key, null);
 	}
 
 	/**
 	 * Deletes the {@link Entity} with the given {@link Key} asynchronously from
 	 * GAE
-	 * 
+	 *
 	 * @param key
 	 *            The entity to remove from the datastore.
 	 * @param txn
 	 */
 	@Override
 	@XGaeOperation(datastoreWrite = true)
-	public void deleteEntity(SKey key, STransaction txn) {
+	public void deleteEntity(final SKey key, final STransaction txn) {
 		assert key != null;
 		this.log.debug(XGaeDebugHelper.dataPut(DATASTORE_NAME, key.toString(), null, Timing.Now));
 		makeSureDatestoreServiceIsInitialised();
@@ -212,11 +212,11 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 	 */
 	@Override
 	@XGaeOperation(datastoreWrite = true)
-	public void deleteEntities(Iterable<SKey> it) {
+	public void deleteEntities(final Iterable<SKey> it) {
 		assert it != null;
 		if (this.log.isDebugEnabled()) {
-			Map<Key, Object> map = new HashMap<Key, Object>();
-			for (SKey k : it) {
+			final Map<Key, Object> map = new HashMap<Key, Object>();
+			for (final SKey k : it) {
 				map.put((Key) k.raw(), null);
 			}
 			this.log.debug(XGaeDebugHelper.dataPut(DATASTORE_NAME, map, Timing.Now));
@@ -249,27 +249,27 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 	}
 
 	public void deleteAllEntitiesOneByOne() {
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		Query mydeleteq = new Query();
-		PreparedQuery pq = datastore.prepare(mydeleteq);
-		for (Entity result : pq.asIterable()) {
+		final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		final Query mydeleteq = new Query();
+		final PreparedQuery pq = datastore.prepare(mydeleteq);
+		for (final Entity result : pq.asIterable()) {
 			datastore.delete(result.getKey());
 		}
 	}
 
 	@XGaeOperation(datastoreWrite = true)
 	private void deleteAllDataOnLiveDatastore() {
-		List<String> kinds = getAllKinds();
-		for (String kind : kinds) {
-			List<Key> keys = new LinkedList<Key>();
-			Query q = new Query(kind).setKeysOnly();
-			PreparedQuery pq = this.syncDatastore.prepare(q);
-			for (Entity entity : pq.asIterable()) {
+		final List<String> kinds = getAllKinds();
+		for (final String kind : kinds) {
+			final List<Key> keys = new LinkedList<Key>();
+			final Query q = new Query(kind).setKeysOnly();
+			final PreparedQuery pq = this.syncDatastore.prepare(q);
+			for (final Entity entity : pq.asIterable()) {
 				keys.add(entity.getKey());
 			}
 			try {
 				this.syncDatastore.delete(keys);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				this.log.warn("Could not delete kind '" + kind + "'", e);
 			}
 		}
@@ -282,11 +282,11 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 	@XGaeOperation(datastoreRead = true)
 	public List<String> getAllKinds() {
 		makeSureDatestoreServiceIsInitialised();
-		List<String> kinds = new LinkedList<String>();
-		Iterable<Entity> statKinds = this.syncDatastore.prepare(new Query("__Stat_Kind__"))
+		final List<String> kinds = new LinkedList<String>();
+		final Iterable<Entity> statKinds = this.syncDatastore.prepare(new Query("__Stat_Kind__"))
 				.asIterable();
-		for (Entity statKind : statKinds) {
-			String kind = statKind.getProperty("kind_name").toString();
+		for (final Entity statKind : statKinds) {
+			final String kind = statKind.getProperty("kind_name").toString();
 			if (!kind.startsWith("__")) {
 				kinds.add(kind);
 			}
@@ -296,17 +296,17 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 
 	/**
 	 * Batch get.
-	 * 
+	 *
 	 * Retrieves the set of Entities matching keys. The result Map will only
 	 * contain Keys for which Entities could be found.
-	 * 
+	 *
 	 * Note: If there is a current Transaction, this operation will execute
 	 * within that Transaction. In this case it is up to the caller to commit or
 	 * rollback. If there is no current Transaction, the behavior of this method
 	 * with respect to Transactions will be determined by the
 	 * ImplicitTransactionManagementPolicy available on the
 	 * DatastoreServiceConfig.
-	 * 
+	 *
 	 * @param keys
 	 *            never null
 	 * @param txn
@@ -314,7 +314,7 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 	 */
 	@Override
 	@XGaeOperation(datastoreRead = true)
-	public Map<SKey, SEntity> getEntities(Collection<SKey> keys, STransaction txn) {
+	public Map<SKey, SEntity> getEntities(final Collection<SKey> keys, final STransaction txn) {
 		assert keys != null;
 		makeSureDatestoreServiceIsInitialised();
 		Map<Key, Entity> result;
@@ -329,7 +329,7 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 	}
 
 	@Override
-	public Map<SKey, SEntity> getEntities(Collection<SKey> keys) {
+	public Map<SKey, SEntity> getEntities(final Collection<SKey> keys) {
 		return getEntities(keys, null);
 	}
 
@@ -343,14 +343,14 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 	 */
 	@Override
 	@XGaeOperation(datastoreRead = true)
-	public GEntity getEntity(SKey key, STransaction txn) {
+	public GEntity getEntity(final SKey key, final STransaction txn) {
 		assert key != null;
 		makeSureDatestoreServiceIsInitialised();
 		Entity e;
 		try {
 			e = this.syncDatastore.get(txn == null ? null : (Transaction) txn.raw(),
 					(Key) key.raw());
-		} catch (EntityNotFoundException e1) {
+		} catch (final EntityNotFoundException e1) {
 			e = null;
 		}
 		this.log.debug(XGaeDebugHelper.dataGet(DATASTORE_NAME, XGaeDebugHelper.toString(key), e,
@@ -359,16 +359,16 @@ public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatas
 	}
 
 	@Override
-	public SPreparedQuery prepareRangeQuery(String kind, boolean keysOnly, String lowName,
-			String highName) {
+	public SPreparedQuery prepareRangeQuery(final String kind, final boolean keysOnly, final String lowName,
+			final String highName) {
 		return prepareRangeQuery(kind, keysOnly, lowName, highName, null);
 	}
 
 	@Override
-	public SPreparedQuery prepareRangeQuery(String kind, boolean keysOnly, String lowName,
-			String highName, STransaction txn) {
+	public SPreparedQuery prepareRangeQuery(final String kind, final boolean keysOnly, final String lowName,
+			final String highName, final STransaction txn) {
 		makeSureDatestoreServiceIsInitialised();
-		Query query = createRangeQuery(kind, keysOnly, lowName, highName);
+		final Query query = createRangeQuery(kind, keysOnly, lowName, highName);
 		assert query != null;
 		assert this.syncDatastore != null;
 		return GPreparedQuery.wrap(this.syncDatastore.prepare(txn == null ? null

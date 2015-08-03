@@ -11,7 +11,7 @@ import org.xydra.base.value.XValue;
  * A change log that {@link XModel XModels} use to log changes on themselves,
  * their {@link XObject XObjects}, their {@link XField XFields} and their
  * {@link XValue XValues}.
- * 
+ *
  * @author kaidel
  * @author xamde
  */
@@ -33,7 +33,7 @@ public interface XChangeLog extends Serializable {
 	/**
 	 * Returns the {@link XEvent} this change log logged at the given revision
 	 * number
-	 * 
+	 *
 	 * @param revisionNumber the revision number which corresponding
 	 *            {@link XEvent} logged by this change log is to be returned
 	 * @return the {@link XEvent} that was logged at the given revision number
@@ -47,7 +47,7 @@ public interface XChangeLog extends Serializable {
 	/**
 	 * Returns an iterator over all {@link XEvent XEvents} that occurred after
 	 * (and including) beginRevision and before (but not including) endRevision.
-	 * 
+	 *
 	 * @param beginRevision the beginning revision number of the interval from
 	 *            which all {@link XEvent XEvents} are to be returned - can be
 	 *            less than {@link #getBaseRevisionNumber()} to get all
@@ -68,7 +68,7 @@ public interface XChangeLog extends Serializable {
 	/**
 	 * Returns a list of all {@link XEvent XEvents} that occurred after (and
 	 * including) the given revision number.
-	 * 
+	 *
 	 * @param revisionNumber the revision number determining which
 	 *            {@link XEvent XEvents} logged by this change log are to be
 	 *            returned
@@ -81,7 +81,7 @@ public interface XChangeLog extends Serializable {
 	/**
 	 * Returns a list of all {@link XEvent XEvents} that occurred until (but not
 	 * including) the given revision number.
-	 * 
+	 *
 	 * @param revisionNumber the revision number determining which
 	 *            {@link XEvent XEvents} logged by this change log are to be
 	 *            returned
@@ -99,7 +99,7 @@ public interface XChangeLog extends Serializable {
 
 	/**
 	 * Public, so it can be serialized.
-	 * 
+	 *
 	 * @return the internal, serialisable state holder
 	 */
 	XChangeLogState getChangeLogState();

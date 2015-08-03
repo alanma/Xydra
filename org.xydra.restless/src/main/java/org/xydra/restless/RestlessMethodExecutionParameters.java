@@ -14,24 +14,24 @@ import org.xydra.common.NanoClock;
  * and which are needed for
  * {@link RestlessMethod#execute(RestlessMethodExecutionParameters, Restless, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}
  * .
- * 
+ *
  * @author kaidel
  * @author xamde
  */
 @NotThreadSafe
 class RestlessMethodExecutionParameters {
 
-	private Method method;
-	private IRestlessContext restlessContext;
-	private List<Object> javaMethodArgs;
-	private boolean hasHttpServletResponseParameter;
-	private String uniqueRequestId;
-	private NanoClock clock;
-	private boolean isMultipartFormDataHandler;
-	private String progressToken;
+	private final Method method;
+	private final IRestlessContext restlessContext;
+	private final List<Object> javaMethodArgs;
+	private final boolean hasHttpServletResponseParameter;
+	private final String uniqueRequestId;
+	private final NanoClock clock;
+	private final boolean isMultipartFormDataHandler;
+	private final String progressToken;
 
 	/**
-	 * 
+	 *
 	 * @param method @NeverNull
 	 * @param isMultipartFormDataHandler
 	 * @param progressToken @CanBeNull to retrieve progress information while
@@ -42,11 +42,11 @@ class RestlessMethodExecutionParameters {
 	 * @param uniqueRequestId @NeverNull
 	 * @param clock @NeverNull
 	 */
-	public RestlessMethodExecutionParameters(@NeverNull Method method,
-			boolean isMultipartFormDataHandler, @CanBeNull String progressToken,
-			@NeverNull IRestlessContext restlessContext, @NeverNull List<Object> javaMethodArgs,
-			boolean hasHttpServletResponseParameter, @NeverNull String uniqueRequestId,
-			@NeverNull NanoClock clock) {
+	public RestlessMethodExecutionParameters(@NeverNull final Method method,
+			final boolean isMultipartFormDataHandler, @CanBeNull final String progressToken,
+			@NeverNull final IRestlessContext restlessContext, @NeverNull final List<Object> javaMethodArgs,
+			final boolean hasHttpServletResponseParameter, @NeverNull final String uniqueRequestId,
+			@NeverNull final NanoClock clock) {
 		this.method = method;
 		this.isMultipartFormDataHandler = isMultipartFormDataHandler;
 		this.progressToken = progressToken;

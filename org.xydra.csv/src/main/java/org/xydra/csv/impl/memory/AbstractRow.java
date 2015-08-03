@@ -8,55 +8,55 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 
 	private static final long serialVersionUID = -2543133872138623905L;
 
-	AbstractRow(String key) {
+	AbstractRow(final String key) {
 		super(key);
 	}
 
-	
+
 	@Override
-	public void addAll(IReadableRow otherRow) {
-		for (String colName : otherRow.getColumnNames()) {
+	public void addAll(final IReadableRow otherRow) {
+		for (final String colName : otherRow.getColumnNames()) {
 			this.setValue(colName, otherRow.getValue(colName), true);
 		}
 	}
 
 	protected abstract void removeValue(String colName);
 
-	
+
 	@Override
-	public void appendValue(String columnName, String value, int maximalFieldLength) {
+	public void appendValue(final String columnName, final String value, final int maximalFieldLength) {
 		if (value == null || value.equals("")) {
 			// nothing to set, keep table sparse
 		} else {
-			ICell cell = getOrCreateCell(columnName, true);
+			final ICell cell = getOrCreateCell(columnName, true);
 			try {
 				cell.appendString(value, maximalFieldLength);
-			} catch (IllegalStateException e) {
+			} catch (final IllegalStateException e) {
 				throw new IllegalStateException("Could not append value in column (" + columnName
-						+ "). Stored was " + this.getValue(columnName), e);
+						+ "). Stored was " + getValue(columnName), e);
 			}
 		}
 	}
 
-	
+
 	@Override
-	public void incrementValue(String columnName, int increment) {
+	public void incrementValue(final String columnName, final int increment) {
 		if (increment == 0) {
 			// nothing to set, keep table sparse
 		} else {
-			ICell cell = getOrCreateCell(columnName, true);
+			final ICell cell = getOrCreateCell(columnName, true);
 			try {
 				cell.incrementValue(increment);
-			} catch (IllegalStateException e) {
+			} catch (final IllegalStateException e) {
 				throw new IllegalStateException("Could not increment value in column ("
-						+ columnName + "). Stored was " + this.getValue(columnName), e);
+						+ columnName + "). Stored was " + getValue(columnName), e);
 			}
 		}
 	}
 
-	
+
 	@Override
-	public void setValue(String columnName, long value, boolean initial) {
+	public void setValue(final String columnName, final long value, final boolean initial) {
 		if (value == 0) {
 			// nothing to set, keep table sparse
 		} else {
@@ -64,21 +64,21 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 		}
 	}
 
-	void setValue(String columnName, String value) {
-		ICell c = getOrCreateCell(columnName, true);
+	void setValue(final String columnName, final String value) {
+		final ICell c = getOrCreateCell(columnName, true);
 		c.setValue(value, false);
 	}
 
-	
+
 	@Override
-	public void setValue(String columnName, String value, boolean initial) {
+	public void setValue(final String columnName, final String value, final boolean initial) {
 		if (value == null) {
 			// nothing to set, keep table sparse
 		} else {
-			ICell cell = getOrCreateCell(columnName, true);
+			final ICell cell = getOrCreateCell(columnName, true);
 			try {
 				cell.setValue(value, initial);
-			} catch (IllegalStateException e) {
+			} catch (final IllegalStateException e) {
 				throw new IllegalStateException("Could not set value in column (" + columnName
 						+ ")", e);
 			}
@@ -86,18 +86,18 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 	}
 
 	@Override
-	public void setValue(String columnName, double value, boolean initial) {
+	public void setValue(final String columnName, final double value, final boolean initial) {
 		if (value == 0) {
 			// nothing to set, keep table sparse
 		} else {
-			String vStr = "" + value;
-			String germanValueString = vStr.replace(".", ",");
+			final String vStr = "" + value;
+			final String germanValueString = vStr.replace(".", ",");
 			setValue(columnName, germanValueString, initial);
 		}
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(final Object other) {
 		return other instanceof IRow && ((IRow) other).getKey().equals(getKey());
 	}
 

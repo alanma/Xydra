@@ -3,6 +3,7 @@ package org.xydra.store;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.xydra.base.Base;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.XX;
 import org.xydra.core.model.impl.memory.AbstractPersistenceSynchronizerTest;
@@ -32,7 +33,7 @@ public class GaePersistenceSynchronizerTest extends AbstractPersistenceSynchroni
 
 	@Override
 	protected XydraPersistence createPersistence() {
-		GaePersistence p = new GaePersistence(XX.toId("repo"));
+		final GaePersistence p = new GaePersistence(Base.toId("repo"));
 		p.clear();
 		return p;
 	}

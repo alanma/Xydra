@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.ReadOperation;
+import org.xydra.base.Base;
 import org.xydra.base.IHasXAddress;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
@@ -53,10 +54,10 @@ import org.xydra.sharedutils.XyAssert;
 
 /**
  * An implementation of {@link XObject}.
- * 
+ *
  * @author xamde
  * @author kaidel
- * 
+ *
  */
 public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XObject,
 		IHasXAddress, IHasChangeLog, XSynchronizesChanges, XExecutesCommands, XSendsObjectEvents,
@@ -71,22 +72,22 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 	private final XRMOFChangeListener changeListener = new XRMOFChangeListener() {
 
 		@Override
-		public void onChangeEvent(XFieldEvent event) {
+		public void onChangeEvent(final XFieldEvent event) {
 		}
 
 		@Override
-		public void onChangeEvent(XModelEvent event) {
+		public void onChangeEvent(final XModelEvent event) {
 		}
 
 		@Override
-		public void onChangeEvent(XObjectEvent event) {
+		public void onChangeEvent(final XObjectEvent event) {
 			if (event.getChangeType() == ChangeType.REMOVE) {
 				MemoryObject.this.loadedFields.remove(event.getFieldId());
 			}
 		}
 
 		@Override
-		public void onChangeEvent(XRepositoryEvent event) {
+		public void onChangeEvent(final XRepositoryEvent event) {
 		}
 	};
 
@@ -101,11 +102,11 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 
 	/**
 	 * Wrap an existing objectState.
-	 * 
+	 *
 	 * @param father @NeverNull
 	 * @param objectState @NeverNull
 	 */
-	public MemoryObject(IMemoryModel father, XRevWritableObject objectState) {
+	public MemoryObject(final IMemoryModel father, final XRevWritableObject objectState) {
 		super(father.getRoot());
 		assert objectState != null;
 		assert objectState.getAddress().getRepository() != null;
@@ -131,14 +132,14 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 	 *            initial create-this-object-event is added.
 	 */
 	@SuppressWarnings("null")
-	private MemoryObject(Root root, IMemoryModel father, XId actorId, String passwordHash,
-			XAddress objectAddress, XRevWritableObject objectState, XChangeLogState log,
-			boolean createObject) {
+	private MemoryObject(final Root root, final IMemoryModel father, final XId actorId, final String passwordHash,
+			final XAddress objectAddress, final XRevWritableObject objectState, final XChangeLogState log,
+			final boolean createObject) {
 		super(father == null ? root : father.getRoot());
 		assert father != null || root != null;
 
 		if (objectState == null) {
-			XExistsRevWritableObject newObjectState = new SimpleObject(objectAddress);
+			final XExistsRevWritableObject newObjectState = new SimpleObject(objectAddress);
 			if (father != null) {
 				newObjectState.setRevisionNumber(father.getRevisionNumber());
 			} else {
@@ -161,7 +162,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 
 		if (createObject) {
 			if (father != null) {
-				XModelCommand createObjectCommand = MemoryModelCommand.createAddCommand(
+				final XModelCommand createObjectCommand = MemoryModelCommand.createAddCommand(
 						father.getAddress(), true, getId());
 				Executor.executeCommandOnModel(actorId, createObjectCommand, null,
 						father.getState(), root, null);
@@ -179,12 +180,12 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 	 * Create a new stand-alone object (without father), which can be synced IFF
 	 * objectAddress is a full address and has an initial create-object command
 	 * in its changeLog
-	 * 
+	 *
 	 * @param actorId
 	 * @param passwordHash
 	 * @param objectAddress @NeverNull
 	 */
-	public MemoryObject(XId actorId, String passwordHash, XAddress objectAddress) {
+	public MemoryObject(final XId actorId, final String passwordHash, final XAddress objectAddress) {
 		this(Root.createWithActor(actorId, objectAddress, XCommand.NEW), null, actorId,
 				passwordHash, objectAddress, null, null, true);
 
@@ -198,13 +199,13 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 	 * Create a new stand-alone object (without father), which can be synced IFF
 	 * objectAddress is a full address and has an initial create-object command
 	 * in its changeLog
-	 * 
+	 *
 	 * @param actorId
 	 * @param passwordHash
 	 * @param objectId @NeverNull
 	 */
-	public MemoryObject(XId actorId, String passwordHash, XId objectId) {
-		this(actorId, passwordHash, XX.toAddress(XId.DEFAULT, XId.DEFAULT, objectId, null));
+	public MemoryObject(final XId actorId, final String passwordHash, final XId objectId) {
+		this(actorId, passwordHash, Base.toAddress(XId.DEFAULT, XId.DEFAULT, objectId, null));
 
 		assert objectId != null;
 	}
@@ -213,16 +214,16 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 	 * Create a stand-alone object (without father) wrapping an existing state.
 	 * Can be synced IFF objectAddress is a full address and has an initial
 	 * create-object command in its changeLog.
-	 * 
+	 *
 	 * Used for de-serialisation.
-	 * 
+	 *
 	 * @param actorId
 	 * @param passwordHash
 	 * @param objectState @NeverNull
 	 * @param log @CanBeNull
 	 */
-	public MemoryObject(XId actorId, String passwordHash, XRevWritableObject objectState,
-			XChangeLogState log) {
+	public MemoryObject(final XId actorId, final String passwordHash, final XRevWritableObject objectState,
+			final XChangeLogState log) {
 		this(Root.createWithActorAndChangeLogState(actorId, objectState.getAddress(), log), null,
 				actorId, passwordHash, objectState.getAddress(), objectState, log, true);
 
@@ -232,21 +233,21 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 	}
 
 	@Override
-	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+	public boolean addListenerForFieldEvents(final XFieldEventListener changeListener) {
 		synchronized (getRoot()) {
 			return getRoot().addListenerForFieldEvents(getAddress(), changeListener);
 		}
 	}
 
 	@Override
-	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
+	public boolean addListenerForObjectEvents(final XObjectEventListener changeListener) {
 		synchronized (getRoot()) {
 			return getRoot().addListenerForObjectEvents(getAddress(), changeListener);
 		}
 	}
 
 	@Override
-	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	public boolean addListenerForTransactionEvents(final XTransactionEventListener changeListener) {
 		synchronized (getRoot()) {
 			return getRoot().addListenerForTransactionEvents(getAddress(), changeListener);
 		}
@@ -254,20 +255,21 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 
 	@Override
 	public int countUnappliedLocalChanges() {
-		return this.getRoot().countUnappliedLocalChanges();
+		return getRoot().countUnappliedLocalChanges();
 	}
 
 	@Override
-	public IMemoryField createField(XId fieldId) {
-		if (this.getRevisionNumber() < 0)
+	public IMemoryField createField(final XId fieldId) {
+		if (getRevisionNumber() < 0) {
 			throw new IllegalStateException("cannot add field to not existing object!");
+		}
 
-		XObjectCommand command = MemoryObjectCommand.createAddCommand(getAddress(), true, fieldId);
+		final XObjectCommand command = MemoryObjectCommand.createAddCommand(getAddress(), true, fieldId);
 
 		// synchronize so that return is never null if command succeeded
 		synchronized (getRoot()) {
-			long result = executeObjectCommand(command);
-			IMemoryField field = getField(fieldId);
+			final long result = executeObjectCommand(command);
+			final IMemoryField field = getField(fieldId);
 			XyAssert.xyAssert(result == XCommand.FAILED || field != null, "result=" + result
 					+ " field=" + field);
 			return field;
@@ -287,20 +289,20 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 
 	@ReadOperation
 	@Override
-	public boolean equals(Object object) {
+	public boolean equals(final Object object) {
 		synchronized (getRoot()) {
 			return super.equals(object);
 		}
 	}
 
 	@Override
-	public long executeCommand(XCommand command) {
+	public long executeCommand(final XCommand command) {
 		assert command != null;
 		assert command instanceof XTransaction || command instanceof XModelCommand
 				|| command instanceof XObjectCommand || command instanceof XFieldCommand;
 
 		synchronized (getRoot()) {
-			XId actorId = getRoot().getSessionActor();
+			final XId actorId = getRoot().getSessionActor();
 			XExistsRevWritableModel modelState = null;
 			IMemoryRepository repository = null;
 			XExistsRevWritableRepository repositoryState = null;
@@ -317,13 +319,13 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 	}
 
 	@Override
-	public long executeObjectCommand(XObjectCommand command) {
+	public long executeObjectCommand(final XObjectCommand command) {
 		return executeCommand(command);
 	}
 
 	// implement IMemoryObject
 	@Override
-	public void fireFieldEvent(XFieldEvent event) {
+	public void fireFieldEvent(final XFieldEvent event) {
 		synchronized (getRoot()) {
 			getRoot().fireFieldEvent(getAddress(), event);
 		}
@@ -331,7 +333,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 
 	// implement IMemoryObject
 	@Override
-	public void fireObjectEvent(XObjectEvent event) {
+	public void fireObjectEvent(final XObjectEvent event) {
 		synchronized (getRoot()) {
 			getRoot().fireObjectEvent(getAddress(), event);
 		}
@@ -339,7 +341,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 
 	// implement IMemoryObject
 	@Override
-	public void fireTransactionEvent(XTransactionEvent event) {
+	public void fireTransactionEvent(final XTransactionEvent event) {
 		synchronized (getRoot()) {
 			getRoot().fireTransactionEvent(getAddress(), event);
 		}
@@ -354,7 +356,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 
 	@Override
 	public XChangeLog getChangeLog() {
-		return this.getRoot().getSyncLog();
+		return getRoot().getSyncLog();
 	}
 
 	@Override
@@ -363,7 +365,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 	}
 
 	@Override
-	public IMemoryField getField(XId fieldId) {
+	public IMemoryField getField(final XId fieldId) {
 		synchronized (getRoot()) {
 			assertThisEntityExists();
 
@@ -372,7 +374,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 				return field;
 			}
 
-			XRevWritableField fieldState = this.objectState.getField(fieldId);
+			final XRevWritableField fieldState = this.objectState.getField(fieldId);
 			if (fieldState == null) {
 				return null;
 			}
@@ -409,12 +411,12 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 
 	@Override
 	public XId getSessionActor() {
-		return this.getRoot().getSessionActor();
+		return getRoot().getSessionActor();
 	}
 
 	@Override
 	public String getSessionPasswordHash() {
-		return this.getRoot().getSessionPasswordHash();
+		return getRoot().getSessionPasswordHash();
 	}
 
 	@Override
@@ -434,7 +436,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 	}
 
 	@Override
-	public boolean hasField(XId id) {
+	public boolean hasField(final XId id) {
 		synchronized (getRoot()) {
 			assertThisEntityExists();
 			return this.objectState.hasField(id);
@@ -471,44 +473,44 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 	}
 
 	@Override
-	public boolean removeField(XId fieldId) {
+	public boolean removeField(final XId fieldId) {
 
 		/*
 		 * no synchronization necessary here (except that in
 		 * executeObjectCommand())
 		 */
 
-		XObjectCommand command = MemoryObjectCommand.createRemoveCommand(getAddress(),
+		final XObjectCommand command = MemoryObjectCommand.createRemoveCommand(getAddress(),
 				XCommand.FORCED, fieldId);
 
-		long result = executeObjectCommand(command);
+		final long result = executeObjectCommand(command);
 		XyAssert.xyAssert(result >= 0 || result == XCommand.NOCHANGE);
 		return result != XCommand.NOCHANGE;
 	}
 
 	@Override
-	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+	public boolean removeListenerForFieldEvents(final XFieldEventListener changeListener) {
 		synchronized (getRoot()) {
 			return getRoot().removeListenerForFieldEvents(getAddress(), changeListener);
 		}
 	}
 
 	@Override
-	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
+	public boolean removeListenerForObjectEvents(final XObjectEventListener changeListener) {
 		synchronized (getRoot()) {
 			return getRoot().removeListenerForObjectEvents(getAddress(), changeListener);
 		}
 	}
 
 	@Override
-	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	public boolean removeListenerForTransactionEvents(final XTransactionEventListener changeListener) {
 		synchronized (getRoot()) {
 			return getRoot().removeListenerForTransactionEvents(getAddress(), changeListener);
 		}
 	}
 
 	@Override
-	public void setSessionActor(XId actorId, String passwordHash) {
+	public void setSessionActor(final XId actorId, final String passwordHash) {
 		getRoot().setSessionActor(actorId);
 		getRoot().setSessionPasswordHash(passwordHash);
 	}
@@ -516,7 +518,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 	@ReadOperation
 	@Override
 	public String toString() {
-		return this.getId() + " rev[" + this.getRevisionNumber() + "]" + " "
+		return getId() + " rev[" + getRevisionNumber() + "]" + " "
 				+ this.objectState.toString();
 	}
 
@@ -526,12 +528,12 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 	}
 
 	@Override
-	public void setExists(boolean entityExists) {
+	public void setExists(final boolean entityExists) {
 		this.objectState.setExists(entityExists);
 	}
 
 	@Override
-	public boolean setFieldValue(XId fieldId, XValue value) {
+	public boolean setFieldValue(final XId fieldId, final XValue value) {
 		if (value == null) {
 			return removeField(fieldId);
 		}
@@ -539,10 +541,11 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 	}
 
 	@Override
-	public XValue getFieldValue(XId fieldId) {
-		IMemoryField field = getField(fieldId);
-		if (field == null)
+	public XValue getFieldValue(final XId fieldId) {
+		final IMemoryField field = getField(fieldId);
+		if (field == null) {
 			return null;
+		}
 		return field.getValue();
 	}
 

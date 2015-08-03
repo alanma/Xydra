@@ -31,7 +31,7 @@ public class GaeModelPersistence3 implements IGaeModelPersistence {
 	private final IGaeExecutionService executionService;
 	private final InstanceRevisionManager instanceRevisionManager;
 
-	public GaeModelPersistence3(XAddress modelAddress) {
+	public GaeModelPersistence3(final XAddress modelAddress) {
 		this.instanceRevisionManager = new InstanceRevisionManager(modelAddress);
 		this.modelAddress = modelAddress;
 		this.changesService = new GaeChangesServiceImpl3(this.modelAddress,
@@ -41,22 +41,22 @@ public class GaeModelPersistence3 implements IGaeModelPersistence {
 				this.changesService, this.snapshotService);
 	}
 
-	
+
 	@Override
-	public long executeCommand(XCommand command, XId actorId) {
+	public long executeCommand(final XCommand command, final XId actorId) {
 		// absolutely required
 		calculateModelRevAndCacheInInstance(false);
 		return this.executionService.executeCommand(command, actorId);
 	}
 
-	
+
 	@Override
-	public List<XEvent> getEventsBetween(XAddress address, long beginRevision, long endRevision) {
+	public List<XEvent> getEventsBetween(final XAddress address, final long beginRevision, final long endRevision) {
 		calculateModelRevAndCacheInInstance(true);
 		return this.changesService.getEventsBetween(address, beginRevision, endRevision);
 	}
 
-	private void calculateModelRevAndCacheInInstance(boolean includeTentative) {
+	private void calculateModelRevAndCacheInInstance(final boolean includeTentative) {
 		GaeModelRevision gaeModelRev = this.changesService
 				.calculateCurrentModelRevision(includeTentative);
 		if (gaeModelRev.getModelRevision() == null) {
@@ -67,38 +67,38 @@ public class GaeModelPersistence3 implements IGaeModelPersistence {
 				.setCurrentGaeModelRevIfRevisionIsHigher(gaeModelRev);
 	}
 
-	
+
 	@Override
-	synchronized public XWritableModel getSnapshot(boolean includeTentative) {
+	synchronized public XWritableModel getSnapshot(final boolean includeTentative) {
 		calculateModelRevAndCacheInInstance(false);
-		ModelRevision currentRevision = this.instanceRevisionManager.getInstanceRevisionInfo()
+		final ModelRevision currentRevision = this.instanceRevisionManager.getInstanceRevisionInfo()
 				.getGaeModelRevision().getModelRevision();
 		if (!currentRevision.modelExists()) {
 			return null;
 		}
-		long currentRevNr = currentRevision.revision();
-		XWritableModel snapshot = this.snapshotService.getModelSnapshot(currentRevNr, false);
+		final long currentRevNr = currentRevision.revision();
+		final XWritableModel snapshot = this.snapshotService.getModelSnapshot(currentRevNr, false);
 		log.debug("return snapshot rev " + currentRevNr + " for model " + this.modelAddress);
 		return snapshot;
 	}
 
-	
+
 	@Override
-	public XWritableObject getObjectSnapshot(XId objectId, boolean includeTentative) {
+	public XWritableObject getObjectSnapshot(final XId objectId, final boolean includeTentative) {
 		calculateModelRevAndCacheInInstance(false);
-		ModelRevision currentRevision = this.instanceRevisionManager.getInstanceRevisionInfo()
+		final ModelRevision currentRevision = this.instanceRevisionManager.getInstanceRevisionInfo()
 				.getGaeModelRevision().getModelRevision();
-		boolean modelExists = currentRevision.modelExists();
+		final boolean modelExists = currentRevision.modelExists();
 		if (!modelExists) {
 			return null;
 		}
-		long currentRevNr = currentRevision.revision();
+		final long currentRevNr = currentRevision.revision();
 		return this.snapshotService.getObjectSnapshot(currentRevNr, true, objectId);
 	}
 
-	
+
 	@Override
-	public ModelRevision getModelRevision(boolean includeTentative) {
+	public ModelRevision getModelRevision(final boolean includeTentative) {
 		calculateModelRevAndCacheInInstance(includeTentative);
 		return this.instanceRevisionManager.getInstanceRevisionInfo().getGaeModelRevision()
 				.getModelRevision();
@@ -111,13 +111,13 @@ public class GaeModelPersistence3 implements IGaeModelPersistence {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(final Object other) {
 		return other instanceof GaeModelPersistence3
 				&& ((GaeModelPersistence3) other).modelAddress.equals(this.modelAddress);
 
 	}
 
-	
+
 	@Override
 	public boolean modelHasBeenManaged() {
 		return this.changesService.modelHasBeenManaged();

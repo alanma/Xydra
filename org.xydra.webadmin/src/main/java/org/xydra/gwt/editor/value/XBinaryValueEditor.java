@@ -9,7 +9,7 @@ public class XBinaryValueEditor extends XValueEditor {
 
 	byte[] value;
 
-	public XBinaryValueEditor(byte[] value, EditListener listener) {
+	public XBinaryValueEditor(final byte[] value, final EditListener listener) {
 		super();
 		this.value = value;
 

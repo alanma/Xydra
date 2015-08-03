@@ -11,14 +11,14 @@ import org.xydra.store.impl.gae.changes.GaeChange.Status;
 
 /**
  * Preliminary, unsaved result of executing a command.
- * 
+ *
  * Static methods gather all information required to generate events.
- * 
+ *
  */
 class ExecutionResult {
 
-	public static ExecutionResult createEventsFrom(CheckResult checkResult,
-			@NeverNull ContextBeforeCommand ctxBeforeCommand) {
+	public static ExecutionResult createEventsFrom(final CheckResult checkResult,
+			@NeverNull final ContextBeforeCommand ctxBeforeCommand) {
 		XyAssert.xyAssert(ctxBeforeCommand != null);
 
 		switch (checkResult.getStatus()) {
@@ -29,7 +29,7 @@ class ExecutionResult {
 					checkResult.getDebugHint());
 		case SuccessExecuted:
 		case SuccessExecutedApplied:
-			List<XAtomicEvent> events = checkResult.getExecutionContextInTxn().toEvents(
+			final List<XAtomicEvent> events = checkResult.getExecutionContextInTxn().toEvents(
 					checkResult.getActorId(), ctxBeforeCommand, checkResult.inTransaction());
 			return new ExecutionResult(checkResult.getStatus(), events, null);
 		default:
@@ -341,9 +341,9 @@ class ExecutionResult {
 
 	private List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
 
-	private Status status;
+	private final Status status;
 
-	private String debugHint;
+	private final String debugHint;
 
 	@Override
 	public String toString() {
@@ -362,7 +362,7 @@ class ExecutionResult {
 	 * @param explanation
 	 *            @CanBeNull if status != failed
 	 */
-	public ExecutionResult(Status status, List<XAtomicEvent> events, String explanation) {
+	public ExecutionResult(final Status status, final List<XAtomicEvent> events, final String explanation) {
 		XyAssert.xyAssert(status != null);
 		assert status != null;
 		XyAssert.xyAssert(status.isCommitted());

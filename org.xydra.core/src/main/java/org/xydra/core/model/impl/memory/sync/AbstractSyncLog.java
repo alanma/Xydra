@@ -9,41 +9,42 @@ import org.xydra.index.iterator.AbstractTransformingIterator;
 /**
  * Implementation of {@link ISyncLog} methods that don't vary between
  * implementations.
- * 
+ *
  * @author kahmann
  */
 abstract public class AbstractSyncLog implements ISyncLog {
-	
+
 	private static final long serialVersionUID = -1916889722140082523L;
-	
+
 	class ExtractEventTransformer extends AbstractTransformingIterator<ISyncLogEntry,XEvent> {
-		
-		public ExtractEventTransformer(Iterator<? extends ISyncLogEntry> base) {
+
+		public ExtractEventTransformer(final Iterator<? extends ISyncLogEntry> base) {
 			super(base);
 		}
-		
+
 		@Override
-		public XEvent transform(ISyncLogEntry in) {
-			if(in == null)
+		public XEvent transform(final ISyncLogEntry in) {
+			if(in == null) {
 				return null;
+			}
 			return in.getEvent();
 		}
-		
+
 	}
-	
+
 	@Override
-	public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
+	public Iterator<XEvent> getEventsBetween(final long beginRevision, final long endRevision) {
 		return new ExtractEventTransformer(getSyncLogEntriesBetween(beginRevision, endRevision));
 	}
-	
+
 	@Override
-	public Iterator<XEvent> getEventsSince(long revisionNumber) {
+	public Iterator<XEvent> getEventsSince(final long revisionNumber) {
 		return new ExtractEventTransformer(getSyncLogEntriesSince(revisionNumber));
 	}
-	
+
 	@Override
-	public Iterator<XEvent> getEventsUntil(long revisionNumber) {
+	public Iterator<XEvent> getEventsUntil(final long revisionNumber) {
 		return new ExtractEventTransformer(getSyncLogEntriesUntil(revisionNumber));
 	}
-	
+
 }

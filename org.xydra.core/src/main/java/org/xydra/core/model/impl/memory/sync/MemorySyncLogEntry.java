@@ -11,7 +11,7 @@ public class MemorySyncLogEntry implements ISyncLogEntry, Serializable {
 
 	XEvent event;
 
-	public MemorySyncLogEntry(XCommand command, XEvent event) {
+	public MemorySyncLogEntry(final XCommand command, final XEvent event) {
 		this.command = command;
 		this.event = event;
 	}

@@ -48,7 +48,7 @@ import com.google.gwt.core.client.GWT;
 /**
  * Generates shared interfaces ({@link #generateInterfaces(Class, File, String)}
  * ) and Java factory. For GWT factory, see {@link GwtCodeGenerator}.
- * 
+ *
  * @author xamde
  */
 public class JavaCodeGenerator {
@@ -61,9 +61,9 @@ public class JavaCodeGenerator {
 
 	private static final Logger log = LoggerFactory.getLogger(JavaCodeGenerator.class);
 
-	static void addCollectionGetter(ClassSpec classSpec, String name, IType t, String comment,
-			String generatedFrom) {
-		MethodSpec getter = classSpec.addMethod(NameUtils.firstLetterLowercased(name), t,
+	static void addCollectionGetter(final ClassSpec classSpec, final String name, final IType t, final String comment,
+			final String generatedFrom) {
+		final MethodSpec getter = classSpec.addMethod(NameUtils.firstLetterLowercased(name), t,
 				generatedFrom);
 		getter.returnType.setComment("a writable collection proxy, never null");
 		getter.annotateWith(org.xydra.oo.Field.class, NameUtils.toXFieldName(name));
@@ -81,34 +81,34 @@ public class JavaCodeGenerator {
 	 * @param generatedFrom
 	 *            debug comment
 	 */
-	static void addGetterSetter(ClassSpec classSpec, String name, IType typeSpec,
-			@CanBeNull String comment, String generatedFrom) {
-		MethodSpec getter = classSpec.addMethod("get" + NameUtils.toJavaName(name), typeSpec,
+	static void addGetterSetter(final ClassSpec classSpec, final String name, final IType typeSpec,
+			@CanBeNull final String comment, final String generatedFrom) {
+		final MethodSpec getter = classSpec.addMethod("get" + NameUtils.toJavaName(name), typeSpec,
 				generatedFrom);
 		getter.returnType.setComment("the current value or null if not defined");
 		getter.annotateWith(org.xydra.oo.Field.class, NameUtils.toXFieldName(name));
 
-		MethodSpec setter = classSpec.addMethod("set" + NameUtils.toJavaName(name),
+		final MethodSpec setter = classSpec.addMethod("set" + NameUtils.toJavaName(name),
 				classSpec.asType(), generatedFrom);
 
 		/*
 		 * setter variant that returns void:
-		 * 
+		 *
 		 * MethodSpec setter = classSpec.addVoidMethod("set" +
 		 * NameUtils.toJavaName(name), generatedFrom);
 		 */
-		FieldSpec param = setter.addParam(NameUtils.toXFieldName(name), typeSpec, generatedFrom);
+		final FieldSpec param = setter.addParam(NameUtils.toXFieldName(name), typeSpec, generatedFrom);
 		param.setComment("the value to set");
 		setter.setComment("Set a value, silently overwriting existing values, if any.");
 		setter.annotateWith(org.xydra.oo.Field.class, NameUtils.toXFieldName(name));
 	}
 
-	private static void addGwtGenerateWith(GwtModuleXmlSpec gwtSpec, PackageSpec packageSpec) {
-		for (ClassSpec classSpec : packageSpec.classes) {
+	private static void addGwtGenerateWith(final GwtModuleXmlSpec gwtSpec, final PackageSpec packageSpec) {
+		for (final ClassSpec classSpec : packageSpec.classes) {
 			ClassSpec currentClass = classSpec;
 
 			while (currentClass != null) {
-				GenerateWith gw = gwtSpec.new GenerateWith();
+				final GenerateWith gw = gwtSpec.new GenerateWith();
 				gw.generateWith = GwtCodeGenerator.class;
 				gw.whenTypeAssignable = classSpec.getCanonicalName();
 				gwtSpec.generateWith.add(gw);
@@ -116,7 +116,7 @@ public class JavaCodeGenerator {
 				currentClass = currentClass.superClass;
 			}
 		}
-		for (PackageSpec subPackage : packageSpec.subPackages) {
+		for (final PackageSpec subPackage : packageSpec.subPackages) {
 			addGwtGenerateWith(gwtSpec, subPackage);
 		}
 	}
@@ -130,13 +130,13 @@ public class JavaCodeGenerator {
 	 * @return a set of members (fields and methods) mapped to the Xydra type
 	 *         system
 	 */
-	private static Set<IMember> collectMappedMembers(Class<?> clazz,
-			Set<Class<?>> toBeGeneratedTypes, String sharedPackage) {
-		Set<IMember> classMemberSpecs = new HashSet<IMember>();
+	private static Set<IMember> collectMappedMembers(final Class<?> clazz,
+			final Set<Class<?>> toBeGeneratedTypes, final String sharedPackage) {
+		final Set<IMember> classMemberSpecs = new HashSet<IMember>();
 
-		for (Field field : clazz.getDeclaredFields()) {
-			Class<?> type = field.getType();
-			Class<?> compType = JavaReflectionUtils.getComponentType(field);
+		for (final Field field : clazz.getDeclaredFields()) {
+			final Class<?> type = field.getType();
+			final Class<?> compType = JavaReflectionUtils.getComponentType(field);
 
 			FieldSpec fieldSpec = null;
 
@@ -163,31 +163,33 @@ public class JavaCodeGenerator {
 			}
 
 			if (fieldSpec != null) {
-				String commentText = tryToGetAnnotatedComment(field);
-				if (commentText != null)
+				final String commentText = tryToGetAnnotatedComment(field);
+				if (commentText != null) {
 					fieldSpec.setComment(commentText);
+				}
 				fieldSpec.annotateWith(org.xydra.oo.Field.class,
 						NameUtils.toXFieldName(field.getName()));
 				classMemberSpecs.add(fieldSpec);
 			}
 		}
 
-		for (Method method : clazz.getDeclaredMethods()) {
+		for (final Method method : clazz.getDeclaredMethods()) {
 			try {
-				MethodSpec methodSpec = new MethodSpec(method, clazz.getCanonicalName());
-				String commentText = tryToGetAnnotatedComment(method);
-				if (commentText != null)
+				final MethodSpec methodSpec = new MethodSpec(method, clazz.getCanonicalName());
+				final String commentText = tryToGetAnnotatedComment(method);
+				if (commentText != null) {
 					methodSpec.setComment(commentText);
+				}
 
 				// add parameters
-				Type[] genericTypes = method.getGenericParameterTypes();
+				final Type[] genericTypes = method.getGenericParameterTypes();
 				int n = 0;
-				for (Type t : genericTypes) {
-					FieldSpec typeSpec = new FieldSpec("param" + n++, t, clazz.getCanonicalName());
+				for (final Type t : genericTypes) {
+					final FieldSpec typeSpec = new FieldSpec("param" + n++, t, clazz.getCanonicalName());
 					methodSpec.params.add(typeSpec);
 				}
 				classMemberSpecs.add(methodSpec);
-			} catch (AssertionError e) {
+			} catch (final AssertionError e) {
 				log.warn("Problem in " + clazz.getCanonicalName() + "." + method.getName() + "(..)");
 				throw e;
 			}
@@ -204,27 +206,29 @@ public class JavaCodeGenerator {
 	 * @param specificationCollectionClass
 	 * @return
 	 */
-	private static PackageSpec convertInnerClassesToPackageSpec(String basePackage,
-			String sharedPackage, Class<?> specificationCollectionClass) {
+	private static PackageSpec convertInnerClassesToPackageSpec(final String basePackage,
+			final String sharedPackage, final Class<?> specificationCollectionClass) {
 		// round 1: collect all declared inner classes
-		Set<Class<?>> toBeGeneratedTypes = new HashSet<Class<?>>();
-		for (Class<?> specificationMemberClass : specificationCollectionClass.getDeclaredClasses()) {
+		final Set<Class<?>> toBeGeneratedTypes = new HashSet<Class<?>>();
+		for (final Class<?> specificationMemberClass : specificationCollectionClass.getDeclaredClasses()) {
 			// don't inspect/translate inner Enum-types
-			if (specificationMemberClass.isEnum())
+			if (specificationMemberClass.isEnum()) {
 				continue;
+			}
 
 			toBeGeneratedTypes.add(specificationMemberClass);
 		}
 		// round 2: convert inner classes to PackageSpec
-		PackageSpec packageSpec = new PackageSpec(basePackage + "." + sharedPackage, false);
+		final PackageSpec packageSpec = new PackageSpec(basePackage + "." + sharedPackage, false);
 		packageSpec.generatedFrom = specificationCollectionClass;
-		for (Class<?> specificationMemberClass : specificationCollectionClass.getDeclaredClasses()) {
+		for (final Class<?> specificationMemberClass : specificationCollectionClass.getDeclaredClasses()) {
 			// don't inspect/translate inner Enum-types
-			if (specificationMemberClass.isEnum())
+			if (specificationMemberClass.isEnum()) {
 				continue;
+			}
 
 			log.debug("Processing '" + specificationMemberClass.getCanonicalName() + "'");
-			ClassSpec result = toClassSpec(packageSpec, specificationMemberClass,
+			final ClassSpec result = toClassSpec(packageSpec, specificationMemberClass,
 					toBeGeneratedTypes);
 			convertFieldsToGettersAndSetters(result);
 		}
@@ -236,11 +240,11 @@ public class JavaCodeGenerator {
 	 * generate getter/setter for all primitive types; generate getter for all
 	 * object-types; generate method stubs for all methods;
 	 */
-	private static void convertFieldsToGettersAndSetters(ClassSpec classSpec) {
-		List<IMember> members = new ArrayList<IMember>(classSpec.members);
-		for (IMember t : members) {
+	private static void convertFieldsToGettersAndSetters(final ClassSpec classSpec) {
+		final List<IMember> members = new ArrayList<IMember>(classSpec.members);
+		for (final IMember t : members) {
 			if (t instanceof FieldSpec) {
-				FieldSpec fieldSpec = (FieldSpec) t;
+				final FieldSpec fieldSpec = (FieldSpec) t;
 				// no collection proxies for arrays
 				if (!fieldSpec.getType().isArray()
 						&& JavaReflectionUtils.isJavaCollectionType(fieldSpec.getType())) {
@@ -255,7 +259,7 @@ public class JavaCodeGenerator {
 					 */
 					TypeSpec normalisedType = new TypeSpec(fieldSpec.t);
 					if (normalisedType.isArray()) {
-						IBaseType normalisedCompType = JavaReflectionUtils
+						final IBaseType normalisedCompType = JavaReflectionUtils
 								.getPrimitiveTypeForWrapperClass(normalisedType.getComponentType());
 						if (normalisedCompType != null) {
 							normalisedType = new TypeSpec(normalisedType.getBaseType(),
@@ -265,39 +269,39 @@ public class JavaCodeGenerator {
 					addGetterSetter(classSpec, t.getName(), normalisedType, t.getComment(),
 							t.getGeneratedFrom());
 				}
-				boolean removed = classSpec.members.remove(fieldSpec);
+				final boolean removed = classSpec.members.remove(fieldSpec);
 				assert removed;
 			}
 		}
 	}
 
-	private static void generateFactories(PackageSpec clientPackage, PackageSpec sharedPackage,
-			PackageSpec javaPackage) {
-		PackageSpec builtIn = new PackageSpec("org.xydra.oo.runtime.shared", true);
-		ClassSpec builtInAbstractFactory = builtIn.addClass("AbstractFactory");
+	private static void generateFactories(final PackageSpec clientPackage, final PackageSpec sharedPackage,
+			final PackageSpec javaPackage) {
+		final PackageSpec builtIn = new PackageSpec("org.xydra.oo.runtime.shared", true);
+		final ClassSpec builtInAbstractFactory = builtIn.addClass("AbstractFactory");
 
-		ClassSpec abstractSharedFactory = sharedPackage.addAbstractClass("AbstractSharedFactory");
+		final ClassSpec abstractSharedFactory = sharedPackage.addAbstractClass("AbstractSharedFactory");
 		abstractSharedFactory.superClass = builtInAbstractFactory;
-		ConstructorSpec c1 = abstractSharedFactory.addConstructor("generateFactories-" + "HqDUE");
+		final ConstructorSpec c1 = abstractSharedFactory.addConstructor("generateFactories-" + "HqDUE");
 		c1.addParam("model", XWritableModel.class, "generateFactories-" + "76emU");
 		c1.sourceLines.add("super(model);");
 
-		ClassSpec clientFactory = clientPackage.addClass("GwtFactory");
+		final ClassSpec clientFactory = clientPackage.addClass("GwtFactory");
 		clientFactory.setComment("Generated on " + new Date());
 		clientFactory.superClass = abstractSharedFactory;
-		ConstructorSpec c2 = clientFactory.addConstructor("generateFactories-" + "oTz9R");
+		final ConstructorSpec c2 = clientFactory.addConstructor("generateFactories-" + "oTz9R");
 		c2.addParam("model", XWritableModel.class, "generateFactories-" + "mqFtF");
 		c2.sourceLines.add("super(model);");
 
-		ClassSpec javaFactory = javaPackage.addClass("JavaFactory");
+		final ClassSpec javaFactory = javaPackage.addClass("JavaFactory");
 		javaFactory.superClass = abstractSharedFactory;
-		ConstructorSpec c3 = javaFactory.addConstructor("generateFactories-" + "WaYjk");
+		final ConstructorSpec c3 = javaFactory.addConstructor("generateFactories-" + "WaYjk");
 		c3.addParam("model", XWritableModel.class, "generateFactories-" + "dctg4");
 		c3.sourceLines.add("super(model);");
 
-		for (ClassSpec c : sharedPackage.classes) {
+		for (final ClassSpec c : sharedPackage.classes) {
 			if (!c.isBuiltIn() && c.getName().startsWith("I")) {
-				String n = NameUtils.firstLetterUppercased(c.getName().substring(1));
+				final String n = NameUtils.firstLetterUppercased(c.getName().substring(1));
 				// public ITask createTask(String idStr) {
 				// return createTask(XX.toId(idStr));
 				// }
@@ -345,7 +349,7 @@ public class JavaCodeGenerator {
 
 				// protected abstract ITask getTaskInternal(XWritableModel
 				// model, XId id);
-				String getInternal = "get" + n + "Internal";
+				final String getInternal = "get" + n + "Internal";
 				abstractSharedFactory
 						.addMethod(getInternal, c.getPackageName(), c.getName(),
 								"generateFactories-" + "n6Zvf").setAccess("protected")
@@ -397,9 +401,9 @@ public class JavaCodeGenerator {
 
 	}
 
-	private static GwtModuleXmlSpec generateGwtModuleXmlSpec(PackageSpec packageSpec) {
+	private static GwtModuleXmlSpec generateGwtModuleXmlSpec(final PackageSpec packageSpec) {
 		// prepare GWT module xml
-		GwtModuleXmlSpec gwtSpec = new GwtModuleXmlSpec(packageSpec.getFQPackageName(),
+		final GwtModuleXmlSpec gwtSpec = new GwtModuleXmlSpec(packageSpec.getFQPackageName(),
 				"OODomainModel", null);
 		addGwtGenerateWith(gwtSpec, packageSpec);
 		gwtSpec.inherits.add("org.xydra.oo.runtime.XydraOoRuntime");
@@ -415,21 +419,21 @@ public class JavaCodeGenerator {
 	 *            get.xml file ends in {basePackage}
 	 * @throws IOException
 	 */
-	public static void generateInterfaces(Class<?> spec, File srcDir, String basePackage)
+	public static void generateInterfaces(final Class<?> spec, final File srcDir, final String basePackage)
 			throws IOException {
 		log.info("Generating from '" + spec.getCanonicalName() + "'");
-		PackageSpec packageSpec = new PackageSpec(basePackage, false);
+		final PackageSpec packageSpec = new PackageSpec(basePackage, false);
 
-		PackageSpec shared = convertInnerClassesToPackageSpec(basePackage, "shared", spec);
+		final PackageSpec shared = convertInnerClassesToPackageSpec(basePackage, "shared", spec);
 		packageSpec.subPackages.add(shared);
 
-		PackageSpec client = new PackageSpec(basePackage + ".client", false);
+		final PackageSpec client = new PackageSpec(basePackage + ".client", false);
 		packageSpec.subPackages.add(client);
 
-		PackageSpec java = new PackageSpec(basePackage + ".java", false);
+		final PackageSpec java = new PackageSpec(basePackage + ".java", false);
 		packageSpec.subPackages.add(java);
 
-		GwtModuleXmlSpec gwtSpec = generateGwtModuleXmlSpec(packageSpec);
+		final GwtModuleXmlSpec gwtSpec = generateGwtModuleXmlSpec(packageSpec);
 
 		generateFactories(client, shared, java);
 
@@ -444,7 +448,7 @@ public class JavaCodeGenerator {
 		writeGwtXml(gwtSpec, basePackage, new File(srcDir, "/main/resources"));
 	}
 
-	private static boolean isToBeGeneratedType(Class<?> type, Set<Class<?>> mappedTypes) {
+	private static boolean isToBeGeneratedType(final Class<?> type, final Set<Class<?>> mappedTypes) {
 		return mappedTypes.contains(type);
 	}
 
@@ -459,13 +463,13 @@ public class JavaCodeGenerator {
 	 *         Content is based on specClass.
 	 */
 	@SuppressWarnings("null")
-	private static ClassSpec toClassSpec(PackageSpec packageSpec, Class<?> specClass,
-			Set<Class<?>> toBeGeneratedTypes) {
+	private static ClassSpec toClassSpec(final PackageSpec packageSpec, final Class<?> specClass,
+			final Set<Class<?>> toBeGeneratedTypes) {
 		assert packageSpec != null;
 		assert specClass != null;
 		assert toBeGeneratedTypes != null;
 
-		ClassSpec resultSpec = packageSpec.addInterface(NameUtils.toClassName(specClass));
+		final ClassSpec resultSpec = packageSpec.addInterface(NameUtils.toClassName(specClass));
 		/*
 		 * Look in this class and all super-types. Put members at the right
 		 * level in the hierarchy. Make sure the higher, abstract classes
@@ -476,9 +480,9 @@ public class JavaCodeGenerator {
 		Class<?> currentClass = specClass;
 		while (currentClass != null && !currentClass.equals(Object.class)) {
 			// process this level
-			Set<IMember> currentClassMembers = collectMappedMembers(currentClass,
+			final Set<IMember> currentClassMembers = collectMappedMembers(currentClass,
 					toBeGeneratedTypes, packageSpec.getFQPackageName());
-			for (IMember member : currentClassMembers) {
+			for (final IMember member : currentClassMembers) {
 				if (!currentClassSpec.members.contains(member)) {
 					log.trace("Adding member '" + member.getName() + "' to '" + currentClassSpec
 							+ "'");
@@ -488,7 +492,7 @@ public class JavaCodeGenerator {
 			// move one level up
 			currentClass = currentClass.getSuperclass();
 			if (!currentClass.equals(Object.class)) {
-				ClassSpec superSpec = packageSpec.addInterface(NameUtils.toClassName(currentClass));
+				final ClassSpec superSpec = packageSpec.addInterface(NameUtils.toClassName(currentClass));
 				currentClassSpec.superClass = superSpec;
 				currentClassSpec = superSpec;
 			} else {
@@ -503,25 +507,26 @@ public class JavaCodeGenerator {
 		return resultSpec;
 	}
 
-	private static String tryToGetAnnotatedComment(AccessibleObject ao) {
+	private static String tryToGetAnnotatedComment(final AccessibleObject ao) {
 		String commentText = null;
-		Comment comment = ao.getAnnotation(Comment.class);
-		if (comment != null)
+		final Comment comment = ao.getAnnotation(Comment.class);
+		if (comment != null) {
 			commentText = comment.value();
+		}
 		return commentText;
 	}
 
-	private static void writeGwtXml(GwtModuleXmlSpec gwtSpec, String basePackage, File outDir)
+	private static void writeGwtXml(final GwtModuleXmlSpec gwtSpec, final String basePackage, final File outDir)
 			throws IOException {
-		File dir = new File(outDir.getAbsolutePath() + "/" + basePackage.replace(".", "/"));
-		File moduleFile = new File(dir, gwtSpec.moduleName + ".gwt.xml");
+		final File dir = new File(outDir.getAbsolutePath() + "/" + basePackage.replace(".", "/"));
+		final File moduleFile = new File(dir, gwtSpec.moduleName + ".gwt.xml");
 		log.info("Writing GWT module file into " + moduleFile.getAbsolutePath());
-		Writer w = CodeWriter.openWriter(moduleFile);
+		final Writer w = CodeWriter.openWriter(moduleFile);
 		w.write(gwtSpec.toString());
 		w.close();
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(final String[] args) throws IOException {
 
 		String s = FileUtils
 				.readFileToString(new File(

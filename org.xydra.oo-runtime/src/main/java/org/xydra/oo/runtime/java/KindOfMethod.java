@@ -9,7 +9,7 @@ public enum KindOfMethod {
 	/**
 	 * @param prefix
 	 */
-	private KindOfMethod(String prefix) {
+	private KindOfMethod(final String prefix) {
 		this.prefix = prefix;
 	}
 }

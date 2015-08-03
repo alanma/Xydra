@@ -17,84 +17,84 @@ import org.xydra.sharedutils.XyAssert;
 
 /**
  * A simple data container for {@link XStateWritableRepository}.
- * 
+ *
  * Minimal memory footprint, can be used as data transfer object.
- * 
+ *
  * @author xamde
  */
 public class MemStateRepository extends MemStateEntity implements XStateWritableRepository {
-    
+
     private static final long serialVersionUID = 5593443685935758227L;
-    
+
     // not final for GWT serialisation
-    private Map<XId,XStateWritableModel> models = new HashMap<XId,XStateWritableModel>();
-    
+    private final Map<XId,XStateWritableModel> models = new HashMap<XId,XStateWritableModel>();
+
     /* Just for GWT */
     protected MemStateRepository() {
     }
-    
-    public MemStateRepository(XAddress address) {
+
+    public MemStateRepository(final XAddress address) {
         super(address);
         XyAssert.xyAssert(address.getAddressedType() == XType.XREPOSITORY);
     }
-    
+
     @Override
-    public XStateWritableModel createModel(XId modelId) {
-        XStateWritableModel model = this.models.get(modelId);
+    public XStateWritableModel createModel(final XId modelId) {
+        final XStateWritableModel model = this.models.get(modelId);
         if(model != null) {
             return model;
         }
-        MemStateModel newModel = new MemStateModel(Base.resolveModel(getAddress(), modelId));
+        final MemStateModel newModel = new MemStateModel(Base.resolveModel(getAddress(), modelId));
         addModel(newModel);
         return newModel;
     }
-    
+
     @Override
     public XId getId() {
         return getAddress().getRepository();
     }
-    
+
     @Override
-    public XStateWritableModel getModel(XId modelId) {
+    public XStateWritableModel getModel(final XId modelId) {
         return this.models.get(modelId);
     }
-    
+
     @Override
-    public boolean hasModel(XId modelId) {
+    public boolean hasModel(final XId modelId) {
         return this.models.containsKey(modelId);
     }
-    
+
     @Override
     public boolean isEmpty() {
         return this.models.isEmpty();
     }
-    
+
     @Override
     public Iterator<XId> iterator() {
         return this.models.keySet().iterator();
     }
-    
+
     @Override
-    public boolean removeModel(XId modelId) {
+    public boolean removeModel(final XId modelId) {
         if(this.models.remove(modelId) != null) {
             return true;
         }
         return false;
     }
-    
-    private void addModel(XStateWritableModel model) {
+
+    private void addModel(final XStateWritableModel model) {
         this.models.put(model.getId(), model);
     }
-    
+
     @Override
     public XType getType() {
         return XType.XREPOSITORY;
     }
-    
+
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(final Object other) {
         return other instanceof XStateReadableRepository
                 && XCompareUtils.equalTree(this, (XStateReadableRepository)other);
     }
-    
+
 }

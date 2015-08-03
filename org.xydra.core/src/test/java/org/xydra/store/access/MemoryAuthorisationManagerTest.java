@@ -5,11 +5,11 @@ import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
 
 
 public class MemoryAuthorisationManagerTest extends AbstractAuthorisationManagerTest {
-	
+
 	@Override
-	protected XAuthorisationManager getAccessManager(XGroupDatabaseWithListeners groups,
-	        XAddress rA0) {
+	protected XAuthorisationManager getAccessManager(final XGroupDatabaseWithListeners groups,
+	        final XAddress rA0) {
 		return new MemoryAuthorisationManager(groups);
 	}
-	
+
 }

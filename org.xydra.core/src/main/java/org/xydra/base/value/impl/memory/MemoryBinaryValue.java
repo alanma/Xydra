@@ -9,9 +9,9 @@ import org.xydra.base.value.XBinaryValue;
 
 /**
  * An implementation of {@link XBinaryValue}
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 public class MemoryBinaryValue implements XBinaryValue, Serializable {
 
@@ -24,33 +24,33 @@ public class MemoryBinaryValue implements XBinaryValue, Serializable {
 	protected MemoryBinaryValue() {
 	}
 
-	public MemoryBinaryValue(byte[] content) {
+	public MemoryBinaryValue(final byte[] content) {
 		this.content = new byte[content.length];
 		System.arraycopy(content, 0, this.content, 0, content.length);
 	}
 
-	public MemoryBinaryValue(Collection<Byte> content) {
+	public MemoryBinaryValue(final Collection<Byte> content) {
 		this.content = new byte[content.size()];
 		int i = 0;
-		for (byte b : content) {
+		for (final byte b : content) {
 			this.content[i++] = b;
 		}
 	}
 
 	@Override
 	public byte[] getValue() {
-		byte[] array = new byte[this.content.length];
+		final byte[] array = new byte[this.content.length];
 		System.arraycopy(this.content, 0, array, 0, this.content.length);
 		return array;
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(final Object other) {
 		return other instanceof XBinaryValue
-				&& Arrays.equals(this.getValue(), ((XBinaryValue) other).getValue());
+				&& Arrays.equals(getValue(), ((XBinaryValue) other).getValue());
 	}
 
-	public Byte get(int index) {
+	public Byte get(final int index) {
 		return this.content[index];
 	}
 

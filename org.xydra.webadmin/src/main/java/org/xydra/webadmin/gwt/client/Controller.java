@@ -20,23 +20,23 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 /**
  * Unit that holds some regularly needed objects and has the ability to start /
  * stop processes.
- * 
+ *
  * @author kahmann
- * 
+ *
  */
 public class Controller {
 
-	private ServiceConnection service;
-	private SelectionTreePresenter selectionTreePresenter;
-	private EditorPanelPresenter editorPanelPresenter;
-	private Set<HandlerRegistration> registrations = new HashSet<HandlerRegistration>();
-	private AddressWidgetPresenter addressWidgetPresenter;
+	private final ServiceConnection service;
+	private final SelectionTreePresenter selectionTreePresenter;
+	private final EditorPanelPresenter editorPanelPresenter;
+	private final Set<HandlerRegistration> registrations = new HashSet<HandlerRegistration>();
+	private final AddressWidgetPresenter addressWidgetPresenter;
 
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
 
-	public Controller(XyAdminServiceAsync service2, SelectionTreePresenter selectionTreePresenter2,
-			EditorPanelPresenter editorPanelPresenter2,
-			AddressWidgetPresenter addressWidgetPresenter2) {
+	public Controller(final XyAdminServiceAsync service2, final SelectionTreePresenter selectionTreePresenter2,
+			final EditorPanelPresenter editorPanelPresenter2,
+			final AddressWidgetPresenter addressWidgetPresenter2) {
 
 		this.service = new ServiceConnection(service2);
 		this.selectionTreePresenter = selectionTreePresenter2;
@@ -50,11 +50,11 @@ public class Controller {
 		this.addressWidgetPresenter.present();
 	}
 
-	public void loadModelsObjects(XAddress address) {
+	public void loadModelsObjects(final XAddress address) {
 		this.service.loadModelsObjects(address);
 	}
 
-	public void commit(XAddress modelAddress, XCommand addModelCommand,
+	public void commit(final XAddress modelAddress, final XCommand addModelCommand,
 			final XTransaction modelTransactions) {
 
 		if (addModelCommand != null) {
@@ -69,12 +69,12 @@ public class Controller {
 
 	}
 
-	public void fetchModelIds(XAddress address) {
+	public void fetchModelIds(final XAddress address) {
 		this.service.getModelIdsFromServer(address);
 
 	}
 
-	public void presentModel(XAddress address) {
+	public void presentModel(final XAddress address) {
 		this.editorPanelPresenter.presentModel(address);
 		log.info("now presenting model " + address.toString());
 
@@ -92,7 +92,7 @@ public class Controller {
 		return this.editorPanelPresenter.getCurrentModelAddress();
 	}
 
-	public void addRegistration(HandlerRegistration handler) {
+	public void addRegistration(final HandlerRegistration handler) {
 		this.registrations.add(handler);
 	}
 
@@ -106,7 +106,7 @@ public class Controller {
 		log.info("unregistrated all handlers!");
 	}
 
-	public void removeRegistration(HandlerRegistration handler) {
+	public void removeRegistration(final HandlerRegistration handler) {
 		this.registrations.remove(handler);
 	}
 

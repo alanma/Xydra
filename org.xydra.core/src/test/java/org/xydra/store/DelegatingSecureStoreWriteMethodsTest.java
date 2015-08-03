@@ -4,7 +4,7 @@ import org.xydra.store.impl.memory.SecureMemoryStore;
 
 
 public class DelegatingSecureStoreWriteMethodsTest extends AbstractSecureStoreWriteMethodsTest {
-	
+
 	@Override
 	protected XydraStore createStore() {
 		if(this.store == null) {
@@ -12,5 +12,5 @@ public class DelegatingSecureStoreWriteMethodsTest extends AbstractSecureStoreWr
 		}
 		return this.store;
 	}
-	
+
 }

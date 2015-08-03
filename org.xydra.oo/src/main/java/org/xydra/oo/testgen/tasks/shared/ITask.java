@@ -15,7 +15,7 @@ public interface ITask extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("checked")
@@ -23,7 +23,7 @@ public interface ITask extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("completionDate")
@@ -31,7 +31,7 @@ public interface ITask extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("dueDate")
@@ -39,7 +39,7 @@ public interface ITask extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("note")
@@ -47,7 +47,7 @@ public interface ITask extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("rECENTLY_COMPLETED")
@@ -55,7 +55,7 @@ public interface ITask extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("remindDate")
@@ -63,7 +63,7 @@ public interface ITask extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("starred")
@@ -71,7 +71,7 @@ public interface ITask extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("title")
@@ -79,7 +79,7 @@ public interface ITask extends IHasXId {
 
 	/**
 	 * For GWT-internal use only [generated from: 'toClassSpec 1']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'toClassSpec 2']
 	 * @param id
@@ -89,7 +89,7 @@ public interface ITask extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @return ...
 	 */
 	boolean isRecentlyCompleted();
@@ -97,7 +97,7 @@ public interface ITask extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @param checked
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Task']
@@ -109,7 +109,7 @@ public interface ITask extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @param completionDate
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Task']
@@ -121,7 +121,7 @@ public interface ITask extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @param dueDate
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Task']
@@ -133,7 +133,7 @@ public interface ITask extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @param note
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Task']
@@ -145,7 +145,7 @@ public interface ITask extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @param rECENTLY_COMPLETED
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Task']
@@ -157,7 +157,7 @@ public interface ITask extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @param remindDate
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Task']
@@ -169,7 +169,7 @@ public interface ITask extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @param starred
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Task']
@@ -181,7 +181,7 @@ public interface ITask extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @param title
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Task']
@@ -192,7 +192,7 @@ public interface ITask extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Task']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("subTasks")

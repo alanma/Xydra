@@ -8,7 +8,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 
 /**
  * Utility to use synchronous datastore
- * 
+ *
  * @author xamde
  */
 public abstract class DatastoreImplGaeBase {
@@ -17,12 +17,12 @@ public abstract class DatastoreImplGaeBase {
 
 	/**
 	 * How-to:
-	 * 
+	 *
 	 * <pre>
 	 * Query q = new Query(kind).addFilter(PROP_KEY, FilterOperator.GREATER_THAN_OR_EQUAL, first)
 	 * 		.setKeysOnly();
 	 * </pre>
-	 * 
+	 *
 	 * @param kind
 	 * @param keysOnly
 	 *            if true, the query is very fast and returns entities that have
@@ -35,14 +35,14 @@ public abstract class DatastoreImplGaeBase {
 	 *            requires a lowName in this case
 	 * @return
 	 */
-	protected Query createRangeQuery(String kind, boolean keysOnly, String lowestName,
-			String highestName) {
+	protected Query createRangeQuery(final String kind, final boolean keysOnly, final String lowestName,
+			final String highestName) {
 		assert lowestName != null || highestName != null;
 
-		Key lowestKey = KeyFactory.createKey(kind, lowestName);
-		Key highestKey = KeyFactory.createKey(kind, highestName);
+		final Key lowestKey = KeyFactory.createKey(kind, lowestName);
+		final Key highestKey = KeyFactory.createKey(kind, highestName);
 
-		Query query = new Query(kind);
+		final Query query = new Query(kind);
 		if (lowestName == null) {
 			assert highestName != null;
 			// create half-open interval

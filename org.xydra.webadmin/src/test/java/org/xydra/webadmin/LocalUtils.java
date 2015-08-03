@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
+import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.core.XX;
 import org.xydra.persistence.XydraPersistence;
@@ -15,11 +16,11 @@ import org.xydra.xgae.gaeutils.GaeTestfixer;
 
 public class LocalUtils {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(final String[] args) throws IOException {
 		loadFromLocalDisk("/xxx/file.zip");
 	}
 
-	public static void loadFromLocalDisk(String zipFilePath) throws IOException {
+	public static void loadFromLocalDisk(final String zipFilePath) throws IOException {
 		GaeTestfixer.enable();
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 
@@ -29,13 +30,13 @@ public class LocalUtils {
 		XGae.get().memcache().clear();
 		InstanceContext.clear();
 
-		File zipFile = new File(zipFilePath);
-		FileInputStream fis = new FileInputStream(zipFile);
-		OutputStreamWriter osw = new OutputStreamWriter(System.out);
-		RepositoryResource.updateFromZippedInputStream(fis, XX.toId("gae-data"), osw, true);
+		final File zipFile = new File(zipFilePath);
+		final FileInputStream fis = new FileInputStream(zipFile);
+		final OutputStreamWriter osw = new OutputStreamWriter(System.out);
+		RepositoryResource.updateFromZippedInputStream(fis, Base.toId("gae-data"), osw, true);
 		// now the data is loaded
-		XydraPersistence repo = XydraRuntime.getPersistence(XX.toId("gae-data"));
-		for (XId modelId : repo.getManagedModelIds()) {
+		final XydraPersistence repo = XydraRuntime.getPersistence(Base.toId("gae-data"));
+		for (final XId modelId : repo.getManagedModelIds()) {
 			System.out.println("Managed modelId: " + modelId);
 		}
 		osw.flush();

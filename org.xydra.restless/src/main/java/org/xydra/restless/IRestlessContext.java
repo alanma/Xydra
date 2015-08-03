@@ -5,24 +5,24 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Provides convenient access to all meta-data available in Restless.
- * 
+ *
  * To reduce the number of injected parameters, this context also allows access
  * to {@link HttpServletRequest} and {@link HttpServletResponse}, although those
  * can be injected individually, too.
- * 
+ *
  * In addition, this class provides a unique request identifier
  * {@link #getRequestIdentifier()}, a reference to Restless itself
  * {@link #getRestless()}.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public interface IRestlessContext {
 
 	/**
 	 * parameter name used to re-use request IDs from query parameters or
 	 * cookies.
-	 * 
+	 *
 	 * @see #getRequestIdentifier()
 	 */
 	final String PARAM_REQUEST_ID = "restless__rid";
@@ -49,7 +49,7 @@ public interface IRestlessContext {
 	/**
 	 * A unique tracking string to relate rendered web responses (which can also
 	 * be errors) and server logs.
-	 * 
+	 *
 	 * @return a UUID unique for the given request. Exception: GET-requests
 	 *         following a redirect can carry the same identifier as the request
 	 *         issuing the redirect. This allows to trace a logical

@@ -29,8 +29,8 @@ public class TestInterfaceGenerator {
 	private static final Logger log = LoggerFactory.getLogger(TestInterfaceGenerator.class);
 	private static final String TESTGEN = "org.xydra.oo.testgen";
 
-	public static void main(String[] args) throws IOException {
-		TestInterfaceGenerator t = new TestInterfaceGenerator();
+	public static void main(final String[] args) throws IOException {
+		final TestInterfaceGenerator t = new TestInterfaceGenerator();
 		t.generateAllTypesInterfaces();
 		t.generateTasksInterfaces();
 	}
@@ -40,7 +40,7 @@ public class TestInterfaceGenerator {
 		JavaCodeGenerator
 				.generateInterfaces(TasksSpec.class, new File("./src"), TESTGEN + ".tasks");
 
-		String logs = REMEMBER_LISTENER.getLogs();
+		final String logs = REMEMBER_LISTENER.getLogs();
 		assertFalse("No fields should be ignored", logs.contains("Ignoring field"));
 	}
 
@@ -56,7 +56,7 @@ public class TestInterfaceGenerator {
 
 		assertTrue(OOReflectionUtils.isTranslatableSingleType(MyLongBasedType.class));
 
-		String logs = REMEMBER_LISTENER.getLogs();
+		final String logs = REMEMBER_LISTENER.getLogs();
 		assertFalse("No fields should be ignored", logs.contains("Ignoring field"));
 		assertFalse("There were warnings", logs.toLowerCase().contains("warn"));
 		assertFalse("There were errors", logs.toLowerCase().contains("error"));

@@ -12,7 +12,7 @@ import org.xydra.annotations.ThreadSafe;
 /**
  * Internal class to represent a URL path that gets mapped to a set of variables
  * via regular expressions. Syntax inspired from JRS-311.
- * 
+ *
  * Examples for valid patterns
  * <ul>
  * <li>/my/path/is/this</li>
@@ -20,7 +20,7 @@ import org.xydra.annotations.ThreadSafe;
  * <li>/users/{userid}/view</li>
  * <li>/users/{userid}/view/{command}</li>
  * </ul>
- * 
+ *
  * Examples for invalid patterns
  * <dl>
  * <dt>my/path/is/this</dt>
@@ -30,9 +30,9 @@ import org.xydra.annotations.ThreadSafe;
  * <dt>/users/{user/here</dt>
  * <dd>Closing curly brace missing</dd>
  * </dl>
- * 
+ *
  * @author xamde
- * 
+ *
  */
 @ThreadSafe
 public class PathTemplate {
@@ -65,20 +65,20 @@ public class PathTemplate {
 
 	/**
 	 * Changing the contents of this list is not allowed!
-	 * 
+	 *
 	 * Concerning thread-safety: Since we're disallowing write access to this
 	 * list, all threads only read from it, which means that no specific
 	 * synchronization needs to take place.
 	 */
-	private List<String> variableNames = new ArrayList<String>();
+	private final List<String> variableNames = new ArrayList<String>();
 
 	/**
 	 * Create a new URL pattern with variable parts.
-	 * 
+	 *
 	 * @param pathExpression
 	 *            must start with '/'; may not contain '//' @NeverNull
 	 */
-	public PathTemplate(@NeverNull String pathExpression) {
+	public PathTemplate(@NeverNull final String pathExpression) {
 		if (!pathExpression.startsWith("/")) {
 			throw new IllegalArgumentException("Path must start with '/'. Path ='" + pathExpression
 					+ "'");
@@ -89,10 +89,10 @@ public class PathTemplate {
 		}
 
 		// turn into regex with groups
-		String[] segments = pathExpression.substring(1).split("/");
+		final String[] segments = pathExpression.substring(1).split("/");
 		/* '/way/{id}/step' => '/way/[^/]+/step' */
-		StringBuffer regexBuf = new StringBuffer();
-		for (String segment : segments) {
+		final StringBuffer regexBuf = new StringBuffer();
+		for (final String segment : segments) {
 			regexBuf.append(PATH_REGEX);
 			if (segment.startsWith("{")) {
 				if (!segment.endsWith("}")) {
@@ -100,7 +100,7 @@ public class PathTemplate {
 							"Segment in path must look like '{name}'. Closing brace missing in '"
 									+ segment + "'.");
 				}
-				String variableName = segment.substring(1, segment.length() - 1);
+				final String variableName = segment.substring(1, segment.length() - 1);
 
 				/*
 				 * since this the constructor, we don't need to synchronize here
@@ -124,8 +124,8 @@ public class PathTemplate {
 	 *            constructor
 	 * @return values of variables in order @NeverNull
 	 */
-	public List<String> extractVariables(@NeverNull String path) {
-		Matcher m = this.p.matcher(path);
+	public List<String> extractVariables(@NeverNull final String path) {
+		final Matcher m = this.p.matcher(path);
 
 		if (m.groupCount() != this.variableNames.size()) {
 			throw new IllegalArgumentException("Path contains a different number of variables ("
@@ -136,9 +136,9 @@ public class PathTemplate {
 			return Collections.emptyList();
 		}
 
-		List<String> values = new ArrayList<String>();
+		final List<String> values = new ArrayList<String>();
 		for (int i = 1; i <= m.groupCount(); i++) {
-			String value = m.group(i);
+			final String value = m.group(i);
 			values.add(value);
 		}
 		return values;
@@ -153,11 +153,11 @@ public class PathTemplate {
 
 	/**
 	 * Returns the list of variable names.
-	 * 
+	 *
 	 * Changing the content of this list is not allowed. If you're changing the
 	 * content, no guarantees can be made to the behavior of the complete
 	 * application (for example, it might lead to synchronization problems).
-	 * 
+	 *
 	 * @return the names of variables in the order in which they are used to
 	 *         call the Java method
 	 */
@@ -170,7 +170,7 @@ public class PathTemplate {
 	 *            starting with slash '/' @NeverNull
 	 * @return true if this PathTemplate matches a given path
 	 */
-	public boolean matches(@NeverNull String path) {
+	public boolean matches(@NeverNull final String path) {
 
 		return this.p.matcher(path).matches();
 	}

@@ -4,10 +4,10 @@ public interface IDatastoreShared {
 
 	/**
 	 * Prepares the given query.
-	 * 
+	 *
 	 * Impl note: Yes, this method behaves differently on sync and sync
 	 * datastore.
-	 * 
+	 *
 	 * @param kind
 	 *            for creating the lowKey and the highKey which together form
 	 *            the queried interval (lowKey,highKey).
@@ -27,10 +27,10 @@ public interface IDatastoreShared {
 
 	/**
 	 * Prepares the given query.
-	 * 
+	 *
 	 * Impl note: Yes, this method behaves differently on sync and sync
 	 * datastore.
-	 * 
+	 *
 	 * @param kind
 	 *            for creating the lowKey and the highKey which together form
 	 *            the queried interval (lowKey,highKey).

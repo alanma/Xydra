@@ -20,7 +20,7 @@ public class Row extends AbstractRow implements IRow {
 
 	private static final long serialVersionUID = -1859613946021005526L;
 
-	private HashMap<String, ICell> map = new HashMap<String, ICell>();
+	private final HashMap<String, ICell> map = new HashMap<String, ICell>();
 
 	private final ISparseTable table;
 
@@ -28,24 +28,24 @@ public class Row extends AbstractRow implements IRow {
 	 * @param table
 	 *            used to read configuration and column names
 	 */
-	Row(String key, ISparseTable table) {
+	Row(final String key, final ISparseTable table) {
 		super(key);
 		assert table != null;
 		this.table = table;
 	}
 
-	
+
 	@Override
-	public void aggregate(IReadableRow row, String[] keyColumnNames) {
+	public void aggregate(final IReadableRow row, final String[] keyColumnNames) {
 		assert row != null;
-		for (String colName : this.table.getColumnNames()) {
+		for (final String colName : this.table.getColumnNames()) {
 			if (colName.equals(ROW_KEY)) {
 				// skip row key
 			} else if (!contains(keyColumnNames, colName)) {
 				// skip key columns
 			} else {
-				String thisValue = this.getValue(colName);
-				String otherValue = row.getValue(colName);
+				final String thisValue = getValue(colName);
+				final String otherValue = row.getValue(colName);
 				if (otherValue == null || otherValue.equals("")) {
 					// ignore
 				} else {
@@ -57,14 +57,14 @@ public class Row extends AbstractRow implements IRow {
 						} else {
 							thisLong = Long.parseLong(thisValue);
 						}
-						long otherLong = Long.parseLong(otherValue);
-						long sum = thisLong + otherLong;
+						final long otherLong = Long.parseLong(otherValue);
+						final long sum = thisLong + otherLong;
 						if (sum == 0) {
-							this.removeValue(colName);
+							removeValue(colName);
 						} else {
 							this.setValue(colName, "" + sum);
 						}
-					} catch (NumberFormatException e) {
+					} catch (final NumberFormatException e) {
 						// string concatenation
 						if (otherValue.equals("")) {
 							// do nothing
@@ -76,7 +76,7 @@ public class Row extends AbstractRow implements IRow {
 							} else {
 								if (this.table.getParamAggregateStrings()) {
 									if (!Shared.contains(thisValue, otherValue)) {
-										String concat = thisValue + "|" + otherValue;
+										final String concat = thisValue + "|" + otherValue;
 										this.setValue(colName, concat);
 									}
 								}
@@ -88,7 +88,7 @@ public class Row extends AbstractRow implements IRow {
 		}
 	}
 
-	
+
 	@Override
 	public Set<Entry<String, ICell>> entrySet() {
 		return this.map.entrySet();
@@ -102,21 +102,22 @@ public class Row extends AbstractRow implements IRow {
 	// setValue(ROW_KEY, rowKey);
 	// }
 
-	
+
 	@Override
 	public Collection<String> getColumnNames() {
 		return this.map.keySet();
 	}
 
 	@Override
-	public ICell getOrCreateCell(String column, boolean create) {
+	public ICell getOrCreateCell(final String column, final boolean create) {
 		ICell c = this.map.get(column);
 		if (c == null && create) {
-			if (this.table.getColumnNames().size() == CsvTable.EXCEL_MAX_COLS) {
-				log.warn("Cannot add the " + CsvTable.EXCEL_MAX_COLS
+			if (this.table.getColumnNames().size() == SparseTable.EXCEL_MAX_COLS) {
+				log.warn("Cannot add the " + SparseTable.EXCEL_MAX_COLS
 						+ "th column - that is Excels limit");
-				if (this.table.getParamRestrictToExcelSize())
+				if (this.table.getParamRestrictToExcelSize()) {
 					throw new ExcelLimitException("Column limit reached");
+				}
 			}
 			c = new Cell();
 			this.map.put(column, c);
@@ -126,21 +127,21 @@ public class Row extends AbstractRow implements IRow {
 		return c;
 	}
 
-	
+
 	@Override
-	public String getValue(String columnName) {
-		ICell cell = getOrCreateCell(columnName, false);
+	public String getValue(final String columnName) {
+		final ICell cell = getOrCreateCell(columnName, false);
 		return cell == null ? "null" : cell.getValue();
 	}
 
-	
+
 	@Override
 	public Iterator<ICell> iterator() {
 		return this.map.values().iterator();
 	}
 
 	@Override
-	protected void removeValue(String colName) {
+	protected void removeValue(final String colName) {
 		this.map.remove(colName);
 		// IMPROVE: colName remains indexed, we don't know where else the
 		// colName is used

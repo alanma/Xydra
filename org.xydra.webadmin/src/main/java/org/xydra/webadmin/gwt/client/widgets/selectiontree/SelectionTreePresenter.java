@@ -3,6 +3,7 @@ package org.xydra.webadmin.gwt.client.widgets.selectiontree;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.core.XX;
@@ -24,9 +25,9 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 /**
  * Performs logic for the building {@link RepoBranchWidget}s and adding new
  * repositories. Also holds a presenter to for each {@link RepoBranchWidget}
- * 
+ *
  * @author kahmann
- * 
+ *
  */
 public class SelectionTreePresenter extends Presenter {
 
@@ -36,7 +37,7 @@ public class SelectionTreePresenter extends Presenter {
 
 	private SelectionTree selectionTreeWidget;
 
-	public SelectionTreePresenter(SelectionTree selectionTree) {
+	public SelectionTreePresenter(final SelectionTree selectionTree) {
 		this.selectionTreeWidget = selectionTree;
 		this.repoBranches = new HashMap<XId, RepoBranchPresenter>();
 
@@ -48,23 +49,23 @@ public class SelectionTreePresenter extends Presenter {
 
 	public void present() {
 
-		DataModel dataModel = XyAdmin.getInstance().getModel();
-		Iterator<RepoDataModel> repoIDIterator = dataModel.getRepoIDs();
-		AddRepoWidget addRepoWidget = new AddRepoWidget(this);
+		final DataModel dataModel = XyAdmin.getInstance().getModel();
+		final Iterator<RepoDataModel> repoIDIterator = dataModel.getRepoIDs();
+		final AddRepoWidget addRepoWidget = new AddRepoWidget(this);
 		this.selectionTreeWidget.mainPanel.add(addRepoWidget);
 		this.selectionTreeWidget.mainPanel.setCellHorizontalAlignment(addRepoWidget,
 				HasHorizontalAlignment.ALIGN_CENTER);
 		while (repoIDIterator.hasNext()) {
 
-			RepoDataModel repo = repoIDIterator.next();
+			final RepoDataModel repo = repoIDIterator.next();
 			addRepoBranch(repo);
 		}
 
-		EventHelper.addRepoChangeListener(XX.resolveRepository(XX.toId("newRepo")),
+		EventHelper.addRepoChangeListener(Base.resolveRepository(Base.toId("newRepo")),
 				new IRepoChangedEventHandler() {
 
 					@Override
-					public void onRepoChange(RepoChangedEvent event) {
+					public void onRepoChange(final RepoChangedEvent event) {
 						SelectionTreePresenter.this.addRepoBranch(event.getMoreInfos());
 
 					}
@@ -73,27 +74,27 @@ public class SelectionTreePresenter extends Presenter {
 		log.info("selection tree build!");
 	}
 
-	private void addRepoBranch(RepoDataModel repo) {
-		int position = this.selectionTreeWidget.mainPanel.getWidgetCount() - 1;
-		RepoBranchPresenter repoBranchPresenter = new RepoBranchPresenter(XX.toAddress(
+	private void addRepoBranch(final RepoDataModel repo) {
+		final int position = this.selectionTreeWidget.mainPanel.getWidgetCount() - 1;
+		final RepoBranchPresenter repoBranchPresenter = new RepoBranchPresenter(Base.toAddress(
 				repo.getId(), null, null, null));
 
 		this.selectionTreeWidget.mainPanel.insert(repoBranchPresenter.presentWidget(), position);
 		this.repoBranches.put(repo.getId(), repoBranchPresenter);
 	}
 
-	public void openAddElementDialog(XAddress address, String message) {
-		AddElementDialog addDialog = new AddElementDialog(this, address, message);
+	public void openAddElementDialog(final XAddress address, final String message) {
+		final AddElementDialog addDialog = new AddElementDialog(this, address, message);
 		addDialog.show();
 		addDialog.selectEverything();
 
 	}
 
-	public boolean showRepository(XAddress repoAddress) {
-		XId repoId = repoAddress.getRepository();
+	public boolean showRepository(final XAddress repoAddress) {
+		final XId repoId = repoAddress.getRepository();
 		boolean alreadyOpened = false;
 
-		RepoBranchPresenter repoBranchPresenter = this.repoBranches
+		final RepoBranchPresenter repoBranchPresenter = this.repoBranches
 				.get(repoAddress.getRepository());
 		if (XyAdmin.getInstance().getModel().getRepo(repoId).knowsAllModels()) {
 			alreadyOpened = repoBranchPresenter.assertExpanded();

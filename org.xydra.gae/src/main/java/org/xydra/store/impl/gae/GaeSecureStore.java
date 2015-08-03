@@ -20,11 +20,11 @@ public class GaeSecureStore extends DelegatingSecureStore {
 	/**
 	 * Create a secure store on top of an existing persistence. Default
 	 * repository ID is not used here.
-	 * 
+	 *
 	 * @param persistence
 	 *            never null
 	 */
-	public GaeSecureStore(XydraPersistence persistence) {
+	public GaeSecureStore(final XydraPersistence persistence) {
 		super(persistence, XydraStoreAdmin.XYDRA_ADMIN_ID);
 	}
 }

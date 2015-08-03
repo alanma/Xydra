@@ -188,7 +188,7 @@ public class RestlessException extends RuntimeException {
 	 *            a short message to be displayed to the user. Don't put
 	 *            confidential information here. @CanBeNull
 	 */
-	public RestlessException(int statusCode, @CanBeNull String message) {
+	public RestlessException(final int statusCode, @CanBeNull final String message) {
 		super(message);
 		this.statusCode = statusCode;
 	}
@@ -203,7 +203,7 @@ public class RestlessException extends RuntimeException {
 	 *            TODO make sure this {@link Throwable} is not displayed to
 	 *            remote users @CanBeNull
 	 */
-	public RestlessException(int statusCode, @CanBeNull String message, @CanBeNull Throwable t) {
+	public RestlessException(final int statusCode, @CanBeNull final String message, @CanBeNull final Throwable t) {
 		super(message, t);
 		this.statusCode = statusCode;
 	}

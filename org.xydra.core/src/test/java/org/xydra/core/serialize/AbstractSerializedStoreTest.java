@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
@@ -45,138 +46,138 @@ import org.xydra.store.serialize.SerializedStore.EventsRequest;
 
 
 abstract public class AbstractSerializedStoreTest extends AbstractSerializingTest {
-	
+
 	private static final Logger log = getLogger();
-	
+
 	private static Logger getLogger() {
 		LoggerTestHelper.init();
 		return LoggerFactory.getLogger(AbstractSerializedStoreTest.class);
 	}
-	
+
 	private static final XAddress address = XX.toAddress("/a/b/c/d");
 	private static final XEvent event = MemoryFieldEvent.createAddEvent(XX.toId("actor"), address,
 	        XV.toValue("value"), 2, 1, false);
-	
+
 	@Test
 	public void testExceptionAccess() {
 		testException(new AccessException("test"));
 	}
-	
+
 	@Test
 	public void testExceptionAuthorisation() {
 		testException(new AuthorisationException("test"));
 	}
-	
+
 	@Test
 	public void testExceptionConnection() {
 		testException(new ConnectionException("test"));
 	}
-	
+
 	@Test
 	public void testExceptionTimeout() {
 		testException(new TimeoutException("test"));
 	}
-	
+
 	@Test
 	public void testExceptionInternal() {
 		testException(new InternalStoreException("test"));
 	}
-	
+
 	@Test
 	public void testExceptionQuota() {
 		testException(new QuotaException("test"));
 	}
-	
+
 	@Test
 	public void testExceptionStore() {
 		testException(new StoreException("test"));
 	}
-	
+
 	@Test
 	public void testExceptionRequest() {
 		testException(new RequestException("test"));
 	}
-	
-	private void testException(Throwable t) {
-		
-		XydraOut out = create();
+
+	private void testException(final Throwable t) {
+
+		final XydraOut out = create();
 		SerializedStore.serializeException(t, out);
-		
-		XydraElement e = parse(out.getData());
-		Throwable t2 = SerializedStore.toException(e);
+
+		final XydraElement e = parse(out.getData());
+		final Throwable t2 = SerializedStore.toException(e);
 		assertNotNull(t2);
-		
+
 		checkException(t, t2);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandResultsEmpty() {
 		testCommandResults(new BatchedResult[] {}, null);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandResultsStoreError() {
 		testCommandResults(new BatchedResult[] { storeError() }, null);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandResultsParseError() {
 		testCommandResults(new BatchedResult[] { preError() }, null);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandResultsSuccess() {
 		testCommandResults(new BatchedResult[] { result(42l) }, null);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandResultsMixed() {
 		testCommandResults(new BatchedResult[] { result(42l), preError(), result(-1l),
 		        storeError(), result(-2l) }, null);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandEventsResultEmpty() {
 		testCommandResults(new BatchedResult[] {}, new BatchedResult[] {});
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandEventsResultStoreError() {
 		testCommandResults(new BatchedResult[] {}, new BatchedResult[] { storeError() });
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandEventsResultPreError() {
 		testCommandResults(new BatchedResult[] {}, new BatchedResult[] { preError() });
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandEventsResultParseError() {
 		testCommandResults(new BatchedResult[] {}, new BatchedResult[] { parseError() });
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandEventsResultSuccess() {
 		testCommandResults(new BatchedResult[] {},
 		        new BatchedResult[] { result(new XEvent[] { event }) });
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandEventsResultNull() {
 		testCommandResults(new BatchedResult[] {}, new BatchedResult[] { result(null) });
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandEventsResultMixed() {
@@ -184,133 +185,133 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		        result(new XEvent[] { event }), preError(), result(null), parseError(),
 		        storeError() });
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testEventsResultEmpty() {
 		testEventsResults(new BatchedResult[] {});
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testEventsResultStoreError() {
 		testEventsResults(new BatchedResult[] { storeError() });
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testEventsResultPreError() {
 		testEventsResults(new BatchedResult[] { preError() });
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testEventsResultParseError() {
 		testEventsResults(new BatchedResult[] { parseError() });
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testEventsResultSuccess() {
 		testEventsResults(new BatchedResult[] { result(new XEvent[] { event }) });
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testEventsResultNull() {
 		testEventsResults(new BatchedResult[] { result(null) });
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testEventsResultMixed() {
 		testEventsResults(new BatchedResult[] { result(new XEvent[] { event }), preError(),
 		        result(null), parseError(), storeError() });
 	}
-	
-	private void testEventsResults(BatchedResult<XEvent[]>[] eventRes) {
-		
+
+	private void testEventsResults(final BatchedResult<XEvent[]>[] eventRes) {
+
 		XyAssert.xyAssert(eventRes != null);
 		assert eventRes != null;
-		
-		EventsRequest er = preparePreRequests(eventRes);
-		BatchedResult<XEvent[]>[] events = preparePreResults(eventRes);
-		
-		XydraOut out = create();
+
+		final EventsRequest er = preparePreRequests(eventRes);
+		final BatchedResult<XEvent[]>[] events = preparePreResults(eventRes);
+
+		final XydraOut out = create();
 		SerializedStore.serializeEventsResults(er, events, out);
-		
-		GetEventsRequest[] req = preparePostRequests(eventRes);
-		BatchedResult<XEvent[]>[] res2 = preparePost(eventRes);
-		
-		String data = out.getData();
+
+		final GetEventsRequest[] req = preparePostRequests(eventRes);
+		final BatchedResult<XEvent[]>[] res2 = preparePost(eventRes);
+
+		final String data = out.getData();
 		log.info(data);
-		
-		XydraElement element = parse(data);
+
+		final XydraElement element = parse(data);
 		assertNotNull(element);
 		SerializedStore.toEventResults(element, req, res2);
-		
+
 		checkBatchedResult(eventRes, res2);
 	}
-	
-	private void testCommandResults(BatchedResult<Long>[] commandRes,
-	        BatchedResult<XEvent[]>[] eventRes) {
-		
+
+	private void testCommandResults(final BatchedResult<Long>[] commandRes,
+	        final BatchedResult<XEvent[]>[] eventRes) {
+
 		XyAssert.xyAssert(commandRes != null);
 		assert commandRes != null;
-		
-		BatchedResult<Long>[] commands = preparePre(commandRes);
-		
-		EventsRequest er = preparePreRequests(eventRes);
-		BatchedResult<XEvent[]>[] events = preparePreResults(eventRes);
-		
-		XydraOut out = create();
+
+		final BatchedResult<Long>[] commands = preparePre(commandRes);
+
+		final EventsRequest er = preparePreRequests(eventRes);
+		final BatchedResult<XEvent[]>[] events = preparePreResults(eventRes);
+
+		final XydraOut out = create();
 		SerializedStore.serializeCommandResults(commands, er, events, out);
-		
-		BatchedResult<Long>[] res = preparePost(commandRes);
-		
-		GetEventsRequest[] req = preparePostRequests(eventRes);
-		BatchedResult<XEvent[]>[] res2 = preparePost(eventRes);
-		
-		String data = out.getData();
-		
+
+		final BatchedResult<Long>[] res = preparePost(commandRes);
+
+		final GetEventsRequest[] req = preparePostRequests(eventRes);
+		final BatchedResult<XEvent[]>[] res2 = preparePost(eventRes);
+
+		final String data = out.getData();
+
 		log.info(data);
-		
-		XydraElement element = parse(data);
+
+		final XydraElement element = parse(data);
 		assertNotNull(element);
 		SerializedStore.toCommandResults(element, req, res, res2);
-		
+
 		checkBatchedResult(commandRes, res);
 		if(eventRes != null) {
 			checkBatchedResult(eventRes, res2);
 		}
 	}
-	
-	private static GetEventsRequest[] preparePostRequests(BatchedResult<XEvent[]>[] eventRes) {
-		
+
+	private static GetEventsRequest[] preparePostRequests(final BatchedResult<XEvent[]>[] eventRes) {
+
 		if(eventRes == null) {
 			return null;
 		}
-		
-		GetEventsRequest[] res = new GetEventsRequest[eventRes.length];
+
+		final GetEventsRequest[] res = new GetEventsRequest[eventRes.length];
 		for(int i = 0; i < eventRes.length; i++) {
 			res[i] = makeRequest(eventRes[i]);
 		}
-		
+
 		return res;
 	}
-	
+
 	private static final GetEventsRequest dummyReq = new GetEventsRequest(
 	        XX.toAddress("/hello/world"), 0, Long.MAX_VALUE);
-	
+
 	@SuppressWarnings("unchecked")
-	private static BatchedResult<XEvent[]>[] preparePreResults(BatchedResult<XEvent[]>[] eventRes) {
-		
+	private static BatchedResult<XEvent[]>[] preparePreResults(final BatchedResult<XEvent[]>[] eventRes) {
+
 		if(eventRes == null) {
 			return null;
 		}
-		
-		List<BatchedResult<XEvent[]>> events = new ArrayList<BatchedResult<XEvent[]>>();
-		for(BatchedResult<XEvent[]> res : eventRes) {
+
+		final List<BatchedResult<XEvent[]>> events = new ArrayList<BatchedResult<XEvent[]>>();
+		for(final BatchedResult<XEvent[]> res : eventRes) {
 			XyAssert.xyAssert(res != null);
 			assert res != null;
 			if(!(res.getException() instanceof PreException)) {
@@ -321,27 +322,27 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 				}
 			}
 		}
-		
+
 		return events.toArray(new BatchedResult[events.size()]);
 	}
-	
-	private static EventsRequest preparePreRequests(BatchedResult<XEvent[]>[] eventRes) {
-		
+
+	private static EventsRequest preparePreRequests(final BatchedResult<XEvent[]>[] eventRes) {
+
 		if(eventRes == null) {
 			return null;
 		}
-		
-		List<GetEventsRequest> ger = new ArrayList<GetEventsRequest>();
-		List<StoreException> except = new ArrayList<StoreException>();
-		
-		for(BatchedResult<XEvent[]> res : eventRes) {
+
+		final List<GetEventsRequest> ger = new ArrayList<GetEventsRequest>();
+		final List<StoreException> except = new ArrayList<StoreException>();
+
+		for(final BatchedResult<XEvent[]> res : eventRes) {
 			XyAssert.xyAssert(res != null);
 			assert res != null;
-			
+
 			if(res.getException() instanceof PreException) {
 				continue;
 			}
-			
+
 			if(res.getException() instanceof RequestException) {
 				ger.add(null);
 				except.add((RequestException)res.getException());
@@ -349,31 +350,31 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 				ger.add(makeRequest(res));
 				except.add(null);
 			}
-			
+
 		}
-		
+
 		return new EventsRequest(except.toArray(new StoreException[except.size()]),
 		        ger.toArray(new GetEventsRequest[ger.size()]));
 	}
-	
-	private static GetEventsRequest makeRequest(BatchedResult<XEvent[]> res) {
-		
+
+	private static GetEventsRequest makeRequest(final BatchedResult<XEvent[]> res) {
+
 		if(res.getResult() == null) {
 			return dummyReq;
 		}
-		
-		XEvent[] events = res.getResult();
-		
+
+		final XEvent[] events = res.getResult();
+
 		XAddress addr = null;
 		long min = Long.MAX_VALUE;
 		long max = Long.MIN_VALUE;
-		
-		for(XEvent event : events) {
-			
+
+		for(final XEvent event : events) {
+
 			if(event == null) {
 				continue;
 			}
-			
+
 			if(addr == null) {
 				addr = event.getTarget();
 			} else {
@@ -383,40 +384,40 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 				XyAssert.xyAssert(addr != null);
 				assert addr != null;
 			}
-			
+
 			if(event.getRevisionNumber() < min) {
 				min = event.getRevisionNumber();
 			}
 			if(event.getRevisionNumber() > max) {
 				max = event.getRevisionNumber();
 			}
-			
+
 		}
-		
+
 		return addr == null ? dummyReq : new GetEventsRequest(addr, min, max);
 	}
-	
-	private static <T> void checkBatchedResult(BatchedResult<T>[] expected,
-	        BatchedResult<T>[] actual) {
+
+	private static <T> void checkBatchedResult(final BatchedResult<T>[] expected,
+	        final BatchedResult<T>[] actual) {
 		XyAssert.xyAssert(expected.length == actual.length);
 		for(int i = 0; i < expected.length; i++) {
 			checkBatchedResult(expected[i], actual[i]);
 		}
 	}
-	
-	private static <T> void checkBatchedResult(BatchedResult<T> expected, BatchedResult<T> actual) {
-		
+
+	private static <T> void checkBatchedResult(final BatchedResult<T> expected, final BatchedResult<T> actual) {
+
 		XyAssert.xyAssert(expected != null);
 		assert expected != null;
 		assertNotNull(actual);
-		
+
 		if(expected.getException() != null) {
 			assertNotNull(actual.getException());
 			checkException(expected.getException(), actual.getException());
 		} else {
 			assertNull(actual.getException());
 		}
-		
+
 		if(expected.getResult() != null) {
 			assertNotNull(actual.getResult());
 			if(expected.getResult().getClass().isArray()) {
@@ -430,11 +431,11 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		} else {
 			assertNull(actual.getResult());
 		}
-		
+
 	}
-	
-	private static void checkException(Throwable expected, Throwable actual) {
-		
+
+	private static void checkException(final Throwable expected, final Throwable actual) {
+
 		if(expected instanceof AccessException) {
 			assertTrue(actual instanceof AccessException);
 		} else {
@@ -485,89 +486,89 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		} else {
 			assertFalse(actual instanceof PreException);
 		}
-		
+
 		assertEquals(expected.getMessage(), actual.getMessage());
-		
+
 	}
-	
+
 	private static class PreException extends Throwable {
-		
+
 		public PreException() {
 			super("test");
 		}
-		
+
 		private static final long serialVersionUID = -6088414262013276208L;
-		
+
 	}
-	
+
 	private static <T> BatchedResult<T> preError() {
 		return error(new PreException());
 	}
-	
+
 	private static <T> BatchedResult<T> parseError() {
 		return error(new RequestException("test2"));
 	}
-	
+
 	private static <T> BatchedResult<T> storeError() {
 		return error(new StoreException("hello world"));
 	}
-	
-	private static <T> BatchedResult<T> error(Throwable t) {
+
+	private static <T> BatchedResult<T> error(final Throwable t) {
 		return new BatchedResult<T>(t);
 	}
-	
-	private static <T> BatchedResult<T> result(T result) {
+
+	private static <T> BatchedResult<T> result(final T result) {
 		return new BatchedResult<T>(result);
 	}
-	
+
 	@Test
 	public void testAuthenticationResultTrue() {
 		testAuthenticationResult(true);
 	}
-	
+
 	@Test
 	public void testAuthenticationResultFalse() {
 		testAuthenticationResult(false);
 	}
-	
-	public void testAuthenticationResult(boolean b) {
-		
-		XydraOut out = create();
+
+	public void testAuthenticationResult(final boolean b) {
+
+		final XydraOut out = create();
 		SerializedStore.serializeAuthenticationResult(b, out);
-		
-		XydraElement e = parse(out.getData());
-		boolean b2 = SerializedStore.toAuthenticationResult(e);
-		
+
+		final XydraElement e = parse(out.getData());
+		final boolean b2 = SerializedStore.toAuthenticationResult(e);
+
 		assertEquals(b, b2);
 	}
-	
-	private void testModelRevisions(BatchedResult<ModelRevision>[] revs) {
-		
+
+	private void testModelRevisions(final BatchedResult<ModelRevision>[] revs) {
+
 		XyAssert.xyAssert(revs != null);
 		assert revs != null;
-		
-		BatchedResult<ModelRevision>[] results = preparePre(revs);
-		
-		XydraOut out = create();
+
+		final BatchedResult<ModelRevision>[] results = preparePre(revs);
+
+		final XydraOut out = create();
 		SerializedStore.serializeModelRevisions(results, out);
-		
-		BatchedResult<ModelRevision>[] res = preparePost(revs);
-		
-		XydraElement element = parse(out.getData());
+
+		final BatchedResult<ModelRevision>[] res = preparePost(revs);
+
+		final XydraElement element = parse(out.getData());
 		assertNotNull(element);
 		SerializedStore.toModelRevisions(element, res);
-		
+
 		checkBatchedResult(revs, res);
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	private static <T> BatchedResult<T>[] preparePost(BatchedResult<T>[] revs) {
-		
+	private static <T> BatchedResult<T>[] preparePost(final BatchedResult<T>[] revs) {
+
 		if(revs == null) {
 			return null;
 		}
-		
-		BatchedResult<T>[] res = new BatchedResult[revs.length];
+
+		final BatchedResult<T>[] res = new BatchedResult[revs.length];
 		for(int i = 0; i < revs.length; i++) {
 			XyAssert.xyAssert(revs[i] != null);
 			assert revs[i] != null;
@@ -577,15 +578,15 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		}
 		return res;
 	}
-	
-	private static <T> BatchedResult<T>[] preparePre(BatchedResult<T>[] revs) {
-		
+
+	private static <T> BatchedResult<T>[] preparePre(final BatchedResult<T>[] revs) {
+
 		if(revs == null) {
 			return null;
 		}
-		
-		List<BatchedResult<T>> results = new ArrayList<BatchedResult<T>>();
-		for(BatchedResult<T> res : revs) {
+
+		final List<BatchedResult<T>> results = new ArrayList<BatchedResult<T>>();
+		for(final BatchedResult<T> res : revs) {
 			XyAssert.xyAssert(res != null);
 			assert res != null;
 			if(!(res.getException() instanceof PreException)) {
@@ -594,31 +595,31 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		}
 		return results.toArray(new BatchedResult[results.size()]);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testModelRevisionsEmpty() {
 		testModelRevisions(new BatchedResult[] {});
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testModelRevisionsStoreError() {
 		testModelRevisions(new BatchedResult[] { storeError() });
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testModelRevisionsPreError() {
 		testModelRevisions(new BatchedResult[] { preError() });
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testModelRevisionsSuccess() {
 		testModelRevisions(new BatchedResult[] { result(new ModelRevision(42, true)) });
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testModelRevisionsMixed() {
@@ -626,38 +627,38 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		        result(new ModelRevision(-1, true)), storeError(),
 		        result(new ModelRevision(10, true)) });
 	}
-	
+
 	private static Object modelError() {
 		return new AccessException("model");
 	}
-	
+
 	private static Object objectError() {
 		return new QuotaException("object");
 	}
-	
+
 	private static Object nullModel() {
-		return XX.toAddress("/repo/model");
+		return Base.toAddress("/repo/model");
 	}
-	
+
 	private static Object nullObject() {
-		return XX.toAddress("/repo/model/object");
+		return Base.toAddress("/repo/model/object");
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	private void testSnapshots(Object[] data) {
-		
+	private void testSnapshots(final Object[] data) {
+
 		XyAssert.xyAssert(data != null);
 		assert data != null;
-		
-		StoreException[] parseErrors = new StoreException[data.length];
-		boolean[] isModel = new boolean[data.length];
-		List<BatchedResult<XReadableModel>> models = new ArrayList<BatchedResult<XReadableModel>>();
-		List<BatchedResult<XReadableObject>> objects = new ArrayList<BatchedResult<XReadableObject>>();
-		XAddress[] context = new XAddress[data.length];
-		
+
+		final StoreException[] parseErrors = new StoreException[data.length];
+		final boolean[] isModel = new boolean[data.length];
+		final List<BatchedResult<XReadableModel>> models = new ArrayList<BatchedResult<XReadableModel>>();
+		final List<BatchedResult<XReadableObject>> objects = new ArrayList<BatchedResult<XReadableObject>>();
+		final XAddress[] context = new XAddress[data.length];
+
 		for(int i = 0; i < data.length; i++) {
-			Object item = data[i];
-			
+			final Object item = data[i];
+
 			if(item instanceof RequestException) {
 				parseErrors[i] = (RequestException)item;
 				context[i] = address;
@@ -678,7 +679,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 				isModel[i] = false;
 				context[i] = address;
 			} else if(item instanceof XAddress) {
-				XAddress addr = (XAddress)item;
+				final XAddress addr = (XAddress)item;
 				if(addr.getAddressedType() == XType.XMODEL) {
 					models.add(new BatchedResult<XReadableModel>((XReadableModel)null));
 					isModel[i] = true;
@@ -690,23 +691,23 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 			} else {
 				XyAssert.xyAssert(false);
 			}
-			
+
 		}
-		
-		XydraOut out = create();
+
+		final XydraOut out = create();
 		SerializedStore.serializeSnapshots(parseErrors, isModel,
 		        models.toArray(new BatchedResult[1]), objects.toArray(new BatchedResult[1]), out);
-		
-		XydraElement element = parse(out.getData());
+
+		final XydraElement element = parse(out.getData());
 		assertNotNull(element);
-		List<Object> results = SerializedStore.toSnapshots(element, context);
-		
+		final List<Object> results = SerializedStore.toSnapshots(element, context);
+
 		assertEquals(data.length, results.size());
-		
+
 		for(int i = 0; i < data.length; i++) {
-			Object expected = data[i];
-			Object actual = results.get(i);
-			
+			final Object expected = data[i];
+			final Object actual = results.get(i);
+
 			if(expected instanceof Throwable) {
 				assertTrue(actual instanceof Throwable);
 				checkException((Throwable)expected, (Throwable)actual);
@@ -725,90 +726,90 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 			}
 		}
 	}
-	
+
 	@Test
 	public void testSnapshotsEmpty() {
 		testSnapshots(new Object[] {});
 	}
-	
+
 	@Test
 	public void testSnapshotsError() {
 		testSnapshots(new Object[] { new RequestException("parse error") });
 	}
-	
+
 	@Test
 	public void testSnapshotsSuccessModel() {
-		testSnapshots(new Object[] { new SimpleModel(XX.toAddress("/a/b"), 23l) });
+		testSnapshots(new Object[] { new SimpleModel(Base.toAddress("/a/b"), 23l) });
 	}
-	
+
 	@Test
 	public void testSnapshotsSuccessObject() {
-		testSnapshots(new Object[] { new SimpleObject(XX.toAddress("/a/b/c"), 23l) });
+		testSnapshots(new Object[] { new SimpleObject(Base.toAddress("/a/b/c"), 23l) });
 	}
-	
+
 	@Test
 	public void testSnapshotsModelError() {
 		testSnapshots(new Object[] { modelError() });
 	}
-	
+
 	@Test
 	public void testSnapshotsObjectError() {
 		testSnapshots(new Object[] { objectError() });
 	}
-	
+
 	@Test
 	public void testSnapshotsNullModel() {
 		testSnapshots(new Object[] { nullModel() });
 	}
-	
+
 	@Test
 	public void testSnapshotsNullObject() {
 		testSnapshots(new Object[] { nullObject() });
 	}
-	
+
 	@Test
 	public void testSnapshotsMixed() {
-		testSnapshots(new Object[] { new SimpleModel(XX.toAddress("/a/b"), 23l),
-		        new RequestException("parse error"), new SimpleObject(XX.toAddress("/a/b/c"), 23l),
+		testSnapshots(new Object[] { new SimpleModel(Base.toAddress("/a/b"), 23l),
+		        new RequestException("parse error"), new SimpleObject(Base.toAddress("/a/b/c"), 23l),
 		        nullModel(), modelError(), nullObject(), objectError() });
 	}
-	
+
 	@Test
 	public void testModelIdsEmpty() {
 		testModelIds(new XId[] {});
 	}
-	
+
 	@Test
 	public void testModelIds() {
-		testModelIds(new XId[] { XX.toId("test") });
+		testModelIds(new XId[] { Base.toId("test") });
 	}
-	
-	public void testModelIds(XId[] mids) {
-		
-		Set<XId> ids = new HashSet<XId>();
+
+	public void testModelIds(final XId[] mids) {
+
+		final Set<XId> ids = new HashSet<XId>();
 		ids.addAll(Arrays.asList(mids));
-		
-		XydraOut out = create();
+
+		final XydraOut out = create();
 		SerializedStore.serializeModelIds(ids, out);
-		
-		XydraElement e = parse(out.getData());
-		Set<XId> ids2 = SerializedStore.toModelIds(e);
-		
+
+		final XydraElement e = parse(out.getData());
+		final Set<XId> ids2 = SerializedStore.toModelIds(e);
+
 		assertEquals(ids, ids2);
 	}
-	
+
 	@Test
 	public void testRepositoryId() {
-		
-		XId repoId = XX.toId("repoId");
-		
-		XydraOut out = create();
+
+		final XId repoId = Base.toId("repoId");
+
+		final XydraOut out = create();
 		SerializedStore.serializeRepositoryId(repoId, out);
-		
-		XydraElement e = parse(out.getData());
-		XId repoId2 = SerializedStore.toRepositoryId(e);
-		
+
+		final XydraElement e = parse(out.getData());
+		final XId repoId2 = SerializedStore.toRepositoryId(e);
+
 		assertEquals(repoId, repoId2);
 	}
-	
+
 }

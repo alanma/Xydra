@@ -3,7 +3,7 @@ package org.xydra.store.impl.gae.changes;
 /**
  * A {@link GaeModelRevision} plus a flag to indicate if this is the final Model
  * rev or not
- * 
+ *
  * @author xamde
  */
 class CandidateRev {
@@ -15,7 +15,7 @@ class CandidateRev {
 	 * @param gaeModelRev
 	 *            never null
 	 */
-	public CandidateRev(GaeModelRevision gaeModelRev) {
+	public CandidateRev(final GaeModelRevision gaeModelRev) {
 		assert gaeModelRev != null;
 		assert gaeModelRev.getModelRevision() != null;
 		this.gaeModelRev = gaeModelRev;
@@ -29,7 +29,7 @@ class CandidateRev {
 		this.finalModelRev = true;
 	}
 
-	public void setModelRev(GaeModelRevision modelRev) {
+	public void setModelRev(final GaeModelRevision modelRev) {
 		this.gaeModelRev = modelRev;
 	}
 

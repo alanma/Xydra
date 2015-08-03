@@ -6,10 +6,10 @@ import org.xydra.xgae.memcache.api.IMemCache.IdentifiableValue;
 public class XGaeDebugFormatter implements IDebugFormatter {
 
 	@Override
-	public String format(Object value) {
+	public String format(final Object value) {
 		assert value != null;
 		if (value instanceof IdentifiableValue) {
-			Object o = ((IdentifiableValue) value).getValue();
+			final Object o = ((IdentifiableValue) value).getValue();
 			return format(o);
 		}
 		return null;

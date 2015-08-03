@@ -9,7 +9,7 @@ import org.xydra.annotations.CanBeNull;
 
 public class GwtModuleXmlSpec {
 
-	public GwtModuleXmlSpec(String packageName, String moduleName, String rename_to) {
+	public GwtModuleXmlSpec(final String packageName, final String moduleName, final String rename_to) {
 		this.packageName = packageName;
 		this.moduleName = moduleName;
 	}
@@ -17,7 +17,7 @@ public class GwtModuleXmlSpec {
 	@CanBeNull
 	private String rename_to;
 
-	private String packageName;
+	private final String packageName;
 
 	public String moduleName;
 
@@ -38,13 +38,13 @@ public class GwtModuleXmlSpec {
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(final Object o) {
 			return o instanceof GenerateWith
 					&& ((GenerateWith) o).whenTypeAssignable.endsWith(this.whenTypeAssignable);
 		}
 
-		public String toString(String indent) {
-			StringBuilder b = new StringBuilder();
+		public String toString(final String indent) {
+			final StringBuilder b = new StringBuilder();
 
 			b.append(indent);
 			b.append("<generate-with class=\"");
@@ -65,7 +65,7 @@ public class GwtModuleXmlSpec {
 
 	@Override
 	public String toString() {
-		StringBuilder b = new StringBuilder();
+		final StringBuilder b = new StringBuilder();
 
 		b.append("<module");
 		if (this.rename_to != null) {
@@ -75,11 +75,11 @@ public class GwtModuleXmlSpec {
 		b.append("    <!-- Inherit this module as " + this.packageName + "." + this.moduleName
 				+ " -->\n");
 		b.append("\n");
-		for (GenerateWith g : this.generateWith) {
+		for (final GenerateWith g : this.generateWith) {
 			b.append(g.toString("    "));
 		}
 		b.append("\n");
-		for (String inherit : this.inherits) {
+		for (final String inherit : this.inherits) {
 			b.append("    <inherits name=\"" + inherit + "\" />\n");
 		}
 		b.append("\n");

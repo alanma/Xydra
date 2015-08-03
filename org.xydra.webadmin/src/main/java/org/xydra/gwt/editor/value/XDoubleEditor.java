@@ -11,7 +11,7 @@ public class XDoubleEditor extends AtomicXValueEditor<XDoubleValue> implements K
 
 	private final TextBox editor = new TextBox();
 
-	public XDoubleEditor(double oldValue, EditListener listener) {
+	public XDoubleEditor(final double oldValue, final EditListener listener) {
 		super(listener);
 
 		this.editor.setText(Double.toString(oldValue));
@@ -34,7 +34,7 @@ public class XDoubleEditor extends AtomicXValueEditor<XDoubleValue> implements K
 	}
 
 	@Override
-	public void onKeyPress(KeyPressEvent e) {
+	public void onKeyPress(final KeyPressEvent e) {
 
 		// char cc = e.getCharCode();
 		//

@@ -12,7 +12,7 @@ public interface ISmartList extends IBaseList {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.SmartList']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("querySpec")
@@ -20,7 +20,7 @@ public interface ISmartList extends IBaseList {
 
 	/**
 	 * For GWT-internal use only [generated from: 'toClassSpec 1']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'toClassSpec 2']
 	 * @param id
@@ -32,7 +32,7 @@ public interface ISmartList extends IBaseList {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.SmartList']
-	 * 
+	 *
 	 * @param querySpec
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.SmartList']

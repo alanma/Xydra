@@ -20,7 +20,7 @@ import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 /**
  * A minimal out of date overview on the implementation strategy of this class
  * is this:
- * 
+ *
  * <pre>
  * AccessControlManagerOnPersistence
  * -> CachingOrMemoryAuthenticationDatabase
@@ -46,28 +46,28 @@ import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
  *    [x] user changes -> persistence
  *    [x] persistence changed -> in memory
  * </pre>
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class AccessControlManagerOnPersistence extends DelegatingAccessControlManager {
-	
+
 	@SuppressWarnings("unused")
 	private class SyncingHookAuthorisationManagerAndDb extends HookAuthorisationManagerAndDb {
-		
-		private WritableRepositoryOnPersistence authorisationRepositoryOnPersistence;
-		
-		private PartialAuthorisationDatabaseOnWritableRepository partialAuthorisationDb;
-		
+
+		private final WritableRepositoryOnPersistence authorisationRepositoryOnPersistence;
+
+		private final PartialAuthorisationDatabaseOnWritableRepository partialAuthorisationDb;
+
 		public SyncingHookAuthorisationManagerAndDb(
-		        MemoryAuthorisationManager fastAuthorisationManager,
-		        WritableRepositoryOnPersistence authorisationRepositoryOnPersistence,
-		        PartialAuthorisationDatabaseOnWritableRepository partialAuthorisationDb) {
+		        final MemoryAuthorisationManager fastAuthorisationManager,
+		        final WritableRepositoryOnPersistence authorisationRepositoryOnPersistence,
+		        final PartialAuthorisationDatabaseOnWritableRepository partialAuthorisationDb) {
 			super(fastAuthorisationManager);
 			this.authorisationRepositoryOnPersistence = authorisationRepositoryOnPersistence;
 			this.partialAuthorisationDb = partialAuthorisationDb;
 		}
-		
+
 		@Override
 		protected void beforeRead() {
 			// FIXME check for events in persistence - unfinished impl!
@@ -90,33 +90,33 @@ public class AccessControlManagerOnPersistence extends DelegatingAccessControlMa
 			// }
 			// }
 		}
-		
+
 	}
-	
+
 	/**
 	 * Before each read in the fast in-memory index, we check in the underlying
 	 * persistence if the data is still fresh and update as necessary.
-	 * 
+	 *
 	 * @author xamde
 	 */
 	private class SyncPersistenceToGroupDatabase implements IHookListener {
-		
-		private MemoryGroupDatabase baseDatabase;
-		private WritableModelOnPersistence groupModelOnPersistence;
-		private PartialGroupDatabaseOnWritableModel partialGroupDb;
-		
-		public SyncPersistenceToGroupDatabase(MemoryGroupDatabase fastDatabase,
-		        WritableModelOnPersistence groupModelOnPersistence,
-		        PartialGroupDatabaseOnWritableModel partialGroupDb) {
+
+		private final MemoryGroupDatabase baseDatabase;
+		private final WritableModelOnPersistence groupModelOnPersistence;
+		private final PartialGroupDatabaseOnWritableModel partialGroupDb;
+
+		public SyncPersistenceToGroupDatabase(final MemoryGroupDatabase fastDatabase,
+		        final WritableModelOnPersistence groupModelOnPersistence,
+		        final PartialGroupDatabaseOnWritableModel partialGroupDb) {
 			this.baseDatabase = fastDatabase;
 			this.groupModelOnPersistence = groupModelOnPersistence;
 			this.partialGroupDb = partialGroupDb;
 		}
-		
+
 		@Override
 		public void beforeRead() {
 			// check for events in persistence
-			List<XEvent> events = this.groupModelOnPersistence.getNewEvents();
+			final List<XEvent> events = this.groupModelOnPersistence.getNewEvents();
 			if(events != null) {
 				/* don't let the user perform reads/write while we sync */
 				synchronized(this) {
@@ -132,83 +132,83 @@ public class AccessControlManagerOnPersistence extends DelegatingAccessControlMa
 				}
 			}
 		}
-		
+
 		@Override
 		public void beforeWrite() {
 		}
-		
+
 	}
-	
-	public AccessControlManagerOnPersistence(XydraPersistence persistence, XId executingActorId) {
+
+	public AccessControlManagerOnPersistence(final XydraPersistence persistence, final XId executingActorId) {
 		super();
-		
-		WritableRepositoryOnPersistence repoOnPersistence = new WritableRepositoryOnPersistence(
+
+		final WritableRepositoryOnPersistence repoOnPersistence = new WritableRepositoryOnPersistence(
 		        persistence, executingActorId);
-		
+
 		/* ------------ GROUPS -------------- */
 		/* fast in-memory, initially empty */
-		MemoryGroupDatabase memoryGroupDatabase = new MemoryGroupDatabase();
-		
+		final MemoryGroupDatabase memoryGroupDatabase = new MemoryGroupDatabase();
+
 		// wrap persistence into groupModel-like API
 		repoOnPersistence.createModel(NamingUtils.ID_GROUPS_MODEL);
-		WritableModelOnPersistence groupModelOnPersistence = new WritableModelOnPersistence(
+		final WritableModelOnPersistence groupModelOnPersistence = new WritableModelOnPersistence(
 		        persistence, executingActorId, NamingUtils.ID_GROUPS_MODEL);
-		PartialGroupDatabaseOnWritableModel partialGroupDb = new PartialGroupDatabaseOnWritableModel(
+		final PartialGroupDatabaseOnWritableModel partialGroupDb = new PartialGroupDatabaseOnWritableModel(
 		        groupModelOnPersistence);
 		/*
 		 * Add beforeRead-hook to in-memory DB for sync from persistence to
 		 * in-memory DB
 		 */
-		SyncPersistenceToGroupDatabase syncPersistenceToGroupDb = new SyncPersistenceToGroupDatabase(
+		final SyncPersistenceToGroupDatabase syncPersistenceToGroupDb = new SyncPersistenceToGroupDatabase(
 		        memoryGroupDatabase, groupModelOnPersistence, partialGroupDb);
 		memoryGroupDatabase.addHookListener(syncPersistenceToGroupDb);
-		
+
 		/* Load groups from persistence into memory */
 		partialGroupDb.loadInto(memoryGroupDatabase);
 		groupModelOnPersistence.ignoreAllEventsUntilNow();
-		
+
 		/* Listen to changes in groupDb from user and write to persistence */
 		memoryGroupDatabase.addListener(partialGroupDb);
-		
+
 		/* ------------ AUTHORISATION -------------- */
-		MemoryAuthorisationManager memoryAuthorisationManager = new MemoryAuthorisationManager(
+		final MemoryAuthorisationManager memoryAuthorisationManager = new MemoryAuthorisationManager(
 		        memoryGroupDatabase);
 		// TODO this should not be necessary
 		memoryAuthorisationManager.grantGroupAllAccessToRepository(XGroupDatabase.ADMINISTRATOR_GROUP_ID,
 		        persistence.getRepositoryId());
-		
+
 		// wrap persistence into groupModel-like API
-		PartialAuthorisationDatabaseOnWritableRepository partialAuthorisationDb = new PartialAuthorisationDatabaseOnWritableRepository(
+		final PartialAuthorisationDatabaseOnWritableRepository partialAuthorisationDb = new PartialAuthorisationDatabaseOnWritableRepository(
 		        repoOnPersistence);
 		/*
 		 * Add beforeRead-hook to in-memory DB for sync from persistence to
 		 * in-memory DB
 		 */
-		HookAuthorisationManagerAndDb hookAuthorisationManagerAndDb = new SyncingHookAuthorisationManagerAndDb(
+		final HookAuthorisationManagerAndDb hookAuthorisationManagerAndDb = new SyncingHookAuthorisationManagerAndDb(
 		        memoryAuthorisationManager, repoOnPersistence, partialAuthorisationDb);
 		/* Load access right definitions from persistence into memory */
 		partialAuthorisationDb.loadInto(hookAuthorisationManagerAndDb);
 		// FIXME repoOnPersistence.ignoreAllEventsUntilNow();
-		
+
 		/*
 		 * Listen to changes in authorisationDb from user and write to
 		 * persistence
 		 */
 		hookAuthorisationManagerAndDb.addListener(partialAuthorisationDb);
-		
+
 		super.authorisationManager = hookAuthorisationManagerAndDb;
-		
+
 		/* ------------ AUTHENTICATION -------------- */
 		/* wrap persistence to RMOF-like API */
 		repoOnPersistence.createModel(NamingUtils.ID_AUTHENTICATION_MODEL);
-		XWritableModel authenticationModelOnPersistence = new WritableModelOnPersistence(
+		final XWritableModel authenticationModelOnPersistence = new WritableModelOnPersistence(
 		        persistence, executingActorId, NamingUtils.ID_AUTHENTICATION_MODEL);
 		/* wrap RMOF in authentication database API */
-		XAuthenticationDatabase authenticationDbOnPersistence = new AuthenticationDatabaseOnWritableModel(
+		final XAuthenticationDatabase authenticationDbOnPersistence = new AuthenticationDatabaseOnWritableModel(
 		        authenticationModelOnPersistence);
 		/* wrap with an in-memory cache */
 		super.authenticationDb = new CachingOrMemoryAuthenticationDatabase(
 		        authenticationDbOnPersistence);
 	}
-	
+
 }

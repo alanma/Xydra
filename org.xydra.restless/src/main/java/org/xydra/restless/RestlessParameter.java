@@ -6,7 +6,7 @@ import org.xydra.annotations.ThreadSafe;
 
 /**
  * A parameter that can be used in a method exposed via Restless to the web.
- * 
+ *
  * @author xamde
  */
 
@@ -18,7 +18,7 @@ public class RestlessParameter {
 	 * creation and all methods only read these variable -> no synchronization
 	 * necessary at the moment
 	 */
-	private String name;
+	private final String name;
 
 	@Override
 	public String toString() {
@@ -26,23 +26,23 @@ public class RestlessParameter {
 				+ ", isArray=" + this.isArray + "]";
 	}
 
-	private Object defaultValue;
+	private final Object defaultValue;
 
-	private boolean isArray;
+	private final boolean isArray;
 
 	public static final String DEFAULT_VALUE_NONE_BUT_REQUIRED = "missing_required_parameter";
 
 	private static final String[] defaultArray = new String[0];
 
 	/**
-	 * 
+	 *
 	 * @param name
 	 *            for binding it to variable names @NeverNull
 	 * @param defaultValue
 	 *            the default value if the parameter could not be set from HTTP
 	 *            request content. Use null for none. @CanBeNull
 	 */
-	public RestlessParameter(@NeverNull String name, @CanBeNull String defaultValue) {
+	public RestlessParameter(@NeverNull final String name, @CanBeNull final String defaultValue) {
 		this.name = name;
 		this.defaultValue = defaultValue;
 		this.isArray = false;
@@ -54,7 +54,7 @@ public class RestlessParameter {
 	 * @param isArray
 	 *            true if there can be multiple values @NeverNull
 	 */
-	public RestlessParameter(@NeverNull String name, boolean isArray) {
+	public RestlessParameter(@NeverNull final String name, final boolean isArray) {
 		super();
 		this.name = name;
 		this.defaultValue = isArray ? defaultArray : null;
@@ -64,11 +64,11 @@ public class RestlessParameter {
 	/**
 	 * Create a parameter without a default value. Method fails if parameter not
 	 * set.
-	 * 
+	 *
 	 * @param name
 	 *            for binding it to variable names @NeverNull
 	 */
-	public RestlessParameter(@NeverNull String name) {
+	public RestlessParameter(@NeverNull final String name) {
 		this(name, DEFAULT_VALUE_NONE_BUT_REQUIRED);
 	}
 
@@ -77,7 +77,7 @@ public class RestlessParameter {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return true, if there can be multiple values
 	 */
 	public boolean isArray() {
@@ -85,7 +85,7 @@ public class RestlessParameter {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return a String for binding it to variable names
 	 */
 	public String getName() {
@@ -93,7 +93,7 @@ public class RestlessParameter {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the default value if the parameter could not be set from HTTP
 	 *         request content. May be null (for none).
 	 */

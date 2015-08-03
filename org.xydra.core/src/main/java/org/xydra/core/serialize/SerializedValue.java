@@ -9,6 +9,7 @@ import java.util.Map;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.value.ValueType;
@@ -24,7 +25,7 @@ import org.xydra.log.api.LoggerFactory;
 /**
  * Collection of methods to (de-)serialize variants of {@link XValue} to and
  * from their XML or JSON representation.
- * 
+ *
  * @author dscharrer
  */
 @RunsInGWT(true)
@@ -56,37 +57,37 @@ public class SerializedValue {
 	private static final String XSTRINGSET_ELEMENT = "xstringSet";
 	private static final String NAME_DATA = "data";
 
-	private static List<XAddress> getAddressListContents(XydraElement element) {
+	private static List<XAddress> getAddressListContents(final XydraElement element) {
 
-		List<XAddress> list = new ArrayList<XAddress>();
+		final List<XAddress> list = new ArrayList<XAddress>();
 
-		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XADDRESS_ELEMENT);
+		final Iterator<Object> entryIterator = element.getValues(NAME_DATA, XADDRESS_ELEMENT);
 		while (entryIterator.hasNext()) {
-			Object value = entryIterator.next();
+			final Object value = entryIterator.next();
 			list.add(SerializingUtils.toAddress(value));
 		}
 		return list;
 	}
 
-	public static List<XId> getIdListContents(XydraElement element) {
+	public static List<XId> getIdListContents(final XydraElement element) {
 
-		List<XId> list = new ArrayList<XId>();
+		final List<XId> list = new ArrayList<XId>();
 
-		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XID_ELEMENT);
+		final Iterator<Object> entryIterator = element.getValues(NAME_DATA, XID_ELEMENT);
 		while (entryIterator.hasNext()) {
-			Object value = entryIterator.next();
+			final Object value = entryIterator.next();
 			list.add(SerializingUtils.toId(value));
 		}
 		return list;
 	}
 
-	private static List<String> getStringListContents(XydraElement element) {
+	private static List<String> getStringListContents(final XydraElement element) {
 
-		List<String> list = new ArrayList<String>();
+		final List<String> list = new ArrayList<String>();
 
-		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XSTRING_ELEMENT);
+		final Iterator<Object> entryIterator = element.getValues(NAME_DATA, XSTRING_ELEMENT);
 		while (entryIterator.hasNext()) {
-			Object value = entryIterator.next();
+			final Object value = entryIterator.next();
 			list.add(SerializingUtils.toString(value));
 		}
 		return list;
@@ -98,7 +99,7 @@ public class SerializedValue {
 	 * @throws IllegalArgumentException if the given XML/JSON element is not a
 	 *             valid representation of an {@link XAddress}
 	 */
-	public static XAddress toAddress(XydraElement element) {
+	public static XAddress toAddress(final XydraElement element) {
 
 		if (element == null) {
 			return null;
@@ -106,20 +107,20 @@ public class SerializedValue {
 
 		SerializingUtils.checkElementType(element, XADDRESS_ELEMENT);
 
-		String data = getStringContent(element);
+		final String data = getStringContent(element);
 
 		try {
-			return XX.toAddress(data);
-		} catch (Exception e) {
+			return Base.toAddress(data);
+		} catch (final Exception e) {
 			throw new RuntimeException("An <" + XADDRESS_ELEMENT
 					+ "> element must contain a valid XAddress, got \"" + data + '"', e);
 		}
 
 	}
 
-	private static String getStringContent(XydraElement element) {
+	private static String getStringContent(final XydraElement element) {
 
-		String data = SerializingUtils.toString(element.getContent(NAME_DATA));
+		final String data = SerializingUtils.toString(element.getContent(NAME_DATA));
 		if (data == null) {
 			throw new ParsingException(element, "Content must not be null.");
 		}
@@ -127,25 +128,25 @@ public class SerializedValue {
 		return data;
 	}
 
-	private static List<Boolean> getBooleanListContents(XydraElement element) {
+	private static List<Boolean> getBooleanListContents(final XydraElement element) {
 
-		List<Boolean> list = new ArrayList<Boolean>();
+		final List<Boolean> list = new ArrayList<Boolean>();
 
-		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XBOOLEAN_ELEMENT);
+		final Iterator<Object> entryIterator = element.getValues(NAME_DATA, XBOOLEAN_ELEMENT);
 		while (entryIterator.hasNext()) {
-			Object value = entryIterator.next();
+			final Object value = entryIterator.next();
 			list.add(SerializingUtils.toBoolean(value));
 		}
 		return list;
 	}
 
-	private static List<Double> getDoubleListContents(XydraElement element) {
+	private static List<Double> getDoubleListContents(final XydraElement element) {
 
-		List<Double> list = new ArrayList<Double>();
+		final List<Double> list = new ArrayList<Double>();
 
-		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XDOUBLE_ELEMENT);
+		final Iterator<Object> entryIterator = element.getValues(NAME_DATA, XDOUBLE_ELEMENT);
 		while (entryIterator.hasNext()) {
-			Object value = entryIterator.next();
+			final Object value = entryIterator.next();
 			list.add(SerializingUtils.toDouble(value));
 		}
 		return list;
@@ -157,7 +158,7 @@ public class SerializedValue {
 	 * @throws IllegalArgumentException if the given XML/JSON element is not a
 	 *             valid representation of an {@link XId}
 	 */
-	public static XId toId(XydraElement element) {
+	public static XId toId(final XydraElement element) {
 
 		if (element == null) {
 			return null;
@@ -165,35 +166,35 @@ public class SerializedValue {
 
 		SerializingUtils.checkElementType(element, XID_ELEMENT);
 
-		String data = getStringContent(element);
+		final String data = getStringContent(element);
 
 		try {
-			return XX.toId(data);
-		} catch (Exception e) {
+			return Base.toId(data);
+		} catch (final Exception e) {
 			throw new ParsingException(element, "Expected a valid XId, got " + data, e);
 		}
 
 	}
 
-	private static List<Integer> getIntegerListContents(XydraElement element) {
+	private static List<Integer> getIntegerListContents(final XydraElement element) {
 
-		List<Integer> list = new ArrayList<Integer>();
+		final List<Integer> list = new ArrayList<Integer>();
 
-		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XINTEGER_ELEMENT);
+		final Iterator<Object> entryIterator = element.getValues(NAME_DATA, XINTEGER_ELEMENT);
 		while (entryIterator.hasNext()) {
-			Object value = entryIterator.next();
+			final Object value = entryIterator.next();
 			list.add(SerializingUtils.toInteger(value));
 		}
 		return list;
 	}
 
-	private static List<Long> getLongListContents(XydraElement element) {
+	private static List<Long> getLongListContents(final XydraElement element) {
 
-		List<Long> list = new ArrayList<Long>();
+		final List<Long> list = new ArrayList<Long>();
 
-		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XLONG_ELEMENT);
+		final Iterator<Object> entryIterator = element.getValues(NAME_DATA, XLONG_ELEMENT);
 		while (entryIterator.hasNext()) {
-			Object value = entryIterator.next();
+			final Object value = entryIterator.next();
 			list.add(SerializingUtils.toLong(value));
 		}
 		return list;
@@ -206,7 +207,7 @@ public class SerializedValue {
 	 * @throws IllegalArgumentException if the given XML/JSON element is not a
 	 *             valid representation of an {@link XValue}
 	 */
-	public static XValue toValue(XydraElement element) {
+	public static XValue toValue(final XydraElement element) {
 
 		if (element == null) {
 			return null;
@@ -214,7 +215,7 @@ public class SerializedValue {
 
 		// IMPROVE consider using a (hash)map as the number of XValue types
 		// increases
-		String elementName = element.getType();
+		final String elementName = element.getType();
 		if (elementName.equals(XBOOLEAN_ELEMENT)) {
 			return XV.toValue(SerializingUtils.toBoolean(element.getContent(NAME_DATA)));
 		} else if (elementName.equals(XDOUBLE_ELEMENT)) {
@@ -263,21 +264,22 @@ public class SerializedValue {
 		throw new ParsingException(element, "Unexpected element for an XValue.");
 	}
 
-	private static XValue toIdSortedSetValue(XydraElement element) {
+	private static XValue toIdSortedSetValue(final XydraElement element) {
 
-		List<XId> xids = getIdListContents(element);
+		final List<XId> xids = getIdListContents(element);
 
-		XValue value = XV.toIdSortedSetValue(xids);
+		final XValue value = XV.toIdSortedSetValue(xids);
 
-		if (log.isDebugEnabled())
+		if (log.isDebugEnabled()) {
 			log.debug("Serialised XydraElement to '" + value.toString() + "'");
+		}
 
 		return value;
 	}
 
 	private static final Map<ValueType, String> singleElements = new HashMap<ValueType, String>();
 
-	private static String getSingleElement(ValueType type) {
+	private static String getSingleElement(final ValueType type) {
 
 		synchronized (singleElements) {
 			if (singleElements.isEmpty()) {
@@ -296,7 +298,7 @@ public class SerializedValue {
 
 	private static final Map<ValueType, String> collectionElements = new HashMap<ValueType, String>();
 
-	private static String getCollectionElement(ValueType type) {
+	private static String getCollectionElement(final ValueType type) {
 
 		synchronized (collectionElements) {
 			if (collectionElements.isEmpty()) {
@@ -318,9 +320,9 @@ public class SerializedValue {
 		return collectionElements.get(type);
 	}
 
-	private static void serialize(XSingleValue<?> xvalue, XydraOut out) {
+	private static void serialize(final XSingleValue<?> xvalue, final XydraOut out) {
 
-		String element = getSingleElement(xvalue.getType());
+		final String element = getSingleElement(xvalue.getType());
 		if (element == null) {
 			throw new IllegalArgumentException("Cannot serialize XSingleValue " + xvalue
 					+ " (unknown type: " + xvalue.getClass().getName() + ")");
@@ -329,14 +331,14 @@ public class SerializedValue {
 		out.element(element, NAME_DATA, xvalue.getValue());
 	}
 
-	private static void serialize(XId xid, XydraOut out) {
+	private static void serialize(final XId xid, final XydraOut out) {
 		out.element(XID_ELEMENT, NAME_DATA, xid);
 	}
 
-	private static void serialize(XCollectionValue<?> xvalue, XydraOut out) {
+	private static void serialize(final XCollectionValue<?> xvalue, final XydraOut out) {
 
-		String element = getCollectionElement(xvalue.getType());
-		String componentElement = getSingleElement(xvalue.getComponentType());
+		final String element = getCollectionElement(xvalue.getType());
+		final String componentElement = getSingleElement(xvalue.getComponentType());
 		if (element == null || componentElement == null) {
 			throw new IllegalArgumentException("Cannot serialize XCollectionValue " + xvalue
 					+ " (unknown type: " + xvalue.getClass().getName() + ")");
@@ -347,32 +349,32 @@ public class SerializedValue {
 		out.close(element);
 	}
 
-	private static void serialize(XBinaryValue xvalue, XydraOut out) {
+	private static void serialize(final XBinaryValue xvalue, final XydraOut out) {
 		out.element(XBINARY_ELEMENT, NAME_DATA, serializeBinaryContent(xvalue.getValue()));
 	}
 
-	public static String serializeBinaryContent(byte[] content) {
+	public static String serializeBinaryContent(final byte[] content) {
 		return Base64.encode(content, true);
 	}
 
-	public static byte[] deserializeBinaryContent(String base64) {
+	public static byte[] deserializeBinaryContent(final String base64) {
 		return Base64.decode(base64);
 	}
 
 	/**
 	 * Emit the XML/JSON representation of the given {@link XValue}.
-	 * 
+	 *
 	 * @param xvalue The value to serialize. This may be null.
 	 * @param out
 	 * @throws IllegalArgumentException if given {@link XValue} is an
 	 *             unrecognized type.
 	 */
-	public static void serialize(XValue xvalue, XydraOut out) {
+	public static void serialize(final XValue xvalue, final XydraOut out) {
 		if (xvalue == null) {
 			out.nullElement();
 			return;
 		} else {
-			ValueType type = xvalue.getType();
+			final ValueType type = xvalue.getType();
 			if (type == ValueType.Binary) {
 				serialize((XBinaryValue) xvalue, out);
 			} else if (type == ValueType.Id) {
@@ -388,7 +390,7 @@ public class SerializedValue {
 		}
 	}
 
-	public static void setIdListContents(Iterable<XId> list, XydraOut xo) {
+	public static void setIdListContents(final Iterable<XId> list, final XydraOut xo) {
 		xo.values(NAME_DATA, XID_ELEMENT, list);
 	}
 

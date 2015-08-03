@@ -11,17 +11,17 @@ public class CsvTableTest {
 
 	@Test
 	public void testGroupBy() throws IOException {
-		ICsvTable ct = new CsvTable();
+		final ICsvTable ct = new CsvTable();
 		addDemoData(ct);
 
-		ICsvTable result = new CsvTable();
-		TableTools.groupBy(ct, Arrays.asList("profession", "sex"),
+		final ICsvTable result = new CsvTable();
+		TableCoreTools.groupBy(ct, Arrays.asList("profession", "sex"),
 				Arrays.asList("age", "shoesize"), Arrays.asList("age", "shoesize"),
 				Arrays.asList("age", "shoesize"), result);
 		result.dump();
 	}
 
-	private static void addDemoData(ICsvTable ct) {
+	private static void addDemoData(final ICsvTable ct) {
 		ct.setValueInitial("1", "name", "Jana");
 		ct.setValueInitial("1", "profession", "computer science");
 		ct.setValueInitial("1", "age", "21");
@@ -49,17 +49,17 @@ public class CsvTableTest {
 
 	@Test
 	public void testRemoveRows() throws IOException {
-		ICsvTable ct = new CsvTable();
+		final ICsvTable ct = new CsvTable();
 		addDemoData(ct);
 		ct.removeRowsMatching(new RowFilter() {
 
 			@Override
-			public boolean matches(IRow row) {
+			public boolean matches(final IRow row) {
 				return row.getValue("name").length() < 4;
 			}
 		});
 
-		OutputStreamWriter osw = new OutputStreamWriter(System.out);
+		final OutputStreamWriter osw = new OutputStreamWriter(System.out);
 		ct.writeTo(osw);
 		osw.flush();
 	}

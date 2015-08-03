@@ -5,7 +5,7 @@ import org.xydra.annotations.ThreadSafe;
 /**
  * Interface for Xydra loggers. Named 'Logger' to be compatible to java util
  * logging or Log4j, you only need to change the imports.
- * 
+ *
  * @author xamde
  */
 @ThreadSafe
@@ -19,7 +19,7 @@ public interface Logger {
 	/**
 	 * The classic set of warning levels. Generalised from log4j, slf4j, and
 	 * java util logging.
-	 * 
+	 *
 	 * @author xamde
 	 */
 	public static enum Level {
@@ -45,17 +45,18 @@ public interface Logger {
 		 * @return the Level
 		 * @throws IllegalArgumentException
 		 */
-		public static Level fromString(String levelName) throws IllegalArgumentException {
-			for (Level level : values()) {
-				if (levelName.equalsIgnoreCase(level.name()))
+		public static Level fromString(final String levelName) throws IllegalArgumentException {
+			for (final Level level : values()) {
+				if (levelName.equalsIgnoreCase(level.name())) {
 					return level;
+				}
 			}
 			throw new IllegalArgumentException("Could not parse '" + levelName + "'");
 		}
 
-		private int num;
+		private final int num;
 
-		Level(int num) {
+		Level(final int num) {
 			this.num = num;
 		}
 
@@ -63,7 +64,7 @@ public interface Logger {
 			return this.num;
 		}
 
-		public boolean isAsImportantOrEvenMoreImportantThan(Level other) {
+		public boolean isAsImportantOrEvenMoreImportantThan(final Level other) {
 			return this.num >= other.num;
 		}
 
@@ -103,7 +104,7 @@ public interface Logger {
 
 	/**
 	 * OPTIONAL OPERATION: Not all implementations support this
-	 * 
+	 *
 	 * @param level
 	 */
 	void setLevel(Level level);

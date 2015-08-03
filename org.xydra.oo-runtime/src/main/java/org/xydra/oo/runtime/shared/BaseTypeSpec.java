@@ -8,10 +8,10 @@ import org.xydra.annotations.RunsInGWT;
  * A single type with a package and a simple name. Is either a collection type
  * (List, Set, ...) OR a component type (String, int, boolean, ... ) OR a
  * generic (typeless) array type (Array).
- * 
+ *
  * To represent generic collection types or normal typed arrays, use a
  * {@link TypeSpec}.
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(true)
@@ -25,16 +25,16 @@ public class BaseTypeSpec implements Comparable<BaseTypeSpec>, IBaseType {
 	@NeverNull
 	private String simpleName;
 
-	public BaseTypeSpec(@CanBeNull String packageName, @NeverNull String simpleName) {
+	public BaseTypeSpec(@CanBeNull final String packageName, @NeverNull final String simpleName) {
 		init(packageName, simpleName);
 	}
 
 	/**
 	 * Create a clone
-	 * 
+	 *
 	 * @param baseType
 	 */
-	public BaseTypeSpec(IBaseType baseType) {
+	public BaseTypeSpec(final IBaseType baseType) {
 		this(baseType.getPackageName(), baseType.getSimpleName());
 	}
 
@@ -45,12 +45,13 @@ public class BaseTypeSpec implements Comparable<BaseTypeSpec>, IBaseType {
 	 *            can contain dots to represent inner classes as
 	 *            outercclass.innerclass
 	 */
-	private void init(@CanBeNull String packageName, @NeverNull String simpleName) {
+	private void init(@CanBeNull final String packageName, @NeverNull final String simpleName) {
 		assert simpleName != null;
 		assert simpleName.length() > 0;
 		assert !simpleName.equals("void");
-		if (simpleName.endsWith("[]"))
+		if (simpleName.endsWith("[]")) {
 			throw new IllegalArgumentException("type cannot be an array type");
+		}
 		this.packageName = packageName;
 		this.simpleName = simpleName;
 		assert packageName != null || simpleName.equals("byte") || simpleName.equals("boolean")
@@ -60,37 +61,38 @@ public class BaseTypeSpec implements Comparable<BaseTypeSpec>, IBaseType {
 	}
 
 	@Override
-	public int compareTo(BaseTypeSpec o) {
-		int i = this.packageName.compareTo(o.getPackageName());
-		if (i != 0)
+	public int compareTo(final BaseTypeSpec o) {
+		final int i = this.packageName.compareTo(o.getPackageName());
+		if (i != 0) {
 			return i;
+		}
 
 		return this.simpleName.compareTo(o.getSimpleName());
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (o instanceof BaseTypeSpec) {
-			BaseTypeSpec obts = (BaseTypeSpec) o;
+			final BaseTypeSpec obts = (BaseTypeSpec) o;
 			return obts.packageName.equals(this.packageName)
 					&& obts.simpleName.equals(this.simpleName);
 		}
 		return false;
 	}
 
-	
+
 	@Override
 	public String getCanonicalName() {
 		return (this.packageName == null ? "" : this.packageName + ".") + this.simpleName;
 	}
 
-	
+
 	@Override
 	public String getPackageName() {
 		return this.packageName;
 	}
 
-	
+
 	@Override
 	public String getSimpleName() {
 		return this.simpleName;
@@ -104,25 +106,26 @@ public class BaseTypeSpec implements Comparable<BaseTypeSpec>, IBaseType {
 
 	@Override
 	public String toString() {
-		return this.getCanonicalName();
+		return getCanonicalName();
 	}
 
-	
+
 	@Override
 	public boolean isArray() {
-		return this.equals(ARRAY);
+		return equals(ARRAY);
 	}
 
-	
+
 	@Override
 	public String getRequiredImport() {
 		if (getSimpleName().contains(".")) {
 			// require enclosing class
-			String[] parts = getSimpleName().split("[.]");
+			final String[] parts = getSimpleName().split("[.]");
 			assert parts.length == 2 : "cannot handle multiple level deep nested inner classes";
 			return getPackageName() + "." + parts[0];
-		} else
+		} else {
 			return getCanonicalName();
+		}
 	}
 
 	/**
@@ -132,9 +135,10 @@ public class BaseTypeSpec implements Comparable<BaseTypeSpec>, IBaseType {
 	 *            @CanBeNull
 	 * @return null if simpleName is null
 	 */
-	public static IBaseType create(java.lang.String packageName, java.lang.String simpleName) {
-		if (simpleName == null)
+	public static IBaseType create(final java.lang.String packageName, final java.lang.String simpleName) {
+		if (simpleName == null) {
 			return null;
+		}
 		return new BaseTypeSpec(packageName, simpleName);
 	}
 

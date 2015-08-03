@@ -14,117 +14,117 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * A simple in-memory implementation of {@link ValueIndex}, for testing
  * purposes.
- * 
+ *
  * Warning: Some methods are not supported.
- * 
+ *
  * @author kaidel
- * 
+ *
  */
 
 public class MemoryMapSetIndex implements ValueIndex {
-	private HashMap<String,HashSet<ValueIndexEntry>> map;
-	
+	private final HashMap<String,HashSet<ValueIndexEntry>> map;
+
 	public MemoryMapSetIndex() {
 		this.map = new HashMap<String,HashSet<ValueIndexEntry>>();
 	}
-	
+
 	@Override
-	public Iterator<ValueIndexEntry> constraintIterator(EqualsConstraint<String> c1) {
-		HashSet<ValueIndexEntry> result = new HashSet<ValueIndexEntry>();
-		
-		for(String key : this.map.keySet()) {
+	public Iterator<ValueIndexEntry> constraintIterator(final EqualsConstraint<String> c1) {
+		final HashSet<ValueIndexEntry> result = new HashSet<ValueIndexEntry>();
+
+		for(final String key : this.map.keySet()) {
 			if(c1.matches(key)) {
-				HashSet<ValueIndexEntry> entries = this.map.get(key);
-				
+				final HashSet<ValueIndexEntry> entries = this.map.get(key);
+
 				result.addAll(entries);
 			}
 		}
-		
+
 		return result.iterator();
 	}
-	
+
 	@Override
-	public boolean contains(EqualsConstraint<String> c1,
-	        EqualsConstraint<ValueIndexEntry> entryConstraint) {
+	public boolean contains(final EqualsConstraint<String> c1,
+	        final EqualsConstraint<ValueIndexEntry> entryConstraint) {
 		// TODO maybe implement...
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
-	public boolean containsKey(String key) {
+	public boolean containsKey(final String key) {
 		return this.map.containsKey(key);
 	}
-	
+
 	@Override
-	public void deIndex(String key, XAddress fieldAddress, XValue value) {
+	public void deIndex(final String key, final XAddress fieldAddress, final XValue value) {
 		if(fieldAddress.getAddressedType() != XType.XFIELD) {
 			throw new RuntimeException("The given fieldAddress was no address of a field, but an "
 			        + fieldAddress.getAddressedType() + "type address!");
 		}
-		
-		HashSet<ValueIndexEntry> set = this.map.get(key);
-		
+
+		final HashSet<ValueIndexEntry> set = this.map.get(key);
+
 		if(set == null) {
 			return;
 		}
-		
-		Iterator<ValueIndexEntry> iterator = set.iterator();
-		
+
+		final Iterator<ValueIndexEntry> iterator = set.iterator();
+
 		boolean found = false;
 		while(!found && iterator.hasNext()) {
-			ValueIndexEntry entry = iterator.next();
-			
+			final ValueIndexEntry entry = iterator.next();
+
 			if(entry.equalAddressAndValue(fieldAddress, value)) {
 				found = true;
 				set.remove(entry);
 			}
 		}
-		
+
 		if(set.size() == 0) {
 			deIndex(key);
 		}
-		
+
 	}
-	
+
 	@Override
-	public void deIndex(String key) {
+	public void deIndex(final String key) {
 		this.map.remove(key);
 	}
-	
+
 	@Override
-	public void index(String key, XAddress fieldAddress, XValue value) {
+	public void index(final String key, final XAddress fieldAddress, final XValue value) {
 		if(fieldAddress.getAddressedType() != XType.XFIELD) {
 			throw new RuntimeException("The given fieldAddress was no address of a field, but an "
 			        + fieldAddress.getAddressedType() + "type address!");
 		}
-		
+
 		if(!this.map.containsKey(key)) {
 			this.map.put(key, new HashSet<ValueIndexEntry>());
 		}
-		
-		HashSet<ValueIndexEntry> set = this.map.get(key);
+
+		final HashSet<ValueIndexEntry> set = this.map.get(key);
 		XyAssert.xyAssert(set != null); assert set != null;
-		
-		Iterator<ValueIndexEntry> iterator = set.iterator();
-		
+
+		final Iterator<ValueIndexEntry> iterator = set.iterator();
+
 		boolean found = false;
 		while(!found && iterator.hasNext()) {
-			ValueIndexEntry triple = iterator.next();
-			
+			final ValueIndexEntry triple = iterator.next();
+
 			if(triple.equalAddressAndValue(fieldAddress, value)) {
 				found = true;
 			}
 		}
-		
+
 		if(!found) {
 			// no entry found -> add one
-			ValueIndexEntry newEntry = new ValueIndexEntry(fieldAddress, value);
+			final ValueIndexEntry newEntry = new ValueIndexEntry(fieldAddress, value);
 			set.add(newEntry);
 		}
 	}
-	
+
 	public Iterator<String> keyIterator() {
 		return this.map.keySet().iterator();
 	}
-	
+
 }

@@ -3,7 +3,7 @@ package org.xydra.log.api;
 /**
  * Listens to all log events of a certain {@link Logger}. This is similar to the
  * concept of log handlers/appenders in other frameworks.
- * 
+ *
  * @author xamde
  */
 public interface ILogListener {

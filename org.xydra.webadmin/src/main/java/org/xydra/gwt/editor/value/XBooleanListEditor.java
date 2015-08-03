@@ -10,22 +10,25 @@ import org.xydra.base.value.XV;
 
 public class XBooleanListEditor extends XCollectionEditor<XBooleanValue, XBooleanListValue> {
 
-	public XBooleanListEditor(Iterator<Boolean> value, EditListener listener) {
+	public XBooleanListEditor(final Iterator<Boolean> value, final EditListener listener) {
 		super(listener);
 
-		if (value == null)
+		if (value == null) {
 			return;
+		}
 
-		while (value.hasNext())
+		while (value.hasNext()) {
 			add(new XBooleanEditor(value.next(), this));
+		}
 
 	}
 
 	@Override
-	protected XBooleanListValue asCollectionValue(Iterator<XBooleanValue> entries) {
-		List<Boolean> lst = new ArrayList<Boolean>();
-		while (entries.hasNext())
+	protected XBooleanListValue asCollectionValue(final Iterator<XBooleanValue> entries) {
+		final List<Boolean> lst = new ArrayList<Boolean>();
+		while (entries.hasNext()) {
 			lst.add(entries.next().contents());
+		}
 		return XV.toBooleanListValue(lst);
 	}
 

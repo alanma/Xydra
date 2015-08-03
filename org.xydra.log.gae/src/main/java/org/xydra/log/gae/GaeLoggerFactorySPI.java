@@ -15,7 +15,7 @@ import com.google.appengine.api.utils.SystemProperty;
 
 /**
  * In development mode log4j is used. In production, j.u.l. is used.
- * 
+ *
  * @author xamde
  * @deprecated use {@link UniversalLogger}
  */
@@ -40,12 +40,12 @@ public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 	}
 
 	@Override
-	public Logger getLogger(String name, Collection<ILogListener> logListener) {
+	public Logger getLogger(final String name, final Collection<ILogListener> logListener) {
 		return factory.getLogger(name, logListener);
 	}
 
 	@Override
-	public Logger getWrappedLogger(String name, String fullyQualifiedNameOfDelegatingLoggerClass) {
+	public Logger getWrappedLogger(final String name, final String fullyQualifiedNameOfDelegatingLoggerClass) {
 		return factory.getWrappedLogger(name, fullyQualifiedNameOfDelegatingLoggerClass);
 	}
 
@@ -66,13 +66,13 @@ public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 	}
 
 	@Override
-	public Logger getThreadSafeLogger(String name, Collection<ILogListener> logListeners) {
+	public Logger getThreadSafeLogger(final String name, final Collection<ILogListener> logListeners) {
 		return factory.getThreadSafeLogger(name, logListeners);
 	}
 
 	@Override
-	public Logger getThreadSafeWrappedLogger(String name,
-			String fullyQualifiedNameOfDelegatingLoggerClass) {
+	public Logger getThreadSafeWrappedLogger(final String name,
+			final String fullyQualifiedNameOfDelegatingLoggerClass) {
 		return factory.getThreadSafeWrappedLogger(name, fullyQualifiedNameOfDelegatingLoggerClass);
 	}
 

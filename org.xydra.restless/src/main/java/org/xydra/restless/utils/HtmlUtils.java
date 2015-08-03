@@ -12,9 +12,9 @@ import org.xydra.restless.Restless;
 
 /**
  * Genereates some simple HTML5.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 
 @ThreadSafe
@@ -32,7 +32,7 @@ public class HtmlUtils extends SharedHtmlUtils {
 
 	/**
 	 * Writes core html content including charset header
-	 * 
+	 *
 	 * @param w
 	 * @NeverNull
 	 * @param title
@@ -41,8 +41,8 @@ public class HtmlUtils extends SharedHtmlUtils {
 	 * @CanBeNull
 	 * @throws IOException
 	 */
-	public static void writeHtmlHeaderOpenBody(@NeverNull Writer w, @CanBeNull String title,
-			@CanBeNull HeadChild... headChildren) throws IOException {
+	public static void writeHtmlHeaderOpenBody(@NeverNull final Writer w, @CanBeNull final String title,
+			@CanBeNull final HeadChild... headChildren) throws IOException {
 
 		w.write("<!DOCTYPE html>\r\n"
 
@@ -57,7 +57,7 @@ public class HtmlUtils extends SharedHtmlUtils {
 
 		if (headChildren != null) {
 
-			for (HeadChild headChild : headChildren) {
+			for (final HeadChild headChild : headChildren) {
 				w.write("    " + headChild.toString() + "\r\n");
 			}
 
@@ -71,19 +71,19 @@ public class HtmlUtils extends SharedHtmlUtils {
 
 	/**
 	 * Closes the HTML and flushes the writer.
-	 * 
+	 *
 	 * @param w
 	 *            writer @NeverNull
 	 * @throws IOException
 	 *             from writer
 	 */
-	public static void writeCloseBodyHtml(@NeverNull Writer w) throws IOException {
+	public static void writeCloseBodyHtml(@NeverNull final Writer w) throws IOException {
 		w.write("</div></body>\r\n" + "</html>");
 		w.flush();
 	}
 
 	/**
-	 * 
+	 *
 	 * @param res
 	 * @NeverNull
 	 * @param title
@@ -92,20 +92,20 @@ public class HtmlUtils extends SharedHtmlUtils {
 	 * @CanBeNull
 	 * @throws IOException
 	 */
-	public static void writeHtmlPage(@NeverNull HttpServletResponse res, @CanBeNull String title,
-			@CanBeNull String content) throws IOException {
-		Writer w = startHtmlPage(res, title);
+	public static void writeHtmlPage(@NeverNull final HttpServletResponse res, @CanBeNull final String title,
+			@CanBeNull final String content) throws IOException {
+		final Writer w = startHtmlPage(res, title);
 		w.write(content);
 		endHtmlPage(w);
 	}
 
 	/**
-	 * 
+	 *
 	 * @param w
 	 * @NeverNull
 	 * @throws IOException
 	 */
-	public static void endHtmlPage(@NeverNull Writer w) throws IOException {
+	public static void endHtmlPage(@NeverNull final Writer w) throws IOException {
 
 		writeCloseBodyHtml(w);
 		w.close();
@@ -114,7 +114,7 @@ public class HtmlUtils extends SharedHtmlUtils {
 
 	/**
 	 * Creates a text/html, UTF8, non-cached HTML page header
-	 * 
+	 *
 	 * @param res
 	 *            sets content type html + encoding UTF8 @NeverNull
 	 * @param title
@@ -125,18 +125,18 @@ public class HtmlUtils extends SharedHtmlUtils {
 	 * @throws IOException
 	 *             from underlying streams
 	 */
-	public static Writer startHtmlPage(@NeverNull HttpServletResponse res, @CanBeNull String title,
-			@CanBeNull HeadChild... headChildren) throws IOException {
+	public static Writer startHtmlPage(@NeverNull final HttpServletResponse res, @CanBeNull final String title,
+			@CanBeNull final HeadChild... headChildren) throws IOException {
 
 		ServletUtils.headers(res, ServletUtils.CONTENTTYPE_TEXT_HTML);
-		Writer w = res.getWriter();
+		final Writer w = res.getWriter();
 		writeHtmlHeaderOpenBody(w, title, headChildren);
 		w.flush();
 		return w;
 	}
 
 	/**
-	 * 
+	 *
 	 * @param res
 	 * @NeverNull
 	 * @param statusCode
@@ -148,10 +148,10 @@ public class HtmlUtils extends SharedHtmlUtils {
 	 * @return an opened writer that has just written the start of the page
 	 * @throws IOException
 	 */
-	public static Writer startHtmlPage(@NeverNull HttpServletResponse res, int statusCode,
-			@CanBeNull String title, @CanBeNull HeadChild... headChildren) throws IOException {
+	public static Writer startHtmlPage(@NeverNull final HttpServletResponse res, final int statusCode,
+			@CanBeNull final String title, @CanBeNull final HeadChild... headChildren) throws IOException {
 		ServletUtils.headers(res, statusCode, -1, ServletUtils.CONTENTTYPE_TEXT_HTML);
-		Writer w = res.getWriter();
+		final Writer w = res.getWriter();
 		writeHtmlHeaderOpenBody(w, title, headChildren);
 		w.flush();
 		return w;
@@ -164,8 +164,8 @@ public class HtmlUtils extends SharedHtmlUtils {
 	 *            >= 0 @NeverNull
 	 * @return a script snippet
 	 */
-	public static String scriptRedirect(@NeverNull String redirectUrl, int redirectWaitMs) {
-		String redirMarker = "#";
+	public static String scriptRedirect(@NeverNull final String redirectUrl, final int redirectWaitMs) {
+		final String redirMarker = "#";
 		return "<script type='text/javascript'>\n" // .
 				+ "function redir() { \n" // .
 				+ "if( (window.location+'').indexOf('"
@@ -188,8 +188,8 @@ public class HtmlUtils extends SharedHtmlUtils {
 	 * @throws IOException
 	 *             ...
 	 */
-	public static void writeInTheMiddleOfAResponse(@NeverNull Writer w,
-			@NeverNull String messageHtml, @NeverNull String redirectUrl, int redirectWaitMs)
+	public static void writeInTheMiddleOfAResponse(@NeverNull final Writer w,
+			@NeverNull final String messageHtml, @NeverNull final String redirectUrl, final int redirectWaitMs)
 			throws IOException {
 		w.write("<div style='" + "position:absolute; left:20px; top:20px;" + "z-index: 1000;"
 				+ "padding: 10px;" + "background-color: #FFC;" + "font-family: sans-serif;"
@@ -220,7 +220,7 @@ public class HtmlUtils extends SharedHtmlUtils {
 
 	}
 
-	public static void script(@NeverNull Writer w, String scriptCode) throws IOException {
+	public static void script(@NeverNull final Writer w, final String scriptCode) throws IOException {
 		w.write("<script type='text/javascript'>\n");
 		w.write(scriptCode);
 		w.write("\n</script>\n");

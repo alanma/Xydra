@@ -7,45 +7,46 @@ import java.util.Set;
 
 /**
  * Packagename + classes, sub-packages
- * 
+ *
  * @author xamde
  */
 public class PackageSpec {
 
 	public Set<ClassSpec> classes = new HashSet<ClassSpec>();
 
-	private String fullPackageName;
+	private final String fullPackageName;
 
 	public Class<?> generatedFrom;
 
-	private boolean isBuiltIn;
+	private final boolean isBuiltIn;
 
 	public List<PackageSpec> subPackages = new ArrayList<PackageSpec>();
 
-	public PackageSpec(String fullPackageName, boolean isBuiltIn) {
+	public PackageSpec(final String fullPackageName, final boolean isBuiltIn) {
 		this.fullPackageName = fullPackageName;
 		this.isBuiltIn = isBuiltIn;
 	}
 
-	public ClassSpec addAbstractClass(String name) {
+	public ClassSpec addAbstractClass(final String name) {
 		return new ClassSpec(this, "abstract class", name);
 	}
 
-	public ClassSpec addClass(String name) {
+	public ClassSpec addClass(final String name) {
 		return new ClassSpec(this, "class", name);
 	}
 
 	/**
 	 * Don't always create a new one, also return existing one with same name
-	 * 
+	 *
 	 * @param name
 	 * @return an existing or new classSpec with the given name
 	 */
-	public ClassSpec addInterface(String name) {
+	public ClassSpec addInterface(final String name) {
 		// slow, but who cares
-		for (ClassSpec cs : this.classes) {
-			if (cs.getName().equals(name))
+		for (final ClassSpec cs : this.classes) {
+			if (cs.getName().equals(name)) {
 				return cs;
+			}
 		}
 		// else
 		return new ClassSpec(this, "interface", name);
@@ -56,7 +57,7 @@ public class PackageSpec {
 				+ this.fullPackageName);
 		System.out.println("Generated from: "
 				+ (this.generatedFrom == null ? "UNKNOWN" : this.generatedFrom.getCanonicalName()));
-		for (ClassSpec c : this.classes) {
+		for (final ClassSpec c : this.classes) {
 			c.dump();
 		}
 	}

@@ -14,11 +14,11 @@ public class GwtXydraMapped implements IHasXId {
 	public GwtXydraMapped() {
 	}
 
-	public void init(XWritableModel model, XId id) {
+	public void init(final XWritableModel model, final XId id) {
 		this.oop = new SharedProxy(model, id);
 	}
 
-	public GwtXydraMapped(XWritableModel model, XId id) {
+	public GwtXydraMapped(final XWritableModel model, final XId id) {
 		this.oop = new SharedProxy(model, id);
 	}
 

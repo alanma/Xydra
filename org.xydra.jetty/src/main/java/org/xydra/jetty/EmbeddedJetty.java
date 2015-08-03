@@ -22,9 +22,9 @@ import org.xydra.restless.utils.HostUtils;
 
 /**
  * A nicer way to configure Jetty. Less complex.
- * 
+ *
  * Zero-arg constructor.
- * 
+ *
  * @author xamde
  */
 public abstract class EmbeddedJetty {
@@ -47,11 +47,13 @@ public abstract class EmbeddedJetty {
 	private int port;
 
 	/**
-	 * The preferred way to config.
-	 * 
+	 * The preferred way to configure port, doc root, context path, usage of default servlet.
+	 *
+	 *  Also inits logging (mapping jetty logging to Xydra logging)
+	 *
 	 * @param conf
 	 */
-	public synchronized void configureFromConf(IConfig conf) {
+	public synchronized void configureFromConf(final IConfig conf) {
 		assert conf != null;
 		this.port = conf.getInt(ConfParamsJetty.PORT);
 		this.contextPath = conf.getString(ConfParamsJetty.CONTEXT_PATH);
@@ -65,13 +67,13 @@ public abstract class EmbeddedJetty {
 		// JettyLog2XydraLogger("initialLogger"));
 		try {
 			org.eclipse.jetty.util.log.Log.setLog(new org.eclipse.jetty.util.log.Slf4jLog());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 		// didn't work
 		// System.setProperty("org.eclipse.jetty.util.log.class",
 		// JettyLog2XydraLogger.class.getCanonicalName());
-		String serverVersion = Server.getVersion();
+		final String serverVersion = Server.getVersion();
 		log.info("Mapped Jetty logging to global logging. Expect '" + serverVersion
 				+ "' as next line");
 	}
@@ -80,11 +82,11 @@ public abstract class EmbeddedJetty {
 	protected long startTime;
 
 	@NeverNull
-	private WebAppContext webapp = new WebAppContext();
+	private final WebAppContext webapp = new WebAppContext();
 
 	/**
 	 * Make sure to #configure first
-	 * 
+	 *
 	 * @return the URI where the server runs
 	 */
 	public URI startServer() {
@@ -131,7 +133,7 @@ public abstract class EmbeddedJetty {
 		Resource base;
 		try {
 			base = Resource.newResource(this.docRootURL);
-		} catch (MalformedURLException e2) {
+		} catch (final MalformedURLException e2) {
 			throw new RuntimeException(e2);
 		}
 		this.webapp.setBaseResource(base);
@@ -139,7 +141,7 @@ public abstract class EmbeddedJetty {
 
 		configureWebapp(this.webapp);
 
-		HandlerList handlers = new HandlerList();
+		final HandlerList handlers = new HandlerList();
 		handlers.setHandlers(new Handler[] {
 				// staticHandler,
 				this.webapp, new DefaultHandler() });
@@ -150,7 +152,7 @@ public abstract class EmbeddedJetty {
 		this.startTime = System.currentTimeMillis();
 		try {
 			// Setup JMX
-			MBeanContainer mbContainer = new MBeanContainer(
+			final MBeanContainer mbContainer = new MBeanContainer(
 					ManagementFactory.getPlatformMBeanServer());
 			this.server.addEventListener(mbContainer);
 			this.server.addBean(mbContainer);
@@ -165,7 +167,7 @@ public abstract class EmbeddedJetty {
 						System.out.println("Starting...");
 						try {
 							Thread.sleep(1000);
-						} catch (InterruptedException e) {
+						} catch (final InterruptedException e) {
 						}
 					}
 					System.out.println("Done. Now " + EmbeddedJetty.this.server.getState());
@@ -174,18 +176,18 @@ public abstract class EmbeddedJetty {
 			}.start();
 
 			// this.server.join();
-		} catch (BindException e) {
+		} catch (final BindException e) {
 			log.warn("App is already running at port " + this.port
 					+ ", could not automatically stop it.");
 			System.exit(1);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 
 		try {
-			String uriString = "http://" + HostUtils.getLocalHostname() + ":" + this.port + "/";
+			final String uriString = "http://" + HostUtils.getLocalHostname() + ":" + this.port + "/";
 			return new URI(uriString).resolve(this.contextPath);
-		} catch (URISyntaxException e) {
+		} catch (final URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -194,7 +196,7 @@ public abstract class EmbeddedJetty {
 
 	/**
 	 * This must be implemented by sub-classes
-	 * 
+	 *
 	 * @param webapp
 	 */
 	protected abstract void configureWebapp(WebAppContext webapp);
@@ -204,7 +206,7 @@ public abstract class EmbeddedJetty {
 			try {
 				this.server.stop();
 				this.server.destroy();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new RuntimeException("error stopping server", e);
 			}
 			this.server = null;

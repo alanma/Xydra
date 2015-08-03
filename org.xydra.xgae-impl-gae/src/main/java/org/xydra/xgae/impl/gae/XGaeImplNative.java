@@ -19,9 +19,9 @@ import com.google.apphosting.api.ApiProxy;
  * Implements the IXGae abstraction interface simply by calling the real Google
  * Appengine. Includes some tweaks to improve testability, e.g. another local
  * memcache impl.
- * 
+ *
  * FIXME deal with {@link GaeTestfixer}
- * 
+ *
  * @author xamde
  */
 public class XGaeImplNative extends AbstractXGaeBaseImpl implements IXGae {

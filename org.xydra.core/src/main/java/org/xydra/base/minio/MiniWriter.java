@@ -15,14 +15,14 @@ public interface MiniWriter {
 
 	/**
 	 * Flushes the underlying stream, if there is one
-	 * 
+	 *
 	 * @throws MiniIOException
 	 */
 	void flush() throws MiniIOException;
 
 	/**
 	 * Closes the underlying stream, if there is one
-	 * 
+	 *
 	 * @throws MiniIOException
 	 */
 	void close() throws MiniIOException;

@@ -3,6 +3,7 @@ package org.xydra.store.impl.gae;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.xydra.base.BaseRuntime;
 import org.xydra.core.X;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
@@ -20,11 +21,11 @@ public class GaeDetailedPersistenceTestForTransactions extends
 	 * heap space bigger through an Eclipse parameter - but this doesn't seem to
 	 * be the right way to go, using Xydra as I do in the test shouldn't result
 	 * in allocating the complete heap space, I think.
-	 * 
+	 *
 	 * I unfortunately don't know the reason. Are the XModel-Java Objects too
 	 * big or is the output on the console from the logger "too much"? Running
 	 * the MemoryPersistenceTest of org.xydra.core never shows this behavior.
-	 * 
+	 *
 	 * ~Kaidel
 	 */
 
@@ -41,7 +42,7 @@ public class GaeDetailedPersistenceTestForTransactions extends
 
 		super.persistence = new GaePersistence(super.repoId);
 		super.persistence.clear();
-		super.comFactory = X.getCommandFactory();
+		super.comFactory = BaseRuntime.getCommandFactory();
 
 		Assert.assertTrue(log.isDebugEnabled());
 	}

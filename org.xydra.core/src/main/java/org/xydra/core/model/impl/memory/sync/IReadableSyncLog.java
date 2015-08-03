@@ -7,11 +7,11 @@ import org.xydra.base.change.XEvent;
 
 
 public interface IReadableSyncLog {
-	
+
 	/**
 	 * Returns an iterator over all {@link ISyncLogEntry} that were logged after
 	 * (and including) beginRevision and before (but not including) endRevision.
-	 * 
+	 *
 	 * @param beginRevision
 	 * @param endRevision
 	 * @return an iterator over all matching {@link ISyncLogEntry}
@@ -21,33 +21,33 @@ public interface IReadableSyncLog {
 	 *             endRevision
 	 */
 	Iterator<ISyncLogEntry> getSyncLogEntriesBetween(long beginRevision, long endRevision);
-	
+
 	/**
 	 * Returns a list of all {@link ISyncLogEntry} that were logged after (and
 	 * including) the given revision number.
-	 * 
+	 *
 	 * @param revisionNumber
 	 * @return all {@link ISyncLogEntry} until (but not including) the given
 	 *         revision number.
 	 * @throws IndexOutOfBoundsException if revisionNumber is negative
 	 */
 	Iterator<ISyncLogEntry> getSyncLogEntriesSince(long revisionNumber);
-	
+
 	/**
 	 * Returns a list of all {@link ISyncLogEntry} that occurred until (but not
 	 * including) the given revision number.
-	 * 
+	 *
 	 * @param revisionNumber
 	 * @return all {@link ISyncLogEntry} until (but not including) the given
 	 *         revision number.
 	 * @throws IndexOutOfBoundsException if revisionNumber is negative
 	 */
 	Iterator<ISyncLogEntry> getSyncLogEntriesUntil(long revisionNumber);
-	
+
 	/**
 	 * Returns the ISyncLogEntry (basically a pair of {@link XCommand} and
 	 * {@link XEvent}) this sync log logged at the given revision number
-	 * 
+	 *
 	 * @param revisionNumber the revision number which corresponding
 	 *            {@link ISyncLogEntry} logged by this sync log is to be
 	 *            returned

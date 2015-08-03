@@ -33,11 +33,11 @@ public class GaeConfigurationResource {
 	 * @param path
 	 *            should be empty string
 	 */
-	public static void restless(Restless r, String path) {
+	public static void restless(final Restless r, final String path) {
 		r.addMethod(path + "/gaeconf", "GET", GaeConfigurationResource.class, "index", true);
 	}
 
-	private static void addCommonStyle(Writer w) throws IOException {
+	private static void addCommonStyle(final Writer w) throws IOException {
 		w.write("<style type='text/css'>\n"
 
 		+ "form { display:inline; } \n"
@@ -68,9 +68,9 @@ public class GaeConfigurationResource {
 	/**
 	 * Take all parameters found {@link HttpServletRequest} and put them in the
 	 * current configuration.
-	 * 
+	 *
 	 * Then display current config.
-	 * 
+	 *
 	 * @param req
 	 *            ..
 	 * @param res
@@ -78,12 +78,12 @@ public class GaeConfigurationResource {
 	 * @throws IOException
 	 *             ...
 	 */
-	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
+	public static void index(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
 		GaeConfigurationManager.assertValidGaeConfiguration();
-		NanoClock c = new NanoClock().start();
+		final NanoClock c = new NanoClock().start();
 
 		ServletUtils.headers(res, ServletUtils.CONTENTTYPE_TEXT_HTML);
-		Writer w = res.getWriter();
+		final Writer w = res.getWriter();
 		HtmlUtils.writeHtmlHeaderOpenBody(w,
 				"GAE cache conf on instance " + XydraRuntime.getInstanceId());
 		w.flush();
@@ -95,7 +95,7 @@ public class GaeConfigurationResource {
 		w.write("Processing current request...<br />");
 		// process backend conf
 		w.write("Processing GAE back-end configuration from request...<br />");
-		Map<String, String> params = ServletUtils.getRequestparametersAsMap(req);
+		final Map<String, String> params = ServletUtils.getRequestparametersAsMap(req);
 		w.write("<dl class='cpodebug'>");
 		w.write("<dt>Clear memcache</dt><dd>");
 		handleClearMemcache(params, w);
@@ -109,7 +109,7 @@ public class GaeConfigurationResource {
 		// load current instance
 		w.write("Loading current GAE conf ...<br />");
 		w.flush();
-		GaeConfiguration gaeConf = GaeConfigurationManager.getCurrentConfiguration();
+		final GaeConfiguration gaeConf = GaeConfigurationManager.getCurrentConfiguration();
 		assert gaeConf.isStillValid();
 		w.write("Valid for " + gaeConf.getTimeToLive() + " ms (until " + gaeConf.getValidUntilUTC()
 				+ ") <br />");
@@ -119,12 +119,12 @@ public class GaeConfigurationResource {
 		w.write("Processing updates to current conf ...<br />");
 		w.flush();
 		// first extract validUtc
-		String validUntilUtcStr = params.get(GaeConfiguration.PROP_VALID_UTC);
+		final String validUntilUtcStr = params.get(GaeConfiguration.PROP_VALID_UTC);
 
-		Map<String, String> changeMap = XydraConfigUtils.getChanges(gaeConf.map(), params);
+		final Map<String, String> changeMap = XydraConfigUtils.getChanges(gaeConf.map(), params);
 		boolean changes = false;
-		for (String key : changeMap.keySet()) {
-			String value = changeMap.get(key);
+		for (final String key : changeMap.keySet()) {
+			final String value = changeMap.get(key);
 			if (value.equals(XydraConfigUtils.EMPTY_VALUE)) {
 				// remove request, persist as key=empty so that instances can
 				// know about this change
@@ -158,10 +158,10 @@ public class GaeConfigurationResource {
 		 * Display current config
 		 */
 		w.write("<h2>Config summary for instance " + XydraRuntime.getInstanceId() + " </h2>");
-		long lastUpdateMsAgo = System.currentTimeMillis() - XydraRuntime.getLastTimeInitialisedAt();
+		final long lastUpdateMsAgo = System.currentTimeMillis() - XydraRuntime.getLastTimeInitialisedAt();
 		w.write("Last XydraRuntime init on this instance was " + lastUpdateMsAgo + " ms ago.<br />");
 
-		TreeSet<String> keys = new TreeSet<String>();
+		final TreeSet<String> keys = new TreeSet<String>();
 		keys.addAll(params.keySet());
 		keys.addAll(XydraRuntime.getConfigMap().keySet());
 		keys.addAll(gaeConf.map().keySet());
@@ -192,8 +192,8 @@ public class GaeConfigurationResource {
 		"<th scope='col'>This instance</th>" +
 
 		"</tr>");
-		for (String key : keys) {
-			String gaeConfValue = normalize(gaeConf.map().get(key));
+		for (final String key : keys) {
+			final String gaeConfValue = normalize(gaeConf.map().get(key));
 
 			w.write("<tr><td>" + key + "</td>" +
 
@@ -210,10 +210,10 @@ public class GaeConfigurationResource {
 		w.write("Add key = <input type='text' name='__protoKey' value='' />");
 		w.write(", value = <input type='text' name='__protoValue' value='' /><br />");
 
-		long now = System.currentTimeMillis();
-		long in1Minute = now + (60 * 1000);
-		long in1Hour = now + (60 * 60 * 1000);
-		long in1Day = now + (24 * 60 * 60 * 1000);
+		final long now = System.currentTimeMillis();
+		final long in1Minute = now + 60 * 1000;
+		final long in1Hour = now + 60 * 60 * 1000;
+		final long in1Day = now + 24 * 60 * 60 * 1000;
 		w.write("Valid for "
 
 		+ "<input type='radio' name='" + GaeConfiguration.PROP_VALID_UTC + "' value='" + in1Minute
@@ -243,9 +243,9 @@ public class GaeConfigurationResource {
 		HtmlUtils.endHtmlPage(w);
 	}
 
-	private static void handleProcessConfigNow(Map<String, String> params, Writer w)
+	private static void handleProcessConfigNow(final Map<String, String> params, final Writer w)
 			throws IOException {
-		String value = normalize(params.get(GaeConfigSettings.PROCESS_CONFIG_NOW));
+		final String value = normalize(params.get(GaeConfigSettings.PROCESS_CONFIG_NOW));
 		if (!value.equals("")) {
 			w.write("Force processing local gae conf (as it was before this request)<br/>");
 			w.write("Force reload from datastore...<br/>");
@@ -269,7 +269,7 @@ public class GaeConfigurationResource {
 	 *            can be null
 	 * @return never null. Returns value or empty String to denote null.
 	 */
-	public static String normalize(String value) {
+	public static String normalize(final String value) {
 		if (value == null || value.trim().equals("") || value.trim().equals("null")
 				|| value.trim().equals("false")) {
 			return "";
@@ -278,7 +278,7 @@ public class GaeConfigurationResource {
 		}
 	}
 
-	private static String formField(String key, String initialValue) {
+	private static String formField(final String key, final String initialValue) {
 		return "<input type='text' name='" + key + "' value='" + initialValue + "' />";
 	}
 
@@ -291,8 +291,8 @@ public class GaeConfigurationResource {
 	 *            never null
 	 * @throws IOException
 	 */
-	private static void setNewTimeToLive(GaeConfiguration currentConf, String validUntilUtcStr,
-			Writer w) throws IOException {
+	private static void setNewTimeToLive(final GaeConfiguration currentConf, final String validUntilUtcStr,
+			final Writer w) throws IOException {
 		if (validUntilUtcStr == null) {
 			log.warn("No paramter '" + GaeConfiguration.PROP_VALID_UTC
 					+ "' set. Using default 60 seconds.");
@@ -305,9 +305,9 @@ public class GaeConfigurationResource {
 				+ " ms<br />");
 	}
 
-	private static void handleClearMemcache(Map<String, String> params, Writer w)
+	private static void handleClearMemcache(final Map<String, String> params, final Writer w)
 			throws IOException {
-		String value = normalize(params.get(GaeConfigSettings.PROP_CLEARMEMCACHE_NOW));
+		final String value = normalize(params.get(GaeConfigSettings.PROP_CLEARMEMCACHE_NOW));
 		if (!value.equals("")) {
 			w.write("Clearing memcache <b>now</b> (effective for all instances)<br />");
 			w.flush();
@@ -327,24 +327,24 @@ public class GaeConfigurationResource {
 	 * @return true if the given instanceId matches the ID of this AppEngine
 	 *         server instance.
 	 */
-	private static boolean onRightInstance(String requestedInstanceId) {
+	private static boolean onRightInstance(final String requestedInstanceId) {
 		return XydraRuntime.getInstanceId().equals(requestedInstanceId);
 	}
 
 	/**
 	 * Set some parameters just for a specific instance.
-	 * 
+	 *
 	 * Currently, there are no instance specific parameters.
-	 * 
+	 *
 	 * @param instanceId
 	 * @param res
-	 * 
+	 *
 	 * @throws IOException
 	 *             ...
 	 */
-	public static void setInstanceConfiguration(String instanceId, HttpServletResponse res)
+	public static void setInstanceConfiguration(final String instanceId, final HttpServletResponse res)
 			throws IOException {
-		Writer w = HtmlUtils.startHtmlPage(res,
+		final Writer w = HtmlUtils.startHtmlPage(res,
 				"Setting configuration on instance " + XydraRuntime.getInstanceId());
 		w.write("InstanceID: " + XydraRuntime.getInstanceId() + "<br />");
 		w.write("Requested instance: " + instanceId + "<br />");

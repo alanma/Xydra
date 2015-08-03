@@ -36,18 +36,18 @@ public class RemoveElementDialog extends DialogBox {
 	@UiField(provided = true)
 	ButtonPanel buttonPanel;
 
-	private XAddress address;
+	private final XAddress address;
 
-	public RemoveElementDialog(final Presenter presenter, XAddress address) {
+	public RemoveElementDialog(final Presenter presenter, final XAddress address) {
 
 		super();
 
 		this.address = address;
 
-		ClickHandler okHandler = new ClickHandler() {
+		final ClickHandler okHandler = new ClickHandler() {
 
 			@Override
-			public void onClick(ClickEvent event) {
+			public void onClick(final ClickEvent event) {
 				RemoveElementDialog.this.removeFromParent();
 				presenter.remove(RemoveElementDialog.this.address);
 			}
@@ -61,10 +61,10 @@ public class RemoveElementDialog extends DialogBox {
 				+ "?");
 
 		this.setStyleName("dialogStyle");
-		this.setText("remove Entity");
-		this.getElement().setId("removeDialog");
+		setText("remove Entity");
+		getElement().setId("removeDialog");
 
-		this.center();
+		center();
 	}
 
 }

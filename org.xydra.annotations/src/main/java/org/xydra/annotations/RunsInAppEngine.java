@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Code with this tag runs in the Google AppEngine for Java (GAE/J).
- * 
+ *
  * AppEngine has no notion of files.
  */
 @Retention(RetentionPolicy.SOURCE)

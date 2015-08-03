@@ -34,22 +34,22 @@ import org.xydra.log.coreimpl.sysout.DefaultLoggerFactorySPI;
  * This class is starts a Jetty server configured to allow testing of the
  * webapp, loading static files directly from src/main/webapp. This class is not
  * required to run the webapp.
- * 
+ *
  * This class requires to build and assemble the web app: call
  * <code>mvn clean compile gwt:compile gwt:mergewebxml war:war -Dmaven.test.skip=true -o
  * </code>
- * 
+ *
  * <p>
  * If only the client source code changed, use <code>mvn gwt:compile</code>
- * 
+ *
  * <p>
  * If the web.xml changed use
  * <code>mvn gwt:mergwebxml war:war to update the web.xml in target/iba-1.0.0-SNAPSHOT/WEB-INF
- * 
+ *
  * <p>If only static files have been modified, no call is neccesary as this Jetty is configured to load the directly from src/main/webapp.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class GwtTestServer {
 
@@ -60,7 +60,7 @@ public class GwtTestServer {
 		return LoggerFactory.getLogger(GwtTestServer.class);
 	}
 
-	private int port;
+	private final int port;
 
 	private Server server;
 
@@ -70,7 +70,7 @@ public class GwtTestServer {
 		this(8888);
 	}
 
-	public GwtTestServer(int port) {
+	public GwtTestServer(final int port) {
 		this.port = port;
 	}
 
@@ -79,11 +79,11 @@ public class GwtTestServer {
 		// Create an instance of the jetty server.
 		this.server = new Server(this.port);
 
-		String contextPath = "/";
+		final String contextPath = "/";
 
 		// Where to server files from.
-		File docRoot = new File("target/gwt-0.1.4-SNAPSHOT");
-		File webappRoot = new File("src/main/webapp");
+		final File docRoot = new File("target/gwt-0.1.4-SNAPSHOT");
+		final File webappRoot = new File("src/main/webapp");
 
 		/*
 		 * Create the webapp. This will load the servlet configuration from
@@ -94,17 +94,17 @@ public class GwtTestServer {
 		// Add the servlets.
 		this.webapp.setClassLoader(Thread.currentThread().getContextClassLoader());
 
-		HandlerList hl = new HandlerList();
+		final HandlerList hl = new HandlerList();
 
 		// Add a handler serving static files directly from src/main/webapp
-		ResourceHandler publicDocs = new ResourceHandler() {
+		final ResourceHandler publicDocs = new ResourceHandler() {
 			// nothing
 		};
 		publicDocs.setResourceBase(webappRoot.getAbsolutePath());
 		hl.addHandler(publicDocs);
 
 		// Add a handler serving static files directly from src/main/webapp
-		ResourceHandler gwtFiles = new ResourceHandler() {
+		final ResourceHandler gwtFiles = new ResourceHandler() {
 			// nothing
 		};
 		gwtFiles.setResourceBase(docRoot.getAbsolutePath());
@@ -112,7 +112,7 @@ public class GwtTestServer {
 
 		this.webapp.setHandler(hl);
 
-		FilterHolder filterHolder = new FilterHolder();
+		final FilterHolder filterHolder = new FilterHolder();
 		filterHolder.setFilter(new Filter() {
 
 			@Override
@@ -121,10 +121,10 @@ public class GwtTestServer {
 			}
 
 			@Override
-			public void doFilter(ServletRequest request, ServletResponse response,
-					FilterChain filterChain) throws IOException, ServletException {
+			public void doFilter(final ServletRequest request, final ServletResponse response,
+					final FilterChain filterChain) throws IOException, ServletException {
 				System.out.println("Jetty GET " + ((HttpServletRequest) request).getRequestURI());
-				HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
+				final HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
 						(HttpServletResponse) response);
 
 				// Modify the servlet which serves png and gif files so that it
@@ -133,14 +133,14 @@ public class GwtTestServer {
 				// removed. The Expires header should be set according to the
 				// caching recommendations mentioned in the previous section.
 
-				Calendar cal = Calendar.getInstance();
+				final Calendar cal = Calendar.getInstance();
 				cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) + 1);
 
-				SimpleDateFormat dateFormatter = new SimpleDateFormat(
+				final SimpleDateFormat dateFormatter = new SimpleDateFormat(
 						"EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-				TimeZone tz = TimeZone.getTimeZone("GMT");
+				final TimeZone tz = TimeZone.getTimeZone("GMT");
 				dateFormatter.setTimeZone(tz);
-				String rfc1123 = dateFormatter.format(cal.getTime());
+				final String rfc1123 = dateFormatter.format(cal.getTime());
 				((HttpServletResponse) response).addHeader("Expires", rfc1123);
 				((HttpServletResponse) response).addHeader("Cache-Control",
 						"public; max-age=31536000");
@@ -148,7 +148,7 @@ public class GwtTestServer {
 			}
 
 			@Override
-			public void init(FilterConfig filterConfig) {
+			public void init(final FilterConfig filterConfig) {
 				// do nothing
 			}
 		});
@@ -161,7 +161,7 @@ public class GwtTestServer {
 
 		try {
 			this.server.start();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 
@@ -171,19 +171,19 @@ public class GwtTestServer {
 				uri = uri.resolve(contextPath + "/");
 			}
 			return uri;
-		} catch (URISyntaxException e) {
+		} catch (final URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
 
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(final String[] args) throws Exception {
 
-		TestServer testServer = new TestServer();
+		final TestServer testServer = new TestServer();
 
-		URI store = testServer.startXydraServer(new File("src/test/resources/webapp"));
+		final URI store = testServer.startXydraServer(new File("src/test/resources/webapp"));
 
-		URI ui = new GwtTestServer().startServer();
+		final URI ui = new GwtTestServer().startServer();
 
 		log.info("Started servers.");
 		log.info(" - Backend is at " + store);

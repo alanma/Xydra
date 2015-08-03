@@ -10,7 +10,7 @@ public interface IDatastoreAsync extends IDatastoreShared {
 
 	/**
 	 * Deletes the {@link SEntity} with the given {@link SKey} from GAE
-	 * 
+	 *
 	 * @param key
 	 *            The entity to remove from the datastore.
 	 * @return a Future to be aware when the delete actually happens
@@ -20,7 +20,7 @@ public interface IDatastoreAsync extends IDatastoreShared {
 	/**
 	 * Deletes the {@link SEntity} with the given {@link SKey} asynchronously
 	 * from GAE
-	 * 
+	 *
 	 * @param key
 	 *            The entity to remove from the datastore.
 	 * @param txn
@@ -32,17 +32,17 @@ public interface IDatastoreAsync extends IDatastoreShared {
 
 	/**
 	 * Batch get.
-	 * 
+	 *
 	 * Retrieves the set of Entities matching keys. The result Map will only
 	 * contain Keys for which Entities could be found.
-	 * 
+	 *
 	 * Note: If there is a current Transaction, this operation will execute
 	 * within that Transaction. In this case it is up to the caller to commit or
 	 * rollback. If there is no current Transaction, the behavior of this method
 	 * with respect to Transactions will be determined by the
 	 * ImplicitTransactionManagementPolicy available on the
 	 * DatastoreServiceConfig.
-	 * 
+	 *
 	 * @param keys
 	 *            never null
 	 * @param txn
@@ -69,7 +69,7 @@ public interface IDatastoreAsync extends IDatastoreShared {
 
 	/**
 	 * Batch put
-	 * 
+	 *
 	 * @param it
 	 * @return a future that returns the keys of the putted entities on success
 	 */
@@ -77,7 +77,7 @@ public interface IDatastoreAsync extends IDatastoreShared {
 
 	/**
 	 * Stores a GAE {@link SEntity} asynchronously in the GAE back-end
-	 * 
+	 *
 	 * @param entity
 	 *            The entity to write to the datastore.
 	 * @return a future that returns the key of the putted entity on success
@@ -86,7 +86,7 @@ public interface IDatastoreAsync extends IDatastoreShared {
 
 	/**
 	 * Stores a GAE {@link SEntity} asynchronously in the GAE back-end
-	 * 
+	 *
 	 * @param entity
 	 *            The entity to write to the datastore.
 	 * @param txn
@@ -96,14 +96,14 @@ public interface IDatastoreAsync extends IDatastoreShared {
 
 	/**
 	 * Begin a synchronous GAE Transaction.
-	 * 
+	 *
 	 * @return The started Transaction.
 	 */
 	Future<STransaction> beginTransaction();
 
 	/**
 	 * Commit the given GAE Transaction.
-	 * 
+	 *
 	 * @param txn
 	 *            The Transaction to commit.
 	 * @throws ConcurrentModificationException

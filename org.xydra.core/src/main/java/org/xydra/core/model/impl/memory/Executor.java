@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.xydra.annotations.CanBeNull;
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -42,36 +43,36 @@ import org.xydra.sharedutils.XyAssert;
 
 /**
  * Does not deal with synchronisation.
- * 
+ *
  * Does not deal with entity-does-not-exist.
- * 
+ *
  * Implementation notes: Transaction locking is controlled by root.
- * 
- * 
- * 
+ *
+ *
+ *
  * === Transaction handling ===
- * 
+ *
  * execute XTransaction on model; exists? => delegate executing txn to object
- * 
- * 
+ *
+ *
  * execute XTransaction on object; exists?
- * 
- * 
+ *
+ *
  * === Model & Repo handling === Some cases that can happen:
- * 
+ *
  * model has father, model exists =
- * 
+ *
  * model has father, model does not exist
- * 
- * 
+ *
+ *
  * model has no father, model exists
- * 
+ *
  * model has no father, model does not exist
- * 
+ *
  * === Strategy for executing commands ===
- * 
+ *
  * Cases:
- * 
+ *
  * <pre>
  * Type              | Executed on         | Result is
  * ------------------+---------------------+---------------------------------
@@ -81,16 +82,16 @@ import org.xydra.sharedutils.XyAssert;
  * RepositoryCommand | Repository or Model | ModelEvent  or TransactionEvent
  *       Transaction | Model or Object     |                TransactionEvent
  * </pre>
- * 
+ *
  * Strategy:
- * 
+ *
  * <pre>
  * For txn: Wrap in ChangedEntity to preserve revision numbers before txn
- * 
+ *
  * For each atomic command:
- * 
+ *
  *     Check some assertions
- *     
+ *
  *     try {
  *       ChangedMOF changedMOF = evaluateRMOFCommand(XAtomicCommand, revNrs before txn, stateWithinTxn)
  *       if(changedMOF==null) return NOCHANGE;
@@ -102,19 +103,19 @@ import org.xydra.sharedutils.XyAssert;
  *     } catch (ExecutionException) {
  *       return FAILED;
  *     }
- *     
- *     Command + State before txn -> 
- *         ChangedEntity (Success) or 
- *         Exception (Failed) or 
- *         null (NoChange) 
- * 
+ *
+ *     Command + State before txn ->
+ *         ChangedEntity (Success) or
+ *         Exception (Failed) or
+ *         null (NoChange)
+ *
  * if changes:
  * ChangedEntity -> Events + Apply changes (have all the same nextRev)
  * </pre>
- * 
- * 
+ *
+ *
  * Command -evaluate-> ChangedField -create-> Event -apply->
- * 
+ *
  * @author xamde
  */
 public class Executor {
@@ -123,9 +124,9 @@ public class Executor {
 
 	/**
 	 * Execute a single field command, not part of a transaction.
-	 * 
+	 *
 	 * Events are fired to listener and root in an intermixed fashion.
-	 * 
+	 *
 	 * @param actorId @NeverNull
 	 * @param fieldCommand @NeverNull
 	 * @param modelState @CanBeNull
@@ -136,18 +137,18 @@ public class Executor {
 	 * @param root used to fire events @NeverNull
 	 * @return result of executing command
 	 */
-	public static long executeCommandOnField(XId actorId, XFieldCommand fieldCommand,
+	public static long executeCommandOnField(final XId actorId, final XFieldCommand fieldCommand,
 
-	XRevWritableModel modelState, XRevWritableObject objectState, XRevWritableField fieldState,
+	final XRevWritableModel modelState, final XRevWritableObject objectState, final XRevWritableField fieldState,
 
-	Root root, XRMOFChangeListener changeEventListener) {
+	final Root root, final XRMOFChangeListener changeEventListener) {
 		/* Assertions */
 		assert !(objectState == null && modelState != null);
 		XyAssert.xyAssert(!root.isTransactionInProgess());
 
 		/* Command -run-> ChangedField -create-> Events -apply-> -fire-> */
-		ChangedField fieldInTxn = new ChangedField(fieldState);
-		boolean success = fieldInTxn.executeCommand(fieldCommand);
+		final ChangedField fieldInTxn = new ChangedField(fieldState);
+		final boolean success = fieldInTxn.executeCommand(fieldCommand);
 		if (!success) {
 			log.warn("command " + fieldCommand + " failed");
 			return XCommand.FAILED;
@@ -157,21 +158,22 @@ public class Executor {
 		}
 
 		// create event
-		long currentModelRev = modelState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET : modelState
+		final long currentModelRev = modelState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET : modelState
 				.getRevisionNumber();
-		long currentObjectRev = objectState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET
+		final long currentObjectRev = objectState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET
 				: objectState.getRevisionNumber();
 
-		List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
+		final List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
 		DeltaUtils.createEventsForChangedField(events, currentModelRev, actorId, currentObjectRev,
 				fieldInTxn, root.isTransactionInProgess());
 		assert events.size() == 1;
-		XEvent event = createSingleEvent(events, actorId, fieldCommand.getTarget(),
+		final XEvent event = createSingleEvent(events, actorId, fieldCommand.getTarget(),
 				currentModelRev, currentObjectRev);
 		assert event.getChangeType() != ChangeType.TRANSACTION;
-		XFieldEvent fieldEvent = (XFieldEvent) event;
+		final XFieldEvent fieldEvent = (XFieldEvent) event;
 
 		@CanBeNull
+		final
 		XValue oldValue = fieldState.getValue();
 
 		// apply event
@@ -191,7 +193,7 @@ public class Executor {
 
 		(fieldEvent.getChangeType() == ChangeType.REMOVE || fieldEvent.getChangeType() == ChangeType.CHANGE)
 
-				&& (root.getSynchronizedRevision() >= fieldEvent.getOldFieldRevision())
+				&& root.getSynchronizedRevision() >= fieldEvent.getOldFieldRevision()
 
 		) {
 			assert oldValue != null;
@@ -218,9 +220,9 @@ public class Executor {
 
 	/**
 	 * Execute a field, object or model command or a transaction.
-	 * 
+	 *
 	 * Events are fired to listener and root in an intermixed fashion.
-	 * 
+	 *
 	 * @param actorId @NeverNull
 	 * @param command @NeverNull
 	 * @param repositoryState @CanBeNull
@@ -230,12 +232,12 @@ public class Executor {
 	 * @param changeEventListener @CanBeNull
 	 * @return resulting revision number or error code
 	 */
-	public static long executeCommandOnObject(XId actorId, XCommand command,
+	public static long executeCommandOnObject(final XId actorId, final XCommand command,
 
-	XWritableRepository repositoryState, XRevWritableModel modelState,
-			XRevWritableObject objectState,
+	final XWritableRepository repositoryState, final XRevWritableModel modelState,
+			final XRevWritableObject objectState,
 
-			Root root, XRMOFChangeListener changeEventListener) {
+			final Root root, final XRMOFChangeListener changeEventListener) {
 		/* Assertions */
 		assert objectState != null;
 		XyAssert.xyAssert(!root.isTransactionInProgess(),
@@ -246,8 +248,8 @@ public class Executor {
 		}
 
 		/* Command -run-> ChangedField -create-> Events -apply-> -fire-> */
-		ChangedObject objectInTxn = new ChangedObject(objectState);
-		boolean success = objectInTxn.executeCommand(command);
+		final ChangedObject objectInTxn = new ChangedObject(objectState);
+		final boolean success = objectInTxn.executeCommand(command);
 		if (!success) {
 			log.warn("command " + command + " failed");
 			if (command.getChangeType() == ChangeType.TRANSACTION) {
@@ -263,12 +265,12 @@ public class Executor {
 		}
 
 		// create event
-		long currentModelRev = modelState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET : modelState
+		final long currentModelRev = modelState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET : modelState
 				.getRevisionNumber();
-		List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
+		final List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
 		DeltaUtils.createEventsForChangedObject(events, actorId, objectInTxn,
 				root.isTransactionInProgess(), currentModelRev);
-		XEvent event = createSingleEvent(events, actorId, command.getTarget(), currentModelRev,
+		final XEvent event = createSingleEvent(events, actorId, command.getTarget(), currentModelRev,
 				objectState.getRevisionNumber());
 
 		// apply event
@@ -288,9 +290,9 @@ public class Executor {
 
 	/**
 	 * Execute a field, object, model or repository command or a transaction.
-	 * 
+	 *
 	 * Events are fired to listener and root in an intermixed fashion.
-	 * 
+	 *
 	 * @param actorId @NeverNull
 	 * @param command @NeverNull
 	 * @param root @NeverNull
@@ -299,11 +301,11 @@ public class Executor {
 	 * @param changeEventListener @CanBeNull
 	 * @return resulting revision number or error code
 	 */
-	public static long executeCommandOnModel(XId actorId, XCommand command,
+	public static long executeCommandOnModel(final XId actorId, final XCommand command,
 
-	XExistsRevWritableRepository repositoryState, XExistsRevWritableModel modelState,
+	final XExistsRevWritableRepository repositoryState, final XExistsRevWritableModel modelState,
 
-	Root root, XRMOFChangeListener changeEventListener) {
+	final Root root, final XRMOFChangeListener changeEventListener) {
 		/* Assertions */
 		assert modelState != null;
 		assert root != null;
@@ -314,8 +316,8 @@ public class Executor {
 		}
 
 		/* Command -run-> ChangedField -create-> Events -apply-> -fire-> */
-		ChangedModel modelInTxn = new ChangedModel(modelState);
-		boolean success = modelInTxn.executeCommand(command);
+		final ChangedModel modelInTxn = new ChangedModel(modelState);
+		final boolean success = modelInTxn.executeCommand(command);
 		if (!success) {
 			log.warn("command " + command + " failed");
 			if (command.getChangeType() == ChangeType.TRANSACTION) {
@@ -331,14 +333,14 @@ public class Executor {
 		}
 
 		// create event
-		long currentModelRev = modelState.getRevisionNumber();
-		List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
+		final long currentModelRev = modelState.getRevisionNumber();
+		final List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
 		DeltaUtils.createEventsForChangedModel(events, actorId, modelInTxn,
 				root.isTransactionInProgess());
 		long currentObjectRev;
 		if (command.getTarget().getObject() != null) {
 			// object txn
-			XRevWritableObject objectState = modelState.getObject(command.getTarget().getObject());
+			final XRevWritableObject objectState = modelState.getObject(command.getTarget().getObject());
 			if (objectState == null) {
 				throw new IllegalArgumentException("Cannot execute an objectCommand (" + command
 						+ ") on a non-existing object");
@@ -350,7 +352,7 @@ public class Executor {
 			currentObjectRev = RevisionConstants.REVISION_OF_ENTITY_NOT_SET;
 		}
 
-		XEvent event = createSingleEvent(events, actorId, command.getTarget(), currentModelRev,
+		final XEvent event = createSingleEvent(events, actorId, command.getTarget(), currentModelRev,
 				currentObjectRev);
 
 		// apply event
@@ -375,8 +377,8 @@ public class Executor {
 	 * @return the single event within the events list or a
 	 *         {@link XTransactionEvent} containing all given events
 	 */
-	public static XEvent createSingleEvent(List<XAtomicEvent> events, XId actorId, XAddress target,
-			long modelRevision, long objectRevision) {
+	public static XEvent createSingleEvent(final List<XAtomicEvent> events, final XId actorId, final XAddress target,
+			final long modelRevision, final long objectRevision) {
 		assert !events.isEmpty() : "no events in list";
 		if (events.size() == 1 && !events.get(0).inTransaction()) {
 			return events.get(0);
@@ -384,16 +386,16 @@ public class Executor {
 		XAddress txnTarget = target;
 		if (target.getAddressedType() == XType.XREPOSITORY) {
 			// need to construct the model address
-			txnTarget = XX.resolveModel(events.get(0).getTarget());
+			txnTarget = Base.resolveModel(events.get(0).getTarget());
 		}
 
-		XTransactionEvent txnEvent = MemoryTransactionEvent.createTransactionEvent(actorId,
+		final XTransactionEvent txnEvent = MemoryTransactionEvent.createTransactionEvent(actorId,
 				txnTarget, events, modelRevision, objectRevision);
 		return txnEvent;
 	}
 
-	private static void fireAtomicEvent(Root root, XRMOFChangeListener changeEventListener,
-			XAtomicEvent atomicEvent) {
+	private static void fireAtomicEvent(final Root root, final XRMOFChangeListener changeEventListener,
+			final XAtomicEvent atomicEvent) {
 		if (atomicEvent instanceof XFieldEvent) {
 			if (changeEventListener != null) {
 				changeEventListener.onChangeEvent((XFieldEvent) atomicEvent);
@@ -420,16 +422,16 @@ public class Executor {
 	/**
 	 * Fires the transaction events correctly: fires first atomic events, then
 	 * the transaction event itself
-	 * 
+	 *
 	 * @param root
 	 * @param changeEventListener @CanBeNull An additional changeEventListener
 	 * @param event
 	 */
-	private static void fireEvents(Root root, XRMOFChangeListener changeEventListener, XEvent event) {
+	private static void fireEvents(final Root root, final XRMOFChangeListener changeEventListener, final XEvent event) {
 		if (event instanceof XTransactionEvent) {
-			XTransactionEvent txnEvent = (XTransactionEvent) event;
+			final XTransactionEvent txnEvent = (XTransactionEvent) event;
 			for (int i = 0; i < txnEvent.size(); i++) {
-				XAtomicEvent atomicEvent = txnEvent.getEvent(i);
+				final XAtomicEvent atomicEvent = txnEvent.getEvent(i);
 				fireAtomicEvent(root, changeEventListener, atomicEvent);
 			}
 			/*
@@ -442,7 +444,7 @@ public class Executor {
 				root.fireTransactionEvent(txnEvent.getTarget().getParent(), txnEvent);
 			}
 		} else {
-			XAtomicEvent atomicEvent = (XAtomicEvent) event;
+			final XAtomicEvent atomicEvent = (XAtomicEvent) event;
 			fireAtomicEvent(root, changeEventListener, atomicEvent);
 		}
 	}

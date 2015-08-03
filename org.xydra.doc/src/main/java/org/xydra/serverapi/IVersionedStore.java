@@ -7,9 +7,9 @@ import org.xydra.base.XId;
 
 /**
  * Supports persistence, commands, transactions, versioning, access rights.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public interface IVersionedStore {
 

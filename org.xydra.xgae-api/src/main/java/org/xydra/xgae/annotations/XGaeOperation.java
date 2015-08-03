@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * A summary of which persistence and memcache operations are triggered by this
  * method.
- * 
+ *
  * @author xamde
  */
 @Retention(RetentionPolicy.SOURCE)

@@ -15,13 +15,13 @@ import org.xydra.log.spi.ILoggerFactorySPI;
 
 /**
  * In development mode log4j is used. In production, j.u.l. is used.
- * 
+ *
  * This class plays a double role. Calling {@link #activate()} uses the static
  * setup.
- * 
+ *
  * The zero-args constructor can be used to use {@link UniversalLogger} as a
  * delegating proxy.
- * 
+ *
  * @author xamde
  */
 @ThreadSafe
@@ -34,27 +34,27 @@ public class UniversalLogger implements ILoggerFactorySPI {
 
 	/**
 	 * Create and register appropriate factory.
-	 * 
+	 *
 	 * Don't set this manually to LoggerFactory.
-	 * 
+	 *
 	 * @param givenFactory
 	 * @CanBeNull
 	 * @param configSource
 	 */
 	@RequireConf(value = { ConfParamsXydrdaUniversalLog.GAE_IN_PRODUCTION,
 			ConfParamsXydrdaUniversalLog.GWT_IN_PRODUCTION })
-	public UniversalLogger(ILoggerFactorySPI givenFactory, String configSource) {
+	public UniversalLogger(final ILoggerFactorySPI givenFactory, final String configSource) {
 		this.innerFactory = configure(givenFactory, configSource);
 	}
 
-	private static ILoggerFactorySPI configure(ILoggerFactorySPI givenFactory, String configSource) {
+	private static ILoggerFactorySPI configure(final ILoggerFactorySPI givenFactory, final String configSource) {
 		ILoggerFactorySPI innerFactory = null;
-		IConfig conf = Env.get().conf();
+		final IConfig conf = Env.get().conf();
 		if (givenFactory == null) {
 			// reasonable auto-conf
-			boolean gwtInProduction = conf
+			final boolean gwtInProduction = conf
 					.getBoolean(ConfParamsXydrdaUniversalLog.GWT_IN_PRODUCTION);
-			boolean gaeInProduction = conf
+			final boolean gaeInProduction = conf
 					.getBoolean(ConfParamsXydrdaUniversalLog.GAE_IN_PRODUCTION);
 
 			if (gwtInProduction || gaeInProduction) {
@@ -75,23 +75,23 @@ public class UniversalLogger implements ILoggerFactorySPI {
 	}
 
 	@Override
-	public Logger getLogger(String name, Collection<ILogListener> logListener) {
+	public Logger getLogger(final String name, final Collection<ILogListener> logListener) {
 		return this.innerFactory.getLogger(name, logListener);
 	}
 
 	@Override
-	public Logger getWrappedLogger(String name, String fullyQualifiedNameOfDelegatingLoggerClass) {
+	public Logger getWrappedLogger(final String name, final String fullyQualifiedNameOfDelegatingLoggerClass) {
 		return this.innerFactory.getWrappedLogger(name, fullyQualifiedNameOfDelegatingLoggerClass);
 	}
 
 	@Override
-	public Logger getThreadSafeLogger(String name, Collection<ILogListener> logListeners) {
+	public Logger getThreadSafeLogger(final String name, final Collection<ILogListener> logListeners) {
 		return this.innerFactory.getThreadSafeLogger(name, logListeners);
 	}
 
 	@Override
-	public Logger getThreadSafeWrappedLogger(String name,
-			String fullyQualifiedNameOfDelegatingLoggerClass) {
+	public Logger getThreadSafeWrappedLogger(final String name,
+			final String fullyQualifiedNameOfDelegatingLoggerClass) {
 		return this.innerFactory.getThreadSafeWrappedLogger(name,
 				fullyQualifiedNameOfDelegatingLoggerClass);
 	}
@@ -106,16 +106,17 @@ public class UniversalLogger implements ILoggerFactorySPI {
 	/**
 	 * Configures default values of {@link ConfParamsXydrdaUniversalLog} and
 	 * sets logger factory.
-	 * 
+	 *
 	 * Sets config values into Env.{@link IConfig}.
-	 * 
+	 *
 	 * @param inGWT if running as compiled JavaScript
 	 * @param onGAE if running on App Engine
 	 */
-	public static synchronized void activate(boolean inGWT, boolean onGAE) {
-		if (activated)
+	public static synchronized void activate(final boolean inGWT, final boolean onGAE) {
+		if (activated) {
 			return;
-		IConfig conf = Env.get().conf();
+		}
+		final IConfig conf = Env.get().conf();
 
 		// set reasonable defaults
 		new ConfParamsXydrdaUniversalLog().configureDefaults(conf);

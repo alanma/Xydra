@@ -39,16 +39,16 @@ public class DatastoreImplGaeAsync extends DatastoreImplGaeBase implements IData
 
 	private static abstract class DebugFuture<K, V> implements Future<V> {
 
-		private Future<V> f;
-		private K key;
+		private final Future<V> f;
+		private final K key;
 
-		public DebugFuture(K key, Future<V> f) {
+		public DebugFuture(final K key, final Future<V> f) {
 			this.key = key;
 			this.f = f;
 		}
 
 		@Override
-		public boolean cancel(boolean mayInterruptIfRunning) {
+		public boolean cancel(final boolean mayInterruptIfRunning) {
 			return this.f.cancel(mayInterruptIfRunning);
 		}
 
@@ -64,7 +64,7 @@ public class DatastoreImplGaeAsync extends DatastoreImplGaeBase implements IData
 
 		@Override
 		public V get() throws InterruptedException, ExecutionException {
-			V result = this.f.get();
+			final V result = this.f.get();
 			log(this.key, result);
 			return result;
 		}
@@ -72,9 +72,9 @@ public class DatastoreImplGaeAsync extends DatastoreImplGaeBase implements IData
 		abstract void log(K key, V result);
 
 		@Override
-		public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
+		public V get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException,
 				TimeoutException {
-			V result = this.f.get(timeout, unit);
+			final V result = this.f.get(timeout, unit);
 			log(this.key, result);
 			return result;
 		}
@@ -83,27 +83,27 @@ public class DatastoreImplGaeAsync extends DatastoreImplGaeBase implements IData
 
 	/**
 	 * Almost copy&paste from {@link FutureUtils.TransformingFuture}
-	 * 
+	 *
 	 * @author xamde
-	 * 
+	 *
 	 * @param <K>
 	 * @param <I>
 	 * @param <O>
 	 */
 	private static abstract class TransformingDebugFuture<K, I, O> implements Future<O> {
 
-		private Future<I> f;
-		private K key;
-		private ITransformer<I, O> transformer;
+		private final Future<I> f;
+		private final K key;
+		private final ITransformer<I, O> transformer;
 
-		public TransformingDebugFuture(K key, Future<I> f, ITransformer<I, O> transformer) {
+		public TransformingDebugFuture(final K key, final Future<I> f, final ITransformer<I, O> transformer) {
 			this.key = key;
 			this.f = f;
 			this.transformer = transformer;
 		}
 
 		@Override
-		public boolean cancel(boolean mayInterruptIfRunning) {
+		public boolean cancel(final boolean mayInterruptIfRunning) {
 			return this.f.cancel(mayInterruptIfRunning);
 		}
 
@@ -119,8 +119,8 @@ public class DatastoreImplGaeAsync extends DatastoreImplGaeBase implements IData
 
 		@Override
 		public O get() throws InterruptedException, ExecutionException {
-			I in = this.f.get();
-			O out = this.transformer.transform(in);
+			final I in = this.f.get();
+			final O out = this.transformer.transform(in);
 			log(this.key, out);
 			return out;
 		}
@@ -128,10 +128,10 @@ public class DatastoreImplGaeAsync extends DatastoreImplGaeBase implements IData
 		abstract void log(K key, O result);
 
 		@Override
-		public O get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
+		public O get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException,
 				TimeoutException {
-			I in = this.f.get(timeout, unit);
-			O out = this.transformer.transform(in);
+			final I in = this.f.get(timeout, unit);
+			final O out = this.transformer.transform(in);
 			log(this.key, out);
 			return out;
 		}
@@ -139,31 +139,31 @@ public class DatastoreImplGaeAsync extends DatastoreImplGaeBase implements IData
 	}
 
 	private static class FutureDeleteEntity extends DebugFuture<SKey, Void> {
-		public FutureDeleteEntity(SKey key, Future<Void> f) {
+		public FutureDeleteEntity(final SKey key, final Future<Void> f) {
 			super(key, f);
 		}
 
 		@Override
-		void log(SKey key, Void result) {
+		void log(final SKey key, final Void result) {
 			log.debug(XGaeDebugHelper.dataPut(DATASTORE_NAME, XGaeDebugHelper.toString(key), null,
 					Timing.Finished));
 		}
 	}
 
 	private static class FutureGetEntity extends DebugFuture<SKey, SEntity> {
-		public FutureGetEntity(SKey key, Future<Entity> f) {
+		public FutureGetEntity(final SKey key, final Future<Entity> f) {
 			super(key, new FutureUtils.TransformingFuture<Entity, SEntity>(f,
 					new ITransformer<Entity, SEntity>() {
 
 						@Override
-						public SEntity transform(Entity in) {
+						public SEntity transform(final Entity in) {
 							return GEntity.wrap(in);
 						}
 					}));
 		}
 
 		@Override
-		void log(SKey key, SEntity result) {
+		void log(final SKey key, final SEntity result) {
 			log.debug(XGaeDebugHelper.dataGet(DATASTORE_NAME, XGaeDebugHelper.toString(key),
 					result, Timing.Finished));
 		}
@@ -171,50 +171,50 @@ public class DatastoreImplGaeAsync extends DatastoreImplGaeBase implements IData
 
 	/**
 	 * Print debug info at moment of retrieval
-	 * 
+	 *
 	 * @author xamde
 	 */
 	private static class FutureGetEntities extends
 			TransformingDebugFuture<Collection<SKey>, Map<Key, Entity>, Map<SKey, SEntity>> {
 
-		public FutureGetEntities(Collection<SKey> keys, Future<Map<Key, Entity>> f,
-				ITransformer<Map<Key, Entity>, Map<SKey, SEntity>> transformer) {
+		public FutureGetEntities(final Collection<SKey> keys, final Future<Map<Key, Entity>> f,
+				final ITransformer<Map<Key, Entity>, Map<SKey, SEntity>> transformer) {
 			super(keys, f, transformer);
 		}
 
 		@Override
-		void log(Collection<SKey> key, Map<SKey, SEntity> result) {
+		void log(final Collection<SKey> key, final Map<SKey, SEntity> result) {
 			log.debug(XGaeDebugHelper.dataGet(DATASTORE_NAME, key, result, Timing.Finished));
 		}
 	}
 
 	private static class FuturePutEntities extends
 			TransformingDebugFuture<Iterable<SEntity>, List<Key>, List<SKey>> {
-		public FuturePutEntities(Iterable<SEntity> it, Future<List<Key>> f,
-				ITransformer<List<Key>, List<SKey>> transformer) {
+		public FuturePutEntities(final Iterable<SEntity> it, final Future<List<Key>> f,
+				final ITransformer<List<Key>, List<SKey>> transformer) {
 			super(it, f, transformer);
 		}
 
 		@Override
-		void log(Iterable<SEntity> key, List<SKey> result) {
+		void log(final Iterable<SEntity> key, final List<SKey> result) {
 			log.debug(XGaeDebugHelper.dataPut(DATASTORE_NAME, "manyKeys", key, Timing.Finished));
 		}
 	}
 
 	private static class FuturePutEntity extends DebugFuture<SEntity, SKey> {
-		public FuturePutEntity(SEntity key, Future<Key> f) {
+		public FuturePutEntity(final SEntity key, final Future<Key> f) {
 			super(key, new FutureUtils.TransformingFuture<Key, SKey>(f,
 					new ITransformer<Key, SKey>() {
 
 						@Override
-						public SKey transform(Key in) {
+						public SKey transform(final Key in) {
 							return GKey.wrap(in);
 						}
 					}));
 		}
 
 		@Override
-		void log(SEntity key, SKey result) {
+		void log(final SEntity key, final SKey result) {
 			log.debug(XGaeDebugHelper.dataPut(DATASTORE_NAME, XGaeDebugHelper.toString(result),
 					key, Timing.Finished));
 		}
@@ -239,44 +239,44 @@ public class DatastoreImplGaeAsync extends DatastoreImplGaeBase implements IData
 
 	@Override
 	@ModificationOperation
-	public Future<Void> deleteEntity(SKey key) {
+	public Future<Void> deleteEntity(final SKey key) {
 		return deleteEntity(key, null);
 	}
 
 	@Override
 	@ModificationOperation
-	public Future<Void> deleteEntity(SKey key, STransaction txn) {
+	public Future<Void> deleteEntity(final SKey key, final STransaction txn) {
 		assert key != null;
 		log.debug(XGaeDebugHelper.dataPut(DATASTORE_NAME, key.toString(), null, Timing.Started));
 		makeSureDatestoreServiceIsInitialised();
 
-		Future<Void> future = this.asyncDatastore.delete((Transaction) txn.raw(), (Key) key.raw());
+		final Future<Void> future = this.asyncDatastore.delete((Transaction) txn.raw(), (Key) key.raw());
 		return new FutureDeleteEntity(key, future);
 	}
 
 	@Override
 	@ModificationOperation
-	public void endTransaction(STransaction txn) throws ConcurrentModificationException {
+	public void endTransaction(final STransaction txn) throws ConcurrentModificationException {
 		log.debug("-- end Transaction --");
 		makeSureDatestoreServiceIsInitialised();
 		((Transaction) txn.raw()).commit();
 	}
 
 	@Override
-	public Future<Map<SKey, SEntity>> getEntities(Collection<SKey> keys) {
+	public Future<Map<SKey, SEntity>> getEntities(final Collection<SKey> keys) {
 		return getEntities(keys, null);
 	}
 
 	@Override
 	@XGaeOperation(datastoreRead = true)
-	public Future<Map<SKey, SEntity>> getEntities(Collection<SKey> keys, STransaction txn) {
+	public Future<Map<SKey, SEntity>> getEntities(final Collection<SKey> keys, final STransaction txn) {
 		assert keys != null;
 		makeSureDatestoreServiceIsInitialised();
 
-		ITransformer<Map<Key, Entity>, Map<SKey, SEntity>> transformer = new ITransformer<Map<Key, Entity>, Map<SKey, SEntity>>() {
+		final ITransformer<Map<Key, Entity>, Map<SKey, SEntity>> transformer = new ITransformer<Map<Key, Entity>, Map<SKey, SEntity>>() {
 
 			@Override
-			public Map<SKey, SEntity> transform(Map<Key, Entity> in) {
+			public Map<SKey, SEntity> transform(final Map<Key, Entity> in) {
 				return TransformerTool.transformMapKeyAndValues(in, GKey.TRANSFOMER_KEY_SKEY,
 						GEntity.TRANSFOMER_ENTITY_SENTITY);
 			}
@@ -284,16 +284,16 @@ public class DatastoreImplGaeAsync extends DatastoreImplGaeBase implements IData
 
 		if (keys.isEmpty()) {
 			if (TRACE_CALLS) {
-				Map<Key, Entity> emptyMap = Collections.emptyMap();
-				Future<Map<Key, Entity>> result = FutureUtils.createCompleted(emptyMap);
+				final Map<Key, Entity> emptyMap = Collections.emptyMap();
+				final Future<Map<Key, Entity>> result = FutureUtils.createCompleted(emptyMap);
 				return new FutureGetEntities(keys, result, transformer);
 			} else {
-				Map<SKey, SEntity> emptyMap = Collections.emptyMap();
-				Future<Map<SKey, SEntity>> result = FutureUtils.createCompleted(emptyMap);
+				final Map<SKey, SEntity> emptyMap = Collections.emptyMap();
+				final Future<Map<SKey, SEntity>> result = FutureUtils.createCompleted(emptyMap);
 				return result;
 			}
 		} else {
-			Future<Map<Key, Entity>> rawResult = this.asyncDatastore.get((Transaction) txn.raw(),
+			final Future<Map<Key, Entity>> rawResult = this.asyncDatastore.get((Transaction) txn.raw(),
 					GKey.unwrap(keys));
 			if (TRACE_CALLS) {
 				return new FutureGetEntities(keys, rawResult, transformer);
@@ -306,16 +306,16 @@ public class DatastoreImplGaeAsync extends DatastoreImplGaeBase implements IData
 
 	@Override
 	@XGaeOperation(datastoreRead = true)
-	public Future<SEntity> getEntity(SKey key) {
+	public Future<SEntity> getEntity(final SKey key) {
 		return getEntity(key, null);
 	}
 
 	@Override
 	@XGaeOperation(datastoreRead = true)
-	public Future<SEntity> getEntity(SKey key, STransaction txn) {
+	public Future<SEntity> getEntity(final SKey key, final STransaction txn) {
 		assert key != null;
 		makeSureDatestoreServiceIsInitialised();
-		Future<Entity> e = this.asyncDatastore.get((Transaction) txn.raw(), (Key) key.raw());
+		final Future<Entity> e = this.asyncDatastore.get((Transaction) txn.raw(), (Key) key.raw());
 		return new FutureGetEntity(key, e);
 	}
 
@@ -328,45 +328,45 @@ public class DatastoreImplGaeAsync extends DatastoreImplGaeBase implements IData
 	}
 
 	@Override
-	public SPreparedQuery prepareRangeQuery(String kind, boolean keysOnly, String lowName,
-			String highName) {
+	public SPreparedQuery prepareRangeQuery(final String kind, final boolean keysOnly, final String lowName,
+			final String highName) {
 		return prepareRangeQuery(kind, true, lowName, highName, null);
 	}
 
 	/** @see DatastoreService#prepare(Query) */
 	@Override
-	public SPreparedQuery prepareRangeQuery(String kind, boolean keysOnly, String lowName,
-			String highName, STransaction txn) {
-		Query query = createRangeQuery(kind, keysOnly, lowName, highName);
+	public SPreparedQuery prepareRangeQuery(final String kind, final boolean keysOnly, final String lowName,
+			final String highName, final STransaction txn) {
+		final Query query = createRangeQuery(kind, keysOnly, lowName, highName);
 		assert query != null;
 		return GPreparedQuery.wrap(this.asyncDatastore.prepare((Transaction) txn.raw(), query));
 	}
 
 	@Override
 	@ModificationOperation
-	public Future<List<SKey>> putEntities(Iterable<SEntity> it) {
+	public Future<List<SKey>> putEntities(final Iterable<SEntity> it) {
 		XyAssert.xyAssert(it != null, "iterable is null");
 		assert it != null;
 		log.debug(XGaeDebugHelper.dataPut(DATASTORE_NAME, "entities", "many", Timing.Now));
 		makeSureDatestoreServiceIsInitialised();
-		Future<List<Key>> f = this.asyncDatastore.put(
+		final Future<List<Key>> f = this.asyncDatastore.put(
 
 		TransformerTool.transformIterable(it,
 
 		new ITransformer<SEntity, Entity>() {
 
 			@Override
-			public Entity transform(SEntity in) {
+			public Entity transform(final SEntity in) {
 				return (Entity) in.raw();
 			}
 		})
 
 		);
 
-		ITransformer<List<Key>, List<SKey>> transformer = new ITransformer<List<Key>, List<SKey>>() {
+		final ITransformer<List<Key>, List<SKey>> transformer = new ITransformer<List<Key>, List<SKey>>() {
 
 			@Override
-			public List<SKey> transform(List<Key> in) {
+			public List<SKey> transform(final List<Key> in) {
 				return TransformerTool.transformListEntries(in, GKey.TRANSFOMER_KEY_SKEY);
 			}
 		};
@@ -380,26 +380,26 @@ public class DatastoreImplGaeAsync extends DatastoreImplGaeBase implements IData
 	}
 
 	@Override
-	public Future<SKey> putEntity(SEntity entity) {
+	public Future<SKey> putEntity(final SEntity entity) {
 		return putEntity(entity, null);
 	}
 
 	@Override
 	@ModificationOperation
-	public Future<SKey> putEntity(SEntity entity, STransaction txn) {
+	public Future<SKey> putEntity(final SEntity entity, final STransaction txn) {
 		XyAssert.xyAssert(entity != null, "entity is null");
 		assert entity != null;
 		log.debug(XGaeDebugHelper.dataPut(DATASTORE_NAME,
 				XGaeDebugHelper.toString(entity.getKey()), entity, Timing.Started));
 		makeSureDatestoreServiceIsInitialised();
 
-		Future<Key> f = this.asyncDatastore.put((Transaction) txn.raw(), (Entity) entity.raw());
+		final Future<Key> f = this.asyncDatastore.put((Transaction) txn.raw(), (Entity) entity.raw());
 
 		if (TRACE_CALLS) {
 			return new FutureUtils.TransformingFuture<Key, SKey>(f, new ITransformer<Key, SKey>() {
 
 				@Override
-				public SKey transform(Key in) {
+				public SKey transform(final Key in) {
 					return GKey.wrap(in);
 				}
 			});

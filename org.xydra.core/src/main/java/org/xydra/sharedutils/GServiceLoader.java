@@ -11,18 +11,18 @@ import org.xydra.annotations.RunsInGWT;
 @RunsInGWT(true)
 // super-source
 public class GServiceLoader {
-    
-    public static <T> Collection<T> getAllImplementations(Class<T> interfaze) {
-        Set<T> set = new HashSet<T>();
-        ServiceLoader<T> serviceLoader = ServiceLoader.load(interfaze);
-        for(T implementation : serviceLoader) {
+
+    public static <T> Collection<T> getAllImplementations(final Class<T> interfaze) {
+        final Set<T> set = new HashSet<T>();
+        final ServiceLoader<T> serviceLoader = ServiceLoader.load(interfaze);
+        for(final T implementation : serviceLoader) {
             set.add(implementation);
         }
         return set;
     }
-    
-    public static <T> T getSingleInstance(Class<T> interfaceToBeLoaded) {
+
+    public static <T> T getSingleInstance(final Class<T> interfaceToBeLoaded) {
         return ServiceLoaderUtils.getSingleInstance(interfaceToBeLoaded);
     }
-    
+
 }

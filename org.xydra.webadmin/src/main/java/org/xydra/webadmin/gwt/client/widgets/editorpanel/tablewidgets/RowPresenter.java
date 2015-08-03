@@ -3,6 +3,7 @@ package org.xydra.webadmin.gwt.client.widgets.editorpanel.tablewidgets;
 import java.util.HashMap;
 import java.util.List;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableObject;
@@ -31,39 +32,39 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
  * Performs logic for rows in the table. So it:
- * 
+ *
  * <ul>
  * <li>builds the row
  * <li>fulfills requests given via the {@link FieldWidget}s and
  * {@link EmptyFieldWidget}s in the row
  * <li>has Listeners to {@link ObjectChangedEvent}
  * </ul>
- * 
+ *
  * The listeners react, when
  * <ul>
  * <li>an object is extended by a field,
  * <li>an object is removed,
  * <li>an object is changed (field removed / value changed)
  * </ul>
- * 
+ *
  * @author kahmann
- * 
+ *
  */
 public class RowPresenter extends Presenter {
 
 	private static final Logger log = LoggerFactory.getLogger(RowPresenter.class);
 
-	private int verticalPositionInTable;
-	private String backgroundStyle;
-	private TablePresenter tablePresenter;
+	private final int verticalPositionInTable;
+	private final String backgroundStyle;
+	private final TablePresenter tablePresenter;
 	private TablePresenter.Status status;
-	private HashMap<XId, TableFieldWidget> scrollableFields = new HashMap<XId, TableFieldWidget>();
+	private final HashMap<XId, TableFieldWidget> scrollableFields = new HashMap<XId, TableFieldWidget>();
 	private XAddress objectAddress;
 
 	private HandlerRegistration registration;
 
-	public RowPresenter(int verticalPositionInTable, String backgroundStyle,
-			XReadableObject currentObject, TablePresenter tablePresenter) {
+	public RowPresenter(final int verticalPositionInTable, final String backgroundStyle,
+			final XReadableObject currentObject, final TablePresenter tablePresenter) {
 		super();
 		this.verticalPositionInTable = verticalPositionInTable;
 		this.backgroundStyle = backgroundStyle;
@@ -71,7 +72,7 @@ public class RowPresenter extends Presenter {
 		this.status = Status.Present;
 	}
 
-	public void presentRow(XReadableObject currentObject) {
+	public void presentRow(final XReadableObject currentObject) {
 
 		if (this.registration != null) {
 			XyAdmin.getInstance().getController().removeRegistration(this.registration);
@@ -80,10 +81,10 @@ public class RowPresenter extends Presenter {
 		}
 
 		this.objectAddress = currentObject.getAddress();
-		Grid table = this.tablePresenter.getContentTable();
-		List<XId> columnIds = this.tablePresenter.getColumnIds();
-		int amountColumns = columnIds.size();
-		CellFormatter formatter = table.getCellFormatter();
+		final Grid table = this.tablePresenter.getContentTable();
+		final List<XId> columnIds = this.tablePresenter.getColumnIds();
+		final int amountColumns = columnIds.size();
+		final CellFormatter formatter = table.getCellFormatter();
 
 		for (int j = 0; j < amountColumns + 1; j++) {
 			Widget widget = null;
@@ -98,16 +99,16 @@ public class RowPresenter extends Presenter {
 			} else {
 				if (this.status.equals(Status.Opened)) {
 					// if this object is opened by the user
-					int currentColumnIndex = j - 1;
+					final int currentColumnIndex = j - 1;
 					if (currentColumnIndex > amountColumns - 1) {
 						// we have no column for this widget
 						continue;
 					}
-					XId currentColumn = columnIds.get(currentColumnIndex);
+					final XId currentColumn = columnIds.get(currentColumnIndex);
 
 					if (currentObject.hasField(currentColumn)) {
 
-						FieldWidget widget2 = new FieldWidget(this, currentColumn);
+						final FieldWidget widget2 = new FieldWidget(this, currentColumn);
 						formatter.setVerticalAlignment(this.verticalPositionInTable, j,
 								HasVerticalAlignment.ALIGN_TOP);
 
@@ -135,7 +136,7 @@ public class RowPresenter extends Presenter {
 				new IObjectChangedEventHandler() {
 
 					@Override
-					public void onObjectChange(ObjectChangedEvent event) {
+					public void onObjectChange(final ObjectChangedEvent event) {
 						RowPresenter.this.processChanges(event.getStatus(), event.getMoreInfos());
 
 					}
@@ -143,8 +144,8 @@ public class RowPresenter extends Presenter {
 		XyAdmin.getInstance().getController().addRegistration(this.registration);
 	}
 
-	protected void processChanges(EntityStatus status2, XId fieldId) {
-		XWritableObject currentObject = this.tablePresenter.getModel().getObject(
+	protected void processChanges(final EntityStatus status2, final XId fieldId) {
+		final XWritableObject currentObject = this.tablePresenter.getModel().getObject(
 				this.objectAddress.getObject());
 		if (status2.equals(EntityStatus.EXTENDED)) {
 
@@ -152,22 +153,22 @@ public class RowPresenter extends Presenter {
 			/* open redraw the whole row */
 			this.status = Status.Opened;
 			log.info("now presenting row!");
-			this.presentRow(currentObject);
+			presentRow(currentObject);
 			this.scrollableFields.get(fieldId).scrollToMe();
 
 		} else if (status2.equals(EntityStatus.CHANGED)) {
-			this.clearRow();
+			clearRow();
 			/* redraw the whole row */
-			this.presentRow(currentObject);
+			presentRow(currentObject);
 
 		} else if (status2.equals(EntityStatus.DELETED)) {
-			this.clearRow();
-			this.removeRowFromTable();
+			clearRow();
+			removeRowFromTable();
 		}
 	}
 
 	private void clearRow() {
-		Grid table = this.tablePresenter.getContentTable();
+		final Grid table = this.tablePresenter.getContentTable();
 		for (int i = 0; i < table.getCellCount(this.verticalPositionInTable); i++) {
 			table.clearCell(this.verticalPositionInTable, i);
 		}
@@ -187,11 +188,11 @@ public class RowPresenter extends Presenter {
 		return this.objectAddress;
 	}
 
-	public void handleExpandOrCollapse(Status status) {
+	public void handleExpandOrCollapse(final Status status) {
 		this.status = status;
-		SessionCachedModel model = this.tablePresenter.getModel();
-		XWritableObject object = model.getObject(this.objectAddress.getObject());
-		this.presentRow(object);
+		final SessionCachedModel model = this.tablePresenter.getModel();
+		final XWritableObject object = model.getObject(this.objectAddress.getObject());
+		presentRow(object);
 	}
 
 	public void handleExpandOrCollapse() {
@@ -205,46 +206,46 @@ public class RowPresenter extends Presenter {
 
 	}
 
-	public XValue getFieldValue(XId id) {
-		SessionCachedModel model = this.tablePresenter.getModel();
-		XWritableObject object = model.getObject(this.objectAddress.getObject());
-		XWritableField field = object.getField(id);
+	public XValue getFieldValue(final XId id) {
+		final SessionCachedModel model = this.tablePresenter.getModel();
+		final XWritableObject object = model.getObject(this.objectAddress.getObject());
+		final XWritableField field = object.getField(id);
 		return field.getValue();
 	}
 
-	public long getFieldRevisionNumber(XId id) {
-		SessionCachedModel model = this.tablePresenter.getModel();
-		XWritableObject object = model.getObject(this.objectAddress.getObject());
-		XWritableField field = object.getField(id);
+	public long getFieldRevisionNumber(final XId id) {
+		final SessionCachedModel model = this.tablePresenter.getModel();
+		final XWritableObject object = model.getObject(this.objectAddress.getObject());
+		final XWritableField field = object.getField(id);
 
 		return field.getRevisionNumber();
 	}
 
-	public void deleteField(XId id) {
-		this.remove(XX.resolveField(this.objectAddress, id));
+	public void deleteField(final XId id) {
+		this.remove(Base.resolveField(this.objectAddress, id));
 
 	}
 
-	public void changeFieldValue(XId id, XValue newValue) {
+	public void changeFieldValue(final XId id, final XValue newValue) {
 		XyAdmin.getInstance().getModel()
-				.changeValue(XX.resolveField(this.objectAddress, id), newValue);
+				.changeValue(Base.resolveField(this.objectAddress, id), newValue);
 
 	}
 
-	public void remove(XId id) {
-		super.remove(XX.resolveField(this.objectAddress, id));
+	public void remove(final XId id) {
+		super.remove(Base.resolveField(this.objectAddress, id));
 
 	}
 
-	public void addField(XId id) {
+	public void addField(final XId id) {
 
 		super.processUserInput(this.objectAddress, id.toString());
 
 	}
 
-	public void addEmptyFieldWidget(XId newFieldId) {
-		Grid table = this.tablePresenter.getContentTable();
-		int columnCount = table.getColumnCount() - 1;
+	public void addEmptyFieldWidget(final XId newFieldId) {
+		final Grid table = this.tablePresenter.getContentTable();
+		final int columnCount = table.getColumnCount() - 1;
 
 		if (this.status.equals(Status.Opened)) {
 			// log.info("adding EmptyFieldWidget to row " +
@@ -255,12 +256,13 @@ public class RowPresenter extends Presenter {
 		}
 	}
 
-	public void scrollToField(XId fieldId) {
-		TableFieldWidget tableFieldWidget = this.scrollableFields.get(fieldId);
-		if (tableFieldWidget != null)
+	public void scrollToField(final XId fieldId) {
+		final TableFieldWidget tableFieldWidget = this.scrollableFields.get(fieldId);
+		if (tableFieldWidget != null) {
 			tableFieldWidget.scrollToMe();
-		else {
+		} else {
 			@SuppressWarnings("unused")
+			final
 			WarningDialog warning = new WarningDialog("field " + fieldId.toString()
 					+ " does not exist!");
 		}

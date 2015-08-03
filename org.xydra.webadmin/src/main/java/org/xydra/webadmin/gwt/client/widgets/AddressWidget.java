@@ -1,5 +1,6 @@
 package org.xydra.webadmin.gwt.client.widgets;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.core.XX;
 import org.xydra.gwt.editor.value.XAddressEditor;
@@ -46,7 +47,7 @@ public class AddressWidget extends Composite {
 
 		super();
 
-		this.addressEditor = new XAddressEditor(XX.toAddress(XX.toId("repo1"), null, null, null),
+		this.addressEditor = new XAddressEditor(Base.toAddress(Base.toId("repo1"), null, null, null),
 				null);
 		initWidget(uiBinder.createAndBindUi(this));
 	}
@@ -56,9 +57,9 @@ public class AddressWidget extends Composite {
 	}
 
 	@UiHandler("loadLocationButton")
-	void onClickLoad(ClickEvent e) {
+	void onClickLoad(final ClickEvent e) {
 		// showNYIDialog();
-		XAddress address = getAddress();
+		final XAddress address = getAddress();
 		this.presenter.openAddress(address);
 
 	}
@@ -68,34 +69,34 @@ public class AddressWidget extends Composite {
 		try {
 			address = this.addressEditor.getValue();
 
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			showDialog(ex.getLocalizedMessage());
 		}
 		return address;
 	}
 
 	@UiHandler("clearButton")
-	void onClickClear(ClickEvent e) {
-		this.addressEditor.setValue(XX.toAddress(XX.toId("repo1"), null, null, null));
+	void onClickClear(final ClickEvent e) {
+		this.addressEditor.setValue(Base.toAddress(Base.toId("repo1"), null, null, null));
 	}
 
 	@UiHandler("addElementButton")
-	void onClickAdd(ClickEvent e) {
+	void onClickAdd(final ClickEvent e) {
 		this.presenter.addEntity(getAddress());
 
 	}
 
 	@UiHandler("deleteElementButton")
-	void onClickDelete(ClickEvent e) {
+	void onClickDelete(final ClickEvent e) {
 		this.presenter.removeEntity(getAddress());
 	}
 
-	void showDialog(String message) {
-		WarningDialog dialog = new WarningDialog(message);
+	void showDialog(final String message) {
+		final WarningDialog dialog = new WarningDialog(message);
 		dialog.show();
 	}
 
-	public void registerPresenter(AddressWidgetPresenter addressWidgetPresenter) {
+	public void registerPresenter(final AddressWidgetPresenter addressWidgetPresenter) {
 		this.presenter = addressWidgetPresenter;
 
 	}

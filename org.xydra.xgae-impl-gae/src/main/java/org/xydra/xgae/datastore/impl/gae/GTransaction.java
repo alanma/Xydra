@@ -11,20 +11,20 @@ import com.google.appengine.api.datastore.Transaction;
 
 public class GTransaction extends RawWrapper<Transaction, STransaction> implements STransaction {
 
-	private GTransaction(Transaction raw) {
+	private GTransaction(final Transaction raw) {
 		super(raw);
 	}
 
 	public static class WrappedFuture implements Future<STransaction> {
 
-		private Future<Transaction> raw;
+		private final Future<Transaction> raw;
 
-		public WrappedFuture(Future<Transaction> rawTxn) {
+		public WrappedFuture(final Future<Transaction> rawTxn) {
 			this.raw = rawTxn;
 		}
 
 		@Override
-		public boolean cancel(boolean mayInterruptIfRunning) {
+		public boolean cancel(final boolean mayInterruptIfRunning) {
 			return this.raw.cancel(mayInterruptIfRunning);
 		}
 
@@ -44,20 +44,21 @@ public class GTransaction extends RawWrapper<Transaction, STransaction> implemen
 		}
 
 		@Override
-		public STransaction get(long timeout, TimeUnit unit) throws InterruptedException,
+		public STransaction get(final long timeout, final TimeUnit unit) throws InterruptedException,
 				ExecutionException, TimeoutException {
 			return GTransaction.wrap(this.raw.get(timeout, unit));
 		}
 
 	}
 
-	public static Future<STransaction> wrapFuture(Future<Transaction> rawTxn) {
+	public static Future<STransaction> wrapFuture(final Future<Transaction> rawTxn) {
 		return new WrappedFuture(rawTxn);
 	}
 
-	public static GTransaction wrap(Transaction raw) {
-		if (raw == null)
+	public static GTransaction wrap(final Transaction raw) {
+		if (raw == null) {
 			return null;
+		}
 
 		return new GTransaction(raw);
 	}

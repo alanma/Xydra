@@ -11,29 +11,29 @@ import org.xydra.server.rest.XydraRestServer;
 
 /**
  * At boot time, logs on all levels to test logging, exposed at '/logtest'
- * 
+ *
  * @author xamde
  */
 public class LogTestResource {
 
 	static Logger log = LoggerFactory.getLogger(LogTestResource.class);
 
-	public static void restless(Restless restless, String prefix) {
+	public static void restless(final Restless restless, final String prefix) {
 		restless.addGet(prefix + "/logtest", LogTestResource.class, "init");
 	}
 
-	public void init(HttpServletResponse res) {
+	public void init(final HttpServletResponse res) {
 		log();
 		String result = "result: ";
 
-		java.util.logging.Logger julLog = java.util.logging.Logger.getLogger("dummy");
-		for (Handler handler : julLog.getHandlers()) {
+		final java.util.logging.Logger julLog = java.util.logging.Logger.getLogger("dummy");
+		for (final Handler handler : julLog.getHandlers()) {
 			result += " HANDLER " + handler.getClass().getName();
 		}
 		java.util.logging.Logger parent = julLog.getParent();
 		int depth = 0;
 		while (parent != null && depth < 10) {
-			for (Handler handler : parent.getHandlers()) {
+			for (final Handler handler : parent.getHandlers()) {
 				result += " PARENT-HANDLER " + handler.getClass().getName();
 			}
 			parent = julLog.getParent();
@@ -58,7 +58,7 @@ public class LogTestResource {
 		System.err.println("Log is errorEnabled? " + log.isErrorEnabled());
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		LogTestResource.log();
 	}
 

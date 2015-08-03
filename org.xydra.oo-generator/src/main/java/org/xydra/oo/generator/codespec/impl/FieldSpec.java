@@ -11,45 +11,45 @@ import org.xydra.oo.runtime.shared.TypeSpec;
 
 /**
  * specifies a field
- * 
+ *
  * @author xamde
  */
 public class FieldSpec extends AbstractMember implements IMember {
 
 	public IType t;
 
-	public FieldSpec(String name, Class<?> type, Class<?> componentType, String generatedFrom) {
+	public FieldSpec(final String name, final Class<?> type, final Class<?> componentType, final String generatedFrom) {
 		super(name, generatedFrom);
 		this.t = JavaTypeSpecUtils.createTypeSpec(type, componentType, generatedFrom);
 	}
 
-	public FieldSpec(String name, Class<?> type, String componentPackageName,
-			String componentTypeName, String generatedFrom) {
+	public FieldSpec(final String name, final Class<?> type, final String componentPackageName,
+			final String componentTypeName, final String generatedFrom) {
 		super(name, generatedFrom);
 		this.t = JavaReflectionUtils.createTypeSpec(type, componentPackageName, componentTypeName,
 				generatedFrom);
 	}
 
-	public FieldSpec(String name, String typePackageName, String typeName, String generatedFrom) {
+	public FieldSpec(final String name, final String typePackageName, final String typeName, final String generatedFrom) {
 		super(name, generatedFrom);
 		this.t = new TypeSpec(typePackageName, typeName, generatedFrom);
 	}
 
-	public FieldSpec(String name, Type t, String generatedFrom) {
+	public FieldSpec(final String name, final Type t, final String generatedFrom) {
 		super(name, generatedFrom);
 		this.t = JavaTypeSpecUtils.createTypeSpec(JavaReflectionUtils.getRawType(t),
 				JavaReflectionUtils.getComponentType(t), generatedFrom);
 	}
 
-	FieldSpec(String name, IType typeSpec, String generatedFrom) {
+	FieldSpec(final String name, final IType typeSpec, final String generatedFrom) {
 		super(name, generatedFrom);
 		this.t = typeSpec;
 	}
 
 	@Override
-	public int compareTo(IMember o) {
+	public int compareTo(final IMember o) {
 		if (o instanceof FieldSpec) {
-			return this.id().compareTo(((FieldSpec) o).id());
+			return id().compareTo(((FieldSpec) o).id());
 		} else {
 			return getName().compareTo(o.getName());
 		}
@@ -58,17 +58,17 @@ public class FieldSpec extends AbstractMember implements IMember {
 
 	@Override
 	public void dump() {
-		System.out.println(this.toString());
+		System.out.println(toString());
 	}
 
 	@Override
-	public boolean equals(Object other) {
-		return other instanceof FieldSpec && ((FieldSpec) other).id().equals(this.id());
+	public boolean equals(final Object other) {
+		return other instanceof FieldSpec && ((FieldSpec) other).id().equals(id());
 	}
 
 	@Override
 	public Set<String> getRequiredImports() {
-		Set<String> set = this.t.getRequiredImports();
+		final Set<String> set = this.t.getRequiredImports();
 		set.addAll(super.getRequiredImports());
 		return set;
 	}
@@ -79,12 +79,12 @@ public class FieldSpec extends AbstractMember implements IMember {
 	}
 
 	public String id() {
-		return this.getName() + this.t.id();
+		return getName() + this.t.id();
 	}
 
 	@Override
 	public String toString() {
-		return "FIELD\n" + "  " + this.getName() + " " + this.t.toString();
+		return "FIELD\n" + "  " + getName() + " " + this.t.toString();
 	}
 
 	public String getTypeString() {

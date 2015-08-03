@@ -28,12 +28,12 @@ public class ObjectChangesPanel extends Composite {
 	@UiField(provided = true)
 	VerticalPanel fieldChangesPanel;
 
-	public ObjectChangesPanel(String backgroundColor, HorizontalPanel objectIdPanel,
-			VerticalPanel fieldChangesPanel) {
+	public ObjectChangesPanel(final String backgroundColor, final HorizontalPanel objectIdPanel,
+			final VerticalPanel fieldChangesPanel) {
 		super();
 		this.fieldChangesPanel = fieldChangesPanel;
 		this.objectIdPanel = objectIdPanel;
 		initWidget(uiBinder.createAndBindUi(this));
-		this.getElement().setAttribute("style", "background-color: " + backgroundColor);
+		getElement().setAttribute("style", "background-color: " + backgroundColor);
 	}
 }

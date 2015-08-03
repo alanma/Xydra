@@ -4,11 +4,11 @@ public class DatastoreTimeoutException extends RuntimeException {
 
 	private static final long serialVersionUID = 5181603692209183255L;
 
-	public DatastoreTimeoutException(String msg, Throwable cause) {
+	public DatastoreTimeoutException(final String msg, final Throwable cause) {
 		super(msg, cause);
 	}
 
-	public DatastoreTimeoutException(String msg) {
+	public DatastoreTimeoutException(final String msg) {
 		super(msg);
 	}
 

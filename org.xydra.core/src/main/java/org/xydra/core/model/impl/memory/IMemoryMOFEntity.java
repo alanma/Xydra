@@ -8,33 +8,33 @@ import org.xydra.core.model.impl.memory.sync.Root;
 
 
 public interface IMemoryMOFEntity extends XSendsSyncEvents, IHasXAddress {
-    
+
     /**
      * @return true iff this entity exists, i.e. has been created and has not
      *         been removed yet
      */
     boolean exists();
-    
+
     /**
      * @param exists
      */
     void setExists(boolean exists);
-    
+
     /**
      * @return the root managing event listener registration/firing
      */
     Root getRoot();
-    
+
     /**
      * @param event if this entity receives a sync-event; look inside to find
      *            out if sync-error or sync-success
      */
     void fireSyncEvent(XSyncEvent event);
-    
+
     @Override
 	boolean addListenerForSyncEvents(XSyncEventListener syncListener);
-    
+
     @Override
 	boolean removeListenerForSyncEvents(XSyncEventListener syncListener);
-    
+
 }

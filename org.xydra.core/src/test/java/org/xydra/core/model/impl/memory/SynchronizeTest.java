@@ -13,6 +13,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
@@ -54,25 +55,25 @@ import org.xydra.sharedutils.XyAssert;
 
 /**
  * Test for {@link XSynchronizesChanges} ({@link MemoryModel})
- * 
+ *
  * @author dscharrer
- * 
+ *
  *         FIXME sync test needs to be finished (see commented parts)
- * 
+ *
  */
 public class SynchronizeTest {
-    
+
     @BeforeClass
     public static void init() {
         LoggerTestHelper.init();
     }
-    
-    protected static void replaySyncEvents(XModel checkModel, List<XEvent> events) {
-        
-        for(XEvent event : events) {
-            
+
+    protected static void replaySyncEvents(final XModel checkModel, final List<XEvent> events) {
+
+        for(final XEvent event : events) {
+
             if(event instanceof XModelEvent) {
-                XModelEvent me = (XModelEvent)event;
+                final XModelEvent me = (XModelEvent)event;
                 if(me.getChangeType() == ChangeType.ADD) {
                     assertFalse(checkModel.hasObject(me.getObjectId()));
                     checkModel.createObject(me.getObjectId());
@@ -82,8 +83,8 @@ public class SynchronizeTest {
                     checkModel.removeObject(me.getObjectId());
                 }
             } else if(event instanceof XObjectEvent) {
-                XObjectEvent oe = (XObjectEvent)event;
-                XObject obj = checkModel.getObject(oe.getObjectId());
+                final XObjectEvent oe = (XObjectEvent)event;
+                final XObject obj = checkModel.getObject(oe.getObjectId());
                 assertNotNull(obj);
                 if(oe.getChangeType() == ChangeType.ADD) {
                     assertFalse(obj.hasField(oe.getFieldId()));
@@ -94,144 +95,144 @@ public class SynchronizeTest {
                     obj.removeField(oe.getFieldId());
                 }
             } else if(event instanceof XReversibleFieldEvent) {
-                XReversibleFieldEvent rfe = (XReversibleFieldEvent)event;
-                XObject obj = checkModel.getObject(rfe.getObjectId());
+                final XReversibleFieldEvent rfe = (XReversibleFieldEvent)event;
+                final XObject obj = checkModel.getObject(rfe.getObjectId());
                 assertNotNull(obj);
-                XField fld = obj.getField(rfe.getFieldId());
+                final XField fld = obj.getField(rfe.getFieldId());
                 assertNotNull(fld);
                 assertEquals(fld.getValue(), rfe.getOldValue());
                 fld.setValue(rfe.getNewValue());
             } else if(event instanceof XFieldEvent) {
-                XFieldEvent fe = (XFieldEvent)event;
-                XObject obj = checkModel.getObject(fe.getObjectId());
+                final XFieldEvent fe = (XFieldEvent)event;
+                final XObject obj = checkModel.getObject(fe.getObjectId());
                 assertNotNull(obj);
-                XField fld = obj.getField(fe.getFieldId());
+                final XField fld = obj.getField(fe.getFieldId());
                 assertNotNull(fld);
                 fld.setValue(fe.getNewValue());
             }
-            
+
         }
     }
-    
-    private XId actorId = XX.toId("AbstractSynchronizeTest");
+
+    private final XId actorId = XX.toId("AbstractSynchronizeTest");
     private XModel localModel;
-    
-    private String password = null; // TODO auth: where to get this?
+
+    private final String password = null; // TODO auth: where to get this?
     private XModel remoteModel;
-    
+
     {
         LoggerTestHelper.init();
     }
-    
-    private XCommand fix(XCommand command) {
-        
-        XydraOut out = new XmlOut();
+
+    private XCommand fix(final XCommand command) {
+
+        final XydraOut out = new XmlOut();
         SerializedCommand.serialize(command, out, this.localModel.getAddress());
-        
-        XydraElement e = new XmlParser().parse(out.getData());
+
+        final XydraElement e = new XmlParser().parse(out.getData());
         return SerializedCommand.toCommand(e, this.remoteModel.getAddress());
-        
+
     }
-    
-    private XEvent fix(XEvent event) {
-        
-        XydraOut out = new XmlOut();
+
+    private XEvent fix(final XEvent event) {
+
+        final XydraOut out = new XmlOut();
         SerializedEvent.serialize(event, out, this.remoteModel.getAddress());
-        
-        XydraElement e = new XmlParser().parse(out.getData());
+
+        final XydraElement e = new XmlParser().parse(out.getData());
         return SerializedEvent.toEvent(e, this.localModel.getAddress());
-        
+
     }
-    
-    private static void makeAdditionalChanges(XModel model) {
-        
-        assertNotNull(model.createObject(XX.createUniqueId()));
-        
+
+    private static void makeAdditionalChanges(final XModel model) {
+
+        assertNotNull(model.createObject(Base.createUniqueId()));
+
         assertTrue(model.removeObject(DemoModelUtil.JOHN_ID));
-        
-        assertNotNull(model.getObject(DemoModelUtil.PETER_ID).createField(XX.createUniqueId()));
-        
-        XTransactionBuilder tb = new XTransactionBuilder(model.getAddress());
-        XId objId = XX.createUniqueId();
+
+        assertNotNull(model.getObject(DemoModelUtil.PETER_ID).createField(Base.createUniqueId()));
+
+        final XTransactionBuilder tb = new XTransactionBuilder(model.getAddress());
+        final XId objId = Base.createUniqueId();
         tb.addObject(model.getAddress(), XCommand.SAFE_STATE_BOUND, objId);
-        XAddress objAddr = XX.resolveObject(model.getAddress(), objId);
-        tb.addField(objAddr, XCommand.SAFE_STATE_BOUND, XX.createUniqueId());
+        final XAddress objAddr = Base.resolveObject(model.getAddress(), objId);
+        tb.addField(objAddr, XCommand.SAFE_STATE_BOUND, Base.createUniqueId());
         assertTrue(model.executeCommand(tb.build()) >= 0);
-        
+
         assertTrue(model.removeObject(DemoModelUtil.CLAUDIA_ID));
-        
+
     }
-    
+
     @Before
     public void setUp() {
-        
+
         // create two identical phonebook models
-        XRepository remoteRepo = new MemoryRepository(this.actorId, this.password,
-                XX.toId("remoteRepo"));
+        final XRepository remoteRepo = new MemoryRepository(this.actorId, this.password,
+                Base.toId("remoteRepo"));
         DemoModelUtil.addPhonebookModel(remoteRepo);
         this.remoteModel = remoteRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
-        
+
         // TODO sync: allow to select the state backend
         this.localModel = XCopyUtils.copyModel(this.actorId, this.password, this.remoteModel);
-        
+
         assertTrue(XCompareUtils.equalState(this.localModel, this.remoteModel));
-        
+
     }
-    
+
     @After
     public void tearDown() {
     }
-    
+
     @SuppressWarnings("unused")
     @Test
     public void testModelSynchronize() {
-        
-        XAddress johnAddr = XX.resolveObject(this.localModel.getAddress(), DemoModelUtil.JOHN_ID);
-        
-        long lastRevision = this.localModel.getRevisionNumber();
+
+        final XAddress johnAddr = Base.resolveObject(this.localModel.getAddress(), DemoModelUtil.JOHN_ID);
+
+        final long lastRevision = this.localModel.getRevisionNumber();
         assertEquals(lastRevision, this.remoteModel.getRevisionNumber());
-        
+
         assertTrue(XCompareUtils.equalState(this.remoteModel, this.localModel));
-        
+
         // add some remote changes
         makeAdditionalChanges(this.remoteModel);
-        
+
         // get the remote changes
-        List<XEvent> remoteChanges = new ArrayList<XEvent>();
-        Iterator<XEvent> rCIt = this.remoteModel.getChangeLog().getEventsSince(lastRevision + 1);
+        final List<XEvent> remoteChanges = new ArrayList<XEvent>();
+        final Iterator<XEvent> rCIt = this.remoteModel.getChangeLog().getEventsSince(lastRevision + 1);
         while(rCIt.hasNext()) {
             remoteChanges.add(fix(rCIt.next()));
         }
-        
+
         // create a set of local changes
-        XId newObjectId = XX.toId("cookiemonster");
-        XId newFieldId = XX.toId("cookies");
-        XAddress newObjectAddr = XX.resolveObject(this.localModel.getAddress(), newObjectId);
-        XAddress newFieldAddr = XX.resolveField(newObjectAddr, newFieldId);
-        XValue newValue1 = XV.toValue("chocolate chip");
-        XValue newValue2 = XV.toValue("almond");
-        XModelCommand createObject = MemoryModelCommand.createAddCommand(
+        final XId newObjectId = Base.toId("cookiemonster");
+        final XId newFieldId = Base.toId("cookies");
+        final XAddress newObjectAddr = Base.resolveObject(this.localModel.getAddress(), newObjectId);
+        final XAddress newFieldAddr = Base.resolveField(newObjectAddr, newFieldId);
+        final XValue newValue1 = XV.toValue("chocolate chip");
+        final XValue newValue2 = XV.toValue("almond");
+        final XModelCommand createObject = MemoryModelCommand.createAddCommand(
                 this.localModel.getAddress(), false, newObjectId);
-        XObjectCommand createField = MemoryObjectCommand.createAddCommand(newObjectAddr, false,
+        final XObjectCommand createField = MemoryObjectCommand.createAddCommand(newObjectAddr, false,
                 newFieldId);
-        XFieldCommand setValue1 = MemoryFieldCommand.createAddCommand(newFieldAddr,
+        final XFieldCommand setValue1 = MemoryFieldCommand.createAddCommand(newFieldAddr,
                 lastRevision + 2, newValue1);
-        XFieldCommand setValue2 = MemoryFieldCommand.createAddCommand(newFieldAddr,
+        final XFieldCommand setValue2 = MemoryFieldCommand.createAddCommand(newFieldAddr,
                 XCommand.FORCED, newValue2);
-        XObjectCommand removeField = MemoryObjectCommand.createRemoveCommand(newObjectAddr,
+        final XObjectCommand removeField = MemoryObjectCommand.createRemoveCommand(newObjectAddr,
                 lastRevision + 4, newFieldId);
-        
-        XModelCommand removePeter = MemoryModelCommand.createRemoveCommand(this.localModel
+
+        final XModelCommand removePeter = MemoryModelCommand.createRemoveCommand(this.localModel
                 .getAddress(), this.localModel.getObject(DemoModelUtil.PETER_ID)
                 .getRevisionNumber(), DemoModelUtil.PETER_ID);
-        
-        XObject john = this.localModel.getObject(DemoModelUtil.JOHN_ID);
-        XModelCommand removeJohnSafe = MemoryModelCommand.createRemoveCommand(
+
+        final XObject john = this.localModel.getObject(DemoModelUtil.JOHN_ID);
+        final XModelCommand removeJohnSafe = MemoryModelCommand.createRemoveCommand(
                 this.localModel.getAddress(), john.getRevisionNumber(), john.getId());
-        XModelCommand removeJohnForced = MemoryModelCommand.createRemoveCommand(
+        final XModelCommand removeJohnForced = MemoryModelCommand.createRemoveCommand(
                 this.localModel.getAddress(), XCommand.FORCED, john.getId());
-        
-        List<XCommand> localChanges = new ArrayList<XCommand>();
+
+        final List<XCommand> localChanges = new ArrayList<XCommand>();
         localChanges.add(createObject); // 0
         localChanges.add(createField); // 1
         localChanges.add(setValue1); // 2
@@ -240,41 +241,41 @@ public class SynchronizeTest {
         localChanges.add(removePeter); // 5
         localChanges.add(removeJohnSafe); // 6
         localChanges.add(removeJohnForced); // 7
-        
+
         // create a model identical to localModel to check events sent on sync
-        XModel checkModel = XCopyUtils.copyModel(this.actorId, this.password, this.localModel);
-        
+        final XModel checkModel = XCopyUtils.copyModel(this.actorId, this.password, this.localModel);
+
         // apply the commands locally
-        for(XCommand command : localChanges) {
+        for(final XCommand command : localChanges) {
             long result = 0;
             result = checkModel.executeCommand(command);
             assertTrue("command: " + fix(command), result >= 0 || result == XCommand.NOCHANGE);
             result = this.localModel.executeCommand(command);
             assertTrue("command: " + command, result >= 0 || result == XCommand.NOCHANGE);
         }
-        
+
         // setup listeners
         // List<XEvent> events = ChangeRecorder.record(this.localModel);
-        HasChangedListener hc = new HasChangedListener();
-        XObject newObject = this.localModel.getObject(newObjectId);
+        final HasChangedListener hc = new HasChangedListener();
+        final XObject newObject = this.localModel.getObject(newObjectId);
         newObject.addListenerForFieldEvents(hc);
         newObject.addListenerForObjectEvents(hc);
-        
+
         // synchronize the remoteChanges into localModel
         // XEvent[] remoteEvents = remoteChanges.toArray(new
         // XEvent[remoteChanges.size()]);
-        
+
         XyAssert.xyAssert(lastRevision == this.localModel.getSynchronizedRevision());
-        
-        ISyncLog lc = (ISyncLog)this.localModel.getChangeLog();
-        
+
+        final ISyncLog lc = (ISyncLog)this.localModel.getChangeLog();
+
         // check results
         assertEquals(7, lc.getSize());
-        
+
         // TODO verify syncEvents
-        
+
         // check that commands have been properly modified
-        
+
         // FIXME use syncRev+1 instead of 0 etc...
         // long offset = lc.getSynchronizedRevision() + 1;
         // assertEquals(createObject, lc.getSyncLogEntryAt(offset +
@@ -337,6 +338,6 @@ public class SynchronizeTest {
         // assertFalse(hc.eventsReceived);
         // this.localModel.getObject(newObjectId).createField(newFieldId);
         // assertTrue(hc.eventsReceived);
-        
+
     }
 }

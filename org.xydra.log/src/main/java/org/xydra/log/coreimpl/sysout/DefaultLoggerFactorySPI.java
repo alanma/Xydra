@@ -12,24 +12,24 @@ import org.xydra.log.spi.ILoggerFactorySPI;
 public class DefaultLoggerFactorySPI implements ILoggerFactorySPI {
 
 	@Override
-	public Logger getLogger(String name, Collection<ILogListener> logListeners) {
+	public Logger getLogger(final String name, final Collection<ILogListener> logListeners) {
 		return new DefaultLogger(name, logListeners);
 	}
 
 	@Override
-	public Logger getThreadSafeLogger(String name, Collection<ILogListener> logListeners) {
-		Logger logger = new ThreadSafeDefaultLogger(name);
+	public Logger getThreadSafeLogger(final String name, final Collection<ILogListener> logListeners) {
+		final Logger logger = new ThreadSafeDefaultLogger(name);
 		return new ThreadSafeLoggerWithListeners(logger, logListeners);
 	}
 
 	@Override
-	public Logger getThreadSafeWrappedLogger(String name,
-			String fullyQualifiedNameOfDelegatingLoggerClass) {
+	public Logger getThreadSafeWrappedLogger(final String name,
+			final String fullyQualifiedNameOfDelegatingLoggerClass) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Logger getWrappedLogger(String name, String fullyQualifiedNameOfDelegatingLoggerClass) {
+	public Logger getWrappedLogger(final String name, final String fullyQualifiedNameOfDelegatingLoggerClass) {
 		throw new UnsupportedOperationException();
 	}
 

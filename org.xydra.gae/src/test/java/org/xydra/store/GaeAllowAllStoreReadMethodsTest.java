@@ -3,6 +3,7 @@ package org.xydra.store;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.core.LoggerTestHelper;
@@ -30,11 +31,11 @@ public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMe
 		XydraRuntime.finishRequest();
 	}
 
-	private XId repositoryId = XX.createUniqueId();
+	private final XId repositoryId = XX.createUniqueId();
 
 	@Override
 	protected XCommandFactory getCommandFactory() {
-		return X.getCommandFactory();
+		return BaseRuntime.getCommandFactory();
 	}
 
 	@Override

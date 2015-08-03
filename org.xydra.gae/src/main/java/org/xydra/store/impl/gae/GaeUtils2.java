@@ -16,10 +16,10 @@ public class GaeUtils2 {
 
 	public static final String LAST_UNICODE_CHAR = "\uFFFF";
 
-	public static AsyncEntity getEntityFromMemcacheAndAsyncDatatore(SKey key) {
+	public static AsyncEntity getEntityFromMemcacheAndAsyncDatatore(final SKey key) {
 		if (useMemCache) {
 			// try first to get from memcache
-			SEntity cachedEntity = (SEntity) Memcache.get(key);
+			final SEntity cachedEntity = (SEntity) Memcache.get(key);
 			if (cachedEntity != null) {
 				if (cachedEntity.equals(Memcache.NULL_ENTITY)) {
 					return new AsyncEntity(null);
@@ -28,7 +28,7 @@ public class GaeUtils2 {
 				}
 			}
 		}
-		Future<SEntity> entity = XGae.get().datastore().async().getEntity(key);
+		final Future<SEntity> entity = XGae.get().datastore().async().getEntity(key);
 		return new AsyncEntity(key, entity);
 	}
 

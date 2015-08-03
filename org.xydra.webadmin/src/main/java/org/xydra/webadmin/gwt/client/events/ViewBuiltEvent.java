@@ -7,12 +7,12 @@ import com.google.web.bindery.event.shared.Event;
 
 /**
  * Model has been committed
- * 
+ *
  * @author Andreas
  */
 public class ViewBuiltEvent extends Event<IViewBuiltHandler> {
 
-	private XAddress viewAddress;
+	private final XAddress viewAddress;
 
 	public static final Type<IViewBuiltHandler> TYPE = new Type<IViewBuiltHandler>();
 
@@ -20,7 +20,7 @@ public class ViewBuiltEvent extends Event<IViewBuiltHandler> {
 		void onViewBuilt(ViewBuiltEvent event);
 	}
 
-	public ViewBuiltEvent(XAddress modelAddress) {
+	public ViewBuiltEvent(final XAddress modelAddress) {
 		this.viewAddress = modelAddress;
 	}
 
@@ -29,7 +29,7 @@ public class ViewBuiltEvent extends Event<IViewBuiltHandler> {
 	}
 
 	@Override
-	protected void dispatch(IViewBuiltHandler handler) {
+	protected void dispatch(final IViewBuiltHandler handler) {
 		handler.onViewBuilt(this);
 	}
 

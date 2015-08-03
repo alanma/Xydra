@@ -14,7 +14,7 @@ public class UsageExample {
 	@Test
 	public void testColumnsInInsertionOrder() throws IOException {
 		/* Create a new in-memory table */
-		CsvTable table = new CsvTable(true);
+		final CsvTable table = new CsvTable(true);
 		/* Create a row with a unique key, using the system time */
 		IRow row = table
 				.getOrCreateRow("" + System.currentTimeMillis() + "-" + Math.random(), true);
@@ -32,12 +32,12 @@ public class UsageExample {
 	@Test
 	public void testSimpleUseCases() throws FileNotFoundException {
 		/* A temporary file, create it'S parent directory */
-		File temp = new File("./target/temp/example/table1.csv");
+		final File temp = new File("./target/temp/example/table1.csv");
 		temp.getParentFile().mkdirs();
 		/* Create a new in-memory table */
-		ICsvTable table = new CsvTable();
+		final ICsvTable table = new CsvTable();
 		/* Create a row with a unique key, using the system time */
-		IRow row = table.getOrCreateRow("" + System.currentTimeMillis() + Math.random(), true);
+		final IRow row = table.getOrCreateRow("" + System.currentTimeMillis() + Math.random(), true);
 		/* Set a value */
 		row.setValue("first name", "Heiko", true);
 		/* we overwrite the value */
@@ -46,13 +46,13 @@ public class UsageExample {
 		try {
 			row.setValue("first name", "Jones", true);
 			fail("we try to set the value initially, but there was already a value, so we get an exception.");
-		} catch (IllegalStateException e) {
+		} catch (final IllegalStateException e) {
 			// we expected that.
 		}
 		/* set another value */
 		row.setValue("last name", "Doe", true);
 		/* add a second row with values */
-		IRow row2 = table.getOrCreateRow("" + System.currentTimeMillis() + Math.random(), true);
+		final IRow row2 = table.getOrCreateRow("" + System.currentTimeMillis() + Math.random(), true);
 		row2.setValue("last name", "Homer", true);
 		row2.setValue("first name", "Simpson", true);
 

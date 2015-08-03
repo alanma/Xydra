@@ -11,7 +11,7 @@ import org.xydra.base.rmof.XWritableObject;
 @RunsInGWT(true)
 @RequiresAppEngine(false)
 public interface IIndexFactory {
-	
+
 	/**
 	 * @param fieldId the fieldId to index XObjects by.
 	 * @param indexObject common practice is to use one with ID
@@ -20,7 +20,7 @@ public interface IIndexFactory {
 	 *         entries are stored as XFields.
 	 */
 	IObjectIndex createObjectIndex(XId fieldId, XWritableObject indexObject);
-	
+
 	/**
 	 * @param fieldId the fieldId to index XObjects by.
 	 * @param indexObject common practice is to use one with ID

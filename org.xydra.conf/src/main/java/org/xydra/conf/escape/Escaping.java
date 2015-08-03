@@ -10,13 +10,13 @@ public class Escaping {
 	 * @NeverNull
 	 * @param codepoint must be below xD800 (55296 as int)
 	 */
-	public static void appendAsUnicodeEscapeSequence(StringBuilder b, int codepoint) {
+	public static void appendAsUnicodeEscapeSequence(final StringBuilder b, final int codepoint) {
 		/*
 		 * let's be clever here: encoding in range 0..255 is represented as
 		 * ENCODING_CHAR + 2 hex;
-		 * 
+		 *
 		 * 255.. 65535 is ENCODING_CHAR + ENCODING_CHAR + 4 hex
-		 * 
+		 *
 		 * range 65536..1114111 is represented as ENCODING_CHAR + ENCODING_CHAR
 		 * + ENCODING_CHAR + 6 hex
 		 */
@@ -43,16 +43,16 @@ public class Escaping {
 			 * the UTF-16 encoding of the codepoint.
 			 */
 
-			int x = codepoint - Integer.parseInt("10000", 16);
+			final int x = codepoint - Integer.parseInt("10000", 16);
 			assert x <= Integer.parseInt("FFFFF", 16);
 
-			int high = x >> 10;
-			int low = x - (high << 10);
+			final int high = x >> 10;
+			final int low = x - (high << 10);
 
-			int surrogateHigh = high + Integer.parseInt("D800", 16);
+			final int surrogateHigh = high + Integer.parseInt("D800", 16);
 			assert surrogateHigh >= Integer.parseInt("D800", 16);
 			assert surrogateHigh <= Integer.parseInt("DBFF", 16);
-			int surrogateLow = low + Integer.parseInt("DC00", 16);
+			final int surrogateLow = low + Integer.parseInt("DC00", 16);
 			assert surrogateLow >= Integer.parseInt("DC00", 16);
 			assert surrogateLow <= Integer.parseInt("DFFF", 16);
 
@@ -66,19 +66,19 @@ public class Escaping {
 	/**
 	 * Escape the characters (written as regex char group without
 	 * backslash-escaping) [\\n\t\r:= ]
-	 * 
+	 *
 	 * @param raw
 	 * @param escapeColonSpaceEquals TODO
 	 * @param escapeQuotes TODO
 	 * @return ...
 	 */
-	public static String escape(String raw, boolean escapeColonSpaceEquals, boolean escapeQuotes) {
+	public static String escape(final String raw, final boolean escapeColonSpaceEquals, final boolean escapeQuotes) {
 		assert raw != null;
 
-		StringBuilder esc = new StringBuilder();
+		final StringBuilder esc = new StringBuilder();
 		int i = 0;
 		while (i < raw.length()) {
-			int c = raw.codePointAt(i);
+			final int c = raw.codePointAt(i);
 			i += Character.charCount(c);
 
 			switch (c) {
@@ -134,11 +134,11 @@ public class Escaping {
 		return esc.toString();
 	}
 
-	public static String escapeUnicode(String raw) {
+	public static String escapeUnicode(final String raw) {
 		return escape(raw, false, false);
 	}
 
-	public static String escapeUnicodeAndQuotes(String raw) {
+	public static String escapeUnicodeAndQuotes(final String raw) {
 		return escape(raw, false, true);
 	}
 
@@ -154,9 +154,9 @@ public class Escaping {
 	 *            escaped: [:] = [\\][:], [ ] = [\\][ ], [=] = [\\][=].
 	 * @return number of interpreted characters
 	 */
-	private static int materializeBackslashEscapes(String escaped, int i, StringBuilder unescaped,
-			boolean swallowBackslashNewline, boolean escapeColonSpaceEqual) {
-		int c = escaped.codePointAt(i);
+	private static int materializeBackslashEscapes(final String escaped, final int i, final StringBuilder unescaped,
+			final boolean swallowBackslashNewline, final boolean escapeColonSpaceEqual) {
+		final int c = escaped.codePointAt(i);
 		switch (c) {
 		case '\n':
 			if (swallowBackslashNewline) {
@@ -214,14 +214,14 @@ public class Escaping {
 	 * @return a string in which java and unicode escapes have been replaced
 	 *         with the correct unicode codepoint
 	 */
-	public static String materializeEscapes(String escaped, boolean swallowBackslashNewline,
-			boolean escapeColonSpaceEqual) {
+	public static String materializeEscapes(final String escaped, final boolean swallowBackslashNewline,
+			final boolean escapeColonSpaceEqual) {
 		assert escaped != null;
 
-		StringBuilder unescaped = new StringBuilder();
+		final StringBuilder unescaped = new StringBuilder();
 		int i = 0;
 		while (i < escaped.length()) {
-			int c = escaped.codePointAt(i);
+			final int c = escaped.codePointAt(i);
 			i += Character.charCount(c);
 			switch (c) {
 			case '\\':
@@ -242,17 +242,17 @@ public class Escaping {
 		return unescaped.toString();
 	}
 
-	public static String materializeUnicode(String escaped) {
-		StringBuilder unescaped = new StringBuilder();
+	public static String materializeUnicode(final String escaped) {
+		final StringBuilder unescaped = new StringBuilder();
 		int i = 0;
 		while (i < escaped.length()) {
-			int c = escaped.codePointAt(i);
+			final int c = escaped.codePointAt(i);
 			i += Character.charCount(c);
 			switch (c) {
 			case '\\':
 				if (i < escaped.length()) {
 					// process
-					int j = materializeUnicode(escaped, i + 1, unescaped);
+					final int j = materializeUnicode(escaped, i + 1, unescaped);
 					if (j > 0) {
 						i += j + 1;
 					} else {
@@ -273,23 +273,23 @@ public class Escaping {
 
 	/**
 	 * Surrogate pairs not supported.
-	 * 
+	 *
 	 * @param escapedSource
 	 * @param i position of hex chars after the '\ u'
 	 * @param unescaped
 	 * @return how many chars used
 	 */
-	public static int materializeUnicode(String escapedSource, int i, StringBuilder unescaped) {
+	public static int materializeUnicode(final String escapedSource, final int i, final StringBuilder unescaped) {
 		// try to get hex chars
 		if (i + 4 > escapedSource.length()) {
 			// parse nothing
 			return 0;
 		}
 
-		String hex4 = escapedSource.substring(i, i + 4);
+		final String hex4 = escapedSource.substring(i, i + 4);
 		// TODO optimisation potential
 		if (hex4.matches("[a-fA-F0-9]{4}")) {
-			int codepointNumber = Integer.parseInt(hex4, 16);
+			final int codepointNumber = Integer.parseInt(hex4, 16);
 			unescaped.appendCodePoint(codepointNumber);
 			return 4;
 		} else {
@@ -301,23 +301,23 @@ public class Escaping {
 
 	/**
 	 * Not optimized for speed, but handy for debugging.
-	 * 
+	 *
 	 * @param s
 	 * @return a very readable string
 	 */
-	public static String toCodepoints(String s) {
+	public static String toCodepoints(final String s) {
 		String res = "";
 		int i = 0;
 		while (i < s.length()) {
-			int c = s.codePointAt(i);
+			final int c = s.codePointAt(i);
 			i += Character.charCount(c);
-			res += "[" + Integer.toString(c) + "='" + ((char) c) + "']";
+			res += "[" + Integer.toString(c) + "='" + (char) c + "']";
 		}
 		return res;
 	}
 
-	public static void main(String[] args) {
-		StringBuilder b = new StringBuilder();
+	public static void main(final String[] args) {
+		final StringBuilder b = new StringBuilder();
 		// b.append("foo");
 		// appendAsUnicodeEscapeSequence(b, 254);
 		// b.append("foo");
@@ -326,7 +326,7 @@ public class Escaping {
 		System.out.println(b);
 		System.out.println(materializeUnicode("0298", 0, b));
 		System.out.println("'" + b + "'");
-		String enc = escapeUnicode("Völkel");
+		final String enc = escapeUnicode("Völkel");
 		System.out.println(enc);
 		System.out.println(materializeUnicode(enc));
 	}

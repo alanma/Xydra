@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.junit.Test;
+import org.xydra.base.Base;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
@@ -25,45 +27,45 @@ public abstract class AbstractSingleCommandTransactionTest {
 	static {
 		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
 	}
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(AbstractPersistenceTestForTransactions.class);
-	
+
 	public XydraPersistence persistence;
-	
+
 	public XCommandFactory comFactory;
-	
+
 	public XId repoId = X.getIDProvider().fromString("testRepo");
 	public XAddress repoAddress = XX.resolveRepository(this.repoId);
 	public XId actorId = X.getIDProvider().fromString("testActor");
-	
+
 	@Test
 	public void testSingleCommandTransactionExceptingTransactionEvent() {
-		
-		XId modelId = X.getIDProvider().fromString("singleCommandTransactionModel");
-		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
-		
-		XCommand addModelCommand = this.comFactory.createAddModelCommand(this.repoId, modelId,
+
+		final XId modelId = BaseRuntime.getIDProvider().fromString("singleCommandTransactionModel");
+		final XAddress modelAddress = Base.resolveModel(this.repoId, modelId);
+
+		final XCommand addModelCommand = this.comFactory.createAddModelCommand(this.repoId, modelId,
 		        false);
-		
+
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCommand);
-		
+
 		assertTrue("Model couldn't be added, test cannot be executed", revNr >= 0);
-		
-		XTransactionBuilder txnBuilder = new XTransactionBuilder(modelAddress);
-		XId objectId = X.getIDProvider().fromString("singleCommandTransactionObject");
-		XCommand addObjectCommand = this.comFactory.createAddObjectCommand(XX.resolveModel(this.repoId, modelId),
+
+		final XTransactionBuilder txnBuilder = new XTransactionBuilder(modelAddress);
+		final XId objectId = BaseRuntime.getIDProvider().fromString("singleCommandTransactionObject");
+		final XCommand addObjectCommand = this.comFactory.createAddObjectCommand(Base.resolveModel(this.repoId, modelId),
 		        objectId, false);
-		
+
 		txnBuilder.addCommand(addObjectCommand);
-		XTransaction txn = txnBuilder.build();
-		
+		final XTransaction txn = txnBuilder.build();
+
 		revNr = this.persistence.executeCommand(this.actorId, txn);
-		
+
 		assertTrue("Transaction failed.", revNr > 0);
-		
-		List<XEvent> events = this.persistence.getEvents(modelAddress, revNr, revNr);
-		
+
+		final List<XEvent> events = this.persistence.getEvents(modelAddress, revNr, revNr);
+
 		assertEquals("There should only be one event.", 1, events.size());
 		/*
 		 * implementations are free to replace a txn with a single command with

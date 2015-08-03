@@ -31,16 +31,16 @@ public class ConfirmationDialog extends DialogBox {
 	@UiField(provided = true)
 	ButtonPanel buttonPanel;
 
-	public ConfirmationDialog(final EditorPanelPresenter editorPanelPresenter, String text) {
+	public ConfirmationDialog(final EditorPanelPresenter editorPanelPresenter, final String text) {
 
 		super();
 
-		this.setText(text);
+		setText(text);
 
-		ClickHandler okHandler = new ClickHandler() {
+		final ClickHandler okHandler = new ClickHandler() {
 
 			@Override
-			public void onClick(ClickEvent event) {
+			public void onClick(final ClickEvent event) {
 				editorPanelPresenter.discardChanges();
 				ConfirmationDialog.this.removeFromParent();
 			}
@@ -51,7 +51,7 @@ public class ConfirmationDialog extends DialogBox {
 		setWidget(uiBinder.createAndBindUi(this));
 
 		this.setStyleName("dialogStyle");
-		this.center();
+		center();
 	}
 
 }

@@ -9,29 +9,29 @@ import org.xydra.base.change.XAtomicEvent;
 
 /**
  * Bases class for MOFV.
- * 
+ *
  * Role: Determine the state at the end of a transaction: Which elements have
  * been removed, changed (= children added/removed), or added?
- * 
+ *
  * @author xamde
  */
 abstract class SummaryEntity implements IHasXId {
 
 	protected Change change = new Change();
 
-	private XId id;
+	private final XId id;
 
 	/** for debugging */
 	protected List<Long> appliedEvents = new ArrayList<Long>();
 
-	public SummaryEntity(XId id) {
+	public SummaryEntity(final XId id) {
 		this.id = id;
 	}
 
 	/**
 	 * @param ae
 	 */
-	public void apply(XAtomicEvent ae) {
+	public void apply(final XAtomicEvent ae) {
 		this.change.apply(ae.getChangeType());
 		this.change.lastRev = ae.getRevisionNumber();
 		this.appliedEvents.add(ae.getRevisionNumber());

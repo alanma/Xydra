@@ -5,19 +5,19 @@ import java.util.Set;
 /**
  * An {@link XValue} for storing a set of values. The stored values do not have
  * a specific order, but access to the contains() method is fast.
- * 
+ *
  * @author dscharrer
- * 
+ *
  * @param <E> The type of value which is to be stored.
  */
 public interface XSetValue<E> extends XCollectionValue<E> {
 
 	/**
 	 * TODO better name
-	 * 
+	 *
 	 * Create a new {@link XSetValue} contains all entries from this value as
 	 * well as the specified entry. This value instance is not modified.
-	 * 
+	 *
 	 * The resulting instance contains exactly the same members as this instance
 	 * of the entry to-be-added is already part of the set.
 	 */
@@ -26,7 +26,7 @@ public interface XSetValue<E> extends XCollectionValue<E> {
 
 	/**
 	 * TODO better name
-	 * 
+	 *
 	 * Create a new {@link XSetValue} contains all entries from this value
 	 * except the specified entry. This value is not modified.
 	 */
@@ -35,9 +35,9 @@ public interface XSetValue<E> extends XCollectionValue<E> {
 
 	/**
 	 * Returns a {@link Set} containing the values in this XSetValue.
-	 * 
+	 *
 	 * Note: Changes to the returned {@link Set} will not affect the XSetValue.
-	 * 
+	 *
 	 * @return a {@link Set} containing values in this {@link XSetValue} -
 	 *         changes to the {@link Set} are NOT reflected in this value
 	 */

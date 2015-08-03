@@ -36,16 +36,16 @@ import org.xydra.store.XydraStoreAdmin;
 /**
  * This interface is the blocking (synchronous), single-operation version of
  * {@link XydraStore}.
- * 
+ *
  * To be more efficient, passwordHash may be set to null and no
  * authentication/authorisation checks are performed. Access right checks ARE
  * performed.
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
  * <h2>Adapted from {@link XydraStore}</h2>
- * 
+ *
  * A small yet complete API for a persistence layer that offers the following
  * features:
  * <ol>
@@ -56,20 +56,20 @@ import org.xydra.store.XydraStoreAdmin;
  * <li>Retrieval of all occurred events</li>
  * <li>Partial loading (supports loading single models or objects)</li>
  * </ol>
- * 
+ *
  * <h3>Usage guidelines</h3>
- * 
+ *
  * For secure usage this API should be used over HTTPS.
- * 
+ *
  * <h3>Confidentiality</h3>
- * 
+ *
  * In general, a given actorId is first authenticated, which is throttled to a
  * certain number of login attempts per time interval. If that threshold is
  * exceeded, a {@link QuotaException} is thrown.
- * 
+ *
  * TODO Clarify behaviour (when delayed how much, when blocked, how to unblock,
  * ...)
- * 
+ *
  * Once the actorId is authenticated, Xydra checks if the actor has the
  * necessary rights to perform an operation (read or write). If not, an
  * {@link AccessException} is returned, in most methods within a
@@ -79,22 +79,22 @@ import org.xydra.store.XydraStoreAdmin;
  * read-requests and check if the result is null (entity does not exist) or
  * whether there is a {@link BatchedResult} with {@link AccessException}. This
  * design will make implementing clients using the API easier to debug.
- * 
+ *
  * <h3>Implementation guidelines</h3> For anonymous users over HTTP, the
  * IP-Address could be used as an actorId.
- * 
+ *
  * @author xamde
  * @author dscharrer
  */
 
 public interface XydraBlockingStore {
-	
+
 	/**
 	 * SECURITY.
-	 * 
+	 *
 	 * Redundant method to allow a quick (network-efficient) check if an actorId
 	 * and passwordHash are valid for authentication.
-	 * 
+	 *
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -122,13 +122,13 @@ public interface XydraBlockingStore {
 	boolean checkLogin(XId actorId, String passwordHash) throws IllegalArgumentException,
 	        QuotaException, TimeoutException, ConnectionException, RequestException,
 	        InternalStoreException;
-	
+
 	/**
 	 * Change state.
-	 * 
+	 *
 	 * Check permissions, command pre-conditions, execute the command and log
 	 * the resulting events.
-	 * 
+	 *
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -139,12 +139,12 @@ public interface XydraBlockingStore {
 	 *            {@link XTransaction}.
 	 * @return the result of executing the command. A non-negative number
 	 *         indicates the resulting revision number of the changed entity.
-	 * 
+	 *
 	 *         For successful commands that changed something, the return value
 	 *         is always a revision number that can be used to retrieve the
 	 *         corresponding event using
 	 *         {@link #getEvents(XId, String, GetEventsRequest)}
-	 * 
+	 *
 	 *         Like any other {@link XCommand}, {@link XTransaction}s only
 	 *         "take up" a single revision, which is the one passed to the
 	 *         callback. For {@link XTransaction}s as well as
@@ -153,18 +153,18 @@ public interface XydraBlockingStore {
 	 *         change log may be either a {@link XTransactionEvent} or an
 	 *         {@link XAtomicEvent}, depending on whether there are actually
 	 *         multiple changes.
-	 * 
+	 *
 	 *         Negative numbers indicate a special result:
 	 *         {@link XCommand#FAILED} signals a failure,
 	 *         {@link XCommand#NOCHANGE} signals that the command did not change
 	 *         anything.
-	 * 
+	 *
 	 *         Commands may still "take up" a revision number, even if they
 	 *         failed or didn't change anything, causing the next command to
 	 *         skip a revision number. This means that there can be revision
 	 *         numbers without any associated events. The revision of the model
 	 *         however is only updated if anything actually changed.
-	 * 
+	 *
 	 *         Even after a the callback's {@link Callback#onSuccess(Object)}
 	 *         method has been called, the change may not actually be returned
 	 *         yet by
@@ -202,13 +202,13 @@ public interface XydraBlockingStore {
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        AccessException, TimeoutException, ConnectionException, RequestException,
 	        InternalStoreException;
-	
+
 	/**
 	 * EVENTS.
-	 * 
+	 *
 	 * Fetch all events that happened for a given address in a given range of
 	 * revisions.
-	 * 
+	 *
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -217,10 +217,10 @@ public interface XydraBlockingStore {
 	 * @param getEventsRequest a request for events. See
 	 *            {@link GetEventsRequest}.
 	 * @return an array of XEvents, in the order in which they happened.
-	 * 
+	 *
 	 *         The array can be null to indicate that the requested entity does
 	 *         not exist or the user is not allowed to read it.
-	 * 
+	 *
 	 * @throws IllegalArgumentException if one of the given parameters is null
 	 *             (except passwordHash, which may be null).
 	 * @throws QuotaException to prevent brute-force attacks when too many
@@ -248,10 +248,10 @@ public interface XydraBlockingStore {
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        AccessException, TimeoutException, ConnectionException, RequestException,
 	        InternalStoreException;
-	
+
 	/**
 	 * Read current state.
-	 * 
+	 *
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -281,10 +281,10 @@ public interface XydraBlockingStore {
 	Set<XId> getModelIds(XId actorId, String passwordHash) throws IllegalArgumentException,
 	        QuotaException, AuthorisationException, TimeoutException, ConnectionException,
 	        RequestException, InternalStoreException;
-	
+
 	/**
 	 * Read current state.
-	 * 
+	 *
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -319,13 +319,13 @@ public interface XydraBlockingStore {
 	        GetWithAddressRequest modelAddress) throws IllegalArgumentException, QuotaException,
 	        AuthorisationException, TimeoutException, ConnectionException, RequestException,
 	        InternalStoreException;
-	
+
 	/**
 	 * Read current state.
-	 * 
+	 *
 	 * Retrieve read-only snapshots of {@link XModel} states at the point in
 	 * time when this request is processed.
-	 * 
+	 *
 	 * Possible exceptions for single entries in the returned
 	 * {@link BatchedResult}:
 	 * <ul>
@@ -334,7 +334,7 @@ public interface XydraBlockingStore {
 	 * <li>{@link AccessException} for a modelAddress the given actorId may not
 	 * read</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -343,10 +343,10 @@ public interface XydraBlockingStore {
 	 * @param modelAddressRequest the {@link XAddress} for which model to get a
 	 *            snapshot. The {@link XAddress} must address an {@link XModel}
 	 *            (repositoryId/modelId/-/-).
-	 * 
+	 *
 	 *            TODO @Daniel: How can a client request a specific version of a
 	 *            snapshot?
-	 * 
+	 *
 	 * @return a null value signals that the requested model does not exist in
 	 *         the store or that the requesting actor has not the necessary
 	 *         rights to see it.
@@ -368,20 +368,20 @@ public interface XydraBlockingStore {
 	 * @throws AuthorisationException if actorId and passwordHash don't match
 	 * @throws RequestException if the supplied arguments are considered
 	 *             syntactically or semantically invalid
-	 * 
+	 *
 	 *             Implementation note: Implementation may choose to supply a
 	 *             lazy-loading stub only.
 	 */
 	XReadableModel getModelSnapshot(XId actorId, String passwordHash, GetWithAddressRequest modelAddressRequest)
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
-	
+
 	/**
 	 * Read current state.
-	 * 
+	 *
 	 * Returns read-only snapshots of {@link XObject} state at the point in time
 	 * when this request was processed.
-	 * 
+	 *
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -411,22 +411,22 @@ public interface XydraBlockingStore {
 	 * @throws AuthorisationException if actorId and passwordHash don't match
 	 * @throws RequestException if the supplied arguments are considered
 	 *             syntactically or semantically invalid
-	 * 
+	 *
 	 *             Implementation note: Implementation may chose to supply a
 	 *             lazy-loading stub only.
 	 */
 	XReadableObject getObjectSnapshot(XId actorId, String passwordHash, GetWithAddressRequest objectAddressRequest)
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
-	
+
 	/**
 	 * Read current state.
-	 * 
+	 *
 	 * One {@link XydraBlockingStore} instance refers to exactly one Xydra
 	 * {@link XRepository}.
-	 * 
+	 *
 	 * Every authenticated actorId may read the repository ID.
-	 * 
+	 *
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -455,7 +455,7 @@ public interface XydraBlockingStore {
 	XId getRepositoryId(XId actorId, String passwordHash) throws IllegalArgumentException,
 	        QuotaException, AuthorisationException, TimeoutException, ConnectionException,
 	        RequestException, InternalStoreException;
-	
+
 	/**
 	 * @return a {@link XydraStoreAdmin} interface that contains local
 	 *         administration functions that are not exposed via REST.
@@ -463,5 +463,5 @@ public interface XydraBlockingStore {
 	 *         administrative methods may return null.
 	 */
 	XydraStoreAdmin getXydraStoreAdmin();
-	
+
 }

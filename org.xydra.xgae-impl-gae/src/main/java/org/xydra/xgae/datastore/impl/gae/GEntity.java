@@ -21,19 +21,21 @@ public class GEntity extends RawWrapper<Entity, GEntity> implements SEntity {
 	private static ITransformer<Object, Object> GAE_TO_XGAE = new ITransformer<Object, Object>() {
 
 		@Override
-		public Object transform(Object in) {
+		public Object transform(final Object in) {
 			if (in instanceof List) {
-				List<?> list = (List<?>) in;
-				List<Object> xgaeList = new ArrayList<Object>(list.size());
-				for (Object o : list) {
+				final List<?> list = (List<?>) in;
+				final List<Object> xgaeList = new ArrayList<Object>(list.size());
+				for (final Object o : list) {
 					xgaeList.add(GAE_TO_XGAE.transform(o));
 				}
 				return xgaeList;
 			}
-			if (in instanceof Text)
+			if (in instanceof Text) {
 				return GText.wrap((Text) in);
-			if (in instanceof Key)
+			}
+			if (in instanceof Key) {
 				return GKey.wrap((Key) in);
+			}
 			return in;
 		}
 	};
@@ -41,7 +43,7 @@ public class GEntity extends RawWrapper<Entity, GEntity> implements SEntity {
 	protected static final ITransformer<Entity, SEntity> TRANSFOMER_ENTITY_SENTITY = new ITransformer<Entity, SEntity>() {
 
 		@Override
-		public SEntity transform(Entity in) {
+		public SEntity transform(final Entity in) {
 			return wrap(in);
 		}
 	};
@@ -50,11 +52,11 @@ public class GEntity extends RawWrapper<Entity, GEntity> implements SEntity {
 	private static ITransformer<Object, Object> XGAE_TO_GAE = new ITransformer<Object, Object>() {
 
 		@Override
-		public Object transform(Object in) {
+		public Object transform(final Object in) {
 			if (in instanceof List) {
-				List<?> list = (List<?>) in;
-				List<Object> gaeList = new ArrayList<Object>(list.size());
-				for (Object o : list) {
+				final List<?> list = (List<?>) in;
+				final List<Object> gaeList = new ArrayList<Object>(list.size());
+				for (final Object o : list) {
 					gaeList.add(XGAE_TO_GAE.transform(o));
 				}
 				return gaeList;
@@ -67,31 +69,32 @@ public class GEntity extends RawWrapper<Entity, GEntity> implements SEntity {
 		}
 	};
 
-	public static Iterable<Entity> unwrap(Iterable<SEntity> it) {
+	public static Iterable<Entity> unwrap(final Iterable<SEntity> it) {
 		return _unwrap(it);
 	}
 
-	public static GEntity wrap(Entity raw) {
-		if (raw == null)
+	public static GEntity wrap(final Entity raw) {
+		if (raw == null) {
 			return null;
+		}
 
 		return new GEntity(raw);
 	}
 
-	private GEntity(Entity raw) {
+	private GEntity(final Entity raw) {
 		super(raw);
 	}
 
 	@Override
-	public Object getAttribute(String name) {
-		Object o = raw().getProperty(name);
+	public Object getAttribute(final String name) {
+		final Object o = raw().getProperty(name);
 		return GAE_TO_XGAE.transform(o);
 	}
 
 	@Override
 	public Map<String, Object> getAttributes() {
 		// transform values
-		Map<String, Object> map = raw().getProperties();
+		final Map<String, Object> map = raw().getProperties();
 		return TransformerTool.transformMapValues(map, GAE_TO_XGAE);
 	}
 
@@ -101,43 +104,43 @@ public class GEntity extends RawWrapper<Entity, GEntity> implements SEntity {
 	}
 
 	@Override
-	public boolean hasAttribute(String name) {
+	public boolean hasAttribute(final String name) {
 		return raw().hasProperty(name);
 	}
 
 	@Override
-	public void removeAttribute(String name) {
+	public void removeAttribute(final String name) {
 		raw().removeProperty(name);
 	}
 
 	@Override
-	public void setAttribute(String name, boolean value) {
+	public void setAttribute(final String name, final boolean value) {
 		raw().setUnindexedProperty(name, value);
 	}
 
 	@Override
-	public void setAttribute(String name, List<?> list) {
-		Object gaeList = XGAE_TO_GAE.transform(list);
+	public void setAttribute(final String name, final List<?> list) {
+		final Object gaeList = XGAE_TO_GAE.transform(list);
 		raw().setUnindexedProperty(name, gaeList);
 	}
 
 	@Override
-	public void setAttribute(String name, long value) {
+	public void setAttribute(final String name, final long value) {
 		raw().setUnindexedProperty(name, value);
 	}
 
 	@Override
-	public void setAttribute(String name, Serializable serializable) {
+	public void setAttribute(final String name, final Serializable serializable) {
 		raw().setUnindexedProperty(name, serializable);
 	}
 
 	@Override
-	public void setAttribute(String name, String value) {
+	public void setAttribute(final String name, final String value) {
 		raw().setUnindexedProperty(name, value);
 	}
 
 	@Override
-	public void setAttribute(String name, SValue value) {
+	public void setAttribute(final String name, final SValue value) {
 		raw().setUnindexedProperty(name, value.raw());
 	}
 

@@ -9,7 +9,7 @@ public class LimitedBuffer {
 	 *            in 16-bit chars
 	 * @param lineEnd
 	 */
-	public LimitedBuffer(int maxLen, String lineEnd) {
+	public LimitedBuffer(final int maxLen, final String lineEnd) {
 		this.maxLen = maxLen;
 		this.lineEnd = lineEnd;
 	}
@@ -19,7 +19,7 @@ public class LimitedBuffer {
 
 	private StringBuffer buf = new StringBuffer();
 
-	public void append(String s) {
+	public void append(final String s) {
 		this.buf.append(s);
 		if (this.buf.length() > this.maxLen) {
 			this.buf = new StringBuffer("(too many logs, deleted past)" + this.lineEnd);

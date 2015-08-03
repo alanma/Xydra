@@ -6,7 +6,7 @@ import org.xydra.xgae.memcache.api.IMemCache;
 /**
  * TODO provide ability to have
  * XydraRuntime_GwtEmulated#wrapOrReturn(java.util.Map, IMemCache)
- * 
+ *
  * @author xamde
  */
 public class XGae {

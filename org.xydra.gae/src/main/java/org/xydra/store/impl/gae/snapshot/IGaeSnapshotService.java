@@ -67,7 +67,7 @@ public interface IGaeSnapshotService {
 
 	/**
 	 * Get a snapshot that contains at least those parts specified.
-	 * 
+	 *
 	 * @param modelRevisionNumber
 	 *            of the returned snapshot. This method assumes that this
 	 *            revision responds to a command that didn't fail (or is -1).

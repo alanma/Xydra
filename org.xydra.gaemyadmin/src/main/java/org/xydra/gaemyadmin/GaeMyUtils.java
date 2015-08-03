@@ -16,11 +16,11 @@ public class GaeMyUtils {
 	 *         __Stat_Kind__ which might be out of date for a while.
 	 */
 	public static List<String> getAllKinds() {
-		List<String> kinds = new LinkedList<String>();
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		Iterable<Entity> statKinds = datastore.prepare(new Query("__Stat_Kind__")).asIterable();
-		for (Entity statKind : statKinds) {
-			String kind = statKind.getProperty("kind_name").toString();
+		final List<String> kinds = new LinkedList<String>();
+		final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		final Iterable<Entity> statKinds = datastore.prepare(new Query("__Stat_Kind__")).asIterable();
+		for (final Entity statKind : statKinds) {
+			final String kind = statKind.getProperty("kind_name").toString();
 			kinds.add(kind);
 		}
 		return kinds;
@@ -28,13 +28,13 @@ public class GaeMyUtils {
 
 	/**
 	 * IMPROVE add pagination
-	 * 
+	 *
 	 * @param kind
 	 *            of entity to export
 	 * @return an {@link Iterable} over all Entity of the given kind
 	 */
-	public static Iterable<Entity> getEntitiesOfKind(String kind) {
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+	public static Iterable<Entity> getEntitiesOfKind(final String kind) {
+		final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		return datastore.prepare(new Query(kind)).asIterable();
 	}
 

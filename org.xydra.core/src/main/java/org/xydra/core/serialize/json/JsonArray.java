@@ -20,13 +20,13 @@ public class JsonArray extends AbstractJsonElement {
 	private final List<Object> data;
 	private final String type;
 
-	public JsonArray(List<Object> data, String type) {
+	public JsonArray(final List<Object> data, final String type) {
 		this.data = data;
 		this.type = type == null ? XmlEncoder.XARRAY_ELEMENT : type;
 	}
 
 	@Override
-	public Iterator<XydraElement> getChildren(String defaultType) {
+	public Iterator<XydraElement> getChildren(final String defaultType) {
 		return transform(this.data.iterator(), defaultType);
 	}
 
@@ -46,7 +46,7 @@ public class JsonArray extends AbstractJsonElement {
 	}
 
 	@Override
-	public Object getAttribute(String name) {
+	public Object getAttribute(final String name) {
 		throw new ParsingException(this, "cannot get attribute from JSON array");
 	}
 
@@ -56,37 +56,37 @@ public class JsonArray extends AbstractJsonElement {
 	}
 
 	@Override
-	public XydraElement getChild(String name, String type) {
+	public XydraElement getChild(final String name, final String type) {
 		throw new ParsingException(this, "cannot get single child from JSON array");
 	}
 
 	@Override
-	public Iterator<XydraElement> getChildrenByName(String name, String defaultType) {
+	public Iterator<XydraElement> getChildrenByName(final String name, final String defaultType) {
 		throw new ParsingException(this, "cannot get named children from JSON array");
 	}
 
 	@Override
-	public XydraElement getChild(String name) {
+	public XydraElement getChild(final String name) {
 		throw new ParsingException(this, "cannot get container from JSON array");
 	}
 
 	@Override
-	public Object getContent(String name) {
+	public Object getContent(final String name) {
 		throw new ParsingException(this, "cannot get content from JSON array");
 	}
 
 	@Override
-	public Iterator<Pair<String, XydraElement>> getEntries(String attribute, String defaultType) {
+	public Iterator<Pair<String, XydraElement>> getEntries(final String attribute, final String defaultType) {
 		throw new ParsingException(this, "cannot get entries from JSON array");
 	}
 
 	@Override
-	public Object getValue(String name, int index) {
+	public Object getValue(final String name, final int index) {
 		throw new ParsingException(this, "cannot get attribute from JSON array");
 	}
 
 	@Override
-	public Iterator<Object> getValues(String name) {
+	public Iterator<Object> getValues(final String name) {
 		throw new ParsingException(this, "cannot get named values from JSON array");
 	}
 

@@ -13,6 +13,7 @@ import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
+import org.xydra.restless.utils.SharedHtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 
 import com.google.appengine.api.blobstore.BlobKey;
@@ -27,7 +28,7 @@ public class BlobAdminResource {
 	static final String PAGE_NAME = "Blob Admin";
 	static String URL;
 
-	public static void restless(Restless restless, String prefix) {
+	public static void restless(final Restless restless, final String prefix) {
 		URL = prefix + "/blobs";
 		restless.addMethod(URL, "GET", BlobAdminResource.class, "index", true);
 		restless.addMethod(URL, "POST", BlobAdminResource.class, "upload", true);
@@ -37,43 +38,43 @@ public class BlobAdminResource {
 		);
 	}
 
-	public void index(HttpServletResponse res, HttpServletRequest req) throws IOException {
+	public void index(final HttpServletResponse res, final HttpServletRequest req) throws IOException {
 		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "");
+		final Writer w = AppConstants.startPage(res, PAGE_NAME, "");
 
-		BlobstoreService blobStoreService = BlobstoreServiceFactory.getBlobstoreService();
+		final BlobstoreService blobStoreService = BlobstoreServiceFactory.getBlobstoreService();
 
 		w.write("<b>Status</b><br/>Upload seems to work, download does not.<br />\n");
 
 		w.write("<b>Upload</b><br/>");
-		String url = blobStoreService.createUploadUrl("/admin" + URL,
+		final String url = blobStoreService.createUploadUrl("/admin" + URL,
 				UploadOptions.Builder.withMaxUploadSizeBytes(100 * 1024 * 1024));
-		w.write(HtmlUtils.form(METHOD.POST, url).withInputFile("tempfile")
+		w.write(SharedHtmlUtils.form(METHOD.POST, url).withInputFile("tempfile")
 				.withInputSubmit("Upload as 'tempfile'").toString());
 
 		w.write("<b>Download</b><br/>");
-		w.write(HtmlUtils.form(METHOD.GET, url).withInputText("name", "tempfile")
+		w.write(SharedHtmlUtils.form(METHOD.GET, url).withInputText("name", "tempfile")
 				.withInputSubmit("Download").toString());
 
 		AppConstants.endPage(w);
 	}
 
-	public void upload(HttpServletResponse res, HttpServletRequest req) throws IOException {
+	public void upload(final HttpServletResponse res, final HttpServletRequest req) throws IOException {
 		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "");
+		final Writer w = AppConstants.startPage(res, PAGE_NAME, "");
 
-		BlobstoreService blobStoreService = BlobstoreServiceFactory.getBlobstoreService();
+		final BlobstoreService blobStoreService = BlobstoreServiceFactory.getBlobstoreService();
 
-		Map<String, List<BlobKey>> blobs = blobStoreService.getUploads(req);
-		w.write(HtmlUtils.toOrderedList(blobs.keySet()) + "<br/>\n");
+		final Map<String, List<BlobKey>> blobs = blobStoreService.getUploads(req);
+		w.write(SharedHtmlUtils.toOrderedList(blobs.keySet()) + "<br/>\n");
 
-		List<BlobKey> keys = blobs.get("tempfile");
+		final List<BlobKey> keys = blobs.get("tempfile");
 		if (keys.isEmpty()) {
 			w.write("No tempfiles uploaded");
 		} else {
-			for (BlobKey key : keys) {
+			for (final BlobKey key : keys) {
 				w.write("Have a tempfile uploaded. Key is '" + key.getKeyString() + "'");
 			}
 		}
@@ -81,11 +82,11 @@ public class BlobAdminResource {
 		AppConstants.endPage(w);
 	}
 
-	public void download(String name, HttpServletResponse res, HttpServletRequest req)
+	public void download(final String name, final HttpServletResponse res, final HttpServletRequest req)
 			throws IOException {
 		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		BlobstoreService blobStoreService = BlobstoreServiceFactory.getBlobstoreService();
-		BlobKey blobKey = new BlobKey(name);
+		final BlobstoreService blobStoreService = BlobstoreServiceFactory.getBlobstoreService();
+		final BlobKey blobKey = new BlobKey(name);
 		blobStoreService.serve(blobKey, res);
 	}
 }

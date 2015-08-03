@@ -8,13 +8,13 @@ import org.xydra.log.api.Logger;
 public abstract class JulLogger_GwtEmul implements Logger {
 
 	@RunsInGWT(false)
-	protected synchronized void setCorrectCallerClassAndMethod(LogRecord record) {
+	protected synchronized void setCorrectCallerClassAndMethod(final LogRecord record) {
 		try {
 			throw new RuntimeException("trigger");
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			e.fillInStackTrace();
 			e.getStackTrace();
-			if (this.hasLogListeners()) {
+			if (hasLogListeners()) {
 				// we are wrapped one level deeper
 				record.setSourceClassName(e.getStackTrace()[4].getClassName());
 				record.setSourceMethodName(e.getStackTrace()[4].getMethodName());

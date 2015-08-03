@@ -12,21 +12,21 @@ import org.xydra.base.XId;
 
 /**
  * State: {@link Change}; Map: objectId -> {@link SummaryObject}
- * 
+ *
  * @author xamde
  */
 public class SummaryModel extends SummaryEntity {
 
-	private Map<XId, SummaryObject> id2summaryObject = new HashMap<XId, SummaryObject>();
+	private final Map<XId, SummaryObject> id2summaryObject = new HashMap<XId, SummaryObject>();
 
-	private XAddress modelAddress;
+	private final XAddress modelAddress;
 
-	public SummaryModel(XAddress modelAddress) {
+	public SummaryModel(final XAddress modelAddress) {
 		super(modelAddress.getModel());
 		this.modelAddress = modelAddress;
 	}
 
-	public SummaryObject createOrGet(XId objectId) {
+	public SummaryObject createOrGet(final XId objectId) {
 		SummaryObject summaryObject = this.id2summaryObject.get(objectId);
 		if (summaryObject == null) {
 			summaryObject = new SummaryObject(objectId);
@@ -52,26 +52,26 @@ public class SummaryModel extends SummaryEntity {
 		return toString("").toString();
 	}
 
-	public StringBuilder toString(String indent) {
-		StringBuilder b = new StringBuilder();
+	public StringBuilder toString(final String indent) {
+		final StringBuilder b = new StringBuilder();
 		b.append(indent + "Model." + this.change + " '" + getId() + "'\n");
 		// IMPROVE sort, if possible
-		for (Entry<XId, SummaryObject> e : this.id2summaryObject.entrySet()) {
+		for (final Entry<XId, SummaryObject> e : this.id2summaryObject.entrySet()) {
 			b.append(e.getValue().toString(indent + "  ").toString());
 		}
 		return b;
 	}
 
 	public void removeNoOps() {
-		List<XId> toBeRemoved = new ArrayList<XId>();
-		for (SummaryObject so : this.id2summaryObject.values()) {
+		final List<XId> toBeRemoved = new ArrayList<XId>();
+		for (final SummaryObject so : this.id2summaryObject.values()) {
 			if (so.isNoOp()) {
 				toBeRemoved.add(so.getId());
 			} else {
 				so.removeNoOps();
 			}
 		}
-		for (XId id : toBeRemoved) {
+		for (final XId id : toBeRemoved) {
 			this.id2summaryObject.remove(id);
 		}
 	}

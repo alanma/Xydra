@@ -6,7 +6,7 @@ import org.xydra.xgae.memcache.api.IMemCache;
 /**
  * Central entry point for accessing the wrapper around a Google-Appengine-like
  * environment, which provides a datastore and a memcache.
- * 
+ *
  * @author xamde
  */
 public interface IXGae {
@@ -37,7 +37,7 @@ public interface IXGae {
 	 * <li>
 	 * The put() method does not return the previous known value for a key. It
 	 * always returns null.</li>
-	 * 
+	 *
 	 * @return a new instance of a platform specific Cache implementation or the
 	 *         Java default version if no other version has been configured.
 	 */

@@ -12,41 +12,42 @@ public class XmlUtils {
 	 * @param xydraElement
 	 * @return an XML string
 	 */
-	public static String toString(XydraElement xydraElement) {
-		StringBuilder b = new StringBuilder();
+	public static String toString(final XydraElement xydraElement) {
+		final StringBuilder b = new StringBuilder();
 
 		toStringOpen(xydraElement, b);
 
-		Iterator<XydraElement> children = xydraElement.getChildren();
+		final Iterator<XydraElement> children = xydraElement.getChildren();
 		while (children.hasNext()) {
-			XydraElement child = children.next();
+			final XydraElement child = children.next();
 			b.append(toString(child));
 		}
 
-		Object content = xydraElement.getContent();
-		if (content != null)
+		final Object content = xydraElement.getContent();
+		if (content != null) {
 			b.append(content);
+		}
 
 		toStringClose(xydraElement, b);
 
 		return b.toString();
 	}
 
-	private static void toStringClose(XydraElement xydraElement, StringBuilder b) {
-		String type = xydraElement.getType();
+	private static void toStringClose(final XydraElement xydraElement, final StringBuilder b) {
+		final String type = xydraElement.getType();
 		b.append("</");
 		b.append(type);
 		b.append(">");
 	}
 
-	private static void toStringOpen(XydraElement xydraElement, StringBuilder b) {
+	private static void toStringOpen(final XydraElement xydraElement, final StringBuilder b) {
 		b.append("<");
-		String type = xydraElement.getType();
+		final String type = xydraElement.getType();
 		b.append(type);
-		Iterator<String> attNames = xydraElement.getAttributes();
+		final Iterator<String> attNames = xydraElement.getAttributes();
 		while (attNames.hasNext()) {
-			String attName = attNames.next();
-			Object attValue = xydraElement.getAttribute(attName);
+			final String attName = attNames.next();
+			final Object attValue = xydraElement.getAttribute(attName);
 			b.append(" ");
 			b.append(attName);
 			b.append("='");

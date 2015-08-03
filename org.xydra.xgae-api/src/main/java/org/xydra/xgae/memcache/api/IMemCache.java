@@ -10,7 +10,7 @@ import org.xydra.annotations.RunsInGWT;
 
 /**
  * @author xamde
- * 
+ *
  */
 @RunsInGWT(true)
 public interface IMemCache extends Map<String, Object> {
@@ -25,7 +25,7 @@ public interface IMemCache extends Map<String, Object> {
 	 * efficient than multiple separate calls to get(Object), and allows a
 	 * single call to both test for contains(Object) and also fetch the value,
 	 * because the return will not include mappings for keys not found.
-	 * 
+	 *
 	 * @param keys
 	 *            a collection of keys for which values should be retrieved
 	 * @return a mapping from keys to values of any entries found. If a
@@ -37,7 +37,7 @@ public interface IMemCache extends Map<String, Object> {
 	/**
 	 * Put entityToBeCached if currently the {@link #get(Object)} would return
 	 * null.
-	 * 
+	 *
 	 * @param key
 	 * @param entityToBeCached
 	 */
@@ -49,7 +49,7 @@ public interface IMemCache extends Map<String, Object> {
 	 * previous call to getIdentifiable(java.lang.Object). If another value in
 	 * the cache for key has been stored, or if this cache entry has been
 	 * evicted, then nothing is stored by this call and false is returned.
-	 * 
+	 *
 	 * @param key
 	 * @param oldIdentifiableValue
 	 *            created via {@link #getIdentifiable(String)}
@@ -69,14 +69,14 @@ public interface IMemCache extends Map<String, Object> {
 	/**
 	 * Use this method instead of {@link #put(String, Object)} to have checked
 	 * {@link IOException}
-	 * 
+	 *
 	 * Associates the specified value with the specified key in this map
 	 * (optional operation). If the map previously contained a mapping for the
 	 * key, the old value is replaced by the specified value. (A map <tt>m</tt>
 	 * is said to contain a mapping for a key <tt>k</tt> if and only if
 	 * {@link #containsKey(Object) m.containsKey(k)} would return <tt>true</tt>
 	 * .)
-	 * 
+	 *
 	 * @param key
 	 *            key with which the specified value is to be associated
 	 * @param value
@@ -104,7 +104,7 @@ public interface IMemCache extends Map<String, Object> {
 
 	/**
 	 * Batch increment.
-	 * 
+	 *
 	 * @param offsets
 	 *            a mapping of separate controllable offsets for each key
 	 *            individually. Good for incrementing by a sum and a count in

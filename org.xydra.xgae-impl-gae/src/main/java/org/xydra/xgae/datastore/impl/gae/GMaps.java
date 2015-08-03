@@ -12,15 +12,16 @@ import com.google.appengine.api.datastore.Key;
 
 public class GMaps {
 
-	public static Map<SKey, SEntity> wrap(Map<Key, Entity> raw) {
-		if (raw == null)
+	public static Map<SKey, SEntity> wrap(final Map<Key, Entity> raw) {
+		if (raw == null) {
 			return null;
+		}
 
-		Map<SKey, SEntity> map = new HashMap<SKey, SEntity>(raw.size());
-		for (Entry<Key, Entity> e : raw.entrySet()) {
+		final Map<SKey, SEntity> map = new HashMap<SKey, SEntity>(raw.size());
+		for (final Entry<Key, Entity> e : raw.entrySet()) {
 
-			GKey gkey = GKey.wrap(e.getKey());
-			GEntity gentity = GEntity.wrap(e.getValue());
+			final GKey gkey = GKey.wrap(e.getKey());
+			final GEntity gentity = GEntity.wrap(e.getValue());
 
 			map.put(gkey, gentity);
 		}

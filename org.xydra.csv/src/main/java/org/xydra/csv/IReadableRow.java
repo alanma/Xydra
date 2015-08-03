@@ -8,7 +8,7 @@ import java.util.Set;
 
 /**
  * A Row is a sparse representation of a table row.
- * 
+ *
  * @author xamde
  */
 public interface IReadableRow extends Iterable<ICell>, Serializable {

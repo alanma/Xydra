@@ -25,7 +25,7 @@ import com.google.appengine.api.memcache.Stats;
 
 /**
  * An implementation of {@link IMemCache} using the low-level GAE memcache API.
- * 
+ *
  * @author xamde
  */
 public class GaeLowLevelMemCache implements IMemCache {
@@ -34,10 +34,10 @@ public class GaeLowLevelMemCache implements IMemCache {
 
 	private static final String MEMCACHE_NAME = "[#=MC]";
 
-	private MemcacheService memcacheService;
+	private final MemcacheService memcacheService;
 	/* used to prefix all keys */
 	@SuppressWarnings("unused")
-	private String appVersion;
+	private final String appVersion;
 
 	@XGaeOperation()
 	public GaeLowLevelMemCache() {
@@ -49,7 +49,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@Override
 	@XGaeOperation(memcacheRead = true)
 	public String stats() {
-		Stats stats = this.memcacheService.getStatistics();
+		final Stats stats = this.memcacheService.getStatistics();
 		return "In-memory, size: " + size()
 
 		+ " maxTimeWithoutAccess: " + stats.getBytesReturnedForHits()
@@ -72,19 +72,19 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@Override
 	@XGaeOperation(memcacheRead = true)
 	public boolean isEmpty() {
-		return this.size() == 0;
+		return size() == 0;
 	}
 
 	@Override
 	@XGaeOperation(memcacheRead = true)
-	public boolean containsKey(Object key) {
+	public boolean containsKey(final Object key) {
 		assert key instanceof String;
-		String usedKey = (key instanceof String ? (String) key : key.toString());
+		final String usedKey = key instanceof String ? (String) key : key.toString();
 		return this.memcacheService.contains(keyUniqueForCurrentAppVersion(usedKey));
 	}
 
 	@XGaeOperation()
-	private static String keyUniqueForCurrentAppVersion(String key) {
+	private static String keyUniqueForCurrentAppVersion(final String key) {
 		return key;
 		/*
 		 * TODO(stability) @Daniel: use a memcache key that is specific for a
@@ -110,24 +110,24 @@ public class GaeLowLevelMemCache implements IMemCache {
 	}
 
 	@Override
-	public boolean containsValue(Object value) {
+	public boolean containsValue(final Object value) {
 		throw new UnsupportedOperationException("GaeMemcache does not support this");
 	}
 
 	@Override
 	@XGaeOperation(memcacheRead = true)
-	public Object get(Object key) {
+	public Object get(final Object key) {
 		assert key instanceof String;
-		String usedKey = (key instanceof String ? (String) key : key.toString());
-		Object o = this.memcacheService.get(keyUniqueForCurrentAppVersion(usedKey));
+		final String usedKey = key instanceof String ? (String) key : key.toString();
+		final Object o = this.memcacheService.get(keyUniqueForCurrentAppVersion(usedKey));
 		log.debug(XGaeDebugHelper.dataGet(MEMCACHE_NAME, usedKey, o, Timing.Now));
 		return o;
 	}
 
 	@Override
 	@XGaeOperation(memcacheRead = true)
-	public Map<String, Object> getAll(Collection<String> keys) {
-		Map<String, Object> result = this.memcacheService.getAll(keys);
+	public Map<String, Object> getAll(final Collection<String> keys) {
+		final Map<String, Object> result = this.memcacheService.getAll(keys);
 		log.debug(XGaeDebugHelper.dataGet(MEMCACHE_NAME, keys, result, Timing.Now));
 		return result;
 	}
@@ -139,7 +139,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 	 */
 	@Override
 	@XGaeOperation(memcacheWrite = true)
-	public Object put(String key, Object value) {
+	public Object put(final String key, final Object value) {
 		XyAssert.xyAssert(value != null, "value is null");
 		assert value != null;
 		log.debug(XGaeDebugHelper.dataPut(MEMCACHE_NAME, key.toString(), value, Timing.Now));
@@ -153,23 +153,23 @@ public class GaeLowLevelMemCache implements IMemCache {
 
 	@Override
 	@XGaeOperation(memcacheWrite = true)
-	public Object remove(Object key) {
+	public Object remove(final Object key) {
 		assert key instanceof String;
-		String usedKey = (key instanceof String ? (String) key : key.toString());
+		final String usedKey = key instanceof String ? (String) key : key.toString();
 		log.debug(XGaeDebugHelper.dataPut(MEMCACHE_NAME, usedKey, null, Timing.Now));
 		return this.memcacheService.delete(keyUniqueForCurrentAppVersion(usedKey));
 	}
 
 	@Override
 	@XGaeOperation(memcacheWrite = true)
-	public void putAll(Map<? extends String, ? extends Object> m) {
+	public void putAll(final Map<? extends String, ? extends Object> m) {
 		if (m.isEmpty()) {
 			return;
 		}
 		log.debug(XGaeDebugHelper.dataPut(MEMCACHE_NAME, m, Timing.Now));
 		// transform keys
-		Map<String, Object> keyTransformedMap = new HashMap<String, Object>();
-		for (java.util.Map.Entry<? extends String, ? extends Object> mapEntry : m.entrySet()) {
+		final Map<String, Object> keyTransformedMap = new HashMap<String, Object>();
+		for (final java.util.Map.Entry<? extends String, ? extends Object> mapEntry : m.entrySet()) {
 			XyAssert.xyAssert(mapEntry.getValue() != null, "mapEntry.getValue() is null");
 			assert mapEntry.getValue() != null;
 			// TODO memcache: relaxed assert to allow caching null-entities --
@@ -206,7 +206,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 
 	@Override
 	// Expires in 10 days. There is no default.
-	public void putIfValueIsNull(String key, Object value) {
+	public void putIfValueIsNull(final String key, final Object value) {
 		XyAssert.xyAssert(value != null, "value is null");
 		assert value != null;
 		// TODO memcache: reenable? assert
@@ -224,10 +224,10 @@ public class GaeLowLevelMemCache implements IMemCache {
 
 	private static class IdentifiableValueImpl implements IdentifiableValue {
 
-		private com.google.appengine.api.memcache.MemcacheService.IdentifiableValue id;
+		private final com.google.appengine.api.memcache.MemcacheService.IdentifiableValue id;
 
 		public IdentifiableValueImpl(
-				com.google.appengine.api.memcache.MemcacheService.IdentifiableValue id) {
+				final com.google.appengine.api.memcache.MemcacheService.IdentifiableValue id) {
 			this.id = id;
 		}
 
@@ -243,8 +243,8 @@ public class GaeLowLevelMemCache implements IMemCache {
 
 	@Override
 	@XGaeOperation(memcacheRead = true)
-	public IdentifiableValue getIdentifiable(String key) {
-		com.google.appengine.api.memcache.MemcacheService.IdentifiableValue id = this.memcacheService
+	public IdentifiableValue getIdentifiable(final String key) {
+		final com.google.appengine.api.memcache.MemcacheService.IdentifiableValue id = this.memcacheService
 				.getIdentifiable(keyUniqueForCurrentAppVersion(key));
 		log.debug(XGaeDebugHelper.dataGet(MEMCACHE_NAME, key, id, Timing.Now));
 		return new IdentifiableValueImpl(id);
@@ -252,15 +252,15 @@ public class GaeLowLevelMemCache implements IMemCache {
 
 	@Override
 	@XGaeOperation(memcacheWrite = true)
-	public boolean putIfUntouched(String key, IdentifiableValue oldValue, Object newValue) {
+	public boolean putIfUntouched(final String key, final IdentifiableValue oldValue, final Object newValue) {
 		XyAssert.xyAssert(newValue != null, "newValue is null");
 		assert newValue != null;
 		assert oldValue instanceof IdentifiableValueImpl : "this cache can only handly its own impls "
 				+ oldValue.getClass().getCanonicalName();
-		IdentifiableValueImpl idImpl = (IdentifiableValueImpl) oldValue;
-		com.google.appengine.api.memcache.MemcacheService.IdentifiableValue gaeId = idImpl
+		final IdentifiableValueImpl idImpl = (IdentifiableValueImpl) oldValue;
+		final com.google.appengine.api.memcache.MemcacheService.IdentifiableValue gaeId = idImpl
 				.getAppEngineInternal();
-		Expiration expiration = Expiration.byDeltaSeconds(60 * 60 * 24 * 10);
+		final Expiration expiration = Expiration.byDeltaSeconds(60 * 60 * 24 * 10);
 		boolean result;
 		if (gaeId == null) {
 			log.debug(XGaeDebugHelper.dataPutIfNull(MEMCACHE_NAME, key, newValue, Timing.Now));
@@ -280,15 +280,15 @@ public class GaeLowLevelMemCache implements IMemCache {
 	}
 
 	@Override
-	public Map<String, Long> incrementAll(Map<String, Long> offsets, long initialValue) {
+	public Map<String, Long> incrementAll(final Map<String, Long> offsets, final long initialValue) {
 		return this.memcacheService.incrementAll(offsets, initialValue);
 	}
 
 	@Override
-	public Object putChecked(String key, Object value) throws IOException {
+	public Object putChecked(final String key, final Object value) throws IOException {
 		try {
 			return put(key, value);
-		} catch (MemcacheServiceException e) {
+		} catch (final MemcacheServiceException e) {
 			throw new IOException(e);
 		}
 	}

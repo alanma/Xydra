@@ -20,8 +20,8 @@ public class JavaTypeSpecUtils {
 	 *            a debug string, not used for identity
 	 * @return ...
 	 */
-	public static TypeSpec createTypeSpec(Class<?> type, Class<?> componentType,
-			String generatedFrom) {
+	public static TypeSpec createTypeSpec(final Class<?> type, final Class<?> componentType,
+			final String generatedFrom) {
 		IBaseType baseType;
 		IBaseType componentBaseType;
 		if (type.isArray()) {
@@ -39,9 +39,10 @@ public class JavaTypeSpecUtils {
 	 * @param c
 	 * @return null or wrapped type
 	 */
-	public static IBaseType createBaseTypeSpec(@CanBeNull Class<?> c) {
-		if (c == null)
+	public static IBaseType createBaseTypeSpec(@CanBeNull final Class<?> c) {
+		if (c == null) {
 			return null;
+		}
 		// package is null for primitive types
 		String packageName = null;
 		if (c.getPackage() != null) {
@@ -60,12 +61,12 @@ public class JavaTypeSpecUtils {
 	 * @param collectionType
 	 * @param collectionComponentType
 	 * @return ...
-	 * 
+	 *
 	 *         TODO This does not work in GWT
 	 */
-	public static XCollectionValue<?> createCollectionValue(Class<?> collectionType,
-			Class<?> collectionComponentType) {
-		SharedTypeMapping mapping = SharedTypeSystem.getMapping(createTypeSpec(collectionType,
+	public static XCollectionValue<?> createCollectionValue(final Class<?> collectionType,
+			final Class<?> collectionComponentType) {
+		final SharedTypeMapping mapping = SharedTypeSystem.getMapping(createTypeSpec(collectionType,
 				collectionComponentType, "JavaTypeSpecUtils"));
 		return mapping.createEmptyXydraCollection();
 	}
@@ -77,16 +78,16 @@ public class JavaTypeSpecUtils {
 	 *            @CanBeNull
 	 * @return a mapping for the given types
 	 */
-	public static SharedTypeMapping getMapping(@NeverNull Class<?> javaBaseType,
-			Class<?> javaComponentType) {
+	public static SharedTypeMapping getMapping(@NeverNull final Class<?> javaBaseType,
+			final Class<?> javaComponentType) {
 		assert javaBaseType != null;
 		return SharedTypeMapping.getMapping(createTypeSpec(javaBaseType, javaComponentType,
 				"JavaTypeSpecUtils"));
 	}
 
-	public static TypeSpec createTypeSpec(Class<?> javaBaseType, Class<?> javaComponentType) {
-		IBaseType baseType = createBaseTypeSpec(javaBaseType);
-		IBaseType componentType = createBaseTypeSpec(javaComponentType);
+	public static TypeSpec createTypeSpec(final Class<?> javaBaseType, final Class<?> javaComponentType) {
+		final IBaseType baseType = createBaseTypeSpec(javaBaseType);
+		final IBaseType componentType = createBaseTypeSpec(javaComponentType);
 		return new TypeSpec(baseType, componentType, "JavaTypeSpecUtils");
 	}
 

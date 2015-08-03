@@ -17,9 +17,9 @@ import org.xydra.restless.Restless;
  * This class is starts a local Jetty server configured to allow testing of the
  * webapp, loading static files directly from src/main/webapp. This class is not
  * required to run the webapp. Its great for testing.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class RunGaeMyAdminJetty {
 
@@ -28,7 +28,7 @@ public class RunGaeMyAdminJetty {
 
 	private static final Logger log = LoggerFactory.getLogger(RunGaeMyAdminJetty.class);
 
-	public static void main(String[] args) throws Exception {
+	public static void main(final String[] args) throws Exception {
 		GaeMyAdmin_GaeTestfixer.enable();
 		start();
 	}
@@ -40,9 +40,9 @@ public class RunGaeMyAdminJetty {
 
 		// start jetty
 		jetty = new Jetty();
-		IConfig conf = Env.get().conf();
+		final IConfig conf = Env.get().conf();
 		conf.set(ConfParamsJetty.PORT, 8765);
-		File webAppDir = new File("src/main/webapp");
+		final File webAppDir = new File("src/main/webapp");
 		conf.set(ConfParamsJetty.DOC_ROOT, webAppDir.getAbsolutePath());
 		jetty.configureFromConf(conf);
 
@@ -56,7 +56,7 @@ public class RunGaeMyAdminJetty {
 		if (jetty == null) {
 			try {
 				return new URI("http://0.0.0.0:8765");
-			} catch (URISyntaxException e) {
+			} catch (final URISyntaxException e) {
 				throw new RuntimeException(e);
 			}
 		}

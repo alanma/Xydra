@@ -6,9 +6,9 @@ import org.xydra.store.XydraRuntime;
  * This class contains the parts of {@link XydraRuntime} that can only be
  * emulated on GWT. I.e. on GWT a different class, located in
  * /src/main/resources/..../gwtemul/... is used.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class XydraRuntime_GwtEmulated {
 

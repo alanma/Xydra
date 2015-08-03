@@ -5,7 +5,7 @@ import org.xydra.log.api.Logger;
 
 /**
  * Mapping
- * 
+ *
  * <pre>
  * Log4j --> XydraLog
  * ----
@@ -18,7 +18,7 @@ import org.xydra.log.api.Logger;
  * TRACE  --> Trace
  * ALL
  * </pre>
- * 
+ *
  * @author xamde
  */
 @ThreadSafe
@@ -29,46 +29,46 @@ public class Log4jLogger implements Logger {
 	 * http://logging.apache.org/log4j/1.2/faq.html#a1.7), so no manual
 	 * synchronization needs to be done in this class.
 	 */
-	private org.apache.log4j.Logger log4j;
+	private final org.apache.log4j.Logger log4j;
 
-	private String callerClassToHideFromStacktrace;
+	private final String callerClassToHideFromStacktrace;
 
-	public Log4jLogger(String callerClassToHideFromStacktrace, org.apache.log4j.Logger log4jLogger) {
+	public Log4jLogger(final String callerClassToHideFromStacktrace, final org.apache.log4j.Logger log4jLogger) {
 		super();
 		this.callerClassToHideFromStacktrace = callerClassToHideFromStacktrace;
 		this.log4j = log4jLogger;
 	}
 
 	@Override
-	public void debug(String msg) {
+	public void debug(final String msg) {
 		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.DEBUG, msg,
 				null);
 	}
 
 	@Override
-	public void debug(String msg, Throwable t) {
+	public void debug(final String msg, final Throwable t) {
 		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.DEBUG, msg, t);
 	}
 
 	@Override
-	public void error(String msg) {
+	public void error(final String msg) {
 		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.ERROR, msg,
 				null);
 	}
 
 	@Override
-	public void error(String msg, Throwable t) {
+	public void error(final String msg, final Throwable t) {
 		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.ERROR, msg, t);
 	}
 
 	@Override
-	public void info(String msg) {
+	public void info(final String msg) {
 		this.log4j
 				.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.INFO, msg, null);
 	}
 
 	@Override
-	public void info(String msg, Throwable t) {
+	public void info(final String msg, final Throwable t) {
 		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.INFO, msg, t);
 	}
 
@@ -98,24 +98,24 @@ public class Log4jLogger implements Logger {
 	}
 
 	@Override
-	public void trace(String msg) {
+	public void trace(final String msg) {
 		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.TRACE, msg,
 				null);
 	}
 
 	@Override
-	public void trace(String msg, Throwable t) {
+	public void trace(final String msg, final Throwable t) {
 		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.TRACE, msg, t);
 	}
 
 	@Override
-	public void warn(String msg) {
+	public void warn(final String msg) {
 		this.log4j
 				.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.WARN, msg, null);
 	}
 
 	@Override
-	public void warn(String msg, Throwable t) {
+	public void warn(final String msg, final Throwable t) {
 		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.WARN, msg, t);
 	}
 
@@ -125,11 +125,11 @@ public class Log4jLogger implements Logger {
 	}
 
 	@Override
-	public void setLevel(Level level) {
+	public void setLevel(final Level level) {
 		this.log4j.setLevel(toLog4jLevel(level));
 	}
 
-	private static org.apache.log4j.Level toLog4jLevel(Level xydraLevel) {
+	private static org.apache.log4j.Level toLog4jLevel(final Level xydraLevel) {
 		switch (xydraLevel) {
 		case Trace:
 			return org.apache.log4j.Level.TRACE;

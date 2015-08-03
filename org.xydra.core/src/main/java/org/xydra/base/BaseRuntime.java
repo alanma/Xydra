@@ -11,21 +11,21 @@ import org.xydra.base.value.impl.memory.MemoryValueFactory;
 
 
 public class BaseRuntime {
-    
+
     private static XCommandFactory commandFactory;
-    
+
     @Setting("repositoryId")
     public static final String DEFAULT_REPOSITORY_ID = "repo";
-    
+
     private static XIdProvider idProvider;
-    
+
     private static XValueFactory valueFactory;
-    
+
     /**
      * Returns the {@link XCommandFactory} instance of the Xydra Instance that
      * is currently being used. An {@link XCommandFactory} provides methods for
      * creating {@link XCommand}s of all types.
-     * 
+     *
      * @return Returns the {@link XCommandFactory} of the Xydra Instance that is
      *         currently being used.
      */
@@ -33,16 +33,16 @@ public class BaseRuntime {
         if(commandFactory == null) {
             commandFactory = new MemoryCommandFactory();
         }
-        
+
         return commandFactory;
     }
-    
+
     /**
      * Returns the {@link XIdProvider} instance of the Xydra Instance that is
      * currently being used. {@link XId}s should only be created using this
      * {@link XIdProvider} instance to ensure, that only unique {@link XId}s are
      * being used.
-     * 
+     *
      * @return Returns the {@link XIdProvider} instance of the Xydra Instance
      *         that is currently being used.
      */
@@ -52,16 +52,16 @@ public class BaseRuntime {
         }
         return idProvider;
     }
-    
-    public static void setIdProvider(XIdProvider idProvider) {
+
+    public static void setIdProvider(final XIdProvider idProvider) {
         BaseRuntime.idProvider = idProvider;
     }
-    
+
     /**
      * Returns the {@link XValueFactory} instance of the Xydra Instance that is
      * currently being used. An {@link XValueFactory} provides methods for
      * creating {@link XValue XValues} of all types.
-     * 
+     *
      * @return Returns the {@link XValueFactory} of the Xydra Instance that is
      *         currently being used.
      */
@@ -69,8 +69,8 @@ public class BaseRuntime {
         if(valueFactory == null) {
             valueFactory = new MemoryValueFactory();
         }
-        
+
         return valueFactory;
     }
-    
+
 }

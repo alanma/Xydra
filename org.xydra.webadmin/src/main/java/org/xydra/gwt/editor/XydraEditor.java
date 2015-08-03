@@ -1,5 +1,6 @@
 package org.xydra.gwt.editor;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableModel;
@@ -68,13 +69,13 @@ public class XydraEditor implements EntryPoint {
 		// set uncaught exception handler
 		GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
 			@Override
-			public void onUncaughtException(Throwable throwable) {
+			public void onUncaughtException(final Throwable throwable) {
 
 				Throwable t = throwable;
 
 				String text = "Uncaught exception: ";
 				while (t != null) {
-					StackTraceElement[] stackTraceElements = t.getStackTrace();
+					final StackTraceElement[] stackTraceElements = t.getStackTrace();
 					text += t.toString() + "\n";
 					for (int i = 0; i < stackTraceElements.length; i++) {
 						text += "    at " + stackTraceElements[i] + "\n";
@@ -102,8 +103,8 @@ public class XydraEditor implements EntryPoint {
 
 		log.info("starting the xydra editor");
 
-		VerticalPanel layout = new VerticalPanel();
-		HorizontalPanel header = new HorizontalPanel();
+		final VerticalPanel layout = new VerticalPanel();
+		final HorizontalPanel header = new HorizontalPanel();
 		layout.add(header);
 		layout.add(this.panel);
 		RootPanel.get().add(layout);
@@ -112,7 +113,7 @@ public class XydraEditor implements EntryPoint {
 
 		address.setText("phonebook");
 
-		Button load = new Button("Load");
+		final Button load = new Button("Load");
 
 		header.add(address);
 		header.add(load);
@@ -120,7 +121,7 @@ public class XydraEditor implements EntryPoint {
 		load.addClickHandler(new ClickHandler() {
 
 			@Override
-			public void onClick(ClickEvent arg0) {
+			public void onClick(final ClickEvent arg0) {
 				loadData(address.getText());
 			}
 
@@ -130,7 +131,7 @@ public class XydraEditor implements EntryPoint {
 
 	private XAddress addr;
 
-	protected void loadData(String addrStr) {
+	protected void loadData(final String addrStr) {
 
 		log.info("editor: loading " + addrStr);
 
@@ -144,32 +145,32 @@ public class XydraEditor implements EntryPoint {
 		XId modelId;
 		XId objectId;
 		try {
-			int p = addrStr.indexOf('/');
+			final int p = addrStr.indexOf('/');
 			if (p >= 0) {
-				modelId = XX.toId(addrStr.substring(0, p));
-				objectId = XX.toId(addrStr.substring(p + 1));
+				modelId = Base.toId(addrStr.substring(0, p));
+				objectId = Base.toId(addrStr.substring(p + 1));
 			} else {
-				modelId = XX.toId(addrStr);
+				modelId = Base.toId(addrStr);
 				objectId = null;
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			this.panel.add(new Label("invalid XId: " + e.getMessage()));
 			return;
 		}
 
-		this.addr = XX.toAddress(XX.toId("data"), modelId, objectId, null);
+		this.addr = Base.toAddress(Base.toId("data"), modelId, objectId, null);
 
 		try {
 			if (objectId != null) {
-				Callback<BatchedResult<XReadableObject>[]> cb = new Callback<BatchedResult<XReadableObject>[]>() {
+				final Callback<BatchedResult<XReadableObject>[]> cb = new Callback<BatchedResult<XReadableObject>[]>() {
 
 					@Override
-					public void onFailure(Throwable error) {
+					public void onFailure(final Throwable error) {
 						handleError(error);
 					}
 
 					@Override
-					public void onSuccess(BatchedResult<XReadableObject>[] object) {
+					public void onSuccess(final BatchedResult<XReadableObject>[] object) {
 						assert object.length == 1;
 						if (object[0].getException() != null) {
 							handleError(object[0].getException());
@@ -186,15 +187,15 @@ public class XydraEditor implements EntryPoint {
 						new GetWithAddressRequest[] { new GetWithAddressRequest(this.addr) }, cb);
 
 			} else {
-				Callback<BatchedResult<XReadableModel>[]> cb = new Callback<BatchedResult<XReadableModel>[]>() {
+				final Callback<BatchedResult<XReadableModel>[]> cb = new Callback<BatchedResult<XReadableModel>[]>() {
 
 					@Override
-					public void onFailure(Throwable error) {
+					public void onFailure(final Throwable error) {
 						handleError(error);
 					}
 
 					@Override
-					public void onSuccess(BatchedResult<XReadableModel>[] object) {
+					public void onSuccess(final BatchedResult<XReadableModel>[] object) {
 						assert object.length == 1;
 						if (object[0].getException() != null) {
 							handleError(object[0].getException());
@@ -211,13 +212,13 @@ public class XydraEditor implements EntryPoint {
 						new GetWithAddressRequest[] { new GetWithAddressRequest(this.addr) }, cb);
 			}
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			this.panel.add(new Label(e.toString()));
 		}
 
 	}
 
-	private void handleError(Throwable error) {
+	private void handleError(final Throwable error) {
 		if (error instanceof StoreException) {
 			this.panel.add(new Label(error.getMessage()));
 		} else {
@@ -225,11 +226,11 @@ public class XydraEditor implements EntryPoint {
 		}
 	}
 
-	protected void loadedModel(XReadableModel modelSnapshot) {
+	protected void loadedModel(final XReadableModel modelSnapshot) {
 
 		log.info("editor: loaded model, starting synchronizer");
 
-		XModel model = XX.wrap(ACTOR, PSW, modelSnapshot);
+		final XModel model = XX.wrap(ACTOR, PSW, modelSnapshot);
 
 		startSynchronizer(model);
 
@@ -237,11 +238,11 @@ public class XydraEditor implements EntryPoint {
 		this.panel.add(new XModelEditor(model));
 	}
 
-	protected void loadedObject(XReadableObject objectSnapshot) {
+	protected void loadedObject(final XReadableObject objectSnapshot) {
 
 		log.info("editor: loaded object, starting synchronizer");
 
-		XObject object = XX.wrap(ACTOR, PSW, objectSnapshot);
+		final XObject object = XX.wrap(ACTOR, PSW, objectSnapshot);
 
 		startSynchronizer(object);
 
@@ -249,7 +250,7 @@ public class XydraEditor implements EntryPoint {
 		this.panel.add(new XObjectEditor(object));
 	}
 
-	private void startSynchronizer(XSynchronizesChanges entity) {
+	private void startSynchronizer(final XSynchronizesChanges entity) {
 		ISyncableState syncableState;
 		if (entity instanceof IMemoryObject) {
 			syncableState = ((IMemoryObject) entity).getState();

@@ -6,20 +6,20 @@ public class EclipseFormat {
 
 	/**
 	 * The key to click-able links in Eclipse seems to be '(SomeName.java:941)'.
-	 * 
+	 *
 	 * @param logRecord
 	 * @param lineNumber
 	 *            use 1 if unknown
 	 * @return a nicely formatted message
 	 */
-	public static String format(LogRecord logRecord, int lineNumber) {
-		String level = logRecord.getLevel().getName();
-		String msg = logRecord.getMessage();
-		String loggername = logRecord.getLoggerName();
-		String clazz = Jul_GwtEmul.getSourceClassName(logRecord);
-		String method = Jul_GwtEmul.getSourceMethodName(logRecord);
+	public static String format(final LogRecord logRecord, final int lineNumber) {
+		final String level = logRecord.getLevel().getName();
+		final String msg = logRecord.getMessage();
+		final String loggername = logRecord.getLoggerName();
+		final String clazz = Jul_GwtEmul.getSourceClassName(logRecord);
+		final String method = Jul_GwtEmul.getSourceMethodName(logRecord);
 
-		StringBuffer buf = new StringBuffer();
+		final StringBuffer buf = new StringBuffer();
 		buf.append(level);
 		buf.append(": ");
 		buf.append(msg);

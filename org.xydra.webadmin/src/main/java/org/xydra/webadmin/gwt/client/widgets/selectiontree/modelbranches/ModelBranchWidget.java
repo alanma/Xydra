@@ -27,15 +27,15 @@ public class ModelBranchWidget extends Composite implements IModelBranchWidget {
 	@SuppressWarnings("unused")
 	private ModelBranchPresenter presenter;
 
-	public ModelBranchWidget(ModelBranchPresenter modelBranchPresenter) {
+	public ModelBranchWidget(final ModelBranchPresenter modelBranchPresenter) {
 
 		this.presenter = modelBranchPresenter;
 
 	}
 
 	@Override
-	public void init(ModelBranchPresenter presenter, XAddress address,
-			ClickHandler anchorClickHandler) {
+	public void init(final ModelBranchPresenter presenter, final XAddress address,
+			final ClickHandler anchorClickHandler) {
 		this.entityWidget = new EntityWidget(presenter, address, anchorClickHandler);
 		this.entityWidget.setDeleteModelDialog();
 		initWidget(uiBinder.createAndBindUi(this));
@@ -56,12 +56,12 @@ public class ModelBranchWidget extends Composite implements IModelBranchWidget {
 
 	@Override
 	public void delete() {
-		this.removeFromParent();
+		removeFromParent();
 		this.presenter = null;
 	}
 
 	@Override
-	public void setRevisionNumber(long revisionNumber) {
+	public void setRevisionNumber(final long revisionNumber) {
 		this.entityWidget.setRevisionNumber(revisionNumber);
 
 	}

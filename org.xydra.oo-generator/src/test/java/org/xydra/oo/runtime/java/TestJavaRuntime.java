@@ -10,8 +10,10 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 
 import org.junit.Test;
+import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.util.DumpUtilsBase;
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XV;
 import org.xydra.core.XX;
@@ -26,8 +28,8 @@ import org.xydra.oo.testtypes.MyLongBasedType;
 
 public class TestJavaRuntime {
 
-	public static void main(String[] args) throws IOException {
-		TestJavaRuntime t = new TestJavaRuntime();
+	public static void main(final String[] args) throws IOException {
+		final TestJavaRuntime t = new TestJavaRuntime();
 		t.useAllTypesRuntime();
 	}
 
@@ -38,16 +40,16 @@ public class TestJavaRuntime {
 		JavaTypeMapping.addSingleTypeMapping(MyLongBasedType.class, ValueType.Long,
 				MyLongBasedType.MAPPER);
 
-		XWritableModel model = new MemoryModel(XX.toId("actor"), "pass",
-				XX.toAddress("/repo1/model1"));
+		final XWritableModel model = new MemoryModel(Base.toId("actor"), "pass",
+				Base.toAddress("/repo1/model1"));
 
-		JavaFactory factory = new JavaFactory(model);
-		IHasAllType alltypes = factory.createHasAllType("o1");
-		IPerson p1 = factory.createPerson("p1");
-		IPerson p2 = factory.createPerson("p2");
-		IPerson p3 = factory.createPerson("p3");
+		final JavaFactory factory = new JavaFactory(model);
+		final IHasAllType alltypes = factory.createHasAllType("o1");
+		final IPerson p1 = factory.createPerson("p1");
+		final IPerson p2 = factory.createPerson("p2");
+		final IPerson p3 = factory.createPerson("p3");
 
-		XId id = XX.toId("o1");
+		final XId id = Base.toId("o1");
 		// IHasAllType alltypes = (IHasAllType)Proxy.newProxyInstance(
 		// IHasAllType.class.getClassLoader(), new Class<?>[] {
 		// IHasAllType.class },
@@ -105,15 +107,15 @@ public class TestJavaRuntime {
 		// f 6
 		alltypes.setXintegerlist(XV.toIntegerListValue(Arrays.asList(601, 602, 602)));
 		alltypes.setXinteger(XV.toValue(7));
-		alltypes.setXidsortedset(XV.toIdSortedSetValue(Arrays.asList(XX.toId("h1"), XX.toId("h2"),
-				XX.toId("h3"))));
-		alltypes.setXidset(XV.toIdSetValue(Arrays.asList(XX.toId("i1"), XX.toId("i2"),
-				XX.toId("i3"))));
-		alltypes.setXidlist(XV.toIdListValue(Arrays.asList(XX.toId("j1"), XX.toId("j2"),
-				XX.toId("j3"))));
+		alltypes.setXidsortedset(XV.toIdSortedSetValue(Arrays.asList(Base.toId("h1"), Base.toId("h2"),
+				Base.toId("h3"))));
+		alltypes.setXidset(XV.toIdSetValue(Arrays.asList(Base.toId("i1"), Base.toId("i2"),
+				Base.toId("i3"))));
+		alltypes.setXidlist(XV.toIdListValue(Arrays.asList(Base.toId("j1"), Base.toId("j2"),
+				Base.toId("j3"))));
 
 		// k 11
-		alltypes.setXid(XX.toId("k"));
+		alltypes.setXid(Base.toId("k"));
 		alltypes.setXdoublelist(XV.toDoubleListValue(Arrays.asList(121d, 122d, 123d)));
 		alltypes.setXdouble(XV.toValue(13d));
 		alltypes.setXbooleanlist(XV.toValue(new boolean[] { true, true, false }));
@@ -122,20 +124,20 @@ public class TestJavaRuntime {
 		// p 16
 		alltypes.setXbinary(XV.toValue(new byte[] { (byte) 161, (byte) 162, (byte) 163 }));
 		alltypes.setXaddresssortedset(XV.toAddressSortedSetValue(Arrays.asList(
-				XX.toAddress("/repo1/model1/q1"), XX.toAddress("/repo1/model1/q2"),
-				XX.toAddress("/repo1/model1/q3"))));
+				Base.toAddress("/repo1/model1/q1"), Base.toAddress("/repo1/model1/q2"),
+				Base.toAddress("/repo1/model1/q3"))));
 		alltypes.setXaddressset(XV.toAddressSetValue(Arrays.asList(
-				XX.toAddress("/repo1/model1/r1"), XX.toAddress("/repo1/model1/r2"),
-				XX.toAddress("/repo1/model1/r3"))));
+				Base.toAddress("/repo1/model1/r1"), Base.toAddress("/repo1/model1/r2"),
+				Base.toAddress("/repo1/model1/r3"))));
 		alltypes.setXaddresslist(XV.toAddressListValue(Arrays.asList(
-				XX.toAddress("/repo1/model1/s1"), XX.toAddress("/repo1/model1/s2"),
-				XX.toAddress("/repo1/model1/s3"))));
-		alltypes.setXaddress(XX.toAddress("/repo1/model1/t1"));
+				Base.toAddress("/repo1/model1/s1"), Base.toAddress("/repo1/model1/s2"),
+				Base.toAddress("/repo1/model1/s3"))));
+		alltypes.setXaddress(Base.toAddress("/repo1/model1/t1"));
 
 		// u 21
-		model.createObject(XX.toId("u-p4"));
-		IPerson p4 = (IPerson) Proxy.newProxyInstance(IPerson.class.getClassLoader(),
-				new Class<?>[] { IPerson.class }, new OOJavaOnlyProxy(model, XX.toId("u-p4")));
+		model.createObject(Base.toId("u-p4"));
+		final IPerson p4 = (IPerson) Proxy.newProxyInstance(IPerson.class.getClassLoader(),
+				new Class<?>[] { IPerson.class }, new OOJavaOnlyProxy(model, Base.toId("u-p4")));
 		alltypes.setPartner(p4);
 		alltypes.setJString("v");
 		alltypes.setJLong(23l);
@@ -154,11 +156,11 @@ public class TestJavaRuntime {
 		alltypes.setMyLongBasedType(new MyLongBasedType(3));
 		assertEquals(3, alltypes.getMyLongBasedType().getInternalLong());
 
-		DumpUtils.dump("filled", model);
+		DumpUtilsBase.dump("filled", model);
 	}
 
-	private static String[] genStrings(String prefix, int n) {
-		String[] s = new String[n];
+	private static String[] genStrings(final String prefix, final int n) {
+		final String[] s = new String[n];
 		for (int i = 0; i < s.length; i++) {
 			s[i] = prefix + i;
 		}
@@ -168,29 +170,29 @@ public class TestJavaRuntime {
 	@Test
 	public void useTasksRuntime() {
 		// setup
-		XWritableModel model = new MemoryModel(XX.toId("actor"), "pass",
-				XX.toAddress("/repo1/model1"));
-		org.xydra.oo.testgen.tasks.java.JavaFactory factory = new org.xydra.oo.testgen.tasks.java.JavaFactory(
+		final XWritableModel model = new MemoryModel(Base.toId("actor"), "pass",
+				Base.toAddress("/repo1/model1"));
+		final org.xydra.oo.testgen.tasks.java.JavaFactory factory = new org.xydra.oo.testgen.tasks.java.JavaFactory(
 				model);
 
 		// usage
-		ITask task = factory.createTask("o1");
+		final ITask task = factory.createTask("o1");
 		task.setTitle("Foo");
 		task.setNote("Der Schorsch braucht das dringend");
 		task.setChecked(false);
-		ITask o1_2 = factory.createTask("o1_2");
+		final ITask o1_2 = factory.createTask("o1_2");
 		assert task.subTasks() != null;
 		task.subTasks().add(o1_2);
 
-		String t = task.getTitle();
+		final String t = task.getTitle();
 		System.out.println(t);
 
-		ITask task2 = factory.getTask("o1");
+		final ITask task2 = factory.getTask("o1");
 		assert task2 != null;
 		assert task2.getTitle() != null;
 		assert task2.getTitle().equals(t);
 
-		DumpUtils.dump("filled", model);
+		DumpUtilsBase.dump("filled", model);
 	}
 
 }

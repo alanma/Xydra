@@ -11,10 +11,10 @@ import com.google.apphosting.api.ApiProxy;
 
 /**
  * Information about AppEngine
- * 
- * 
+ *
+ *
  * TODO expose os.environ['INSTANCE_ID']
- * 
+ *
  * @author xamde
  */
 public class AboutAppEngine {
@@ -57,7 +57,7 @@ public class AboutAppEngine {
 	 *         application plus a timestamp at which it was deployed. This is
 	 *         not just the version identifier string you specify in
 	 *         appengine-web.xml.
-	 * 
+	 *
 	 *         Format: user-chosen-versionId-from-appengine-xml '.' timestamp
 	 */
 	public static String getVersion() {
@@ -75,7 +75,7 @@ public class AboutAppEngine {
 	}
 
 	public static String getThreadInfo() {
-		Thread ct = Thread.currentThread();
+		final Thread ct = Thread.currentThread();
 		return ct.getId() + "-'" + ct.getName() + "'";
 	}
 
@@ -91,8 +91,8 @@ public class AboutAppEngine {
 	 * @return true if GAE self-reports that the datastore works fine.
 	 */
 	public static boolean canWriteDataStore() {
-		CapabilitiesService service = CapabilitiesServiceFactory.getCapabilitiesService();
-		CapabilityStatus status = service.getStatus(Capability.DATASTORE_WRITE).getStatus();
+		final CapabilitiesService service = CapabilitiesServiceFactory.getCapabilitiesService();
+		final CapabilityStatus status = service.getStatus(Capability.DATASTORE_WRITE).getStatus();
 
 		if (status == CapabilityStatus.ENABLED) {
 			return true;
@@ -105,7 +105,7 @@ public class AboutAppEngine {
 	public static String inModeAsString() {
 		return (inProduction() ? "inProduction" : "inDevelopment") + "-"
 				+ (onAppEngine() ? "onAppEngine" : "notOnAppEngine") + "-"
-				+ ("module:" + ApiProxy.getCurrentEnvironment().getModuleId());
+				+ "module:" + ApiProxy.getCurrentEnvironment().getModuleId();
 	}
 
 	// TODO get os.environ REQUEST HASH

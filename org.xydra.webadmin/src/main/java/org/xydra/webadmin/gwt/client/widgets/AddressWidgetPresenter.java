@@ -1,5 +1,6 @@
 package org.xydra.webadmin.gwt.client.widgets;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.core.XX;
@@ -18,11 +19,11 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
  * Processes requests via the {@link AddressWidget}
- * 
+ *
  * handles callbacks and listens to {@link ViewBuiltEvent}s to proceed requests.
- * 
+ *
  * @author kahmann
- * 
+ *
  */
 public class AddressWidgetPresenter extends Presenter {
 
@@ -37,11 +38,11 @@ public class AddressWidgetPresenter extends Presenter {
 		void executeCommand();
 	}
 
-	private AddressWidget widget;
+	private final AddressWidget widget;
 	private HandlerRegistration currentPresentingRegistration;
 	protected HandlerRegistration currentChangeRegistration;
 
-	public AddressWidgetPresenter(AddressWidget addressWidget) {
+	public AddressWidgetPresenter(final AddressWidget addressWidget) {
 		this.widget = addressWidget;
 		this.widget.registerPresenter(this);
 	}
@@ -52,14 +53,14 @@ public class AddressWidgetPresenter extends Presenter {
 
 	/**
 	 * loads model from repository
-	 * 
+	 *
 	 * @param desiredAddress
 	 */
 	void openAddress(final XAddress desiredAddress) {
 		log.info("ordered to open address " + desiredAddress.toString());
 
-		XId repoID = desiredAddress.getRepository();
-		XAddress repoAddress = XX.resolveRepository(repoID);
+		final XId repoID = desiredAddress.getRepository();
+		final XAddress repoAddress = Base.resolveRepository(repoID);
 
 		CompoundActionCallback openModelCallback = null;
 		if (desiredAddress.getModel() != null) {
@@ -112,14 +113,14 @@ public class AddressWidgetPresenter extends Presenter {
 	private void showRepository(final XAddress repoAddress,
 			final CompoundActionCallback compoundActionCallback) {
 		if (XyAdmin.getInstance().getModel().getRepo(repoAddress.getRepository()) != null) {
-			boolean alreadyOpened = XyAdmin.getInstance().getController()
+			final boolean alreadyOpened = XyAdmin.getInstance().getController()
 					.getSelectionTreePresenter().showRepository(repoAddress);
 			if (!alreadyOpened) {
 				this.currentPresentingRegistration = EventHelper.addViewBuildListener(repoAddress,
 						new IViewBuiltHandler() {
 
 							@Override
-							public void onViewBuilt(ViewBuiltEvent event) {
+							public void onViewBuilt(final ViewBuiltEvent event) {
 
 								AddressWidgetPresenter.this.currentPresentingRegistration
 										.removeHandler();
@@ -143,24 +144,25 @@ public class AddressWidgetPresenter extends Presenter {
 
 		} else {
 			@SuppressWarnings("unused")
+			final
 			WarningDialog dialog = new WarningDialog("repository " + repoAddress.getRepository()
 					+ " does not exist!");
 		}
 	}
 
-	private void showModel(XAddress desiredAddress, final CompoundActionCallback showObjectCallback) {
-		RepoDataModel repo = XyAdmin.getInstance().getModel()
+	private void showModel(final XAddress desiredAddress, final CompoundActionCallback showObjectCallback) {
+		final RepoDataModel repo = XyAdmin.getInstance().getModel()
 				.getRepo(desiredAddress.getRepository());
 		if (repo.getModel(desiredAddress.getModel()) != null) {
 			log.info("starting to present model " + desiredAddress.toString());
 			boolean alreadyPresented = false;
 
-			Controller controller = XyAdmin.getInstance().getController();
-			XAddress resolvedModelAddress = XX.resolveModel(desiredAddress);
-			SessionCachedModel model = repo.getModel(desiredAddress.getModel());
+			final Controller controller = XyAdmin.getInstance().getController();
+			final XAddress resolvedModelAddress = Base.resolveModel(desiredAddress);
+			final SessionCachedModel model = repo.getModel(desiredAddress.getModel());
 			if (model.knowsAllObjects()) {
 				if (controller.getCurrentlyOpenedModelAddress().equals(
-						XX.resolveModel(desiredAddress))) {
+						Base.resolveModel(desiredAddress))) {
 					log.info("model was already open and therefore doesn't need to be presented again... - firing ViewBuildEvent!");
 					alreadyPresented = true;
 					EventHelper.fireViewBuiltEvent(resolvedModelAddress);
@@ -180,12 +182,12 @@ public class AddressWidgetPresenter extends Presenter {
 					showObjectCallback.presentObjects();
 				}
 			} else {
-				final XAddress modelAddress = XX.resolveModel(desiredAddress);
+				final XAddress modelAddress = Base.resolveModel(desiredAddress);
 				this.currentPresentingRegistration = EventHelper.addViewBuildListener(modelAddress,
 						new IViewBuiltHandler() {
 
 							@Override
-							public void onViewBuilt(ViewBuiltEvent event) {
+							public void onViewBuilt(final ViewBuiltEvent event) {
 
 								AddressWidgetPresenter.this.currentPresentingRegistration
 										.removeHandler();
@@ -200,6 +202,7 @@ public class AddressWidgetPresenter extends Presenter {
 			}
 		} else {
 			@SuppressWarnings("unused")
+			final
 			WarningDialog warning = new WarningDialog("model " + desiredAddress.toString()
 					+ " does not exist!");
 			Controller.showDefaultCursor();
@@ -207,13 +210,14 @@ public class AddressWidgetPresenter extends Presenter {
 
 	}
 
-	protected static void showObjectAndField(XAddress desiredAddress) {
+	protected static void showObjectAndField(final XAddress desiredAddress) {
 		if (XyAdmin.getInstance().getModel().getRepo(desiredAddress.getRepository())
 				.getModel(desiredAddress.getModel()).getObject(desiredAddress.getObject()) != null) {
 			XyAdmin.getInstance().getController().getEditorPanelPresenter()
 					.showObjectAndField(desiredAddress);
 		} else {
 			@SuppressWarnings("unused")
+			final
 			WarningDialog dialog = new WarningDialog("object "
 					+ desiredAddress.getObject().toString() + " does not exist!");
 		}
@@ -225,23 +229,23 @@ public class AddressWidgetPresenter extends Presenter {
 
 		switch (desiredAddress.getAddressedType()) {
 		case XREPOSITORY:
-			XId repoId = desiredAddress.getRepository();
-			this.processUserInput(XX.toAddress("/noRepo"), repoId.toString());
+			final XId repoId = desiredAddress.getRepository();
+			processUserInput(Base.toAddress("/noRepo"), repoId.toString());
 			break;
 		case XMODEL:
-			final XAddress repoAddress = XX.toAddress(desiredAddress.getRepository(), null, null,
+			final XAddress repoAddress = Base.toAddress(desiredAddress.getRepository(), null, null,
 					null);
 			AddressWidgetPresenter.this.currentChangeRegistration = EventHelper
 					.addViewBuildListener(repoAddress, new IViewBuiltHandler() {
 
 						@Override
-						public void onViewBuilt(ViewBuiltEvent event) {
+						public void onViewBuilt(final ViewBuiltEvent event) {
 							AddressWidgetPresenter.this.currentChangeRegistration.removeHandler();
-							AddressWidgetPresenter.this.processUserInput(repoAddress,
+							Presenter.processUserInput(repoAddress,
 									desiredAddress.getModel().toString());
 						}
 					});
-			this.openAddress(repoAddress);
+			openAddress(repoAddress);
 
 			break;
 		case XOBJECT:
@@ -251,22 +255,22 @@ public class AddressWidgetPresenter extends Presenter {
 					.addViewBuildListener(modelAddress, new IViewBuiltHandler() {
 
 						@Override
-						public void onViewBuilt(ViewBuiltEvent event) {
+						public void onViewBuilt(final ViewBuiltEvent event) {
 							AddressWidgetPresenter.this.currentChangeRegistration.removeHandler();
-							AddressWidgetPresenter.this.processUserInput(modelAddress,
+							Presenter.processUserInput(modelAddress,
 									desiredAddress.getObject().toString());
 						}
 					});
-			this.openAddress(modelAddress);
+			openAddress(modelAddress);
 			break;
 		case XFIELD:
 			final XAddress objectAddress = desiredAddress.getParent();
 
 			AddressWidgetPresenter.this.currentChangeRegistration = EventHelper
-					.addViewBuildListener(XX.resolveModel(desiredAddress), new IViewBuiltHandler() {
+					.addViewBuildListener(Base.resolveModel(desiredAddress), new IViewBuiltHandler() {
 
 						@Override
-						public void onViewBuilt(ViewBuiltEvent event) {
+						public void onViewBuilt(final ViewBuiltEvent event) {
 							if (XyAdmin.getInstance().getModel()
 									.getRepo(objectAddress.getRepository())
 									.getModel(desiredAddress.getModel())
@@ -274,10 +278,11 @@ public class AddressWidgetPresenter extends Presenter {
 
 								AddressWidgetPresenter.this.currentChangeRegistration
 										.removeHandler();
-								AddressWidgetPresenter.this.processUserInput(objectAddress,
+								Presenter.processUserInput(objectAddress,
 										desiredAddress.getField().toString());
 							} else {
 								@SuppressWarnings("unused")
+								final
 								WarningDialog warning = new WarningDialog("object "
 										+ objectAddress.getObject().toString()
 										+ " does not exist in "
@@ -285,7 +290,7 @@ public class AddressWidgetPresenter extends Presenter {
 							}
 						}
 					});
-			this.openAddress(XX.resolveModel(desiredAddress));
+			openAddress(Base.resolveModel(desiredAddress));
 
 			break;
 		default:
@@ -295,10 +300,12 @@ public class AddressWidgetPresenter extends Presenter {
 	}
 
 	public void unregisterAllListeners() {
-		if (this.currentChangeRegistration != null)
+		if (this.currentChangeRegistration != null) {
 			this.currentChangeRegistration.removeHandler();
-		if (this.currentPresentingRegistration != null)
+		}
+		if (this.currentPresentingRegistration != null) {
 			this.currentPresentingRegistration.removeHandler();
+		}
 	}
 
 	public void removeEntity(final XAddress address) {
@@ -307,21 +314,22 @@ public class AddressWidgetPresenter extends Presenter {
 		switch (address.getAddressedType()) {
 		case XREPOSITORY:
 			@SuppressWarnings("unused")
+			final
 			WarningDialog warning = new WarningDialog("not implemented!");
 			break;
 		case XMODEL:
-			final XAddress repoAddress = XX.toAddress(address.getRepository(), null, null, null);
+			final XAddress repoAddress = Base.toAddress(address.getRepository(), null, null, null);
 			AddressWidgetPresenter.this.currentChangeRegistration = EventHelper
 					.addViewBuildListener(repoAddress, new IViewBuiltHandler() {
 
 						@Override
-						public void onViewBuilt(ViewBuiltEvent event) {
+						public void onViewBuilt(final ViewBuiltEvent event) {
 
 							AddressWidgetPresenter.this.currentChangeRegistration.removeHandler();
 							AddressWidgetPresenter.this.remove(address);
 						}
 					});
-			this.openAddress(repoAddress);
+			openAddress(repoAddress);
 
 			break;
 		case XOBJECT:
@@ -331,21 +339,21 @@ public class AddressWidgetPresenter extends Presenter {
 					.addViewBuildListener(modelAddress, new IViewBuiltHandler() {
 
 						@Override
-						public void onViewBuilt(ViewBuiltEvent event) {
+						public void onViewBuilt(final ViewBuiltEvent event) {
 							AddressWidgetPresenter.this.currentChangeRegistration.removeHandler();
 							AddressWidgetPresenter.this.remove(address);
 						}
 					});
-			this.openAddress(modelAddress);
+			openAddress(modelAddress);
 			break;
 		case XFIELD:
 			final XAddress objectAddress = address.getParent();
 
 			AddressWidgetPresenter.this.currentChangeRegistration = EventHelper
-					.addViewBuildListener(XX.resolveModel(address), new IViewBuiltHandler() {
+					.addViewBuildListener(Base.resolveModel(address), new IViewBuiltHandler() {
 
 						@Override
-						public void onViewBuilt(ViewBuiltEvent event) {
+						public void onViewBuilt(final ViewBuiltEvent event) {
 							if (XyAdmin.getInstance().getModel()
 									.getRepo(objectAddress.getRepository())
 									.getModel(address.getModel()).getObject(address.getObject()) != null) {
@@ -355,6 +363,7 @@ public class AddressWidgetPresenter extends Presenter {
 								AddressWidgetPresenter.this.remove(address);
 							} else {
 								@SuppressWarnings("unused")
+								final
 								WarningDialog warning = new WarningDialog("object "
 										+ objectAddress.getObject().toString()
 										+ " does not exist in "
@@ -362,7 +371,7 @@ public class AddressWidgetPresenter extends Presenter {
 							}
 						}
 					});
-			this.openAddress(XX.resolveObject(address));
+			openAddress(Base.resolveObject(address));
 
 			break;
 		default:

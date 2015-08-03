@@ -13,21 +13,21 @@ import org.xydra.restless.RestlessParameter;
 
 public class TimeResource {
 
-	public static void restless(Restless r) {
+	public static void restless(final Restless r) {
 		r.addGet("/servertime", TimeResource.class, "currentTimeOnServer");
 		r.addGet("/browsertime", TimeResource.class, "getTimeFromBrowser", new RestlessParameter(
 				"millisAtCallTime", null));
 	}
 
 	public String currentTimeOnServer() {
-		Date d = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat();
+		final Date d = new Date();
+		final SimpleDateFormat sdf = new SimpleDateFormat();
 		return "Server time is now " + sdf.format(d);
 	}
 
-	public void getTimeFromBrowser(HttpServletResponse res, String millisAtCallTime)
+	public void getTimeFromBrowser(final HttpServletResponse res, final String millisAtCallTime)
 			throws IOException {
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		final Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
 		w.write("It is now: \r\n"
 				+ "<script type=\"text/javascript\">\r\n"
 				+ "<!--\r\n"

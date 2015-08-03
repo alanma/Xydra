@@ -6,27 +6,27 @@ import java.util.NoSuchElementException;
 
 /**
  * An iterator for {@link XListValue XListValues}.
- * 
+ *
  * @author kaidel
- * 
+ *
  * @param <E> Content Type of the underlying {@link XListValue} type.
  */
 public class XListValueIterator<E> implements Iterator<E> {
-	
+
 	private int index = -1;
 	private final XListValue<E> list;
-	private int size;
-	
-	public XListValueIterator(XListValue<E> list) {
+	private final int size;
+
+	public XListValueIterator(final XListValue<E> list) {
 		this.list = list;
 		this.size = list.size();
 	}
-	
+
 	@Override
     public boolean hasNext() {
-		return ((this.index + 1) < this.size);
+		return this.index + 1 < this.size;
 	}
-	
+
 	@Override
     public E next() {
 		if(hasNext()) {
@@ -35,11 +35,11 @@ public class XListValueIterator<E> implements Iterator<E> {
 			throw new NoSuchElementException();
 		}
 	}
-	
+
 	@Override
     public void remove() {
 		throw new UnsupportedOperationException(
 		        "XListValueIterators do not support the remove() method");
 	}
-	
+
 }

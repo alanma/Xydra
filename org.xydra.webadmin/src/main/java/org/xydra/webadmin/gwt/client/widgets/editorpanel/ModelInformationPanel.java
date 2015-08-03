@@ -29,7 +29,7 @@ public class ModelInformationPanel extends Composite {
 	@UiField
 	HTMLPanel tablePanel;
 
-	public ModelInformationPanel(String modelId) {
+	public ModelInformationPanel(final String modelId) {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
 
@@ -42,7 +42,7 @@ public class ModelInformationPanel extends Composite {
 
 	}
 
-	public void setData(VerticalPanel tableWidget) {
+	public void setData(final VerticalPanel tableWidget) {
 		this.tablePanel.add(tableWidget);
 	}
 

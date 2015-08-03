@@ -10,22 +10,25 @@ import org.xydra.base.value.XV;
 
 public class XDoubleListEditor extends XCollectionEditor<XDoubleValue, XDoubleListValue> {
 
-	public XDoubleListEditor(Iterator<Double> value, EditListener listener) {
+	public XDoubleListEditor(final Iterator<Double> value, final EditListener listener) {
 		super(listener);
 
-		if (value == null)
+		if (value == null) {
 			return;
+		}
 
-		while (value.hasNext())
+		while (value.hasNext()) {
 			add(new XDoubleEditor(value.next(), this));
+		}
 
 	}
 
 	@Override
-	protected XDoubleListValue asCollectionValue(Iterator<XDoubleValue> entries) {
-		List<Double> lst = new ArrayList<Double>();
-		while (entries.hasNext())
+	protected XDoubleListValue asCollectionValue(final Iterator<XDoubleValue> entries) {
+		final List<Double> lst = new ArrayList<Double>();
+		while (entries.hasNext()) {
 			lst.add(entries.next().contents());
+		}
 		return XV.toDoubleListValue(lst);
 	}
 

@@ -1,6 +1,6 @@
 /**
  * Extensible model for MVC.
- * 
+ *
  * <ul>
  * <li>A {@link org.xydra.core.model.XRepository} is a container for
  * {@link org.xydra.core.model.XModel}s.</li>

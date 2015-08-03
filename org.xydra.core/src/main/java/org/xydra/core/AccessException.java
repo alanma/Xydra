@@ -7,15 +7,15 @@ package org.xydra.core;
  * write or administer) a protected repository, model, object or field without
  * the allowance to do so. Access protection is defined and implemented in Xydra
  * Store.
- * 
+ *
  * @author dscharrer
  */
 public class AccessException extends StoreException {
-    
+
     private static final long serialVersionUID = -5273702667318966040L;
-    
-    public AccessException(String message) {
+
+    public AccessException(final String message) {
         super(message);
     }
-    
+
 }

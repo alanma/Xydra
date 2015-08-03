@@ -11,7 +11,7 @@ public class XBooleanEditor extends AtomicXValueEditor<XBooleanValue> {
 
 	private final CheckBox editor = new CheckBox();
 
-	public XBooleanEditor(boolean oldValue, EditListener listener) {
+	public XBooleanEditor(final boolean oldValue, final EditListener listener) {
 		super(listener);
 
 		this.editor.setValue(oldValue);
@@ -22,7 +22,7 @@ public class XBooleanEditor extends AtomicXValueEditor<XBooleanValue> {
 		if (listener != null) {
 			this.editor.addClickHandler(new ClickHandler() {
 				@Override
-				public void onClick(ClickEvent e) {
+				public void onClick(final ClickEvent e) {
 					onChange(null);
 				}
 			});

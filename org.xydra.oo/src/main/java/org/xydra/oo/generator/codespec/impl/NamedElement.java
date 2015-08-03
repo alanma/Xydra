@@ -5,15 +5,15 @@ import org.xydra.oo.generator.codespec.IMember;
 
 /**
  * Such as a {@link ClassSpec} or an {@link IMember} or such a class.
- * 
+ *
  * @author xamde
  */
 public class NamedElement {
 
 	@NeverNull
-	private String name;
+	private final String name;
 
-	NamedElement(String name) {
+	NamedElement(final String name) {
 		this.name = name;
 	}
 

@@ -17,7 +17,7 @@ import org.xydra.testgae.client.RemoteBenchmark;
 
 /**
  * Tiny util to make calling remote HTTP methods easier
- * 
+ *
  * @author xamde
  */
 public class HttpUtils {
@@ -31,24 +31,24 @@ public class HttpUtils {
 	 *            to make a GET request to
 	 * @return true if request returned 200 code
 	 */
-	public static synchronized boolean makeGetRequest(String absoluteUrl) {
+	public static synchronized boolean makeGetRequest(final String absoluteUrl) {
 		return makeGetRequest(absoluteUrl, RemoteBenchmark.SINGLETHREADONLY);
 	}
 
-	public static synchronized boolean makeGetRequest(String absoluteUrl, int threadNr) {
+	public static synchronized boolean makeGetRequest(final String absoluteUrl, final int threadNr) {
 		assert absoluteUrl != null;
 		assert absoluteUrl.startsWith("http");
-		DefaultHttpClient httpclient = createHttpClient();
-		HttpGet httpget = new HttpGet(absoluteUrl);
+		final DefaultHttpClient httpclient = createHttpClient();
+		final HttpGet httpget = new HttpGet(absoluteUrl);
 		try {
 			// log.info("Thread Nr. " + threadNr + ": GET STATUS " +
 			// absoluteUrl);
-			HttpResponse res = httpclient.execute(httpget);
-			int status = res.getStatusLine().getStatusCode();
+			final HttpResponse res = httpclient.execute(httpget);
+			final int status = res.getStatusLine().getStatusCode();
 			// log.info("Thread Nr. " + threadNr + ": GOT STATUS " + absoluteUrl
 			// + " => " + status);
 			return status == 200;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// In case of an unexpected exception you may want to abort
 			// the HTTP request in order to shut down the underlying
 			// connection immediately.
@@ -62,33 +62,33 @@ public class HttpUtils {
 	 *            to make a GET request to
 	 * @return true if request returned 200 code
 	 */
-	public static synchronized String getRequestAsStringResponse(String absoluteUrl) {
+	public static synchronized String getRequestAsStringResponse(final String absoluteUrl) {
 		return getRequestAsStringResponse(absoluteUrl, RemoteBenchmark.SINGLETHREADONLY);
 	}
 
-	public static synchronized String getRequestAsStringResponse(String absoluteUrl, int threadNr) {
+	public static synchronized String getRequestAsStringResponse(final String absoluteUrl, final int threadNr) {
 		assert absoluteUrl != null;
 		assert absoluteUrl.startsWith("http");
-		DefaultHttpClient httpclient = createHttpClient();
-		HttpGet httpget = new HttpGet(absoluteUrl);
+		final DefaultHttpClient httpclient = createHttpClient();
+		final HttpGet httpget = new HttpGet(absoluteUrl);
 		try {
 			// this may take a while
 			log.info("Thread Nr. " + threadNr + ": GET CONTENT " + absoluteUrl);
-			HttpResponse res = httpclient.execute(httpget);
-			int status = res.getStatusLine().getStatusCode();
+			final HttpResponse res = httpclient.execute(httpget);
+			final int status = res.getStatusLine().getStatusCode();
 			assert status == 200 : "status is " + status + " for " + absoluteUrl;
-			InputStream in = res.getEntity().getContent();
-			Reader r = new InputStreamReader(in, "utf-8");
-			String content = IOUtils.toString(r);
+			final InputStream in = res.getEntity().getContent();
+			final Reader r = new InputStreamReader(in, "utf-8");
+			final String content = IOUtils.toString(r);
 			r.close();
 			in.close();
 			log.info("Thread Nr. " + threadNr + ": GOT CONTENT " + absoluteUrl + " "
 					+ content.length() + " chars");
 			return content;
-		} catch (AssertionError e) {
+		} catch (final AssertionError e) {
 			// for example if returned status is 500
 			return null;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// In case of an unexpected exception you may want to abort
 			// the HTTP request in order to shut down the underlying
 			// connection immediately.
@@ -100,7 +100,7 @@ public class HttpUtils {
 	}
 
 	private static DefaultHttpClient createHttpClient() {
-		HttpParams httpParams = new BasicHttpParams();
+		final HttpParams httpParams = new BasicHttpParams();
 		HttpConnectionParams.setConnectionTimeout(httpParams, ConnectionTimeoutMillis);
 		HttpConnectionParams.setSoTimeout(httpParams, SocketTimeoutMillis);
 		return new DefaultHttpClient(httpParams);

@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 /**
  * The annotated method or class uses the listed components. This helps
  * implementors getting their locking strategies right.
- * 
+ *
  * @author xamde
  */
 @Documented

@@ -10,14 +10,14 @@ import org.xydra.core.model.XChangeLog;
 
 /**
  * State: {@link Change} (of the field); old {@link XValue}; new {@link XValue};
- * 
+ *
  * @author xamde
  */
 public class SummaryField extends SummaryEntity {
 
 	/* the super.change is about the field */
 
-	public SummaryField(XId id) {
+	public SummaryField(final XId id) {
 		super(id);
 	}
 
@@ -37,11 +37,11 @@ public class SummaryField extends SummaryEntity {
 	 * @param changeLog
 	 * @param baseSnapshotModel @CanBeNull
 	 */
-	public void apply(XAtomicEvent ae, XChangeLog changeLog, XReadableModel baseSnapshotModel) {
+	public void apply(final XAtomicEvent ae, final XChangeLog changeLog, final XReadableModel baseSnapshotModel) {
 		if (ae instanceof XObjectEvent) {
 			this.change.apply(ae.getChangeType());
 		}
-		XFieldEvent xfe = (XFieldEvent) ae;
+		final XFieldEvent xfe = (XFieldEvent) ae;
 		switch (ae.getChangeType()) {
 		case ADD:
 			this.newValue = xfe.getNewValue();
@@ -81,8 +81,8 @@ public class SummaryField extends SummaryEntity {
 		return this.oldValue;
 	}
 
-	public StringBuilder toString(String indent) {
-		StringBuilder b = new StringBuilder();
+	public StringBuilder toString(final String indent) {
+		final StringBuilder b = new StringBuilder();
 		b.append(indent + "Field." + this.change + " '" + getId() + "'  ");
 		b.append(indent);
 		switch (this.change.getAtomicChangeType()) {
@@ -103,10 +103,12 @@ public class SummaryField extends SummaryEntity {
 	}
 
 	public boolean isNoOp() {
-		if (this.oldValue == null && this.newValue == null)
+		if (this.oldValue == null && this.newValue == null) {
 			return true;
-		if (this.oldValue == this.newValue)
+		}
+		if (this.oldValue == this.newValue) {
 			return true;
+		}
 
 		return false;
 	}

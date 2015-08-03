@@ -27,22 +27,22 @@ import org.xydra.core.model.XRepository;
  * {@link XRepository}, if a method is called and only executes the method, if
  * the actor is allowed to execute it (otherwise {@link AccessException
  * XAccessExceptions} will be thrown).
- * 
+ *
  * All change operations like adding new {@link XModel XModels} executed on an
  * XProtectedRepository will directly affect the wrapped {@link XRepository}.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 public interface XProtectedRepository extends XReadableRepository, XSendsRepositoryEvents,
         XSendsModelEvents, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
         XExecutesCommands, XWritableRepository {
-	
+
 	/**
 	 * Creates a new {@link XModel} with the given {@link XId} and adds it to
 	 * this XProtectedRepository or returns the already existing {@link XModel}
 	 * if the given {@link XId} was already taken.
-	 * 
+	 *
 	 * @param id The {@link XId} for the {@link XModel} which is to be created
 	 * @return the newly created {@link XModel} or the already existing
 	 *         {@link XModel} if the given {@link XId} was already taken (both
@@ -55,10 +55,10 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
 	@Override
     @ModificationOperation
 	XProtectedModel createModel(XId id);
-	
+
 	/**
 	 * Executes the given {@link XRepositoryCommand} if possible.
-	 * 
+	 *
 	 * This method will fail if, the given {@link XRepositoryCommand} cannot be
 	 * executed which may occur in the following cases:
 	 * <ul>
@@ -70,7 +70,7 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
 	 * <li>the repository-{@link XId} in the {@link XRepositoryCommand} does not
 	 * concur with the {@link XId} of this XProtectedRepository
 	 * </ul>
-	 * 
+	 *
 	 * @param command The {@link XRepositoryCommand} which is to be executed
 	 * @return {@link XCommand#FAILED} if executing the
 	 *         {@link XRepositoryCommand} failed, {@link XCommand#NOCHANGE} if
@@ -84,19 +84,19 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
 	 */
 	@ModificationOperation
 	long executeRepositoryCommand(XRepositoryCommand command);
-	
+
 	/**
 	 * @return the actor that is represented by this interface. This is the
 	 *         actor that is recorded for change operations. Operations will
 	 *         only succeed if this actor has access.
 	 */
 	XId getActor();
-	
+
 	/**
 	 * Returns the {@link XModel} contained in this repository with the given
 	 * {@link XId} as an {@link XProtectedModel} linked with the actor of this
 	 * XProtectedRepository.
-	 * 
+	 *
 	 * @param id The {@link XId} of the {@link XModel} which is to be returned
 	 * @return the {@link XModel} with the given {@link XId} as an
 	 *         {@link XProtectedModel} linked with the actor of this
@@ -109,5 +109,5 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
 	@Override
     @ReadOperation
 	XProtectedModel getModel(XId id);
-	
+
 }

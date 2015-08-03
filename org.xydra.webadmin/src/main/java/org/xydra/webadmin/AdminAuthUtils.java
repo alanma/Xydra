@@ -7,7 +7,7 @@ import org.xydra.restless.utils.CookieUtils;
 
 /**
  * Defend against XSS attacks.
- * 
+ *
  * @author xamde
  */
 public class AdminAuthUtils {
@@ -18,13 +18,13 @@ public class AdminAuthUtils {
 
 	/**
 	 * Set auth cookie for 120 seconds.
-	 * 
+	 *
 	 * @param context
 	 * @param passwordPropertyNameInWebXml
 	 */
-	public static void setTempAuthCookie(IRestlessContext context,
-			String passwordPropertyNameInWebXml) {
-		String password = context.getRestless().getInitParameter(passwordPropertyNameInWebXml);
+	public static void setTempAuthCookie(final IRestlessContext context,
+			final String passwordPropertyNameInWebXml) {
+		final String password = context.getRestless().getInitParameter(passwordPropertyNameInWebXml);
 		if (password == null) {
 			throw new RuntimeException(
 					"Password not set in web.xml as init-param of Restless. So admin actions cannot be confirmed securely. Please set '"
@@ -42,9 +42,9 @@ public class AdminAuthUtils {
 	 * @throws IllegalStateException
 	 *             if not authorised
 	 */
-	public static void checkIfAuthorised(IRestlessContext context,
-			String passwordPropertyNameInWebXml, String confirmParam) throws IllegalStateException {
-		String password = context.getRestless().getInitParameter(passwordPropertyNameInWebXml);
+	public static void checkIfAuthorised(final IRestlessContext context,
+			final String passwordPropertyNameInWebXml, final String confirmParam) throws IllegalStateException {
+		final String password = context.getRestless().getInitParameter(passwordPropertyNameInWebXml);
 		if (password == null) {
 			throw new RuntimeException(
 					"Password not set in web.xml as init-param of Restless. So admin actions cannot be confirmed securely. Please set '"
@@ -52,7 +52,7 @@ public class AdminAuthUtils {
 							+ "' as a restless init param in web.xml");
 		}
 
-		String gotCookie = CookieUtils.getCookie(context.getRequest(), COOKIE_NAME_CONFIRM);
+		final String gotCookie = CookieUtils.getCookie(context.getRequest(), COOKIE_NAME_CONFIRM);
 		log.info("Found confirm param='" + confirmParam + "' and cookie ='" + gotCookie + "'");
 
 		if (confirmParam == null) {

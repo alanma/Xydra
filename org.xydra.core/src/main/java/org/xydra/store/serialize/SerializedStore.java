@@ -38,15 +38,15 @@ import org.xydra.store.XydraStore;
 /**
  * Serialization functions to en- and decode request and result objects of the
  * {@link XydraStore} API.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
 public class SerializedStore {
-	
+
 	private static final String NAME_EVENTRESULTS = "eventResults";
 	private static final String NAME_COMMANDRESULTS = "commandResults";
 	private static final String NAME_EVENTS = "events";
@@ -79,11 +79,11 @@ public class SerializedStore {
 	private static final String TYPE_EVENTS = "xevents";
 	private static final String NAME_REVISION = "revision";
 	private static final String NAME_MODELEXISTS = "modelExists";
-	
-	public static void serializeException(Throwable t, XydraOut out) {
-		
+
+	public static void serializeException(final Throwable t, final XydraOut out) {
+
 		out.open(ELEMENT_XERROR);
-		
+
 		if(t instanceof StoreException) {
 			if(t instanceof AccessException) {
 				out.attribute(ATTRIBUTE_TYPE, TYPE_ACCESS);
@@ -105,28 +105,28 @@ public class SerializedStore {
 				out.attribute(ATTRIBUTE_TYPE, TYPE_STORE);
 			}
 		}
-		
-		String m = t.getMessage();
+
+		final String m = t.getMessage();
 		if(m != null && !m.isEmpty()) {
 			out.content(NAME_MESSAGE, t.getMessage());
 		}
-		
+
 		out.close(ELEMENT_XERROR);
-		
+
 	}
-	
-	public static Throwable toException(XydraElement element) {
-		
+
+	public static Throwable toException(final XydraElement element) {
+
 		if(element == null || !ELEMENT_XERROR.equals(element.getType())) {
 			return null;
 		}
-		
-		String type = SerializingUtils.toString(element.getAttribute(ATTRIBUTE_TYPE));
+
+		final String type = SerializingUtils.toString(element.getAttribute(ATTRIBUTE_TYPE));
 		String message = SerializingUtils.toString(element.getContent(NAME_MESSAGE));
 		if(message == null) {
 			message = "";
 		}
-		
+
 		if(TYPE_ACCESS.equals(type)) {
 			return new AccessException(message);
 		} else if(TYPE_AUTHORIZATION.equals(type)) {
@@ -146,139 +146,139 @@ public class SerializedStore {
 		} else {
 			return new RuntimeException(message);
 		}
-		
+
 	}
-	
-	public static void serializeAuthenticationResult(boolean result, XydraOut out) {
+
+	public static void serializeAuthenticationResult(final boolean result, final XydraOut out) {
 		out.element(ELEMENT_AUTHENTICATED, NAME_AUTHENTICATED, result);
 	}
-	
-	public static boolean toAuthenticationResult(XydraElement element) {
-		
+
+	public static boolean toAuthenticationResult(final XydraElement element) {
+
 		SerializingUtils.checkElementType(element, ELEMENT_AUTHENTICATED);
-		
+
 		return SerializingUtils.toBoolean(element.getContent(NAME_AUTHENTICATED));
 	}
-	
+
 	public static class EventsRequest {
-		
+
 		public final StoreException[] exceptions;
 		public final GetEventsRequest[] requests;
-		
-		public EventsRequest(StoreException[] exceptions, GetEventsRequest[] requests) {
+
+		public EventsRequest(final StoreException[] exceptions, final GetEventsRequest[] requests) {
 			this.exceptions = exceptions;
 			this.requests = requests;
 		}
-		
+
 	}
-	
-	public static void serializeCommandResults(BatchedResult<Long>[] commandRes, EventsRequest ger,
-	        BatchedResult<XEvent[]>[] eventsRes, XydraOut out) {
-		
+
+	public static void serializeCommandResults(final BatchedResult<Long>[] commandRes, final EventsRequest ger,
+	        final BatchedResult<XEvent[]>[] eventsRes, final XydraOut out) {
+
 		out.open(ELEMENT_RESULTS);
-		
+
 		out.child(NAME_COMMANDRESULTS, ELEMENT_COMMANDRESULTS);
 		setRevisionLongListContents(commandRes, out);
-		
+
 		if(eventsRes != null) {
 			out.child(NAME_EVENTRESULTS, ELEMENT_EVENTRESULTS);
 			serialize(ger, eventsRes, out);
 		}
-		
+
 		out.close(ELEMENT_RESULTS);
-		
+
 	}
-	
-	public static void toCommandResults(XydraElement element, GetEventsRequest[] context,
-	        BatchedResult<Long>[] commandResults, BatchedResult<XEvent[]>[] eventResults) {
-		
+
+	public static void toCommandResults(final XydraElement element, final GetEventsRequest[] context,
+	        final BatchedResult<Long>[] commandResults, final BatchedResult<XEvent[]>[] eventResults) {
+
 		SerializingUtils.checkElementType(element, ELEMENT_RESULTS);
-		
-		XydraElement commandsEle = element.getChild(NAME_COMMANDRESULTS, ELEMENT_COMMANDRESULTS);
+
+		final XydraElement commandsEle = element.getChild(NAME_COMMANDRESULTS, ELEMENT_COMMANDRESULTS);
 		if(commandsEle == null) {
 			throw new IllegalArgumentException("missing command results");
 		}
-		
+
 		getRevisionLongListContents(commandsEle, commandResults);
-		
-		XydraElement eventsEle = element.getChild(NAME_EVENTRESULTS, ELEMENT_EVENTRESULTS);
+
+		final XydraElement eventsEle = element.getChild(NAME_EVENTRESULTS, ELEMENT_EVENTRESULTS);
 		if(eventResults != null && eventsEle != null) {
 			toEventResultList(eventsEle, context, eventResults);
 		}
-		
+
 	}
-	
-	public static void serializeEventsResults(EventsRequest ger, BatchedResult<XEvent[]>[] results,
-	        XydraOut out) {
-		
+
+	public static void serializeEventsResults(final EventsRequest ger, final BatchedResult<XEvent[]>[] results,
+	        final XydraOut out) {
+
 		out.open(ELEMENT_EVENTRESULTS);
-		
+
 		out.child(NAME_EVENTS);
 		serialize(ger, results, out);
-		
+
 		out.close(ELEMENT_EVENTRESULTS);
-		
+
 	}
-	
-	private static void serialize(EventsRequest ger, BatchedResult<XEvent[]>[] results, XydraOut out) {
-		
+
+	private static void serialize(final EventsRequest ger, final BatchedResult<XEvent[]>[] results, final XydraOut out) {
+
 		out.beginArray();
 		out.setDefaultType(TYPE_EVENTS);
 		XyAssert.xyAssert(results.length == ger.requests.length);
 		for(int i = 0; i < results.length; i++) {
-			BatchedResult<XEvent[]> result = results[i];
-			
+			final BatchedResult<XEvent[]> result = results[i];
+
 			if(ger.requests[i] == null) {
 				serializeException(ger.exceptions[i], out);
 				continue;
 			}
-			
+
 			if(result.getException() != null) {
 				serializeException(result.getException(), out);
 				continue;
 			}
-			
-			XEvent[] events = result.getResult();
+
+			final XEvent[] events = result.getResult();
 			if(events == null) {
 				out.nullElement();
 			} else {
 				out.beginArray();
-				for(XEvent event : events) {
+				for(final XEvent event : events) {
 					SerializedEvent.serialize(event, out, ger.requests[i].address);
 				}
 				out.endArray();
 			}
-			
+
 		}
 		out.endArray();
-		
+
 	}
-	
-	public static void toEventResults(XydraElement element, GetEventsRequest[] context,
-	        BatchedResult<XEvent[]>[] results) {
-		
+
+	public static void toEventResults(final XydraElement element, final GetEventsRequest[] context,
+	        final BatchedResult<XEvent[]>[] results) {
+
 		SerializingUtils.checkElementType(element, ELEMENT_EVENTRESULTS);
-		
+
 		toEventResultList(element.getChild(NAME_EVENTS), context, results);
 	}
-	
-	private static void toEventResultList(XydraElement element, GetEventsRequest[] context,
-	        BatchedResult<XEvent[]>[] results) {
-		
+
+	private static void toEventResultList(final XydraElement element, final GetEventsRequest[] context,
+	        final BatchedResult<XEvent[]>[] results) {
+
 		XyAssert.xyAssert(context.length == results.length);
-		
+
 		int i = 0;
-		
-		Iterator<XydraElement> it = element.getChildren(TYPE_EVENTS);
+
+		final Iterator<XydraElement> it = element.getChildren(TYPE_EVENTS);
 		while(it.hasNext()) {
-			XydraElement result = it.next();
-			
+			final XydraElement result = it.next();
+
 			while(results[i] != null) {
 				i++;
 			}
 			XyAssert.xyAssert(i < results.length);
-			
-			Throwable t = toException(result);
+
+			final Throwable t = toException(result);
 			if(t != null) {
 				results[i] = new BatchedResult<XEvent[]>(t);
 				continue;
@@ -286,264 +286,264 @@ public class SerializedStore {
 				results[i] = new BatchedResult<XEvent[]>((XEvent[])null);
 				continue;
 			}
-			
+
 			try {
-				
+
 				SerializingUtils.checkElementType(result, TYPE_EVENTS);
-				
-				List<XEvent> events = new ArrayList<XEvent>();
-				Iterator<XydraElement> it2 = result.getChildren();
+
+				final List<XEvent> events = new ArrayList<XEvent>();
+				final Iterator<XydraElement> it2 = result.getChildren();
 				while(it2.hasNext()) {
-					XydraElement event = it2.next();
+					final XydraElement event = it2.next();
 					events.add(SerializedEvent.toEvent(event, context[i].address));
 				}
-				
+
 				results[i] = new BatchedResult<XEvent[]>(events.toArray(new XEvent[events.size()]));
-				
-			} catch(Throwable th) {
+
+			} catch(final Throwable th) {
 				results[i] = new BatchedResult<XEvent[]>(th);
 			}
-			
+
 		}
-		
+
 		for(; i < results.length; i++) {
 			XyAssert.xyAssert(results[i] != null); assert results[i] != null;
 		}
 	}
-	
-	public static void serializeModelRevisions(BatchedResult<ModelRevision>[] result, XydraOut out) {
-		
+
+	public static void serializeModelRevisions(final BatchedResult<ModelRevision>[] result, final XydraOut out) {
+
 		out.open(ELEMENT_MODEL_REVISIONS);
 		out.child(NAME_REVISIONS);
 		setRevisionStateListContents(result, out);
 		out.close(ELEMENT_MODEL_REVISIONS);
-		
+
 	}
-	
-	public static void toModelRevisions(XydraElement element, BatchedResult<ModelRevision>[] res) {
-		
+
+	public static void toModelRevisions(final XydraElement element, final BatchedResult<ModelRevision>[] res) {
+
 		SerializingUtils.checkElementType(element, ELEMENT_MODEL_REVISIONS);
-		
+
 		getRevisionStateListContents(element.getChild(NAME_REVISIONS), res);
 	}
-	
+
 	/**
 	 * <pre>
-	 * 
+	 *
 	 *  <xrevisionstate>
 	 *  <xrevision>13</xrevision>
 	 *  <modelexists>true</modelexists>
 	 *  </xrevisionstate>
-	 *  
-	 *  
+	 *
+	 *
 	 *  {
 	 * xrevision: 13,
 	 *  }
-	 * 
+	 *
 	 * </pre>
-	 * 
+	 *
 	 * @param results
 	 * @param out
 	 */
-	private static void setRevisionStateListContents(BatchedResult<ModelRevision>[] results,
-	        XydraOut out) {
-		
+	private static void setRevisionStateListContents(final BatchedResult<ModelRevision>[] results,
+	        final XydraOut out) {
+
 		out.beginArray();
 		out.setDefaultType(ELEMENT_REVISIONSTATE);
-		
-		for(BatchedResult<ModelRevision> result : results) {
+
+		for(final BatchedResult<ModelRevision> result : results) {
 			if(result.getException() != null) {
 				serializeException(result.getException(), out);
 			} else {
 				XyAssert.xyAssert(result.getResult() != null); assert result.getResult() != null;
-				ModelRevision revisionState = result.getResult();
-				long rev = revisionState.revision();
-				boolean modelExists = revisionState.modelExists();
-				
+				final ModelRevision revisionState = result.getResult();
+				final long rev = revisionState.revision();
+				final boolean modelExists = revisionState.modelExists();
+
 				out.open(ELEMENT_REVISIONSTATE);
-				
+
 				out.value(NAME_REVISION, ELEMENT_XREVISION, rev);
 				out.value(NAME_MODELEXISTS, ELEMENT_MODELEXISTS, modelExists);
-				
+
 				out.close(ELEMENT_REVISIONSTATE);
 			}
 		}
-		
+
 		out.endArray();
 	}
-	
+
 	/**
 	 * <pre>
 	 * &lt;xrevision&gt;13&lt;/xrevision&gt;
 	 * </pre>
 	 */
-	private static void setRevisionLongListContents(BatchedResult<Long>[] results, XydraOut out) {
-		
+	private static void setRevisionLongListContents(final BatchedResult<Long>[] results, final XydraOut out) {
+
 		out.beginArray();
 		out.setDefaultType(ELEMENT_XREVISION);
-		
-		for(BatchedResult<Long> result : results) {
+
+		for(final BatchedResult<Long> result : results) {
 			if(result.getException() != null) {
 				serializeException(result.getException(), out);
 			} else {
 				XyAssert.xyAssert(result.getResult() != null); assert result.getResult() != null;
-				long rev = result.getResult();
+				final long rev = result.getResult();
 				out.value(rev);
 			}
 		}
-		
+
 		out.endArray();
 	}
-	
-	private static void getRevisionStateListContents(XydraElement element,
-	        BatchedResult<ModelRevision>[] results) {
-		
+
+	private static void getRevisionStateListContents(final XydraElement element,
+	        final BatchedResult<ModelRevision>[] results) {
+
 		int i = 0;
-		
-		Iterator<XydraElement> it = element.getChildren(ELEMENT_REVISIONSTATE);
+
+		final Iterator<XydraElement> it = element.getChildren(ELEMENT_REVISIONSTATE);
 		while(it.hasNext()) {
-			XydraElement result = it.next();
-			
+			final XydraElement result = it.next();
+
 			while(results[i] != null) {
 				i++;
 			}
 			XyAssert.xyAssert(i < results.length);
-			
-			Throwable t = toException(result);
+
+			final Throwable t = toException(result);
 			if(t != null) {
 				results[i] = new BatchedResult<ModelRevision>(t);
 				continue;
 			}
-			
+
 			try {
-				
+
 				SerializingUtils.checkElementType(result, ELEMENT_REVISIONSTATE);
-				
-				long rev = SerializingUtils.toLong(result
+
+				final long rev = SerializingUtils.toLong(result
 				        .getValue(NAME_REVISION, ELEMENT_XREVISION));
-				boolean modelExists = SerializingUtils.toBoolean(result.getValue(NAME_MODELEXISTS,
+				final boolean modelExists = SerializingUtils.toBoolean(result.getValue(NAME_MODELEXISTS,
 				        ELEMENT_MODELEXISTS));
-				
+
 				results[i] = new BatchedResult<ModelRevision>(new ModelRevision(rev, modelExists));
-				
-			} catch(Throwable th) {
+
+			} catch(final Throwable th) {
 				results[i] = new BatchedResult<ModelRevision>(th);
 			}
-			
+
 		}
-		
+
 		for(; i < results.length; i++) {
 			XyAssert.xyAssert(results[i] != null); assert results[i] != null;
 		}
 	}
-	
-	private static void getRevisionLongListContents(XydraElement element,
-	        BatchedResult<Long>[] results) {
-		
+
+	private static void getRevisionLongListContents(final XydraElement element,
+	        final BatchedResult<Long>[] results) {
+
 		int i = 0;
-		
-		Iterator<XydraElement> it = element.getChildren(ELEMENT_XREVISION);
+
+		final Iterator<XydraElement> it = element.getChildren(ELEMENT_XREVISION);
 		while(it.hasNext()) {
-			XydraElement result = it.next();
-			
+			final XydraElement result = it.next();
+
 			while(results[i] != null) {
 				i++;
 			}
 			XyAssert.xyAssert(i < results.length);
-			
-			Throwable t = toException(result);
+
+			final Throwable t = toException(result);
 			if(t != null) {
 				results[i] = new BatchedResult<Long>(t);
 				continue;
 			}
-			
+
 			try {
-				
+
 				SerializingUtils.checkElementType(result, ELEMENT_XREVISION);
-				
-				long rev = SerializingUtils.toLong(result.getContent());
-				
+
+				final long rev = SerializingUtils.toLong(result.getContent());
+
 				results[i] = new BatchedResult<Long>(rev);
-				
-			} catch(Throwable th) {
+
+			} catch(final Throwable th) {
 				results[i] = new BatchedResult<Long>(th);
 			}
-			
+
 		}
-		
+
 		for(; i < results.length; i++) {
 			XyAssert.xyAssert(results[i] != null); assert results[i] != null;
 		}
 	}
-	
-	public static void serializeSnapshots(StoreException[] ex, boolean[] isModel,
-	        BatchedResult<XReadableModel>[] mr, BatchedResult<XReadableObject>[] or, XydraOut out) {
-		
+
+	public static void serializeSnapshots(final StoreException[] ex, final boolean[] isModel,
+	        final BatchedResult<XReadableModel>[] mr, final BatchedResult<XReadableObject>[] or, final XydraOut out) {
+
 		XyAssert.xyAssert(ex.length == isModel.length);
-		
+
 		out.open(ELEMENT_SNAPSHOTS);
-		
+
 		int mi = 0, oi = 0;
-		
+
 		out.child(NAME_SNAPSHOTS);
 		out.beginArray();
 		for(int i = 0; i < isModel.length; i++) {
-			
+
 			if(ex[i] != null) {
 				serializeException(ex[i], out);
 				continue;
 			}
-			
-			Throwable t = isModel[i] ? mr[mi++].getException() : or[oi++].getException();
+
+			final Throwable t = isModel[i] ? mr[mi++].getException() : or[oi++].getException();
 			if(t != null) {
 				serializeException(t, out);
 				continue;
 			}
-			
+
 			if(isModel[i]) {
-				XReadableModel model = mr[mi - 1].getResult();
+				final XReadableModel model = mr[mi - 1].getResult();
 				if(model == null) {
 					out.nullElement();
 				} else {
 					SerializedModel.serialize(model, out);
 				}
 			} else {
-				XReadableObject object = or[oi - 1].getResult();
+				final XReadableObject object = or[oi - 1].getResult();
 				if(object == null) {
 					out.nullElement();
 				} else {
 					SerializedModel.serialize(object, out);
 				}
 			}
-			
+
 		}
 		out.endArray();
-		
+
 		out.close(ELEMENT_SNAPSHOTS);
-		
+
 	}
-	
-	public static List<Object> toSnapshots(XydraElement element, XAddress[] context) {
-		
+
+	public static List<Object> toSnapshots(final XydraElement element, final XAddress[] context) {
+
 		SerializingUtils.checkElementType(element, ELEMENT_SNAPSHOTS);
-		
-		List<Object> results = new ArrayList<Object>();
-		
+
+		final List<Object> results = new ArrayList<Object>();
+
 		int i = 0 - 1;
-		
-		Iterator<XydraElement> it = element.getChildrenByName(NAME_SNAPSHOTS);
+
+		final Iterator<XydraElement> it = element.getChildrenByName(NAME_SNAPSHOTS);
 		while(it.hasNext()) {
-			XydraElement result = it.next();
+			final XydraElement result = it.next();
 			i++;
-			
+
 			try {
-				
-				Throwable t = toException(result);
+
+				final Throwable t = toException(result);
 				if(t != null) {
 					results.add(t);
 					continue;
 				}
-				
+
 				if(result == null) {
 					results.add(null);
 				} else if(SerializedModel.isModel(result)) {
@@ -551,40 +551,40 @@ public class SerializedStore {
 				} else {
 					results.add(SerializedModel.toObjectState(result, context[i]));
 				}
-				
-			} catch(Throwable th) {
+
+			} catch(final Throwable th) {
 				results.add(th);
 			}
-			
+
 		}
-		
+
 		return results;
 	}
-	
-	public static void serializeModelIds(Set<XId> result, XydraOut out) {
-		
+
+	public static void serializeModelIds(final Set<XId> result, final XydraOut out) {
+
 		out.open(ELEMENT_MODEL_IDS);
 		SerializedValue.setIdListContents(result, out);
 		out.close(ELEMENT_MODEL_IDS);
-		
+
 	}
-	
-	public static Set<XId> toModelIds(XydraElement element) {
-		
+
+	public static Set<XId> toModelIds(final XydraElement element) {
+
 		SerializingUtils.checkElementType(element, ELEMENT_MODEL_IDS);
-		
+
 		return new HashSet<XId>(SerializedValue.getIdListContents(element));
 	}
-	
-	public static void serializeRepositoryId(XId result, XydraOut out) {
+
+	public static void serializeRepositoryId(final XId result, final XydraOut out) {
 		out.element(ELEMENT_REPOSITORY_ID, NAME_XId, result);
 	}
-	
-	public static XId toRepositoryId(XydraElement element) {
-		
+
+	public static XId toRepositoryId(final XydraElement element) {
+
 		SerializingUtils.checkElementType(element, ELEMENT_REPOSITORY_ID);
-		
+
 		return SerializingUtils.toId(element.getContent(NAME_XId));
 	}
-	
+
 }

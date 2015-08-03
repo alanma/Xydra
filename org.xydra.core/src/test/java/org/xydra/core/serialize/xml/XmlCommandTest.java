@@ -6,15 +6,15 @@ import org.xydra.core.serialize.XydraSerializer;
 
 
 public class XmlCommandTest extends AbstractSerializedCommandTest {
-	
+
 	@Override
 	protected XydraParser getParser() {
 		return new XmlParser();
 	}
-	
+
 	@Override
 	protected XydraSerializer getSerializer() {
 		return new XmlSerializer();
 	}
-	
+
 }

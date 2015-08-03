@@ -13,7 +13,7 @@ public interface IUser extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.User']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("email")
@@ -21,7 +21,7 @@ public interface IUser extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.User']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("name")
@@ -29,7 +29,7 @@ public interface IUser extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.User']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("password")
@@ -37,7 +37,7 @@ public interface IUser extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.User']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("picture")
@@ -45,7 +45,7 @@ public interface IUser extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.User']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("settings")
@@ -53,7 +53,7 @@ public interface IUser extends IHasXId {
 
 	/**
 	 * For GWT-internal use only [generated from: 'toClassSpec 1']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'toClassSpec 2']
 	 * @param id
@@ -64,7 +64,7 @@ public interface IUser extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.User']
-	 * 
+	 *
 	 * @param email
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.User']
@@ -76,7 +76,7 @@ public interface IUser extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.User']
-	 * 
+	 *
 	 * @param name
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.User']
@@ -88,7 +88,7 @@ public interface IUser extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.User']
-	 * 
+	 *
 	 * @param password
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.User']
@@ -100,7 +100,7 @@ public interface IUser extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.User']
-	 * 
+	 *
 	 * @param picture
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.User']
@@ -112,7 +112,7 @@ public interface IUser extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.User']
-	 * 
+	 *
 	 * @param settings
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.User']

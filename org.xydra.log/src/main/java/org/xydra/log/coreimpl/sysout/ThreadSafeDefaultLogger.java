@@ -4,17 +4,17 @@ import org.xydra.annotations.ThreadSafe;
 
 /**
  * A thread-safe version of {@link DefaultLogger}.
- * 
+ *
  * @author kaidel
  */
 @ThreadSafe
 public class ThreadSafeDefaultLogger extends DefaultLogger {
 
-	private Object levelLock;
+	private final Object levelLock;
 
-	private Object loggingLock;
+	private final Object loggingLock;
 
-	public ThreadSafeDefaultLogger(String name) {
+	public ThreadSafeDefaultLogger(final String name) {
 		super(name);
 
 		this.levelLock = new Object();
@@ -22,42 +22,42 @@ public class ThreadSafeDefaultLogger extends DefaultLogger {
 	}
 
 	@Override
-	public void debug(String msg) {
+	public void debug(final String msg) {
 		synchronized (this.loggingLock) {
 			super.debug(msg);
 		}
 	}
 
 	@Override
-	public void debug(String msg, Throwable t) {
+	public void debug(final String msg, final Throwable t) {
 		synchronized (this.loggingLock) {
 			super.debug(msg, t);
 		}
 	}
 
 	@Override
-	public void error(String msg) {
+	public void error(final String msg) {
 		synchronized (this.loggingLock) {
 			super.error(msg);
 		}
 	}
 
 	@Override
-	public void error(String msg, Throwable t) {
+	public void error(final String msg, final Throwable t) {
 		synchronized (this.loggingLock) {
 			super.error(msg, t);
 		}
 	}
 
 	@Override
-	public void info(String msg) {
+	public void info(final String msg) {
 		synchronized (this.loggingLock) {
 			super.info(msg);
 		}
 	}
 
 	@Override
-	public void info(String msg, Throwable t) {
+	public void info(final String msg, final Throwable t) {
 		synchronized (this.loggingLock) {
 			super.info(msg, t);
 		}
@@ -99,28 +99,28 @@ public class ThreadSafeDefaultLogger extends DefaultLogger {
 	}
 
 	@Override
-	public void trace(String msg) {
+	public void trace(final String msg) {
 		synchronized (this.loggingLock) {
 			super.trace(msg);
 		}
 	}
 
 	@Override
-	public void trace(String msg, Throwable t) {
+	public void trace(final String msg, final Throwable t) {
 		synchronized (this.loggingLock) {
 			super.trace(msg, t);
 		}
 	}
 
 	@Override
-	public void warn(String msg) {
+	public void warn(final String msg) {
 		synchronized (this.loggingLock) {
 			super.warn(msg);
 		}
 	}
 
 	@Override
-	public void warn(String msg, Throwable t) {
+	public void warn(final String msg, final Throwable t) {
 		synchronized (this.loggingLock) {
 			super.warn(msg, t);
 		}

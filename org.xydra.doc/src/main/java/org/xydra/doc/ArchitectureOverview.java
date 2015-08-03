@@ -19,9 +19,9 @@ import org.xydra.core.model.XSynchronizesChanges;
 /**
  * Xydra uses a client-server concept to let several clients communicate via a
  * persistent store. Clients can be used without a server.
- * 
+ *
  * A client-side model uses the {@link XModel} API.
- * 
+ *
  * The inheritance graph is:
  * <ul>
  * <li>{@link XModel} <br />
@@ -81,7 +81,7 @@ import org.xydra.core.model.XSynchronizesChanges;
  * </ul>
  * </li>
  * </ul>
- * 
+ *
  * <h3>Orthogonal features</h3>
  * <ul>
  * <li>serialisable</li>
@@ -96,7 +96,7 @@ import org.xydra.core.model.XSynchronizesChanges;
  * <li>usage over HTTP</li>
  * <li>persistence</li>
  * </ul>
- * 
+ *
  * <h3>Usage scenarios</h3>
  * <ul>
  * <li>XModel client standalone in-memory in plain old Java</li>
@@ -118,11 +118,11 @@ import org.xydra.core.model.XSynchronizesChanges;
  * REST (XML over HTTP) <br />
  * Potential errors: Failed commands; HTTP errors</li>
  * </ul>
- * 
- * 
- * 
+ *
+ *
+ *
  * @author xamde
- * 
+ *
  */
 public class ArchitectureOverview {
 

@@ -16,9 +16,9 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * An object snapshot that reflects a tentative version. It can be stored in the
  * GAE datastore.
- * 
+ *
  * Basically an {@link XRevWritableObject} + {@link #exists()}
- * 
+ *
  * @author xamde
  */
 public class TentativeObjectState implements Serializable, XRevWritableObject {
@@ -39,7 +39,7 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
 
 	@Override
 	public String toString() {
-		return this.getAddress() + " [" + (this.objectExists ? "exists" : "-na-") + "]"
+		return getAddress() + " [" + (this.objectExists ? "exists" : "-na-") + "]"
 				+ " [model:" + this.modelRevision + "] " + this.object;
 	}
 
@@ -49,8 +49,8 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
 	 * @param objectExists
 	 * @param modelRev
 	 */
-	public TentativeObjectState(@NeverNull XReadableObject object, boolean objectExists,
-			long modelRev) {
+	public TentativeObjectState(@NeverNull final XReadableObject object, final boolean objectExists,
+			final long modelRev) {
 		XyAssert.xyAssert(object != null);
 		this.object = XCopyUtils.createSnapshot(object);
 		this.objectExists = objectExists;
@@ -67,13 +67,13 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
 	}
 
 	@Override
-	public XRevWritableField getField(XId fieldId) {
+	public XRevWritableField getField(final XId fieldId) {
 		return this.object.getField(fieldId);
 	}
 
 	@Override
 	public XId getId() {
-		return this.getAddress().getObject();
+		return getAddress().getObject();
 	}
 
 	public long getModelRevision() {
@@ -91,7 +91,7 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
 	}
 
 	@Override
-	public boolean hasField(XId fieldId) {
+	public boolean hasField(final XId fieldId) {
 		return this.object.hasField(fieldId);
 	}
 
@@ -105,7 +105,7 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
 		return this.object.iterator();
 	}
 
-	public void setModelRev(long modelRev) {
+	public void setModelRev(final long modelRev) {
 		this.modelRevision = modelRev;
 	}
 
@@ -115,30 +115,30 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
 	}
 
 	@Override
-	public boolean removeField(XId fieldId) {
+	public boolean removeField(final XId fieldId) {
 		return this.object.removeField(fieldId);
 	}
 
 	@Override
-	public void addField(XRevWritableField field) {
+	public void addField(final XRevWritableField field) {
 		this.object.addField(field);
 	}
 
 	@Override
-	public XRevWritableField createField(XId fieldId) {
+	public XRevWritableField createField(final XId fieldId) {
 		return this.object.createField(fieldId);
 	}
 
 	@Override
-	public void setRevisionNumber(long rev) {
+	public void setRevisionNumber(final long rev) {
 		this.object.setRevisionNumber(rev);
 	}
 
-	public void setObjectExists(boolean objectExists) {
+	public void setObjectExists(final boolean objectExists) {
 		this.objectExists = objectExists;
 	}
 
-	public void setObjectState(XReadableObject object) {
+	public void setObjectState(final XReadableObject object) {
 		this.object = XCopyUtils.createSnapshot(object);
 	}
 

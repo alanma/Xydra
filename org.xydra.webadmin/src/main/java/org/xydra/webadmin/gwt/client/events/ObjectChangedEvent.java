@@ -8,12 +8,12 @@ import com.google.web.bindery.event.shared.Event;
 
 /**
  * Object has been added or removed or just changed
- * 
+ *
  * @author xamde
  */
 public class ObjectChangedEvent extends Event<IObjectChangedEventHandler> {
 
-	private XAddress objectAddress;
+	private final XAddress objectAddress;
 
 	private EntityStatus status;
 
@@ -25,9 +25,9 @@ public class ObjectChangedEvent extends Event<IObjectChangedEventHandler> {
 		void onObjectChange(ObjectChangedEvent event);
 	}
 
-	public ObjectChangedEvent(XAddress objectAddress, EntityStatus status, XId moreInfos) {
-		this.setStatus(status);
-		this.setMoreInfos(moreInfos);
+	public ObjectChangedEvent(final XAddress objectAddress, final EntityStatus status, final XId moreInfos) {
+		setStatus(status);
+		setMoreInfos(moreInfos);
 		this.objectAddress = objectAddress;
 	}
 
@@ -36,7 +36,7 @@ public class ObjectChangedEvent extends Event<IObjectChangedEventHandler> {
 	}
 
 	@Override
-	protected void dispatch(IObjectChangedEventHandler handler) {
+	protected void dispatch(final IObjectChangedEventHandler handler) {
 		handler.onObjectChange(this);
 	}
 
@@ -49,7 +49,7 @@ public class ObjectChangedEvent extends Event<IObjectChangedEventHandler> {
 		return this.moreInfos;
 	}
 
-	public void setMoreInfos(XId moreInfos) {
+	public void setMoreInfos(final XId moreInfos) {
 		this.moreInfos = moreInfos;
 	}
 
@@ -57,7 +57,7 @@ public class ObjectChangedEvent extends Event<IObjectChangedEventHandler> {
 		return this.status;
 	}
 
-	public void setStatus(EntityStatus status) {
+	public void setStatus(final EntityStatus status) {
 		this.status = status;
 	}
 }

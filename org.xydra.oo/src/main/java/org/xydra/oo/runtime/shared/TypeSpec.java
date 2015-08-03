@@ -10,13 +10,13 @@ import org.xydra.annotations.RunsInGWT;
 /**
  * Represents a Java type as a pair (baseType, componentType?). That is easier
  * to do type inference with.
- * 
+ *
  * Has a base type and optionally a component type - iff base type is a
  * collection type (including array). Both components are represented as
  * {@link BaseTypeSpec} instances.
- * 
+ *
  * Has a comment (for the user) and debug info where it was generated from.
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(true)
@@ -24,23 +24,23 @@ public class TypeSpec implements Comparable<TypeSpec>, IType {
 
 	/** simple type or collection */
 	@NeverNull
-	private IBaseType baseType;
+	private final IBaseType baseType;
 
 	private String comment;
 
 	/** @CanBeNull */
 	private IBaseType componentType;
 
-	private String generatedFrom;
+	private final String generatedFrom;
 
 	/**
 	 * A type with no component type
-	 * 
+	 *
 	 * @param typePackageName
 	 * @param typeName
 	 * @param generatedFrom
 	 */
-	public TypeSpec(String typePackageName, String typeName, String generatedFrom) {
+	public TypeSpec(final String typePackageName, final String typeName, final String generatedFrom) {
 		this.baseType = new BaseTypeSpec(typePackageName, typeName);
 		this.generatedFrom = generatedFrom;
 	}
@@ -50,7 +50,7 @@ public class TypeSpec implements Comparable<TypeSpec>, IType {
 	 * @param componentType
 	 * @param generatedFrom
 	 */
-	public TypeSpec(@NeverNull IBaseType baseType, IBaseType componentType, String generatedFrom) {
+	public TypeSpec(@NeverNull final IBaseType baseType, final IBaseType componentType, final String generatedFrom) {
 		assert baseType != null;
 		this.baseType = baseType;
 		this.componentType = componentType;
@@ -64,8 +64,8 @@ public class TypeSpec implements Comparable<TypeSpec>, IType {
 	 * @param componentTypeSimpleName
 	 * @param generatedFrom
 	 */
-	public TypeSpec(String baseTypePackage, String baseTypeSimpleName, String componentTypePackage,
-			String componentTypeSimpleName, String generatedFrom) {
+	public TypeSpec(final String baseTypePackage, final String baseTypeSimpleName, final String componentTypePackage,
+			final String componentTypeSimpleName, final String generatedFrom) {
 		this.baseType = new BaseTypeSpec(baseTypePackage, baseTypeSimpleName);
 		this.componentType = BaseTypeSpec.create(componentTypePackage, componentTypeSimpleName);
 		this.generatedFrom = generatedFrom;
@@ -73,18 +73,18 @@ public class TypeSpec implements Comparable<TypeSpec>, IType {
 
 	/**
 	 * Create a clone
-	 * 
+	 *
 	 * @param t
 	 */
-	public TypeSpec(IType t) {
+	public TypeSpec(final IType t) {
 		this(new BaseTypeSpec(t.getBaseType()), t.getComponentType() == null ? null
 				: new BaseTypeSpec(t.getComponentType()), t.getGeneratedFrom());
 		setComment(t.getComment());
 	}
 
 	@Override
-	public int compareTo(TypeSpec o) {
-		return this.id().compareTo(o.id());
+	public int compareTo(final TypeSpec o) {
+		return id().compareTo(o.id());
 	}
 
 	public void dump() {
@@ -92,8 +92,8 @@ public class TypeSpec implements Comparable<TypeSpec>, IType {
 	}
 
 	@Override
-	public boolean equals(Object other) {
-		return other instanceof TypeSpec && ((TypeSpec) other).id().equals(this.id());
+	public boolean equals(final Object other) {
+		return other instanceof TypeSpec && ((TypeSpec) other).id().equals(id());
 	}
 
 	@Override
@@ -113,7 +113,7 @@ public class TypeSpec implements Comparable<TypeSpec>, IType {
 
 	@Override
 	public Set<String> getRequiredImports() {
-		HashSet<String> req = new HashSet<String>();
+		final HashSet<String> req = new HashSet<String>();
 
 		if (this.baseType.isArray()) {
 			// require component type
@@ -131,9 +131,9 @@ public class TypeSpec implements Comparable<TypeSpec>, IType {
 		assert req.size() <= 2;
 
 		// remove primitive types and built-in imports
-		Iterator<String> it = req.iterator();
+		final Iterator<String> it = req.iterator();
 		while (it.hasNext()) {
-			String r = it.next();
+			final String r = it.next();
 			if (r.startsWith("java.lang")
 
 			|| r.equals("boolean") || r.equals("int") || r.equals("long") || r.equals("double")
@@ -181,7 +181,7 @@ public class TypeSpec implements Comparable<TypeSpec>, IType {
 	}
 
 	@Override
-	public void setComment(String string) {
+	public void setComment(final String string) {
 		this.comment = string;
 	}
 

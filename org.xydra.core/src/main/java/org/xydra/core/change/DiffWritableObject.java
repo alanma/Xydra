@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XAtomicCommand;
@@ -27,16 +28,16 @@ import org.xydra.sharedutils.XyAssert;
 
 /**
  * A helper class to minimize the number and size of persistence accesses.
- * 
+ *
  * Helps also to create transactions easily.
- * 
+ *
  * Does not support revision numbers.
- * 
+ *
  * An implementation of {@link XWritableObject} that works as a diff on top of a
  * base {@link XWritableObject}. Via {@link #toCommandList(boolean)} a minimal
  * list of commands that changes the base model into the current state can be
  * created. The base model is changed at no times.
- * 
+ *
  * @author xamde
  */
 public class DiffWritableObject extends AbstractDelegatingWritableObject implements XWritableObject {
@@ -48,10 +49,10 @@ public class DiffWritableObject extends AbstractDelegatingWritableObject impleme
 	/*
 	 * Each index has the structure (field, value) with the notion to represent
 	 * added/removed content in this model within a given repository.
-	 * 
+	 *
 	 * An added/removed, empty field without values is represented as ( fieldId,
 	 * NOVALUE).
-	 * 
+	 *
 	 * A added/removed value is represented as ( fieldId, value).
 	 */
 	MapIndex<XId, XValue> added, removed;
@@ -69,15 +70,16 @@ public class DiffWritableObject extends AbstractDelegatingWritableObject impleme
 		this.removed = new MapIndex<XId, XValue>();
 	}
 
-	private XValue getFieldValueFromBase(XId fieldId) {
-		XWritableField f = this.base.getField(fieldId);
-		if (f == null)
+	private XValue getFieldValueFromBase(final XId fieldId) {
+		final XWritableField f = this.base.getField(fieldId);
+		if (f == null) {
 			return null;
+		}
 		return f.getValue();
 	}
 
 	@Override
-	protected XValue field_getValue(XId fieldId) {
+	protected XValue field_getValue(final XId fieldId) {
 		XValue value = this.added.lookup(fieldId);
 		if (value != null) {
 			if (value == NOVALUE) {
@@ -95,14 +97,14 @@ public class DiffWritableObject extends AbstractDelegatingWritableObject impleme
 	}
 
 	@Override
-	protected boolean field_setValue(XId fieldId, XValue value) {
+	protected boolean field_setValue(final XId fieldId, final XValue value) {
 		XyAssert.xyAssert(fieldId != null);
 		assert fieldId != null;
 		XyAssert.xyAssert(this.removed.lookup(fieldId) == null);
 		XyAssert.xyAssert(hasField(fieldId));
 
-		XValue v = field_getValue(fieldId);
-		if ((v == null && value == null) || (v != null && v.equals(value))) {
+		final XValue v = field_getValue(fieldId);
+		if (v == null && value == null || v != null && v.equals(value)) {
 			return false;
 		}
 
@@ -118,7 +120,7 @@ public class DiffWritableObject extends AbstractDelegatingWritableObject impleme
 
 	/**
 	 * Allows to end a transaction and go back to using the base object.
-	 * 
+	 *
 	 * @return the base object that has been used to created this wrapped
 	 *         {@link DiffWritableObject}.
 	 */
@@ -132,23 +134,23 @@ public class DiffWritableObject extends AbstractDelegatingWritableObject impleme
 	}
 
 	protected Set<XId> idsAsSet() {
-		Set<XId> set = IndexUtils.diff(this.base.iterator(), this.added.keyIterator(),
+		final Set<XId> set = IndexUtils.diff(this.base.iterator(), this.added.keyIterator(),
 				this.removed.keyIterator());
 		return set;
 	}
 
 	@Override
 	public boolean isEmpty() {
-		return this.idsAsSet().isEmpty();
+		return idsAsSet().isEmpty();
 	}
 
 	@Override
 	public Iterator<XId> iterator() {
-		return this.idsAsSet().iterator();
+		return idsAsSet().iterator();
 	}
 
 	@Override
-	public XWritableField createField(XId fieldId) {
+	public XWritableField createField(final XId fieldId) {
 		XyAssert.xyAssert(fieldId != null);
 		assert fieldId != null;
 		if (!hasField(fieldId)) {
@@ -159,7 +161,7 @@ public class DiffWritableObject extends AbstractDelegatingWritableObject impleme
 	}
 
 	@Override
-	public boolean hasField(XId fieldId) {
+	public boolean hasField(final XId fieldId) {
 		XyAssert.xyAssert(fieldId != null);
 		assert fieldId != null;
 		if (this.added.tupleIterator(new EqualsConstraint<XId>(fieldId)).hasNext()) {
@@ -173,7 +175,7 @@ public class DiffWritableObject extends AbstractDelegatingWritableObject impleme
 	}
 
 	@Override
-	public boolean removeField(XId fieldId) {
+	public boolean removeField(final XId fieldId) {
 		XyAssert.xyAssert(fieldId != null);
 		assert fieldId != null;
 		if (this.added.containsKey(new EqualsConstraint<XId>(fieldId))) {
@@ -187,47 +189,47 @@ public class DiffWritableObject extends AbstractDelegatingWritableObject impleme
 
 	/**
 	 * @param forced if true, create forced commands
-	 * 
+	 *
 	 *            TODO implement semantics of 'forced'
-	 * 
+	 *
 	 * @return a list of commands which transform the base model given at
 	 *         creation time into this current model state
 	 */
-	public List<XAtomicCommand> toCommandList(boolean forced) {
-		List<XAtomicCommand> list = new LinkedList<XAtomicCommand>();
+	public List<XAtomicCommand> toCommandList(final boolean forced) {
+		final List<XAtomicCommand> list = new LinkedList<XAtomicCommand>();
 
 		// remove
 		Iterator<KeyEntryTuple<XId, XValue>> it = this.removed.tupleIterator(new Wildcard<XId>());
 		while (it.hasNext()) {
-			KeyEntryTuple<XId, XValue> field_value = it.next();
+			final KeyEntryTuple<XId, XValue> field_value = it.next();
 			// remove empty field or field with value
-			list.add(X.getCommandFactory().createForcedRemoveFieldCommand(
+			list.add(BaseRuntime.getCommandFactory().createForcedRemoveFieldCommand(
 					resolveField(field_value.getKey())));
 		}
 
 		// add
 		it = this.added.tupleIterator(new Wildcard<XId>());
 		while (it.hasNext()) {
-			KeyEntryTuple<XId, XValue> e = it.next();
+			final KeyEntryTuple<XId, XValue> e = it.next();
 			if (e.getEntry().equals(NOVALUE)) {
 				// add empty field
-				list.add(X.getCommandFactory()
+				list.add(BaseRuntime.getCommandFactory()
 						.createForcedAddFieldCommand(getAddress(), e.getKey()));
 			} else {
 				// value
-				XValue currentValue = getFieldValueFromBase(e.getKey());
+				final XValue currentValue = getFieldValueFromBase(e.getKey());
 				if (currentValue == null) {
 					// maybe still add field
 					if (!this.base.hasField(e.getKey())) {
-						list.add(X.getCommandFactory().createForcedAddFieldCommand(getAddress(),
+						list.add(BaseRuntime.getCommandFactory().createForcedAddFieldCommand(getAddress(),
 								e.getKey()));
 					}
 					// add value
-					list.add(X.getCommandFactory().createForcedAddValueCommand(
+					list.add(BaseRuntime.getCommandFactory().createForcedAddValueCommand(
 							resolveField(e.getKey()), e.getEntry()));
 				} else {
 					// change value
-					list.add(X.getCommandFactory().createForcedChangeValueCommand(
+					list.add(BaseRuntime.getCommandFactory().createForcedChangeValueCommand(
 							resolveField(e.getKey()), e.getEntry()));
 				}
 			}
@@ -240,7 +242,7 @@ public class DiffWritableObject extends AbstractDelegatingWritableObject impleme
 		 */
 		Collections.sort(list, new Comparator<XAtomicCommand>() {
 			@Override
-			public int compare(XAtomicCommand a, XAtomicCommand b) {
+			public int compare(final XAtomicCommand a, final XAtomicCommand b) {
 				return b.getChangedEntity().getAddressedType()
 						.compareTo(a.getChangedEntity().getAddressedType());
 			}
@@ -251,28 +253,31 @@ public class DiffWritableObject extends AbstractDelegatingWritableObject impleme
 
 	/**
 	 * TODO merge with impl in {@link DiffWritableModel}
-	 * 
+	 *
 	 * @return txn or null
 	 */
 	public XTransaction toTransaction() {
-		List<XAtomicCommand> list = toCommandList(true);
-		XTransactionBuilder builder = new XTransactionBuilder(this.getAddress());
-		for (XAtomicCommand command : list) {
+		final List<XAtomicCommand> list = toCommandList(true);
+		final XTransactionBuilder builder = new XTransactionBuilder(getAddress());
+		for (final XAtomicCommand command : list) {
 			builder.addCommand(command);
 		}
 		if (builder.isEmpty()) {
-			if (log.isDebugEnabled())
-				log.debug("No command in txn for model '" + this.getId() + "'");
+			if (log.isDebugEnabled()) {
+				log.debug("No command in txn for model '" + getId() + "'");
+			}
 			return null;
 		}
-		XTransaction txn = builder.build();
+		final XTransaction txn = builder.build();
 		assert txn != null;
 		if (log.isTraceEnabled()) {
-			if (log.isDebugEnabled())
-				log.debug("Commands in txn for model '" + this.getId() + "'");
-			for (XAtomicCommand atomicCommand : txn) {
-				if (log.isDebugEnabled())
+			if (log.isDebugEnabled()) {
+				log.debug("Commands in txn for model '" + getId() + "'");
+			}
+			for (final XAtomicCommand atomicCommand : txn) {
+				if (log.isDebugEnabled()) {
 					log.debug("  Command " + atomicCommand);
+				}
 			}
 		}
 		return txn;
@@ -291,7 +296,7 @@ public class DiffWritableObject extends AbstractDelegatingWritableObject impleme
 	}
 
 	@Override
-	protected long getRevisionNumber(XId objectId) {
+	protected long getRevisionNumber(final XId objectId) {
 		throw new UnsupportedOperationException();
 		// XWritableObject object = this.base.getObject(objectId);
 		// if(object == null) {
@@ -301,7 +306,7 @@ public class DiffWritableObject extends AbstractDelegatingWritableObject impleme
 	}
 
 	@Override
-	protected long field_getRevisionNumber(XId fieldId) {
+	protected long field_getRevisionNumber(final XId fieldId) {
 		throw new UnsupportedOperationException();
 		// XWritableObject object = this.base.getObject(objectId);
 		// if(object == null) {
@@ -315,12 +320,12 @@ public class DiffWritableObject extends AbstractDelegatingWritableObject impleme
 	}
 
 	@Override
-	protected boolean field_exists(XId fieldId) {
+	protected boolean field_exists(final XId fieldId) {
 		return hasField(fieldId);
 	}
 
 	@Override
-	protected boolean field_isEmpty(XId fieldId) {
+	protected boolean field_isEmpty(final XId fieldId) {
 		if (hasField(fieldId)) {
 			return field_getValue(fieldId) == null;
 		}

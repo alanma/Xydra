@@ -15,9 +15,9 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * For column heads in the table
- * 
+ *
  * @author kahmann
- * 
+ *
  */
 public class ColumnHeaderWidget extends Composite {
 
@@ -35,7 +35,7 @@ public class ColumnHeaderWidget extends Composite {
 	@UiField
 	Label idLabel;
 
-	public ColumnHeaderWidget(XId id) {
+	public ColumnHeaderWidget(final XId id) {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
 

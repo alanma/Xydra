@@ -20,13 +20,13 @@ public class FutureUtils {
 	 *            a future
 	 * @return value or null
 	 */
-	public static <T> T waitFor(Future<T> t) {
+	public static <T> T waitFor(final Future<T> t) {
 		while (true) {
 			try {
 				return t.get();
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				log.warn("interrrupted while waiting for datastore get", e);
-			} catch (ExecutionException e) {
+			} catch (final ExecutionException e) {
 				return null;
 			}
 		}
@@ -36,7 +36,7 @@ public class FutureUtils {
 		return new Future<T>() {
 
 			@Override
-			public boolean cancel(boolean mayInterruptIfRunning) {
+			public boolean cancel(final boolean mayInterruptIfRunning) {
 				return false;
 			}
 
@@ -56,7 +56,7 @@ public class FutureUtils {
 			}
 
 			@Override
-			public T get(long timeout, TimeUnit unit) {
+			public T get(final long timeout, final TimeUnit unit) {
 				return value;
 			}
 		};
@@ -65,7 +65,7 @@ public class FutureUtils {
 	public static class TransformingFuture<I, O> implements Future<O> {
 
 		@Override
-		public boolean cancel(boolean mayInterruptIfRunning) {
+		public boolean cancel(final boolean mayInterruptIfRunning) {
 			return this.in.cancel(mayInterruptIfRunning);
 		}
 
@@ -81,22 +81,22 @@ public class FutureUtils {
 
 		@Override
 		public O get() throws InterruptedException, ExecutionException {
-			I inValue = this.in.get();
+			final I inValue = this.in.get();
 			return this.transformer.transform(inValue);
 		}
 
 		@Override
-		public O get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
+		public O get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException,
 				TimeoutException {
-			I inValue = this.in.get(timeout, unit);
+			final I inValue = this.in.get(timeout, unit);
 			return this.transformer.transform(inValue);
 		}
 
-		private Future<I> in;
+		private final Future<I> in;
 
-		private ITransformer<I, O> transformer;
+		private final ITransformer<I, O> transformer;
 
-		public TransformingFuture(Future<I> in, ITransformer<I, O> transformer) {
+		public TransformingFuture(final Future<I> in, final ITransformer<I, O> transformer) {
 			super();
 			this.in = in;
 			this.transformer = transformer;

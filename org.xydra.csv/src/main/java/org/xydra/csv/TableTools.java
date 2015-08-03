@@ -12,15 +12,15 @@ import org.xydra.log.api.LoggerFactory;
 
 /**
  * A set of tools for {@link CsvTable}.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class TableTools extends TableCoreTools {
 
 	/**
 	 * Processes a file and writes results to a shared {@link CsvTable}.
-	 * 
+	 *
 	 * @author xamde
 	 */
 	public interface IFileProcessor {
@@ -41,7 +41,7 @@ public class TableTools extends TableCoreTools {
 	/**
 	 * Merges the content of two CSV-files into one resulting CSV-table. This is
 	 * a memory-efficient operation.
-	 * 
+	 *
 	 * @param a
 	 *            source file
 	 * @param b
@@ -51,8 +51,8 @@ public class TableTools extends TableCoreTools {
 	 * @throws IOException
 	 *             from file I/O
 	 */
-	public static void merge(File a, File b, File mergeFile) throws IOException {
-		ICsvTable table = new CsvTable();
+	public static void merge(final File a, final File b, final File mergeFile) throws IOException {
+		final ICsvTable table = new CsvTable();
 		table.readFrom(a);
 		table.readFrom(b);
 		table.writeTo(mergeFile);
@@ -63,7 +63,7 @@ public class TableTools extends TableCoreTools {
 	 * all files matching the 'filenameFilter' are processed using the given
 	 * 'processor'. A {@link CsvTable} is used to persist any results the
 	 * processor can generate.
-	 * 
+	 *
 	 * @param startDirectory
 	 *            the root of the directory traversal
 	 * @param table
@@ -75,14 +75,14 @@ public class TableTools extends TableCoreTools {
 	 * @throws IOException
 	 *             from read/write files
 	 */
-	public static void process(File startDirectory, ICsvTable table, FilenameFilter filenameFilter,
-			IFileProcessor processor) throws IOException {
-		for (File f : startDirectory.listFiles(filenameFilter)) {
+	public static void process(final File startDirectory, final ICsvTable table, final FilenameFilter filenameFilter,
+			final IFileProcessor processor) throws IOException {
+		for (final File f : startDirectory.listFiles(filenameFilter)) {
 			processor.process(table, f);
 		}
-		for (File f : startDirectory.listFiles(new FileFilter() {
+		for (final File f : startDirectory.listFiles(new FileFilter() {
 			@Override
-			public boolean accept(File f) {
+			public boolean accept(final File f) {
 				return f.isDirectory();
 			}
 		})) {
@@ -90,24 +90,24 @@ public class TableTools extends TableCoreTools {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
-		CsvTable test = new CsvTable();
-		Row row1 = test.getOrCreateRow("row-1", true);
+	public static void main(final String[] args) throws IOException {
+		final CsvTable test = new CsvTable();
+		final Row row1 = test.getOrCreateRow("row-1", true);
 		row1.setValue("colA", "A1", true);
 		row1.setValue("colB", "B1", true);
 		row1.setValue("colC", "C1", true);
-		Row row2 = test.getOrCreateRow("row-2", true);
+		final Row row2 = test.getOrCreateRow("row-2", true);
 		row2.setValue("colA", "A2", true);
 		row2.setValue("colB", "B2", true);
 		row2.setValue("colC", "C2", true);
-		Row row3 = test.getOrCreateRow("row-3", true);
+		final Row row3 = test.getOrCreateRow("row-3", true);
 		row3.setValue("colA", "A3", true);
 		row3.setValue("colB", "B3", true);
 		row3.setValue("colC", "C3", true);
 
 		test.dump();
-		CsvTable t = new CsvTable();
-		TableTools.transpose(test, t);
+		final CsvTable t = new CsvTable();
+		TableCoreTools.transpose(test, t);
 		t.dump();
 	}
 

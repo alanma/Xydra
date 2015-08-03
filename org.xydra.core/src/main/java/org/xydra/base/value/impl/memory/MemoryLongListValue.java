@@ -11,136 +11,136 @@ import org.xydra.index.XI;
 
 /**
  * An implementation of {@link XLongListValue}
- * 
+ *
  * @author kaidel
- * 
+ *
  */
 public class MemoryLongListValue extends MemoryListValue<Long> implements XLongListValue,
         Serializable {
-	
+
 	private static final long serialVersionUID = -3294191125211048647L;
-	
+
 	// non-final to be GWT-Serializable
 	private long[] list;
-	
+
 	// empty constructor for GWT-Serializable
 	protected MemoryLongListValue() {
 	}
-	
-	public MemoryLongListValue(Collection<Long> content) {
+
+	public MemoryLongListValue(final Collection<Long> content) {
 		this.list = new long[content.size()];
 		int i = 0;
-		for(long b : content) {
+		for(final long b : content) {
 			this.list[i++] = b;
 		}
 	}
-	
-	private MemoryLongListValue(int length) {
+
+	private MemoryLongListValue(final int length) {
 		this.list = new long[length];
 	}
-	
-	public MemoryLongListValue(long[] content) {
+
+	public MemoryLongListValue(final long[] content) {
 		this.list = new long[content.length];
 		System.arraycopy(content, 0, this.list, 0, content.length);
 	}
-	
+
 	@Override
-	public XLongListValue add(int index, Long entry) {
-		int size = this.list.length;
+	public XLongListValue add(final int index, final Long entry) {
+		final int size = this.list.length;
 		if(index < 0 || index > size) {
 			throw new IndexOutOfBoundsException();
 		}
-		MemoryLongListValue v = new MemoryLongListValue(size + 1);
+		final MemoryLongListValue v = new MemoryLongListValue(size + 1);
 		System.arraycopy(this.list, 0, v.list, 0, index);
 		v.list[index] = entry;
 		System.arraycopy(this.list, index, v.list, index + 1, size - index);
 		return v;
 	}
-	
+
 	@Override
-	public XLongListValue add(Long entry) {
+	public XLongListValue add(final Long entry) {
 		return add(this.list.length, entry);
 	}
-	
+
 	@Override
 	public long[] contents() {
-		long[] array = new long[this.list.length];
+		final long[] array = new long[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
 	}
-	
+
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(final Object other) {
 		return other instanceof XLongListValue
-		        && XI.equalsIterator(this.iterator(), ((XLongListValue)other).iterator());
+		        && XI.equalsIterator(iterator(), ((XLongListValue)other).iterator());
 	}
-	
+
 	@Override
-	public Long get(int index) {
+	public Long get(final int index) {
 		return this.list[index];
 	}
-	
+
 	@Override
 	public ValueType getComponentType() {
 		return ValueType.Long;
 	}
-	
+
 	@Override
 	public ValueType getType() {
 		return ValueType.LongList;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return Arrays.hashCode(this.list);
 	}
-	
+
 	@Override
-	public XLongListValue remove(int index) {
-		int size = this.list.length;
+	public XLongListValue remove(final int index) {
+		final int size = this.list.length;
 		if(index < 0 || index >= size) {
 			throw new IndexOutOfBoundsException();
 		}
-		MemoryLongListValue v = new MemoryLongListValue(size - 1);
+		final MemoryLongListValue v = new MemoryLongListValue(size - 1);
 		System.arraycopy(this.list, 0, v.list, 0, index);
 		System.arraycopy(this.list, index + 1, v.list, index, size - index - 1);
 		return v;
 	}
-	
+
 	@Override
-	public XLongListValue remove(Long entry) {
-		int index = indexOf(entry);
+	public XLongListValue remove(final Long entry) {
+		final int index = indexOf(entry);
 		if(index < 0) {
 			return this;
 		}
 		return remove(index);
 	}
-	
+
 	@Override
 	public int size() {
 		return this.list.length;
 	}
-	
+
 	@Override
 	public Long[] toArray() {
-		Long[] array = new Long[this.list.length];
+		final Long[] array = new Long[this.list.length];
 		fillArray(array);
 		return array;
 	}
-	
+
 	@Override
 	public Number[] toNumberArray() {
-		Number[] array = new Number[this.list.length];
+		final Number[] array = new Number[this.list.length];
 		int i = 0;
-		for(Number e : this) {
+		for(final Number e : this) {
 			array[i++] = e;
 		}
 		return array;
 	}
-	
+
 	@Override
 	public String toString() {
 		return Arrays.toString(this.list);
 	}
-	
+
 }

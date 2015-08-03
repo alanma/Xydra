@@ -5,20 +5,20 @@ import org.xydra.base.value.XValueJavaUtils;
 
 /**
  * Use during development of {@link XValueJavaUtils}
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class XValueJavaUtils_DevTool {
 
-	public static void main(String[] args) {
-		for (ValueType v : ValueType.values()) {
-			String X = v.getXydraInterface().getSimpleName();
-			String J = v.getJavaClass().getSimpleName();
+	public static void main(final String[] args) {
+		for (final ValueType v : ValueType.values()) {
+			final String X = v.getXydraInterface().getSimpleName();
+			final String J = v.getJavaClass().getSimpleName();
 
 			System.out.println();
 			System.out.println("// " + v);
-			String XXX = v.name();
+			final String XXX = v.name();
 
 			if (v.isSingle()) {
 				// from ...
@@ -52,7 +52,7 @@ public class XValueJavaUtils_DevTool {
 				System.out.println("}");
 			} else {
 				// e.g. X = XAddressSetValue
-				String C = v.getComponentType().getJavaClass().getSimpleName();
+				final String C = v.getComponentType().getJavaClass().getSimpleName();
 
 				// from ...
 				System.out.println("public static " + J + "<" + C + "> from" + XXX + "(" + X

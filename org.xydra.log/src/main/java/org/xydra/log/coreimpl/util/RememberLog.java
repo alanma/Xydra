@@ -9,29 +9,29 @@ import org.xydra.log.util.SharedExceptionUtils;
  * Remembers all log input up to a certain memory limit. Keeps always the piece
  * of the earliest and another piece of the latest logs, even if space becomes
  * exhausted.
- * 
+ *
  * @author xamde
  */
 public class RememberLog implements Logger {
 
 	private static final String LINEEND = "\n";
 
-	private LimitedBuffer buf = new LimitedBuffer(100 * 1024, LINEEND);
+	private final LimitedBuffer buf = new LimitedBuffer(100 * 1024, LINEEND);
 
 	private Level minLevel;
 
 	@CanBeNull
-	private Logger delegate;
+	private final Logger delegate;
 
 	/**
 	 * @param minLevel
 	 *            all logs below this level are discarded
 	 */
-	public RememberLog(Level minLevel) {
+	public RememberLog(final Level minLevel) {
 		this(minLevel, null);
 	}
 
-	public RememberLog(Level minLevel, Logger delegate) {
+	public RememberLog(final Level minLevel, final Logger delegate) {
 		this.minLevel = minLevel;
 		this.delegate = delegate;
 	}
@@ -43,7 +43,7 @@ public class RememberLog implements Logger {
 		this(Level.Trace);
 	}
 
-	public RememberLog(Logger delegate) {
+	public RememberLog(final Logger delegate) {
 		this(Level.Trace, delegate);
 	}
 
@@ -57,36 +57,40 @@ public class RememberLog implements Logger {
 	}
 
 	@Override
-	public void debug(String msg) {
-		if (shouldLog(Level.Debug))
+	public void debug(final String msg) {
+		if (shouldLog(Level.Debug)) {
 			log("debug", msg);
+		}
 		if (this.delegate != null) {
 			this.delegate.debug(msg);
 		}
 	}
 
 	@Override
-	public void debug(String msg, Throwable t) {
-		if (shouldLog(Level.Debug))
+	public void debug(final String msg, final Throwable t) {
+		if (shouldLog(Level.Debug)) {
 			log("debug", msg, t);
+		}
 		if (this.delegate != null) {
 			this.delegate.debug(msg, t);
 		}
 	}
 
 	@Override
-	public void error(String msg) {
-		if (shouldLog(Level.Error))
+	public void error(final String msg) {
+		if (shouldLog(Level.Error)) {
 			log("error", msg);
+		}
 		if (this.delegate != null) {
 			this.delegate.error(msg);
 		}
 	}
 
 	@Override
-	public void error(String msg, Throwable t) {
-		if (shouldLog(Level.Error))
+	public void error(final String msg, final Throwable t) {
+		if (shouldLog(Level.Error)) {
 			log("error", msg, t);
+		}
 		if (this.delegate != null) {
 			this.delegate.error(msg, t);
 		}
@@ -97,67 +101,73 @@ public class RememberLog implements Logger {
 	}
 
 	@Override
-	public void info(String msg) {
-		if (shouldLog(Level.Info))
+	public void info(final String msg) {
+		if (shouldLog(Level.Info)) {
 			log("info", msg);
+		}
 		if (this.delegate != null) {
 			this.delegate.info(msg);
 		}
 	}
 
 	@Override
-	public void info(String msg, Throwable t) {
-		if (shouldLog(Level.Info))
+	public void info(final String msg, final Throwable t) {
+		if (shouldLog(Level.Info)) {
 			log("info", msg, t);
+		}
 		if (this.delegate != null) {
 			this.delegate.info(msg, t);
 		}
 	}
 
-	private void log(String logLevel, String msg) {
+	private void log(final String logLevel, final String msg) {
 		this.buf.append("[" + logLevel + "] " + msg + LINEEND);
 	}
 
-	private void log(String logLevel, String msg, Throwable t) {
+	private void log(final String logLevel, final String msg, final Throwable t) {
 		this.buf.append("[" + logLevel + "] " + msg + LINEEND);
 		this.buf.append("Exception: " + SharedExceptionUtils.toString(t) + LINEEND);
 	}
 
-	private boolean shouldLog(@NeverNull Level level) {
+	private boolean shouldLog(@NeverNull final Level level) {
 		return level.isAsImportantOrEvenMoreImportantThan(this.minLevel);
 	}
 
 	@Override
-	public void trace(String msg) {
-		if (shouldLog(Level.Trace))
+	public void trace(final String msg) {
+		if (shouldLog(Level.Trace)) {
 			log("trace", msg);
+		}
 		if (this.delegate != null) {
 			this.delegate.trace(msg);
 		}
 	}
 
 	@Override
-	public void trace(String msg, Throwable t) {
-		if (shouldLog(Level.Trace))
+	public void trace(final String msg, final Throwable t) {
+		if (shouldLog(Level.Trace)) {
 			log("trace", msg, t);
+		}
 		if (this.delegate != null) {
 			this.delegate.trace(msg, t);
 		}
 	}
 
 	@Override
-	public void warn(String msg) {
-		if (shouldLog(Level.Warn))
+	public void warn(final String msg) {
+		if (shouldLog(Level.Warn)) {
 			log("warn", msg);
+		}
 		if (this.delegate != null) {
 			this.delegate.warn(msg);
 		}
 	}
 
 	@Override
-	public void warn(String msg, Throwable t) {
-		if (shouldLog(Level.Warn))
+	public void warn(final String msg, final Throwable t) {
+		if (shouldLog(Level.Warn)) {
 			log("warn", msg, t);
+		}
 		if (this.delegate != null) {
 			this.delegate.warn(msg, t);
 		}
@@ -189,7 +199,7 @@ public class RememberLog implements Logger {
 	}
 
 	@Override
-	public void setLevel(Level level) {
+	public void setLevel(final Level level) {
 		this.minLevel = level;
 	}
 

@@ -32,14 +32,14 @@ import org.xydra.sharedutils.XyAssert;
 
 /**
  * Helper class for executing commands and generating matching events.
- * 
+ *
  * @author dscharrer
  */
 public abstract class DeltaUtils {
 
 	/**
 	 * A description of what happened to the model itself.
-	 * 
+	 *
 	 * Changes to individual objects and fields are described by
 	 * {@link ChangedModel}.
 	 */
@@ -52,7 +52,7 @@ public abstract class DeltaUtils {
 
 	/**
 	 * Apply the given changes to a {@link XRevWritableModel}.
-	 * 
+	 *
 	 * @param modelAddr
 	 *            The address of the model to change. This is used if the model
 	 *            needs to be created first (modelToChange is null).
@@ -67,10 +67,10 @@ public abstract class DeltaUtils {
 	 * @return a model with the changes applied or null if model has been
 	 *         removed by the changes.
 	 */
-	public static XRevWritableModel applyChanges(XAddress modelAddr,
-			XRevWritableModel modelToChange, @NeverNull ChangedModel changedModel, long rev) {
+	public static XRevWritableModel applyChanges(final XAddress modelAddr,
+			final XRevWritableModel modelToChange, @NeverNull final ChangedModel changedModel, final long rev) {
 
-		XRevWritableModel model = modelToChange;
+		final XRevWritableModel model = modelToChange;
 
 		if (changedModel.modelWasRemoved()) {
 			return null;
@@ -90,47 +90,47 @@ public abstract class DeltaUtils {
 		return model;
 	}
 
-	private static void applyChanges(XRevWritableModel model, ChangedModel changedModel, long rev) {
+	private static void applyChanges(final XRevWritableModel model, final ChangedModel changedModel, final long rev) {
 
-		for (XId objectId : changedModel.getRemovedObjects()) {
+		for (final XId objectId : changedModel.getRemovedObjects()) {
 			XyAssert.xyAssert(model.hasObject(objectId));
 			model.removeObject(objectId);
 		}
 
-		for (XReadableObject object : changedModel.getNewObjects()) {
+		for (final XReadableObject object : changedModel.getNewObjects()) {
 			XyAssert.xyAssert(!model.hasObject(object.getId()));
-			XRevWritableObject newObject = model.createObject(object.getId());
-			for (XId fieldId : object) {
+			final XRevWritableObject newObject = model.createObject(object.getId());
+			for (final XId fieldId : object) {
 				applyChanges(newObject, object.getField(fieldId), rev);
 			}
 			newObject.setRevisionNumber(rev);
 		}
 
-		for (ChangedObject changedObject : changedModel.getChangedObjects()) {
+		for (final ChangedObject changedObject : changedModel.getChangedObjects()) {
 
 			boolean objectChanged = false;
 
-			XRevWritableObject object = model.getObject(changedObject.getId());
+			final XRevWritableObject object = model.getObject(changedObject.getId());
 			XyAssert.xyAssert(object != null);
 			assert object != null;
 
-			for (XId fieldId : changedObject.getRemovedFields()) {
+			for (final XId fieldId : changedObject.getRemovedFields()) {
 				XyAssert.xyAssert(object.hasField(fieldId));
 				object.removeField(fieldId);
 				objectChanged = true;
 			}
 
-			for (XReadableField field : changedObject.getNewFields()) {
+			for (final XReadableField field : changedObject.getNewFields()) {
 				applyChanges(object, field, rev);
 				objectChanged = true;
 			}
 
-			for (ChangedField changedField : changedObject.getChangedFields()) {
+			for (final ChangedField changedField : changedObject.getChangedFields()) {
 				if (changedField.isChanged()) {
-					XRevWritableField field = object.getField(changedField.getId());
+					final XRevWritableField field = object.getField(changedField.getId());
 					XyAssert.xyAssert(field != null);
 					assert field != null;
-					boolean valueChanged = field.setValue(changedField.getValue());
+					final boolean valueChanged = field.setValue(changedField.getValue());
 					XyAssert.xyAssert(valueChanged);
 					field.setRevisionNumber(rev);
 					objectChanged = true;
@@ -147,16 +147,16 @@ public abstract class DeltaUtils {
 
 	}
 
-	private static void applyChanges(XRevWritableObject object, XReadableField field, long rev) {
+	private static void applyChanges(final XRevWritableObject object, final XReadableField field, final long rev) {
 		XyAssert.xyAssert(!object.hasField(field.getId()));
-		XRevWritableField newField = object.createField(field.getId());
+		final XRevWritableField newField = object.createField(field.getId());
 		newField.setValue(field.getValue());
 		newField.setRevisionNumber(rev);
 	}
 
 	/**
 	 * Calculated the events describing the given change.
-	 * 
+	 *
 	 * @param modelAddr
 	 *            The model the change applies to.
 	 * @param changedModel
@@ -172,15 +172,15 @@ public abstract class DeltaUtils {
 	 * @return the appropriate events for the change (as returned by
 	 *         {@link #executeCommand(XExistsReadableModel, XCommand)}
 	 */
-	public static List<XAtomicEvent> createEvents(XAddress modelAddr, ChangedModel changedModel,
-			XId actorId, long rev, boolean forceTxnEvent) {
+	public static List<XAtomicEvent> createEvents(final XAddress modelAddr, final ChangedModel changedModel,
+			final XId actorId, final long rev, final boolean forceTxnEvent) {
 		XyAssert.xyAssert(changedModel != null);
 		assert changedModel != null;
 
 		/* we count only 0, 1 or 2 = many */
-		int nChanges = changedModel.countCommandsNeeded(2);
+		final int nChanges = changedModel.countCommandsNeeded(2);
 
-		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
+		final List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
 
 		if (nChanges == 0) {
 			return events;
@@ -193,7 +193,7 @@ public abstract class DeltaUtils {
 		 * command might create a transaction, i.e. when there are more than 1
 		 * resulting event
 		 */
-		boolean inTxn = (nChanges > 1) || forceTxnEvent;
+		final boolean inTxn = nChanges > 1 || forceTxnEvent;
 
 		XyAssert.xyAssert(changedModel.getAddress().equals(modelAddr));
 
@@ -209,14 +209,14 @@ public abstract class DeltaUtils {
 		return events;
 	}
 
-	public static void createEventsForChangedField(List<XAtomicEvent> events, long currentModelRev,
-			XId actorId, long currentObjectRev, ChangedField field, boolean inTransaction) {
+	public static void createEventsForChangedField(final List<XAtomicEvent> events, final long currentModelRev,
+			final XId actorId, final long currentObjectRev, final ChangedField field, final boolean inTransaction) {
 		if (field.isChanged()) {
 			// IMPROVE we only need to know if the old value exists
-			XValue oldValue = field.getOldValue();
-			XValue newValue = field.getValue();
-			XAddress target = field.getAddress();
-			long currentFieldRev = field.getRevisionNumber();
+			final XValue oldValue = field.getOldValue();
+			final XValue newValue = field.getValue();
+			final XAddress target = field.getAddress();
+			final long currentFieldRev = field.getRevisionNumber();
 			if (newValue == null) {
 				XyAssert.xyAssert(oldValue != null);
 				assert oldValue != null;
@@ -239,45 +239,45 @@ public abstract class DeltaUtils {
 	 * @param forceTransaction
 	 *            should always be true if there are more than 1 events
 	 */
-	public static void createEventsForChangedModel(List<XAtomicEvent> events, XId actorId,
-			ChangedModel changedModel, boolean forceTransaction) {
+	public static void createEventsForChangedModel(final List<XAtomicEvent> events, final XId actorId,
+			final ChangedModel changedModel, final boolean forceTransaction) {
 
-		boolean implied = changedModel.modelWasRemoved();
-		long rev = changedModel.getRevisionNumber();
-		int nChanges = changedModel.countEventsNeeded(2);
-		boolean inTransaction = forceTransaction || nChanges > 1;
+		final boolean implied = changedModel.modelWasRemoved();
+		final long rev = changedModel.getRevisionNumber();
+		final int nChanges = changedModel.countEventsNeeded(2);
+		final boolean inTransaction = forceTransaction || nChanges > 1;
 
 		/* Repository ADD commands handled first */
 		if (changedModel.modelWasCreated()) {
-			XAddress target = changedModel.getAddress().getParent();
-			XRepositoryEvent repositoryEvent = MemoryRepositoryEvent.createAddEvent(actorId,
+			final XAddress target = changedModel.getAddress().getParent();
+			final XRepositoryEvent repositoryEvent = MemoryRepositoryEvent.createAddEvent(actorId,
 					target, changedModel.getId(), rev, inTransaction);
 			events.add(repositoryEvent);
 		}
 
-		for (XId objectId : changedModel.getRemovedObjects()) {
-			XReadableObject removedObject = changedModel.getOldObject(objectId);
+		for (final XId objectId : changedModel.getRemovedObjects()) {
+			final XReadableObject removedObject = changedModel.getOldObject(objectId);
 			DeltaUtils.createEventsForRemovedObject(events, rev, actorId, removedObject,
 					inTransaction, implied);
 		}
 
-		for (XReadableObject object : changedModel.getNewObjects()) {
+		for (final XReadableObject object : changedModel.getNewObjects()) {
 			events.add(MemoryModelEvent.createAddEvent(actorId, changedModel.getAddress(),
 					object.getId(), rev, inTransaction));
-			for (XId fieldId : object) {
+			for (final XId fieldId : object) {
 				DeltaUtils.createEventsForNewField(events, rev, actorId, object,
 						object.getField(fieldId), inTransaction);
 			}
 		}
 
-		for (ChangedObject object : changedModel.getChangedObjects()) {
+		for (final ChangedObject object : changedModel.getChangedObjects()) {
 			createEventsForChangedObject(events, actorId, object, forceTransaction, rev);
 		}
 
 		/* Repository REMOVE commands handled last */
 		if (changedModel.modelWasRemoved()) {
-			XAddress target = changedModel.getAddress().getParent();
-			XRepositoryEvent repositoryEvent = MemoryRepositoryEvent.createRemoveEvent(actorId,
+			final XAddress target = changedModel.getAddress().getParent();
+			final XRepositoryEvent repositoryEvent = MemoryRepositoryEvent.createRemoveEvent(actorId,
 					target, changedModel.getId(), rev, inTransaction);
 			events.add(repositoryEvent);
 		}
@@ -292,30 +292,30 @@ public abstract class DeltaUtils {
 	 * @param currentModelRev
 	 *            the new resulting model revision
 	 */
-	public static void createEventsForChangedObject(List<XAtomicEvent> events, XId actorId,
-			ChangedObject object, boolean forceTransaction, long currentModelRev) {
-		boolean inTransaction = forceTransaction || object.countCommandsNeeded(2) > 1;
+	public static void createEventsForChangedObject(final List<XAtomicEvent> events, final XId actorId,
+			final ChangedObject object, final boolean forceTransaction, final long currentModelRev) {
+		final boolean inTransaction = forceTransaction || object.countCommandsNeeded(2) > 1;
 
-		for (XId fieldId : object.getRemovedFields()) {
+		for (final XId fieldId : object.getRemovedFields()) {
 			DeltaUtils.createEventsForRemovedField(events, currentModelRev, actorId, object,
 					object.getOldField(fieldId), inTransaction, false);
 		}
 
-		for (XReadableField field : object.getNewFields()) {
+		for (final XReadableField field : object.getNewFields()) {
 			DeltaUtils.createEventsForNewField(events, currentModelRev, actorId, object, field,
 					inTransaction);
 		}
 
-		for (ChangedField field : object.getChangedFields()) {
-			long objectRev = object.getRevisionNumber();
+		for (final ChangedField field : object.getChangedFields()) {
+			final long objectRev = object.getRevisionNumber();
 			DeltaUtils.createEventsForChangedField(events, currentModelRev, actorId, objectRev,
 					field, inTransaction);
 		}
 	}
 
-	private static void createEventsForNewField(List<XAtomicEvent> events, long rev, XId actorId,
-			XReadableObject object, XReadableField field, boolean inTransaction) {
-		long objectRev = object.getRevisionNumber();
+	private static void createEventsForNewField(final List<XAtomicEvent> events, final long rev, final XId actorId,
+			final XReadableObject object, final XReadableField field, final boolean inTransaction) {
+		final long objectRev = object.getRevisionNumber();
 		events.add(MemoryObjectEvent.createAddEvent(actorId, object.getAddress(), field.getId(),
 				rev, objectRev, inTransaction));
 		if (!field.isEmpty()) {
@@ -324,11 +324,11 @@ public abstract class DeltaUtils {
 		}
 	}
 
-	private static void createEventsForRemovedField(List<XAtomicEvent> events, long modelRev,
-			XId actorId, XReadableObject object, XReadableField field, boolean inTransaction,
-			boolean implied) {
-		long objectRev = object.getRevisionNumber();
-		long fieldRev = field.getRevisionNumber();
+	private static void createEventsForRemovedField(final List<XAtomicEvent> events, final long modelRev,
+			final XId actorId, final XReadableObject object, final XReadableField field, final boolean inTransaction,
+			final boolean implied) {
+		final long objectRev = object.getRevisionNumber();
+		final long fieldRev = field.getRevisionNumber();
 		if (!field.isEmpty()) {
 			events.add(MemoryFieldEvent.createRemoveEvent(actorId, field.getAddress(), modelRev,
 					objectRev, fieldRev, inTransaction, true));
@@ -337,9 +337,9 @@ public abstract class DeltaUtils {
 				modelRev, objectRev, fieldRev, inTransaction, implied));
 	}
 
-	private static void createEventsForRemovedObject(List<XAtomicEvent> events, long modelRev,
-			XId actorId, XReadableObject object, boolean inTransaction, boolean implied) {
-		for (XId fieldId : object) {
+	private static void createEventsForRemovedObject(final List<XAtomicEvent> events, final long modelRev,
+			final XId actorId, final XReadableObject object, final boolean inTransaction, final boolean implied) {
+		for (final XId fieldId : object) {
 			DeltaUtils.createEventsForRemovedField(events, modelRev, actorId, object,
 					object.getField(fieldId), inTransaction, true);
 		}
@@ -353,12 +353,12 @@ public abstract class DeltaUtils {
 	 * @CanBeNull
 	 * @return the given model, if not null, or create a new one
 	 */
-	private static XReadableModel createNonExistingModel(XAddress modelAddress, XReadableModel model) {
+	private static XReadableModel createNonExistingModel(final XAddress modelAddress, final XReadableModel model) {
 		if (model != null) {
 			return model;
 		}
 
-		SimpleModel nonExistingModel = new SimpleModel(modelAddress);
+		final SimpleModel nonExistingModel = new SimpleModel(modelAddress);
 		nonExistingModel.setExists(false);
 		nonExistingModel.setRevisionNumber(RevisionConstants.NOT_EXISTING);
 		return nonExistingModel;
@@ -367,7 +367,7 @@ public abstract class DeltaUtils {
 	/**
 	 * Calculate the changes resulting from executing the given command on the
 	 * given model.
-	 * 
+	 *
 	 * @param model
 	 *            The model to modify. Null if the model currently doesn't
 	 *            exist. This instance is modified. @CanBeNull
@@ -375,12 +375,12 @@ public abstract class DeltaUtils {
 	 * @return The changed model after executing the command. Returns null if
 	 *         the command failed.
 	 */
-	public static ChangedModel executeCommand(XExistsReadableModel model, XCommand command) {
+	public static ChangedModel executeCommand(final XExistsReadableModel model, final XCommand command) {
 
-		boolean modelExists = model != null && model.exists();
+		final boolean modelExists = model != null && model.exists();
 
 		if (command instanceof XRepositoryCommand) {
-			XRepositoryCommand rc = (XRepositoryCommand) command;
+			final XRepositoryCommand rc = (XRepositoryCommand) command;
 
 			switch (rc.getChangeType()) {
 			case ADD:
@@ -395,7 +395,7 @@ public abstract class DeltaUtils {
 				} else {
 					if (rc.getIntent() == Intent.SafeRevBound) {
 						if (model != null) {
-							long currentModelRev = model.getRevisionNumber();
+							final long currentModelRev = model.getRevisionNumber();
 							if (((XRepositoryCommand) command).getRevisionNumber() != currentModelRev) {
 								log.warn("Safe RepositoryCommand ADD failed; modelRev="
 										+ currentModelRev + " command=" + command);
@@ -405,8 +405,8 @@ public abstract class DeltaUtils {
 							log.warn("SafeRevBound model-ADD, but we cannot check rev, model is null");
 						}
 					}
-					XAddress modelAddress = rc.getChangedEntity();
-					ChangedModel changedModel = new ChangedModel(createNonExistingModel(
+					final XAddress modelAddress = rc.getChangedEntity();
+					final ChangedModel changedModel = new ChangedModel(createNonExistingModel(
 							modelAddress, model));
 					changedModel.setExists(true);
 					return changedModel;
@@ -433,10 +433,11 @@ public abstract class DeltaUtils {
 						}
 					}
 					// do change
-					if (log.isDebugEnabled())
+					if (log.isDebugEnabled()) {
 						log.debug("Removing model " + model.getAddress() + " "
 								+ model.getRevisionNumber());
-					ChangedModel changedModel = new ChangedModel(model);
+					}
+					final ChangedModel changedModel = new ChangedModel(model);
 					changedModel.setExists(false);
 					return changedModel;
 				}
@@ -451,7 +452,7 @@ public abstract class DeltaUtils {
 				return null;
 			}
 
-			ChangedModel changedModel = new ChangedModel(model);
+			final ChangedModel changedModel = new ChangedModel(model);
 
 			// apply changes to the delta-model
 			if (!changedModel.executeCommand(command)) {

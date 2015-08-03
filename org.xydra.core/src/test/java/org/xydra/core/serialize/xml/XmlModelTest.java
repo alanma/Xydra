@@ -6,12 +6,12 @@ import org.xydra.core.serialize.XydraSerializer;
 
 
 public class XmlModelTest extends AbstractSerializedModelTest {
-	
+
 	@Override
 	protected XydraParser getParser() {
 		return new XmlParser();
 	}
-	
+
 	@Override
 	protected XydraSerializer getSerializer() {
 		return new XmlSerializer();

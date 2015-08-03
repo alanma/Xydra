@@ -2,9 +2,9 @@ package org.xydra.gae.admin;
 
 /**
  * Manages configuration values specific to GAE aspects.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class GaeConfigSettings {
 

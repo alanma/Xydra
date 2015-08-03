@@ -10,22 +10,25 @@ import org.xydra.base.value.XV;
 
 public class XAddressSetEditor extends XCollectionEditor<XAddress, XAddressSetValue> {
 
-	public XAddressSetEditor(Iterator<XAddress> value, EditListener listener) {
+	public XAddressSetEditor(final Iterator<XAddress> value, final EditListener listener) {
 		super(listener);
 
-		if (value == null)
+		if (value == null) {
 			return;
+		}
 
-		while (value.hasNext())
+		while (value.hasNext()) {
 			add(new XAddressEditor(value.next(), this));
+		}
 
 	}
 
 	@Override
-	protected XAddressSetValue asCollectionValue(Iterator<XAddress> entries) {
-		List<XAddress> lst = new ArrayList<XAddress>();
-		while (entries.hasNext())
+	protected XAddressSetValue asCollectionValue(final Iterator<XAddress> entries) {
+		final List<XAddress> lst = new ArrayList<XAddress>();
+		while (entries.hasNext()) {
 			lst.add(entries.next());
+		}
 		return XV.toAddressSetValue(lst);
 	}
 

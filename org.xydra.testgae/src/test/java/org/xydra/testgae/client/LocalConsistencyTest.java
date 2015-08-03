@@ -12,9 +12,9 @@ public class LocalConsistencyTest {
 
 	public static final int THREADS = 30;
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		for (int i = 0; i < THREADS; i++) {
-			ConsistencyTestClient client = new ConsistencyTestClient(SERVER_ROOT, "thread" + i
+			final ConsistencyTestClient client = new ConsistencyTestClient(SERVER_ROOT, "thread" + i
 					+ "-", 10);
 			client.start();
 		}

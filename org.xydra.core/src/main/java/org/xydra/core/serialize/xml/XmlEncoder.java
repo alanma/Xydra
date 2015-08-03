@@ -18,7 +18,7 @@ import org.xydra.annotations.RunsInGWT;
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
 public class XmlEncoder {
-    
+
     /**
      * Standard XML header with UTF-8 encoding.
      */
@@ -28,8 +28,8 @@ public class XmlEncoder {
     private static final String ENC_GT = "&gt;";
     private static final String ENC_APOS = "&apos;";
     private static final String ENC_QUOT = "&quot;";
-    
-    public static String decode(String in) {
+
+    public static String decode(final String in) {
         String result = in;
         result = result.replace(ENC_AMP, "&");
         result = result.replace(ENC_LT, "<");
@@ -37,16 +37,16 @@ public class XmlEncoder {
         result = result.replace(ENC_APOS, "'");
         result = result.replace(ENC_QUOT, "\"");
         return result;
-        
+
     }
-    
-    public static String encode(String in) {
+
+    public static String encode(final String in) {
         if(in == null) {
             return null;
         }
-        
-        StringBuilder b = new StringBuilder((int)(in.length() * 1.2));
-        StringReader r = new StringReader(in);
+
+        final StringBuilder b = new StringBuilder((int)(in.length() * 1.2));
+        final StringReader r = new StringReader(in);
         int c;
         try {
             c = r.read();
@@ -72,11 +72,11 @@ public class XmlEncoder {
                 }
                 c = r.read();
             }
-        } catch(IOException e) {
+        } catch(final IOException e) {
             throw new RuntimeException(e);
         }
         return b.toString();
-        
+
         // String result = in;
         // result = result.replace("&", "&amp;");
         // result = result.replace("<", "&lt;");
@@ -85,7 +85,7 @@ public class XmlEncoder {
         // result = result.replace("\"", "&quot;");
         // return result;
     }
-    
+
     public static final String XMAP_ELEMENT = "xmap";
     public static final String XARRAY_ELEMENT = "xarray";
     public static final String XNULL_ELEMENT = "xnull";
@@ -94,5 +94,5 @@ public class XmlEncoder {
     public static final String NULL_VALUE = "true";
     public static final String NULL_CONTENT_ATTRIBUTE = "nullContent";
     public static final String NULL_CONTENT_VALUE = "true";
-    
+
 }

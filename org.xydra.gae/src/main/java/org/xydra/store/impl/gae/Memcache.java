@@ -25,9 +25,10 @@ public class Memcache {
 
 	private static boolean useMemache_ = true;
 
-	public static Object get(SKey key) {
-		if (!useMemache_)
+	public static Object get(final SKey key) {
+		if (!useMemache_) {
 			return null;
+		}
 
 		return XGae.get().memcache().get(KeyStructure.toString(key));
 	}
@@ -39,7 +40,7 @@ public class Memcache {
 	 *         . Values might contain {@link #NULL_ENTITY}. Never returns null.
 	 */
 	@XGaeOperation(memcacheRead = true)
-	public static Map<String, Object> getEntities(Collection<String> keys) {
+	public static Map<String, Object> getEntities(final Collection<String> keys) {
 		assert keys != null;
 		Map<String, Object> memcachedEntities = null;
 		if (useMemache_) {
@@ -51,25 +52,28 @@ public class Memcache {
 		return memcachedEntities;
 	}
 
-	public static void put(SKey key, Object value) {
-		if (!useMemache_)
+	public static void put(final SKey key, final Object value) {
+		if (!useMemache_) {
 			return;
+		}
 		XGae.get().memcache().put(KeyStructure.toString(key), value);
 	}
 
 	public static void clear() {
-		if (!useMemache_)
+		if (!useMemache_) {
 			return;
+		}
 		XGae.get().memcache().clear();
 	}
 
-	public static void setUseMemCache(boolean useMemcache) {
+	public static void setUseMemCache(final boolean useMemcache) {
 		useMemache_ = useMemcache;
 	}
 
-	public static void putChecked(SKey key, Object value) throws IOException {
-		if (!useMemache_)
+	public static void putChecked(final SKey key, final Object value) throws IOException {
+		if (!useMemache_) {
 			return;
+		}
 		XGae.get().memcache().putChecked(KeyStructure.toString(key), value);
 	}
 

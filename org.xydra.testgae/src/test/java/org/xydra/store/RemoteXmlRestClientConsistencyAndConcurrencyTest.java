@@ -43,7 +43,7 @@ public class RemoteXmlRestClientConsistencyAndConcurrencyTest extends
 		return this.store;
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		// server
 		if (serverConfig == ServerConfig.TEST_GAE_LOCAL) {
 			log.info("make sure you RunXmasJetty in project testgae");
@@ -52,13 +52,13 @@ public class RemoteXmlRestClientConsistencyAndConcurrencyTest extends
 		}
 
 		// client
-		RemoteXmlRestClientConsistencyAndConcurrencyTest t = new RemoteXmlRestClientConsistencyAndConcurrencyTest();
-		XydraStore store = t.createStore();
-		XydraPersistence persistence = new PersistenceOnStore(t.getCorrectUser(),
+		final RemoteXmlRestClientConsistencyAndConcurrencyTest t = new RemoteXmlRestClientConsistencyAndConcurrencyTest();
+		final XydraStore store = t.createStore();
+		final XydraPersistence persistence = new PersistenceOnStore(t.getCorrectUser(),
 				t.getCorrectUserPasswordHash(), store);
 
 		for (int i = 0; i < 5; i++) {
-			PersistenceRobot robot = new PersistenceRobot(persistence, t.getCorrectUser(), "" + i);
+			final PersistenceRobot robot = new PersistenceRobot(persistence, t.getCorrectUser(), "" + i);
 			robot.start();
 		}
 		log.debug("Robots started");

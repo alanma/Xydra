@@ -17,7 +17,7 @@ import org.xydra.xgae.XGae;
 
 /**
  * GAE implementation of {@link XydraPlatformRuntime}.
- * 
+ *
  * Maps memcache to Google AppEngine memcache service; {@link XydraPersistence}
  * to Google AppEngine data store service.
  */
@@ -30,6 +30,7 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 
 		/* Set default values for GaeConf */
 		@Setting(value = "")
+		final
 		GaeConfiguration defaultConf = GaeConfigurationManager.getDefaultConfiguration();
 		defaultConf.map().put(GaeConfigSettings.PROP_ASSERT, "true");
 		defaultConf.map().put(GaeConfigSettings.PROP_USEMEMCACHE, "true");
@@ -50,7 +51,7 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 				// configMap.get(GaeConfigSettings.PROP_ASSERT) != null;
 				// FIXME GAE... XyAssert.setEnabled(gaeAssert);
 				// memcache
-				boolean usememcache = XydraRuntime.getConfigMap().get(
+				final boolean usememcache = XydraRuntime.getConfigMap().get(
 						GaeConfigSettings.PROP_USEMEMCACHE) != null;
 				Memcache.setUseMemCache(usememcache);
 			}
@@ -60,13 +61,13 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 		GaeConfigurationManager.addListener(new GaeConfigurationManager.Listener() {
 
 			@Override
-			public void onChange(GaeConfiguration conf) {
+			public void onChange(final GaeConfiguration conf) {
 				/* Apply the diff */
 				boolean requiresRuntimeInit = false;
-				Map<String, String> changes = XydraConfigUtils.getChanges(
+				final Map<String, String> changes = XydraConfigUtils.getChanges(
 						XydraRuntime.getConfigMap(), conf.map());
-				for (String key : changes.keySet()) {
-					String value = XydraConfigUtils.normalizeValue(changes.get(key));
+				for (final String key : changes.keySet()) {
+					final String value = XydraConfigUtils.normalizeValue(changes.get(key));
 					if (value.equals(XydraConfigUtils.EMPTY_VALUE)) {
 						// remove
 						log.info("Instance conf: remove key '" + key + "'");
@@ -91,17 +92,17 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 				}
 			}
 
-			private void handleClearLocalVmCache(String key, String value) {
+			private void handleClearLocalVmCache(final String key, final String value) {
 				if (!key.equals(GaeConfigSettings.CLEAR_LOCAL_VM_CACHE)) {
 					return;
 				}
 				assert value != null;
 				assert !value.equals(XydraConfigUtils.EMPTY_VALUE);
 
-				String lastExecutedStr = XydraRuntime.getConfigMap().get(
+				final String lastExecutedStr = XydraRuntime.getConfigMap().get(
 						GaeConfigSettings.CLEAR_LOCAL_VM_CACHE_LAST_EXECUTED);
-				long lastExecuted = lastExecutedStr == null ? 0 : Long.parseLong(lastExecutedStr);
-				long clearRequested = Long.parseLong(value);
+				final long lastExecuted = lastExecutedStr == null ? 0 : Long.parseLong(lastExecutedStr);
+				final long clearRequested = Long.parseLong(value);
 				if (lastExecuted < clearRequested) {
 					log.info("clearLocalVmCache requested with Nr. " + clearRequested
 							+ " lastExecuted: " + lastExecuted);
@@ -118,7 +119,7 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 	}
 
 	@Override
-	public XydraPersistence createPersistence(XId repositoryId) {
+	public XydraPersistence createPersistence(final XId repositoryId) {
 		log.info("INIT XydraPersistence instance with id '" + repositoryId + "'.");
 		return new GaePersistence(repositoryId);
 	}

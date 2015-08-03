@@ -12,7 +12,7 @@ import org.xydra.restless.utils.HostUtils;
  * A tweaked request that returns the server name with support for
  * Restless.X_HOST_Override. For security reasons, this is only effective on
  * localhost, where it simplifies testing..
- * 
+ *
  * @author xamde
  */
 
@@ -25,11 +25,11 @@ class TweakedRequest extends HttpServletRequestWrapper {
 	private String pathInfo = null;
 
 	/**
-	 * 
+	 *
 	 * @param baseReq
 	 * @NeverNull
 	 */
-	public TweakedRequest(@NeverNull HttpServletRequest baseReq) {
+	public TweakedRequest(@NeverNull final HttpServletRequest baseReq) {
 		super(baseReq);
 	}
 
@@ -51,23 +51,23 @@ class TweakedRequest extends HttpServletRequestWrapper {
 
 	private void initialise() {
 		this.initalised = true;
-		String serverName = super.getServerName();
+		final String serverName = super.getServerName();
 		assert isLocalhost(serverName);
 
 		// look for override param
 		this.hostOverride = super.getParameter(Restless.X_HOST_Override);
 
 		// process path
-		String superPathInfo = super.getPathInfo();
+		final String superPathInfo = super.getPathInfo();
 		if (superPathInfo != null) {
-			StringBuffer adaptedPathInfo = new StringBuffer();
+			final StringBuffer adaptedPathInfo = new StringBuffer();
 			if (superPathInfo.startsWith("/")) {
 				adaptedPathInfo.append("/");
 			}
-			String[] parts = superPathInfo.split("/");
+			final String[] parts = superPathInfo.split("/");
 			boolean hadSignificantPart = false;
 			for (int i = 0; i < parts.length; i++) {
-				String part = parts[i];
+				final String part = parts[i];
 				if (part.startsWith(Restless.X_HOST_Override + "=")) {
 					this.hostOverride = part.substring(Restless.X_HOST_Override.length() + 1);
 					// do not append anything
@@ -96,7 +96,7 @@ class TweakedRequest extends HttpServletRequestWrapper {
 	 * @return true if the servername denotes localhost by means of 'localhost',
 	 *         '127.0.0.1' or COMPUTERNAME
 	 */
-	static boolean isLocalhost(@CanBeNull String serverName) {
+	static boolean isLocalhost(@CanBeNull final String serverName) {
 		if (serverName == null) {
 			return false;
 		} else {

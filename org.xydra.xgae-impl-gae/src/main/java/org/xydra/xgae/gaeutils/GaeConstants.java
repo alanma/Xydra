@@ -4,7 +4,7 @@ import com.google.appengine.api.taskqueue.QueueConstants;
 
 /**
  * Limits defined by GAE infrastructure.
- * 
+ *
  * @author xamde
  */
 public interface GaeConstants {

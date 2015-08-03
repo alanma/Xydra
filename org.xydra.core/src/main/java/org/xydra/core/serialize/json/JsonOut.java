@@ -13,32 +13,32 @@ import org.xydra.core.serialize.AbstractXydraOut;
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
 public class JsonOut extends AbstractXydraOut {
-    
+
     public static final String CONTENT_TYPE_JSON = "application/json";
-    
+
     private final String callback;
-    
+
     public JsonOut() {
         this((String)null);
     }
-    
-    public JsonOut(MiniWriter writer) {
+
+    public JsonOut(final MiniWriter writer) {
         this(writer, null);
     }
-    
-    public JsonOut(MiniWriter writer, String callback) {
+
+    public JsonOut(final MiniWriter writer, final String callback) {
         super(writer);
         this.callback = callback;
         init();
     }
-    
-    public JsonOut(String callback) {
+
+    public JsonOut(final String callback) {
         super();
         this.callback = callback;
         init();
     }
-    
-    private void begin(Frame frame, boolean newline) {
+
+    private void begin(final Frame frame, final boolean newline) {
         if(frame.hasContent || frame.hasSpecialContent) {
             // This is not the first child element
             write(',');
@@ -57,14 +57,14 @@ public class JsonOut extends AbstractXydraOut {
             }
         }
     }
-    
-    private void beginContainer(Frame container, char c, boolean newline) {
+
+    private void beginContainer(final Frame container, final char c, final boolean newline) {
         begin(container.parent, newline || !container.parent.hasContent);
         write(c);
         container.depth = container.parent.depth + 1;
     }
-    
-    private void endContainer(Frame container, char c) {
+
+    private void endContainer(final Frame container, final char c) {
         if(container.hasContent) {
             whitespace('\n');
             indent(container.depth);
@@ -73,19 +73,19 @@ public class JsonOut extends AbstractXydraOut {
         }
         write(c);
     }
-    
+
     @Override
     public String getContentType() {
         return CONTENT_TYPE_JSON;
     }
-    
+
     private void init() {
         if(this.callback != null) {
             write(this.callback);
             write('(');
         }
     }
-    
+
     @Override
     protected void outpuEnd() {
         if(this.callback != null) {
@@ -93,8 +93,8 @@ public class JsonOut extends AbstractXydraOut {
         }
         whitespace('\n');
     }
-    
-    private <T> void output(T value) {
+
+    private <T> void output(final T value) {
         if(value instanceof Boolean || value instanceof Number || value instanceof XBooleanValue
                 || value instanceof XNumberValue) {
             write(value.toString());
@@ -104,66 +104,66 @@ public class JsonOut extends AbstractXydraOut {
             write('"');
         }
     }
-    
+
     @Override
-    protected <T> void outputAttribute(Frame element, String name, T value) {
+    protected <T> void outputAttribute(final Frame element, final String name, final T value) {
         outputName(element, name);
         output(value);
     }
-    
+
     @Override
-    protected void outputBeginArray(Frame array) {
+    protected void outputBeginArray(final Frame array) {
         beginContainer(array, '[', false);
     }
-    
+
     @Override
-    protected void outputBeginMap(Frame map) {
+    protected void outputBeginMap(final Frame map) {
         beginContainer(map, '{', false);
     }
-    
+
     @Override
-    protected void outputChild(Frame child) {
+    protected void outputChild(final Frame child) {
         outputName(child.parent, child.name);
         child.depth = child.parent.depth;
     }
-    
+
     @Override
-    protected void outputCloseElement(Frame element) {
+    protected void outputCloseElement(final Frame element) {
         endContainer(element, '}');
     }
-    
+
     @Override
-    protected void outputEndArray(Frame array) {
+    protected void outputEndArray(final Frame array) {
         endContainer(array, ']');
     }
-    
+
     @Override
-    protected void outputEndMap(Frame map) {
+    protected void outputEndMap(final Frame map) {
         endContainer(map, '}');
     }
-    
+
     @Override
-    protected void outputEntry(Frame entry) {
+    protected void outputEntry(final Frame entry) {
         outputChild(entry);
     }
-    
-    private void outputName(Frame frame, String name) {
+
+    private void outputName(final Frame frame, final String name) {
         begin(frame, true);
         write('"');
         write(name);
         write("\":");
         whitespace(' ');
     }
-    
+
     @Override
-    protected void outputNullElement(Frame container) {
+    protected void outputNullElement(final Frame container) {
         begin(container, true);
         write("null");
     }
-    
+
     @Override
-    protected void outputOpenElement(Frame element) {
-        boolean saveType = !element.name.equals(element.parent.getChildType());
+    protected void outputOpenElement(final Frame element) {
+        final boolean saveType = !element.name.equals(element.parent.getChildType());
         beginContainer(element, '{', saveType && element.parent.type != Type.Child);
         if(saveType) {
             whitespace(' ');
@@ -177,9 +177,9 @@ public class JsonOut extends AbstractXydraOut {
             element.hasSpecialContent = true;
         }
     }
-    
+
     @Override
-    protected <T> void outputValue(Frame container, T value) {
+    protected <T> void outputValue(final Frame container, final T value) {
         begin(container, false);
         if(value == null) {
             write("null");
@@ -187,5 +187,5 @@ public class JsonOut extends AbstractXydraOut {
             output(value);
         }
     }
-    
+
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -36,12 +37,12 @@ import org.xydra.xgae.util.AsyncEntity;
 /**
  * Code to handle saving and loading of XEvents and XValues stored on the GAE
  * datastore.
- * 
+ *
  * Events are stored as properties in the XCHANGE GAE entities normally managed
  * by {@link GaeChange}. Only for {@link XFieldEvent XFieldEvents},
  * {@link XValue XValues} whose XML-encoding is longer than
  * {@link #MAX_VALUE_SIZE} are stored in their own GAE entity.
- * 
+ *
  * The values stored for the events may also be referenced by the internal field
  * state by the revision number that set the value and a special index
  * indicating where the value is stored (as there could have been multiple
@@ -52,9 +53,9 @@ import org.xydra.xgae.util.AsyncEntity;
  * that entity. All other values can be passed to
  * {@link #getInternalValueId(int)} to get an index into the values (
  * {@link #PROP_EVENT_VALUES}) stored in the XCHANGE entity.
- * 
+ *
  * Encoding on AppEngine:
- * 
+ *
  * <pre>
  * Int - types
  * Str - targets
@@ -62,12 +63,12 @@ import org.xydra.xgae.util.AsyncEntity;
  * Long - object revision
  * Long - field revision
  * Bool - implied or not
- * 
+ *
  * revNr + index in List
  * </pre>
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 public class GaeEvents {
 
@@ -81,11 +82,11 @@ public class GaeEvents {
 
 		public final int id;
 
-		private EventType(int id) {
+		private EventType(final int id) {
 			this.id = id;
 		}
 
-		static EventType get(int id) {
+		static EventType get(final int id) {
 			switch (id) {
 			case 1:
 				return AddModel;
@@ -162,7 +163,7 @@ public class GaeEvents {
 			}
 		}
 
-		public static EventType get(XType entity, ChangeType change) {
+		public static EventType get(final XType entity, final ChangeType change) {
 			assert change != ChangeType.TRANSACTION;
 			switch (entity) {
 			case XREPOSITORY:
@@ -241,14 +242,14 @@ public class GaeEvents {
 
 		/**
 		 * Load a value asynchronously.
-		 * 
+		 *
 		 * @param future
 		 *            The entity containing the value.
 		 * @param transIndex
 		 *            The index of the value in the entity. See
 		 *            {@link GaeEvents#getValue(XAddress, long, int)}
 		 */
-		private AsyncValue(AsyncEntity future, int transIndex) {
+		private AsyncValue(final AsyncEntity future, final int transIndex) {
 			this.future = future;
 			this.transIndex = transIndex;
 			assert transIndex != TRANSINDEX_NONE;
@@ -257,7 +258,7 @@ public class GaeEvents {
 		/**
 		 * Construct with an already-loaded value.
 		 */
-		protected AsyncValue(XValue value) {
+		protected AsyncValue(final XValue value) {
 			this.value = value;
 			this.future = null;
 			this.transIndex = TRANSINDEX_NONE;
@@ -267,15 +268,16 @@ public class GaeEvents {
 
 			if (this.value == null && this.transIndex != TRANSINDEX_NONE) {
 
-				SEntity eventEntity = this.future.get();
+				final SEntity eventEntity = this.future.get();
 				if (eventEntity == null) {
 					return null;
 				}
 
 				SText eventXml;
 				if (this.transIndex < 0) {
-					int realindex = getInternalValueId(this.transIndex);
+					final int realindex = getInternalValueId(this.transIndex);
 					@SuppressWarnings("unchecked")
+					final
 					List<SText> eventValues = (List<SText>) eventEntity
 							.getAttribute(PROP_EVENT_VALUES);
 					if (eventValues == null || realindex >= eventValues.size()) {
@@ -289,7 +291,7 @@ public class GaeEvents {
 					eventXml = (SText) eventEntity.getAttribute(PROP_VALUE);
 				}
 
-				XydraElement eventElement = new XmlParser().parse(eventXml.getValue());
+				final XydraElement eventElement = new XmlParser().parse(eventXml.getValue());
 
 				this.value = SerializedValue.toValue(eventElement);
 
@@ -312,14 +314,14 @@ public class GaeEvents {
 	 *            {@link #loadAtomicEvents(XAddress, long, XId, Entity, boolean)}
 	 * @return Never null but {@link AsyncValue#get()} may return null.
 	 */
-	protected static AsyncValue getValue(XAddress modelAddr, long revisionNumber, int transindex) {
+	protected static AsyncValue getValue(final XAddress modelAddr, final long revisionNumber, final int transindex) {
 
 		if (transindex == TRANSINDEX_NONE) {
 			return VALUE_NULL;
 		}
 
 		if (transindex < TRANSINDEX_NONE) {
-			SKey changeKey = KeyStructure.createChangeKey(modelAddr, revisionNumber);
+			final SKey changeKey = KeyStructure.createChangeKey(modelAddr, revisionNumber);
 			return new AsyncValue(GaeUtils2.getEntityFromMemcacheAndAsyncDatatore(changeKey),
 					transindex);
 		} else {
@@ -327,39 +329,39 @@ public class GaeEvents {
 		}
 	}
 
-	private static AsyncValue getExternalValue(XAddress modelAddr, long revisionNumber,
-			int transindex) {
-		SKey valueKey = KeyStructure.createValueKey(modelAddr, revisionNumber, transindex);
+	private static AsyncValue getExternalValue(final XAddress modelAddr, final long revisionNumber,
+			final int transindex) {
+		final SKey valueKey = KeyStructure.createValueKey(modelAddr, revisionNumber, transindex);
 		return new AsyncValue(GaeUtils2.getEntityFromMemcacheAndAsyncDatatore(valueKey), transindex);
 	}
 
 	/**
 	 * Save the given events in the given change entity.
-	 * 
+	 *
 	 * The changeEntity is not actually put in the datastore by this method,
 	 * only properties are set. Other additional GAE entities might be saved to
 	 * the datastore though.
-	 * 
+	 *
 	 * @return a list of indices that can be used later to load XValues using
 	 *         {@link #getValue(XAddress, long, int)}, as well as a list of GAE
 	 *         entities that have been saved asynchronously.
 	 */
-	protected static Pair<int[], List<Future<SKey>>> saveEvents(XAddress modelAddr,
-			SEntity changeEntity, List<XAtomicEvent> events) {
+	protected static Pair<int[], List<Future<SKey>>> saveEvents(final XAddress modelAddr,
+			final SEntity changeEntity, final List<XAtomicEvent> events) {
 
-		List<Integer> types = new ArrayList<Integer>();
-		List<String> targets = new ArrayList<String>();
-		List<SText> values = new ArrayList<SText>();
-		List<Long> objectRevs = new ArrayList<Long>();
-		List<Long> fieldRevs = new ArrayList<Long>();
-		List<Boolean> implied = new ArrayList<Boolean>();
+		final List<Integer> types = new ArrayList<Integer>();
+		final List<String> targets = new ArrayList<String>();
+		final List<SText> values = new ArrayList<SText>();
+		final List<Long> objectRevs = new ArrayList<Long>();
+		final List<Long> fieldRevs = new ArrayList<Long>();
+		final List<Boolean> implied = new ArrayList<Boolean>();
 
-		int[] valueIds = new int[events.size()];
+		final int[] valueIds = new int[events.size()];
 
-		List<Future<SKey>> futures = new ArrayList<Future<SKey>>();
+		final List<Future<SKey>> futures = new ArrayList<Future<SKey>>();
 
 		for (int i = 0; i < events.size(); i++) {
-			XAtomicEvent ae = events.get(i);
+			final XAtomicEvent ae = events.get(i);
 
 			XyAssert.xyAssert(
 					events.size() == 1 || ae.inTransaction(),
@@ -394,20 +396,20 @@ public class GaeEvents {
 				objectRevs.add(ae.getOldObjectRevision());
 				fieldRevs.add(ae.getOldFieldRevision());
 
-				XValue xv = ((XFieldEvent) ae).getNewValue();
+				final XValue xv = ((XFieldEvent) ae).getNewValue();
 				if (xv == null) {
 					values.add(null);
 					valueIds[i] = TRANSINDEX_NONE;
 				} else {
-					XydraOut out = new XmlOut(false);
+					final XydraOut out = new XmlOut(false);
 					SerializedValue.serialize(xv, out);
-					String valueStr = out.getData();
-					SText value = XGae.get().datastore().createText(valueStr);
+					final String valueStr = out.getData();
+					final SText value = XGae.get().datastore().createText(valueStr);
 
 					if (valueStr.length() > MAX_VALUE_SIZE) {
-						SKey k = KeyStructure.createValueKey(modelAddr,
+						final SKey k = KeyStructure.createValueKey(modelAddr,
 								ae.getOldModelRevision() + 1, i);
-						SEntity e = XGae.get().datastore().createEntity(k);
+						final SEntity e = XGae.get().datastore().createEntity(k);
 						e.setAttribute(PROP_VALUE, value);
 						futures.add(XGae.get().datastore().async().putEntity(e));
 						values.add(VALUE_EXTERN);
@@ -441,63 +443,63 @@ public class GaeEvents {
 	 *         retrieve the value for the i-th atomic event that is stored in
 	 *         the change entity itself.
 	 */
-	private static int getInternalValueId(int i) {
+	private static int getInternalValueId(final int i) {
 		return TRANSINDEX_NONE - 1 - i;
 	}
 
 	/**
 	 * Load the individual events associated with the given change.
-	 * 
+	 *
 	 * This method should only be called if the change entity actually contains
 	 * events.
-	 * 
+	 *
 	 * @param change
 	 *            The change whose events should be loaded.
 	 * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
 	 *         entities
 	 */
 	@SuppressWarnings("unchecked")
-	protected static Pair<XAtomicEvent[], int[]> loadAtomicEvents(XAddress modelAddr, long rev,
-			XId actor, SEntity changeEntity) {
+	protected static Pair<XAtomicEvent[], int[]> loadAtomicEvents(final XAddress modelAddr, final long rev,
+			final XId actor, final SEntity changeEntity) {
 
 		/*
 		 * Load the event properties that were set in saveEvents().
-		 * 
+		 *
 		 * Be careful with types, as GAE might not return the exact same type
 		 * that was set.
 		 */
-		List<Number> types = (List<Number>) changeEntity.getAttribute(PROP_EVENT_TYPES);
-		List<String> targets = (List<String>) changeEntity.getAttribute(PROP_EVENT_TARGETS);
-		List<SText> values = (List<SText>) changeEntity.getAttribute(PROP_EVENT_VALUES);
-		List<Number> objectRevs = (List<Number>) changeEntity.getAttribute(PROP_EVENT_REVS_OBJECT);
-		List<Number> fieldRevs = (List<Number>) changeEntity.getAttribute(PROP_EVENT_REVS_FIELD);
-		List<Boolean> implied = (List<Boolean>) changeEntity.getAttribute(PROP_EVENT_IMPLIED);
+		final List<Number> types = (List<Number>) changeEntity.getAttribute(PROP_EVENT_TYPES);
+		final List<String> targets = (List<String>) changeEntity.getAttribute(PROP_EVENT_TARGETS);
+		final List<SText> values = (List<SText>) changeEntity.getAttribute(PROP_EVENT_VALUES);
+		final List<Number> objectRevs = (List<Number>) changeEntity.getAttribute(PROP_EVENT_REVS_OBJECT);
+		final List<Number> fieldRevs = (List<Number>) changeEntity.getAttribute(PROP_EVENT_REVS_FIELD);
+		final List<Boolean> implied = (List<Boolean>) changeEntity.getAttribute(PROP_EVENT_IMPLIED);
 
 		XyAssert.xyAssert(types != null, "changeEntity.PROP_EVENT_TYPES was null");
 		assert types != null && targets != null && values != null && implied != null;
 
-		XAtomicEvent[] events = new XAtomicEvent[types.size()];
+		final XAtomicEvent[] events = new XAtomicEvent[types.size()];
 
 		assert targets.size() == events.length && implied.size() == events.length
 				&& values.size() == events.length;
 
-		int[] valueIds = new int[events.length];
+		final int[] valueIds = new int[events.length];
 
-		boolean inTrans = (events.length > 1);
+		final boolean inTrans = events.length > 1;
 
 		int ori = 0, fri = 0;
 
-		long modelRev = rev - 1;
+		final long modelRev = rev - 1;
 
 		for (int i = 0; i < events.length; i++) {
-			EventType type = EventType.get(types.get(i).intValue());
+			final EventType type = EventType.get(types.get(i).intValue());
 
-			XAddress target = XX.toAddress(targets.get(i));
-			boolean isImplied = implied.get(i);
+			final XAddress target = Base.toAddress(targets.get(i));
+			final boolean isImplied = implied.get(i);
 
 			switch (type.getTargetType()) {
 			case XREPOSITORY: {
-				XId modelId = XX.toId(values.get(i).getValue());
+				final XId modelId = Base.toId(values.get(i).getValue());
 				switch (type.getChangeType()) {
 				case ADD:
 					events[i] = MemoryRepositoryEvent.createAddEvent(actor, target, modelId,
@@ -513,8 +515,8 @@ public class GaeEvents {
 				break;
 			}
 			case XMODEL: {
-				XId objectId = XX.toId(values.get(i).getValue());
-				long objectRev = objectRevs.get(ori++).longValue();
+				final XId objectId = Base.toId(values.get(i).getValue());
+				final long objectRev = objectRevs.get(ori++).longValue();
 				switch (type.getChangeType()) {
 				case ADD:
 					events[i] = MemoryModelEvent.createAddEvent(actor, target, objectId, modelRev,
@@ -530,9 +532,9 @@ public class GaeEvents {
 				break;
 			}
 			case XOBJECT: {
-				XId fieldId = XX.toId(values.get(i).getValue());
-				long objectRev = objectRevs.get(ori++).longValue();
-				long fieldRev = fieldRevs.get(fri++).longValue();
+				final XId fieldId = Base.toId(values.get(i).getValue());
+				final long objectRev = objectRevs.get(ori++).longValue();
+				final long fieldRev = fieldRevs.get(fri++).longValue();
 				switch (type.getChangeType()) {
 				case ADD:
 					events[i] = MemoryObjectEvent.createAddEvent(actor, target, fieldId, modelRev,
@@ -548,9 +550,9 @@ public class GaeEvents {
 				break;
 			}
 			case XFIELD: {
-				SText valueTxt = values.get(i);
-				long objectRev = objectRevs.get(ori++).longValue();
-				long fieldRev = fieldRevs.get(fri++).longValue();
+				final SText valueTxt = values.get(i);
+				final long objectRev = objectRevs.get(ori++).longValue();
+				final long fieldRev = fieldRevs.get(fri++).longValue();
 				AsyncValue value;
 				if (valueTxt == null) {
 					assert type.getChangeType() == ChangeType.REMOVE;
@@ -558,10 +560,10 @@ public class GaeEvents {
 					valueIds[i] = TRANSINDEX_NONE;
 				} else {
 					assert type.getChangeType() != ChangeType.REMOVE;
-					boolean isExtern = VALUE_EXTERN.equals(valueTxt);
+					final boolean isExtern = VALUE_EXTERN.equals(valueTxt);
 					if (!isExtern) {
-						String valueXml = valueTxt.getValue();
-						XydraElement eventElement = new XmlParser().parse(valueXml);
+						final String valueXml = valueTxt.getValue();
+						final XydraElement eventElement = new XmlParser().parse(valueXml);
 						value = new AsyncValue(SerializedValue.toValue(eventElement));
 						valueIds[i] = getInternalValueId(i);
 					} else {
@@ -580,7 +582,7 @@ public class GaeEvents {
 		return new Pair<XAtomicEvent[], int[]>(events, valueIds);
 	}
 
-	static int getEventIndex(int transindex) {
+	static int getEventIndex(final int transindex) {
 		return transindex < TRANSINDEX_NONE ? getInternalValueId(transindex) : transindex;
 	}
 

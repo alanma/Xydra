@@ -13,7 +13,7 @@ import org.xydra.core.model.impl.memory.sync.Root;
 public abstract class AbstractMOFEntity extends AbstractEntity implements IMemoryMOFEntity,
 		XSynchronizesChanges, Serializable {
 
-	public AbstractMOFEntity(Root root) {
+	public AbstractMOFEntity(final Root root) {
 		assert root != null;
 		this.root = root;
 	}
@@ -42,24 +42,24 @@ public abstract class AbstractMOFEntity extends AbstractEntity implements IMemor
 	}
 
 	@Override
-	public boolean addListenerForSyncEvents(XSyncEventListener syncListener) {
+	public boolean addListenerForSyncEvents(final XSyncEventListener syncListener) {
 		return this.root.addListenerForSyncEvents(getAddress(), syncListener);
 	}
 
 	@Override
-	public boolean removeListenerForSyncEvents(XSyncEventListener syncListener) {
+	public boolean removeListenerForSyncEvents(final XSyncEventListener syncListener) {
 		return this.root.removeListenerForSyncEvents(getAddress(), syncListener);
 	}
 
 	@Override
-	public void fireSyncEvent(XSyncEvent event) {
+	public void fireSyncEvent(final XSyncEvent event) {
 		this.root.fireSyncEvent(getAddress(), event);
 	}
 
 	// implement XSynchronizesChanges
 	@Override
 	public int countUnappliedLocalChanges() {
-		return this.getRoot().countUnappliedLocalChanges();
+		return getRoot().countUnappliedLocalChanges();
 	}
 
 	// implement XSynchronizesChanges
@@ -83,12 +83,12 @@ public abstract class AbstractMOFEntity extends AbstractEntity implements IMemor
 	/**
 	 * Set a new actor to be used when building commands for changes to this
 	 * entity and its children.
-	 * 
+	 *
 	 * @param actorId for this entity and its children, if any.
 	 * @param passwordHash the password for the given actor.
 	 */
 	@Override
-	public void setSessionActor(XId actorId, String passwordHash) {
+	public void setSessionActor(final XId actorId, final String passwordHash) {
 		this.root.setSessionActor(actorId);
 		this.root.setSessionPasswordHash(passwordHash);
 	}

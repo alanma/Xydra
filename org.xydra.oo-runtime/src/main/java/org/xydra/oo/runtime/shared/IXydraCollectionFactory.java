@@ -2,7 +2,7 @@ package org.xydra.oo.runtime.shared;
 
 /**
  * A factory for creating empty collections
- * 
+ *
  * @author xamde
  */
 public interface IXydraCollectionFactory {

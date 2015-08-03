@@ -24,7 +24,7 @@ import org.xydra.store.XydraStore;
 
 /**
  * A REST-server exposing a {@link XydraStore} over HTTP.
- * 
+ *
  * @author xamde
  * @author dscharrer
  */
@@ -71,8 +71,8 @@ public class XydraRestServer {
 	 * @throws InternalStoreException
 	 *             if no XydraStore is found in servlet context
 	 */
-	public static XydraStore getStore(Restless restless) {
-		XydraStore store = getXydraStoreInternal(restless);
+	public static XydraStore getStore(final Restless restless) {
+		final XydraStore store = getXydraStoreInternal(restless);
 		if (store == null) {
 			throw new InternalStoreException(
 					"XydraRestServer not initialized - store not found in servlet context");
@@ -83,11 +83,11 @@ public class XydraRestServer {
 	/**
 	 * Use the servlet context to exchange parameters among different Restless
 	 * apps booting/running in the same servlet.
-	 * 
+	 *
 	 * @param restless
 	 * @return a {@link XydraStore} from servlet context
 	 */
-	private static XydraStore getXydraStoreInternal(Restless restless) {
+	private static XydraStore getXydraStoreInternal(final Restless restless) {
 		return (XydraStore) restless.getServletContext().getAttribute(
 				SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE);
 	}
@@ -95,16 +95,16 @@ public class XydraRestServer {
 	/**
 	 * Use the servlet context to exchange parameters among different Restless
 	 * apps booting/running in the same servlet.
-	 * 
+	 *
 	 * @param restless
 	 * @param store
 	 *            too be retrieved via {@link #getStore(Restless)}
 	 */
-	public static void setXydraStoreInServletContext(Restless restless, XydraStore store) {
+	public static void setXydraStoreInServletContext(final Restless restless, final XydraStore store) {
 		restless.getServletContext().setAttribute(SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE, store);
 	}
 
-	public static void setXydraServerAppInServletContext(Restless restless, XydraServerApp serverApp) {
+	public static void setXydraServerAppInServletContext(final Restless restless, final XydraServerApp serverApp) {
 		restless.getServletContext().setAttribute(SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVERAPP,
 				serverApp);
 	}
@@ -114,30 +114,30 @@ public class XydraRestServer {
 	 * @return a {@link XydraServerApp} (assuming init ran first and one was
 	 *         configured in web.xml)
 	 */
-	public static XydraServerApp getXydraServerApp(Restless restless) {
+	public static XydraServerApp getXydraServerApp(final Restless restless) {
 		return (XydraServerApp) restless.getServletContext().getAttribute(
 				SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVERAPP);
 	}
 
 	/**
 	 * Setup the Xydra REST API at '/store/v1'
-	 * 
+	 *
 	 * @param restless
 	 * @param prefix
 	 */
-	public static void restless(Restless restless, String prefix) {
+	public static void restless(final Restless restless, final String prefix) {
 		log.info("Booting XydraRestServer");
 		xydraV1(restless, prefix);
 	}
 
-	private static void xydraV1(Restless restless, String prefix) {
+	private static void xydraV1(final Restless restless, final String prefix) {
 		// configure
 		initializeServer(restless);
 
 		restless.addExceptionHandler(new XAccessExceptionHandler());
 
 		// init store resources, delegate all traffic to XydraStoreResource
-		String storePrefix = prefix + "/store/v1";
+		final String storePrefix = prefix + "/store/v1";
 		XydraStoreResource.restless(restless, storePrefix);
 
 		// '/ping' - for debugging purposes
@@ -151,20 +151,20 @@ public class XydraRestServer {
 
 	/**
 	 * Instantiate a XydraStore via reflection as configured in web.xml
-	 * 
+	 *
 	 * @param restless
 	 *            never null
 	 * @throws RuntimeException
 	 *             if instantiation goes wrong
 	 */
-	public static synchronized void initializeServer(Restless restless) throws RuntimeException {
+	public static synchronized void initializeServer(final Restless restless) throws RuntimeException {
 		// initialize only once
 		if (getXydraStoreInternal(restless) != null) {
 			// server already initialized
 			return;
 		}
 
-		String storeClassName = restless.getInitParameter(INIT_PARAM_XYDRASTORE);
+		final String storeClassName = restless.getInitParameter(INIT_PARAM_XYDRASTORE);
 		XydraStore storeInstance;
 		if (storeClassName == null) {
 			throw new RuntimeException("no xydra store backend configured in web.xml. Set param '"
@@ -172,8 +172,8 @@ public class XydraRestServer {
 		}
 
 		try {
-			Class<?> storeClass = Class.forName(storeClassName);
-			Constructor<?> cons = storeClass.getConstructor();
+			final Class<?> storeClass = Class.forName(storeClassName);
+			final Constructor<?> cons = storeClass.getConstructor();
 			if (!XydraStore.class.isAssignableFrom(storeClass)) {
 				throw new RuntimeException(storeClass.getClass() + " is not a XydraStore");
 			}
@@ -183,26 +183,26 @@ public class XydraRestServer {
 			setXydraStoreInServletContext(restless, storeInstance);
 			log.info("XydraStore instance stored in servletContext at key '"
 					+ SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE + "'");
-		} catch (InvocationTargetException e) {
+		} catch (final InvocationTargetException e) {
 			log.error("Could no start XydraStore: '" + storeClassName + "'", e);
-		} catch (InstantiationException e) {
+		} catch (final InstantiationException e) {
 			log.error("Could no start XydraStore: '" + storeClassName + "'", e);
-		} catch (IllegalAccessException e) {
+		} catch (final IllegalAccessException e) {
 			log.error("Could no start XydraStore due to IllegalAccessException", e);
-		} catch (NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
 			log.error("Could no start XydraStore: '" + storeClassName
 					+ "' seems to be a broken implementation", e);
-		} catch (ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			log.error("XydraStore is malconfigured: '" + storeClassName + "'", e);
 		}
 
 		/* Configure ServerApp, if one is defined */
-		String serverAppClassName = restless.getInitParameter(INIT_PARAM_SERVER_APP);
+		final String serverAppClassName = restless.getInitParameter(INIT_PARAM_SERVER_APP);
 		XydraServerApp serverAppInstance;
 		if (serverAppClassName != null) {
 			try {
-				Class<?> storeClass = Class.forName(serverAppClassName);
-				Constructor<?> cons = storeClass.getConstructor();
+				final Class<?> storeClass = Class.forName(serverAppClassName);
+				final Constructor<?> cons = storeClass.getConstructor();
 				if (!XydraServerApp.class.isAssignableFrom(storeClass)) {
 					throw new RuntimeException(storeClass.getClass() + " is not a XydraServerApp");
 				}
@@ -212,16 +212,16 @@ public class XydraRestServer {
 				setXydraServerAppInServletContext(restless, serverAppInstance);
 				log.info("XydraServerApp instance stored in servletContext at key '"
 						+ SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVERAPP + "'");
-			} catch (InvocationTargetException e) {
+			} catch (final InvocationTargetException e) {
 				log.error("Could no start XydraServerApp: '" + serverAppClassName + "'", e);
-			} catch (InstantiationException e) {
+			} catch (final InstantiationException e) {
 				log.error("Could no start XydraServerApp: '" + serverAppClassName + "'", e);
-			} catch (IllegalAccessException e) {
+			} catch (final IllegalAccessException e) {
 				log.error("Could no start XydraServerApp due to IllegalAccessException", e);
-			} catch (NoSuchMethodException e) {
+			} catch (final NoSuchMethodException e) {
 				log.error("Could no start XydraServerApp: '" + serverAppClassName
 						+ "' seems to be a broken implementation", e);
-			} catch (ClassNotFoundException e) {
+			} catch (final ClassNotFoundException e) {
 				log.error("XydraServerApp is malconfigured: '" + serverAppClassName + "'", e);
 			}
 		} else {
@@ -230,11 +230,11 @@ public class XydraRestServer {
 		}
 
 		/* Configure simulated delay */
-		String simulateDelay = restless.getInitParameter(INIT_PARAM_DELAY);
+		final String simulateDelay = restless.getInitParameter(INIT_PARAM_DELAY);
 		if (simulateDelay == null || simulateDelay.equals(new String("false"))) {
 			Delay.setAjaxDelayMs(0);
 		} else {
-			int msDelay = Integer.parseInt(simulateDelay);
+			final int msDelay = Integer.parseInt(simulateDelay);
 			Delay.setAjaxDelayMs(msDelay);
 		}
 
@@ -242,44 +242,44 @@ public class XydraRestServer {
 
 	/**
 	 * Returns server time as text/plain
-	 * 
+	 *
 	 * @param res
 	 * @throws IOException
 	 */
-	public static void ping(HttpServletResponse res) throws IOException {
+	public static void ping(final HttpServletResponse res) throws IOException {
 		res.setStatus(200);
 		res.setContentType("text/plain");
 		res.setCharacterEncoding("utf-8");
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		final Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
 		w.write("Running. Server time = " + System.currentTimeMillis());
 		w.flush();
 		w.close();
 	}
 
-	public static void textResponse(HttpServletResponse res, int statusCode, String xml) {
+	public static void textResponse(final HttpServletResponse res, final int statusCode, final String xml) {
 		response(res, "text/plain; charset=UTF-8", statusCode, xml);
 	}
 
-	public static void response(HttpServletResponse res, String contentType, int statusCode,
-			String xml) {
+	public static void response(final HttpServletResponse res, final String contentType, final int statusCode,
+			final String xml) {
 
 		res.setContentType(contentType);
 		res.setStatus(statusCode);
 		try {
 			new OutputStreamWriter(res.getOutputStream(), "utf-8").write(xml);
-		} catch (IOException ioe) {
+		} catch (final IOException ioe) {
 			throw new RuntimeException("IOException while sending response", ioe);
 		}
 
 	}
 
-	public static String readPostData(HttpServletRequest req) {
+	public static String readPostData(final HttpServletRequest req) {
 
 		try {
 
-			Reader in = req.getReader();
+			final Reader in = req.getReader();
 			final char[] buffer = new char[0x10000];
-			StringBuilder out = new StringBuilder();
+			final StringBuilder out = new StringBuilder();
 			int read;
 			do {
 				read = in.read(buffer, 0, buffer.length);
@@ -290,7 +290,7 @@ public class XydraRestServer {
 
 			return out.toString();
 
-		} catch (IOException ioe) {
+		} catch (final IOException ioe) {
 			throw new RuntimeException("IOException while reading POSTed data", ioe);
 		}
 

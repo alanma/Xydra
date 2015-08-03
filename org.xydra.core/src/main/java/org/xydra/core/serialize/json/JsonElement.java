@@ -18,11 +18,11 @@ public class JsonElement extends AbstractJsonElement {
 	private static final Iterator<Object> noValue = NoneIterator.create();
 
 	protected static Iterator<Pair<String, XydraElement>> transformMap(
-			Iterator<Map.Entry<String, Object>> iterator, final String type) {
+			final Iterator<Map.Entry<String, Object>> iterator, final String type) {
 		return new AbstractTransformingIterator<Map.Entry<String, Object>, Pair<String, XydraElement>>(
 				iterator) {
 			@Override
-			public Pair<String, XydraElement> transform(Map.Entry<String, Object> in) {
+			public Pair<String, XydraElement> transform(final Map.Entry<String, Object> in) {
 				return new Pair<String, XydraElement>(in.getKey(), wrap(in.getValue(), type));
 			}
 		};
@@ -32,9 +32,9 @@ public class JsonElement extends AbstractJsonElement {
 
 	private final String type;
 
-	public JsonElement(Map<String, Object> data, String type) {
+	public JsonElement(final Map<String, Object> data, final String type) {
 		this.data = data;
-		Object key = this.data.get(JsonEncoder.PROPERTY_TYPE);
+		final Object key = this.data.get(JsonEncoder.PROPERTY_TYPE);
 		if (key != null) {
 			this.type = key.toString();
 		} else if (type != null) {
@@ -45,7 +45,7 @@ public class JsonElement extends AbstractJsonElement {
 	}
 
 	@Override
-	public Object getAttribute(String name) {
+	public Object getAttribute(final String name) {
 		return this.data.get(name);
 	}
 
@@ -55,23 +55,23 @@ public class JsonElement extends AbstractJsonElement {
 	}
 
 	@Override
-	public XydraElement getChild(String name) {
+	public XydraElement getChild(final String name) {
 		return getElement(name);
 	}
 
 	@Override
-	public XydraElement getChild(String name, String type) {
+	public XydraElement getChild(final String name, final String type) {
 		return this.data.containsKey(name) ? wrap(this.data.get(name), type) : null;
 	}
 
 	@Override
-	public Iterator<XydraElement> getChildren(String defaultType) {
+	public Iterator<XydraElement> getChildren(final String defaultType) {
 		throw new ParsingException(this, "cannot get unnamed children from JSON object");
 	}
 
 	@Override
-	public Iterator<XydraElement> getChildrenByName(String name, String defaultType) {
-		Object childList = this.data.get(name);
+	public Iterator<XydraElement> getChildrenByName(final String name, final String defaultType) {
+		final Object childList = this.data.get(name);
 		if (childList == null || !(childList instanceof List<?>)) {
 			return noChildren;
 		}
@@ -84,12 +84,12 @@ public class JsonElement extends AbstractJsonElement {
 	}
 
 	@Override
-	public Object getContent(String name) {
+	public Object getContent(final String name) {
 		return getAttribute(name);
 	}
 
 	@Override
-	public Iterator<Pair<String, XydraElement>> getEntries(String attribute, String defaultType) {
+	public Iterator<Pair<String, XydraElement>> getEntries(final String attribute, final String defaultType) {
 		return transformMap(this.data.entrySet().iterator(), defaultType);
 	}
 
@@ -99,8 +99,8 @@ public class JsonElement extends AbstractJsonElement {
 	}
 
 	@Override
-	public Object getValue(String name, int index) {
-		Object value = this.data.get(name);
+	public Object getValue(final String name, final int index) {
+		final Object value = this.data.get(name);
 		if (value instanceof Map<?, ?> || value instanceof List<?>) {
 			throw new ParsingException(this, "expected value, got container");
 		}
@@ -114,8 +114,8 @@ public class JsonElement extends AbstractJsonElement {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Iterator<Object> getValues(String name) {
-		Object childList = this.data.get(name);
+	public Iterator<Object> getValues(final String name) {
+		final Object childList = this.data.get(name);
 		if (childList == null || !(childList instanceof List<?>)) {
 			return noValue;
 		}

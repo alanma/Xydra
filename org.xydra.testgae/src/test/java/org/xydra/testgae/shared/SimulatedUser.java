@@ -15,27 +15,27 @@ import org.xydra.testgae.server.model.xmas.NameUtils;
 /**
  * A simulated user makes a number of actions, almost like a real user would do.
  * Idealy for performance testing.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class SimulatedUser extends Thread {
 
 	private static final Logger log = LoggerFactory.getLogger(SimulatedUser.class);
 
-	private String serverUrl;
+	private final String serverUrl;
 
-	private String repoIdStr;
+	private final String repoIdStr;
 
 	private int actions = 0;
 
-	private Exchanger<Exception> exchanger;
+	private final Exchanger<Exception> exchanger;
 
 	int getActions() {
 		return this.actions;
 	}
 
-	private static int random(int max) {
+	private static int random(final int max) {
 		return 1 + (int) (Math.random() * max);
 	}
 
@@ -45,19 +45,19 @@ public class SimulatedUser extends Thread {
 
 		private int howOften;
 
-		Action(int howOften) {
+		Action(final int howOften) {
 			this.howOften = howOften;
 		}
 
 		static Action randomAction() {
 			int sum = 0;
-			for (Action a : Action.values()) {
+			for (final Action a : Action.values()) {
 				sum += a.howOften;
 			}
-			int rnd = random(sum);
+			final int rnd = random(sum);
 
 			sum = 0;
-			for (Action a : Action.values()) {
+			for (final Action a : Action.values()) {
 				sum += a.howOften;
 				if (sum >= rnd) {
 					return a;
@@ -68,14 +68,14 @@ public class SimulatedUser extends Thread {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param serverUrl
 	 *            should not include repository. May not have a trailing slash
 	 *            at the end.
 	 * @param repo
 	 * @param exchanger
 	 */
-	public SimulatedUser(String serverUrl, String repo, Exchanger<Exception> exchanger) {
+	public SimulatedUser(final String serverUrl, final String repo, final Exchanger<Exception> exchanger) {
 		super();
 		this.serverUrl = serverUrl;
 		this.repoIdStr = repo;
@@ -90,8 +90,8 @@ public class SimulatedUser extends Thread {
 	 * @throws IOException
 	 *             ...
 	 */
-	public void doBenchmark1(Writer w) throws IOException {
-		Clock c = new Clock();
+	public void doBenchmark1(final Writer w) throws IOException {
+		final Clock c = new Clock();
 
 		// add 20 lists
 		c.start();
@@ -128,7 +128,7 @@ public class SimulatedUser extends Thread {
 		while (!this.stopSoon) {
 			try {
 				doRandomAction();
-			} catch (RuntimeException e) {
+			} catch (final RuntimeException e) {
 
 				exception = e;
 
@@ -149,7 +149,7 @@ public class SimulatedUser extends Thread {
 		// TODO document exchange
 		try {
 			this.exchanger.exchange(exception);
-		} catch (InterruptedException ie) {
+		} catch (final InterruptedException ie) {
 			// do nothing
 		}
 		log.info("Thread done");
@@ -157,25 +157,25 @@ public class SimulatedUser extends Thread {
 
 	public void doRandomAction() {
 		/* choose action */
-		Action action = Action.randomAction();
+		final Action action = Action.randomAction();
 		doAction(action);
 	}
 
 	/**
 	 * Do action n times
-	 * 
+	 *
 	 * @param action
 	 *            ..
 	 * @param n
 	 *            ..
 	 */
-	public void doAction(Action action, int n) {
+	public void doAction(final Action action, final int n) {
 		for (int i = 0; i < n; i++) {
 			doAction(action);
 		}
 	}
 
-	public void doAction(Action action) {
+	public void doAction(final Action action) {
 		log.info("Trying action " + this.actions + " = " + action);
 		/*
 		 * some actions make no sense under some circumstances, but we cannot
@@ -188,11 +188,11 @@ public class SimulatedUser extends Thread {
 			log.info("List created");
 		} else {
 			// choose a list - requires an HTTP GET
-			String rootRelativeListUrl = chooseList(this.repoIdStr);
+			final String rootRelativeListUrl = chooseList(this.repoIdStr);
 			if (rootRelativeListUrl != null) {
 				assert !rootRelativeListUrl.endsWith("/");
 				assert rootRelativeListUrl.startsWith("/") : "url is '" + rootRelativeListUrl + "'";
-				String absoluteListUrl = this.serverUrl + rootRelativeListUrl;
+				final String absoluteListUrl = this.serverUrl + rootRelativeListUrl;
 				if (action == Action.DeleteList) {
 					HttpUtils.makeGetRequest(absoluteListUrl + "/clear");
 					log.info("Deleted list");
@@ -204,7 +204,7 @@ public class SimulatedUser extends Thread {
 						log.info("Added wish");
 					} else {
 						// choose a wish from list
-						String wishUrl = chooseWish(absoluteListUrl);
+						final String wishUrl = chooseWish(absoluteListUrl);
 						if (wishUrl != null) {
 							if (action == Action.EditListDeleteWish) {
 								// delete wish
@@ -213,19 +213,19 @@ public class SimulatedUser extends Thread {
 							} else {
 								// edit wish
 								if (action == Action.EditListEditWishName) {
-									String name = NameUtils.getProductName();
+									final String name = NameUtils.getProductName();
 
 									HttpUtils.makeGetRequest(absoluteListUrl + "/editName?name="
 											+ name.replace(" ", "+"));
 									log.info("Edited name of wish");
 								} else if (action == Action.EditListEditWishPrice) {
-									int price = (int) (Math.random() * 1000);
+									final int price = (int) (Math.random() * 1000);
 									HttpUtils.makeGetRequest(absoluteListUrl + "/editPrice?price="
 											+ price);
 									log.info("Edited price of wish");
 								} else {
-									assert (action == Action.EditListEditWishUrl);
-									String url = "http://www.google.de/images?q="
+									assert action == Action.EditListEditWishUrl;
+									final String url = "http://www.google.de/images?q="
 											+ NameUtils.getProductName();
 									HttpUtils.makeGetRequest(absoluteListUrl + "/editUrl?url="
 											+ url.replace(" ", "+"));
@@ -248,24 +248,24 @@ public class SimulatedUser extends Thread {
 	/**
 	 * @return a randomly chosen list URL or null of none found
 	 */
-	private String chooseList(String repoIdStr) {
+	private String chooseList(final String repoIdStr) {
 		/* retrieve list of list urls */
-		List<String> listUrls = listAllListsInRepository(repoIdStr);
+		final List<String> listUrls = listAllListsInRepository(repoIdStr);
 		log.info("Choosing one of " + listUrls.size() + " lists");
 		return randomEntry(listUrls);
 	}
 
-	private static String randomEntry(List<String> entries) {
+	private static String randomEntry(final List<String> entries) {
 		if (entries.size() == 0) {
 			return null;
 		}
-		int rnd = random(entries.size()) - 1;
+		final int rnd = random(entries.size()) - 1;
 		return entries.get(rnd);
 	}
 
-	private static String chooseWish(String listUrl) {
+	private static String chooseWish(final String listUrl) {
 		/* retrieve list of wish urls */
-		List<String> wishUrls = listAllWishesInList(listUrl);
+		final List<String> wishUrls = listAllWishesInList(listUrl);
 		log.info("Choosing one of " + wishUrls.size() + " wishes");
 		return randomEntry(wishUrls);
 	}
@@ -275,16 +275,16 @@ public class SimulatedUser extends Thread {
 	 *            should inclide the repository but not end with a slash
 	 * @return a list of all URLs of wish lists
 	 */
-	private List<String> listAllListsInRepository(String repoIdStr) {
-		String content = HttpUtils.getRequestAsStringResponse(this.serverUrl + "/xmas/" + repoIdStr
+	private List<String> listAllListsInRepository(final String repoIdStr) {
+		final String content = HttpUtils.getRequestAsStringResponse(this.serverUrl + "/xmas/" + repoIdStr
 				+ "?format=urls");
 		return stringParsedByLinebreaks(content);
 	}
 
-	private static List<String> stringParsedByLinebreaks(String content) {
-		String[] lines = content.split("\\n");
-		List<String> list = new ArrayList<String>();
-		for (String line : lines) {
+	private static List<String> stringParsedByLinebreaks(final String content) {
+		final String[] lines = content.split("\\n");
+		final List<String> list = new ArrayList<String>();
+		for (final String line : lines) {
 			if (line.length() > 0) {
 				list.add(line);
 			}
@@ -299,9 +299,9 @@ public class SimulatedUser extends Thread {
 	 *            should inclide the repository but not end with a slash
 	 * @return a list of all wish URLs in given wish list
 	 */
-	private static List<String> listAllWishesInList(String listUrl) {
+	private static List<String> listAllWishesInList(final String listUrl) {
 		assert listUrl.startsWith("http");
-		String content = HttpUtils.getRequestAsStringResponse(listUrl + "?format=urls");
+		final String content = HttpUtils.getRequestAsStringResponse(listUrl + "?format=urls");
 		return stringParsedByLinebreaks(content);
 	}
 
@@ -312,9 +312,9 @@ public class SimulatedUser extends Thread {
 		this.stopSoon = true;
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		// TODO fix the SimulatedUser creation
-		SimulatedUser su = new SimulatedUser("http://localhost:8787", "repo1", null);
+		final SimulatedUser su = new SimulatedUser("http://localhost:8787", "repo1", null);
 		System.out.println(SimulatedUser.listAllWishesInList(su.listAllListsInRepository("repo1")
 				.get(0)));
 		su.pleaseStopSoon();

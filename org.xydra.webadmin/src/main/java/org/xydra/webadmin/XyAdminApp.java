@@ -17,6 +17,7 @@ import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.Restless.IRequestListener;
 import org.xydra.restless.utils.HtmlUtils;
+import org.xydra.restless.utils.SharedHtmlUtils;
 import org.xydra.server.rest.XydraRestServer;
 import org.xydra.store.XydraRuntime;
 import org.xydra.webadmin.ModelResource.MStyle;
@@ -26,10 +27,10 @@ import org.xydra.xgae.gaeutils.GaeTestfixer;
  * Run this either by configuring your Restless servlet to run this
  * {@link XyAdminApp} or embed this admin tool in your own app by calling
  * {@link XyAdminApp#restless(Restless, String)} from your own restless app.
- * 
+ *
  * IMPROVE Add ability to load from servletcontext via
  * {@link XydraRestServer#SERVLET_CONTEXT_ATTRIBUTE_XYDRA_PERSISTENCE}
- * 
+ *
  * @author xamde
  */
 @RunsInAppEngine(true)
@@ -44,7 +45,7 @@ public class XyAdminApp {
 
 	public static final String PAGE_NAME = "Main";
 
-	public static void restless(Restless restless, String prefix) {
+	public static void restless(final Restless restless, final String prefix) {
 		/**
 		 * Register for web request events. Make sure to not have
 		 * XydraRuntime.startRequest/finishRequest in your code.
@@ -52,36 +53,36 @@ public class XyAdminApp {
 		restless.addRequestListener(new IRequestListener() {
 
 			@Override
-			public void onRequestStarted(IRestlessContext restlessContext) {
+			public void onRequestStarted(final IRestlessContext restlessContext) {
 				XydraRuntime.startRequest();
 			}
 
 			@Override
-			public void onRequestFinished(IRestlessContext restlessContext) {
+			public void onRequestFinished(final IRestlessContext restlessContext) {
 				XydraRuntime.finishRequest();
 			}
 		});
 		restless_setupServices(restless);
 	}
 
-	public static void restless_setupServices(Restless restless) {
+	public static void restless_setupServices(final Restless restless) {
 		restless.addMethod(URL, "GET", XyAdminApp.class, "index", true);
 		restless.addMethod(URL + "/list", "GET", XyAdminApp.class, "listRepos", true);
 		DemoResource.restless(restless, URL);
 		RepositoryResource.restless(restless, URL);
 	}
 
-	public static void index(HttpServletResponse res) throws IOException {
+	public static void index(final HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = Utils.startPage(res, PAGE_NAME, "");
+		final Writer w = Utils.startPage(res, PAGE_NAME, "");
 
-		w.write(HtmlUtils.toOrderedList(
+		w.write(SharedHtmlUtils.toOrderedList(
 
-		HtmlUtils.link("/admin" + DemoResource.URL, DemoResource.PAGE_NAME),
+		SharedHtmlUtils.link("/admin" + DemoResource.URL, DemoResource.PAGE_NAME),
 
-		HtmlUtils.link("/admin" + URL + "/list", "List all Models"),
+		SharedHtmlUtils.link("/admin" + URL + "/list", "List all Models"),
 
-		HtmlUtils.link("/admin" + RepositoryResource.URL + "/gae-data",
+		SharedHtmlUtils.link("/admin" + RepositoryResource.URL + "/gae-data",
 				"Default repository 'gae-data'")
 
 		));
@@ -90,14 +91,14 @@ public class XyAdminApp {
 		Utils.endPage(w);
 	}
 
-	public static void listRepos(HttpServletResponse res) throws IOException {
+	public static void listRepos(final HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = Utils.startPage(res, PAGE_NAME, "List all Models in all Repositories");
+		final Writer w = Utils.startPage(res, PAGE_NAME, "List all Models in all Repositories");
 
 		// find repositories in GAE datastore
-		Iterator<XAddress> it = org.xydra.store.impl.gae.changes.Utils.findModelAdresses();
+		final Iterator<XAddress> it = org.xydra.store.impl.gae.changes.Utils.findModelAdresses();
 		while (it.hasNext()) {
-			XAddress modelAddress = it.next();
+			final XAddress modelAddress = it.next();
 			ModelResource.render(w, modelAddress, MStyle.link);
 		}
 		Utils.endPage(w);

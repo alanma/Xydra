@@ -7,11 +7,11 @@ import org.xydra.base.value.XValue;
 public interface IFieldDiff extends IHasXId {
     @Override
     XId getId();
-    
+
     XValue getInitialValue();
-    
+
     // same signature as XReadableField
     XValue getValue();
-    
+
     boolean isChanged();
 }

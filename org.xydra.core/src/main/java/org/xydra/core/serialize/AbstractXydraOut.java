@@ -23,7 +23,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 		public final Frame parent;
 		public final Type type;
 
-		public Frame(Frame parent, Type type, String name) {
+		public Frame(final Frame parent, final Type type, final String name) {
 			this.parent = parent;
 			this.type = type;
 			this.name = name;
@@ -33,7 +33,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 			return this.childType;
 		}
 
-		public String getChildType(String def) {
+		public String getChildType(final String def) {
 			return this.childType == null ? def : this.childType;
 		}
 
@@ -67,7 +67,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 		this(new MiniStringWriter());
 	}
 
-	public AbstractXydraOut(MiniWriter writer) {
+	public AbstractXydraOut(final MiniWriter writer) {
 		this.writer = writer;
 	}
 
@@ -85,7 +85,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 
 	@Override
-	public <T> void attribute(String name, T value) {
+	public <T> void attribute(final String name, final T value) {
 		check();
 
 		if (this.current.type != Type.Element) {
@@ -107,13 +107,13 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 
 	@Override
-	public void beginArray(String type) {
+	public void beginArray(final String type) {
 		beginArray();
 		setChildType(type);
 	}
 
 	@Override
-	public void beginMap(String attribute) {
+	public void beginMap(final String attribute) {
 
 		checkCanAddChild();
 
@@ -123,7 +123,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 
 	@Override
-	public void beginMap(String attribute, String type) {
+	public void beginMap(final String attribute, final String type) {
 		beginMap(attribute);
 		setChildType(type);
 	}
@@ -147,7 +147,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 
 	@Override
-	public void child(String name) {
+	public void child(final String name) {
 		check();
 
 		if (this.current.type == Type.Child) {
@@ -169,13 +169,13 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 
 	@Override
-	public void child(String name, String type) {
+	public void child(final String name, final String type) {
 		child(name);
 		setChildType(type);
 	}
 
 	@Override
-	public void close(String type) {
+	public void close(final String type) {
 		check();
 
 		if (this.current.type == Type.Root) {
@@ -197,26 +197,26 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 
 	@Override
-	public <T> void content(String name, T value) {
+	public <T> void content(final String name, final T value) {
 		child(name);
 		value(value);
 	}
 
 	@Override
-	public void element(String type) {
+	public void element(final String type) {
 		open(type);
 		close(type);
 	}
 
 	@Override
-	public <T> void element(String type, String name, T content) {
+	public <T> void element(final String type, final String name, final T content) {
 		open(type);
 		content(name, content);
 		close(type);
 	}
 
 	@Override
-	public void enableWhitespace(boolean whitespace, boolean idententation) {
+	public void enableWhitespace(final boolean whitespace, final boolean idententation) {
 		this.whitespace = whitespace;
 		this.indent = idententation;
 	}
@@ -254,7 +254,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 
 	@Override
-	public void entry(String id) {
+	public void entry(final String id) {
 		check();
 
 		if (this.current.type == Type.Entry) {
@@ -271,12 +271,12 @@ abstract public class AbstractXydraOut implements XydraOut {
 
 	}
 
-	private void error(String desc) {
-		StringBuilder bt = new StringBuilder();
+	private void error(final String desc) {
+		final StringBuilder bt = new StringBuilder();
 
 		if (this.current == null) {
 			bt.append("(end)");
-		} else
+		} else {
 			do {
 
 				switch (this.current.type) {
@@ -313,6 +313,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 
 				this.current = this.current.parent;
 			} while (this.current != null);
+		}
 
 		throw new IllegalStateException(desc + "; am at " + bt.toString());
 	}
@@ -337,7 +338,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 		return this.writer.toString();
 	}
 
-	protected void indent(int count) {
+	protected void indent(final int count) {
 
 		if (!this.indent || !this.whitespace) {
 			return;
@@ -361,7 +362,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 
 	@Override
-	public void open(String type) {
+	public void open(final String type) {
 		checkCanAddChild();
 
 		if (this.current.forcedChildType && !this.current.childType.equals(type)) {
@@ -398,14 +399,14 @@ abstract public class AbstractXydraOut implements XydraOut {
 	protected abstract <T> void outputValue(Frame container, T value);
 
 	@Override
-	public void setChildType(String type) {
+	public void setChildType(final String type) {
 
 		setDefaultType(type);
 		this.current.forcedChildType = true;
 	}
 
 	@Override
-	public void setDefaultType(String type) {
+	public void setDefaultType(final String type) {
 
 		check();
 
@@ -423,14 +424,14 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 
 	@Override
-	public <T> void value(String name, String type, T value) {
+	public <T> void value(final String name, final String type, final T value) {
 		child(name);
 		setChildType(type);
 		value(value);
 	}
 
 	@Override
-	public <T> void value(T value) {
+	public <T> void value(final T value) {
 		checkCanAddChild();
 
 		outputValue(this.current, value);
@@ -439,27 +440,27 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 
 	@Override
-	public <T> void values(String name, String type, Iterable<T> values) {
+	public <T> void values(final String name, final String type, final Iterable<T> values) {
 		child(name);
 		beginArray();
 		setChildType(type);
-		for (T value : values) {
+		for (final T value : values) {
 			value(value);
 		}
 		endArray();
 	}
 
-	protected void whitespace(char c) {
+	protected void whitespace(final char c) {
 		if (this.whitespace) {
 			this.writer.write(c);
 		}
 	}
 
-	protected void write(char c) {
+	protected void write(final char c) {
 		this.writer.write(c);
 	}
 
-	protected void write(String s) {
+	protected void write(final String s) {
 		this.writer.write(s);
 	}
 

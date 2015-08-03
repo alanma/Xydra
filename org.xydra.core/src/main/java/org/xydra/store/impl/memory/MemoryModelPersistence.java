@@ -26,38 +26,38 @@ import org.xydra.persistence.ModelRevision;
 
 /**
  * A helper class used by {@link MemoryPersistence} to manage individual models.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 
 public class MemoryModelPersistence {
-    
+
     static private Logger log = LoggerFactory.getLogger(MemoryModelPersistence.class);
-    
-    private List<XEvent> events = new ArrayList<XEvent>();
-    
+
+    private final List<XEvent> events = new ArrayList<XEvent>();
+
     /**
      * The current state of the model, or null if the model doesn't currently
      * exist.
      */
-    private XRevWritableModel model;
-    
+    private final XRevWritableModel model;
+
     XAddress modelAddr;
-    
-    public MemoryModelPersistence(XAddress modelAddr) {
+
+    public MemoryModelPersistence(final XAddress modelAddr) {
         this.modelAddr = modelAddr;
-        SimpleModel nonExisting = new SimpleModel(modelAddr);
+        final SimpleModel nonExisting = new SimpleModel(modelAddr);
         nonExisting.setExists(false);
         nonExisting.setRevisionNumber(RevisionConstants.NOT_EXISTING);
         this.model = nonExisting;
     }
-    
-    synchronized public long executeCommand(XId actorId, XCommand command) {
-        
+
+    synchronized public long executeCommand(final XId actorId, final XCommand command) {
+
         assert this.model != null;
-        ChangedModel changedModel = new ChangedModel(this.model);
-        boolean success = changedModel.executeCommand(command);
+        final ChangedModel changedModel = new ChangedModel(this.model);
+        final boolean success = changedModel.executeCommand(command);
         if(!success) {
             log.warn("command " + command + " failed");
             return XCommand.FAILED;
@@ -65,13 +65,13 @@ public class MemoryModelPersistence {
         if(!changedModel.hasChanges()) {
             return XCommand.NOCHANGE;
         }
-        
+
         return applyChanes(changedModel, this.model, actorId, command, this.events);
     }
-    
+
     /**
      * Public for testing only.
-     * 
+     *
      * @param changedModel
      * @param model
      * @param actorId
@@ -79,17 +79,17 @@ public class MemoryModelPersistence {
      * @param eventList
      * @return resulting revision number
      */
-    public static long applyChanes(ChangedModel changedModel, XRevWritableModel model, XId actorId,
-            XCommand command, List<XEvent> eventList) {
+    public static long applyChanes(final ChangedModel changedModel, final XRevWritableModel model, final XId actorId,
+            final XCommand command, final List<XEvent> eventList) {
         // create event
-        long currentModelRev = model.getRevisionNumber();
-        List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
+        final long currentModelRev = model.getRevisionNumber();
+        final List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
         DeltaUtils.createEventsForChangedModel(events, actorId, changedModel,
                 command.getChangeType() == ChangeType.TRANSACTION);
         long currentObjectRev;
         if(command.getTarget().getObject() != null) {
             // object txn
-            XRevWritableObject objectState = model.getObject(command.getTarget().getObject());
+            final XRevWritableObject objectState = model.getObject(command.getTarget().getObject());
             if(objectState == null) {
                 throw new IllegalArgumentException("Cannot execute an objectCommand (" + command
                         + ") on a non-existing object");
@@ -100,16 +100,16 @@ public class MemoryModelPersistence {
             // model txn
             currentObjectRev = RevisionConstants.REVISION_OF_ENTITY_NOT_SET;
         }
-        
-        XEvent event = Executor.createSingleEvent(events, actorId, command.getTarget(),
+
+        final XEvent event = Executor.createSingleEvent(events, actorId, command.getTarget(),
                 currentModelRev, currentObjectRev);
-        
+
         // apply event
         EventUtils.applyEvent(model, event);
         eventList.add(event);
-        
+
         return event.getRevisionNumber();
-        
+
         // long newModelRev = getRevisionNumber() + 1;
         //
         // /*
@@ -183,41 +183,41 @@ public class MemoryModelPersistence {
         //
         // return newModelRev;
     }
-    
+
     public boolean exists() {
         return this.model != null && this.model.exists();
     }
-    
-    synchronized public List<XEvent> getEvents(XAddress address, long beginRevision,
-            long endRevision) {
-        
+
+    synchronized public List<XEvent> getEvents(final XAddress address, final long beginRevision,
+            final long endRevision) {
+
         if(this.events.isEmpty()) {
             return null;
         }
-        
-        long currentRev = getRevisionNumber();
-        long start = beginRevision < 0 ? 0 : beginRevision;
-        long end = endRevision > currentRev ? currentRev : endRevision;
-        
+
+        final long currentRev = getRevisionNumber();
+        final long start = beginRevision < 0 ? 0 : beginRevision;
+        final long end = endRevision > currentRev ? currentRev : endRevision;
+
         log.info("getEvents: [" + beginRevision + "," + endRevision + "]=>[" + start + "," + end
                 + "] curr:" + currentRev + " size:" + this.events.size() + " modelrev:"
                 + (this.model == null ? -2 : this.model.getRevisionNumber()));
-        
+
         if(start > end) {
             // happens if start >= currentRev, which is allowed
             return new ArrayList<XEvent>();
         }
-        
-        List<XEvent> result = new ArrayList<XEvent>();
-        
+
+        final List<XEvent> result = new ArrayList<XEvent>();
+
         /*
          * filter a (sub-) list
-         * 
+         *
          * Note: Can handle max. Integer.MAX events = 2^31 which is a lot of
          * events and the standard java containers cannot contain more anyway,
          * at least the array-based ArrayList.
          */
-        for(XEvent xe : this.events.subList((int)start, (int)end + 1)) {
+        for(final XEvent xe : this.events.subList((int)start, (int)end + 1)) {
             // TODO how to filter transaction events? ~Daniel
             // TODO should this filtering be done in the calling
             // DelegateToPersistenceAndArm since it needs to filter for access
@@ -226,21 +226,22 @@ public class MemoryModelPersistence {
                 result.add(xe);
             }
         }
-        
+
         return result;
     }
-    
+
     /**
      * @return the snapshot or null if not found
      */
     synchronized public XRevWritableModel getModelSnapshot() {
-        if(this.model == null || !this.model.exists())
-            return null;
-        
+        if(this.model == null || !this.model.exists()) {
+			return null;
+		}
+
         return XCopyUtils.createSnapshot(this.model);
     }
-    
-    synchronized public XRevWritableObject getObjectSnapshot(XId objectId) {
+
+    synchronized public XRevWritableObject getObjectSnapshot(final XId objectId) {
         /*
          * if this model has not been created yet, there cannot be an object
          * snapshot
@@ -248,16 +249,16 @@ public class MemoryModelPersistence {
         if(this.model == null) {
             return null;
         }
-        
+
         return XCopyUtils.createSnapshot(this.model.getObject(objectId));
     }
-    
+
     synchronized public long getRevisionNumber() {
         return this.events.size() - 1;
     }
-    
+
     public ModelRevision getModelRevision() {
         return new ModelRevision(getRevisionNumber(), exists());
     }
-    
+
 }

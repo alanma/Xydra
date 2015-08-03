@@ -127,10 +127,10 @@ public class XidCodecTest {
 		for (final Sample sample : SAMPLES) {
 			if (sample.valid) {
 				Assert.assertTrue("Should be valid '" + sample + "'",
-						MemoryStringIDProvider.isValidId(sample.str));
+						BaseStringIDProvider.isValidId(sample.str));
 			} else {
 				Assert.assertFalse("Should be invalid '" + sample + "'",
-						MemoryStringIDProvider.isValidId(sample.str));
+						BaseStringIDProvider.isValidId(sample.str));
 			}
 			if (sample.str.length() < 100) {
 				testEncodeDecode(sample.str);
@@ -152,12 +152,12 @@ public class XidCodecTest {
 	}
 
 	private static void assertValid(final String s) {
-		Assert.assertTrue(s, MemoryStringIDProvider.isValidId(s));
+		Assert.assertTrue(s, BaseStringIDProvider.isValidId(s));
 		Assert.assertTrue(s, gwt_matchesXydraId(s));
 	}
 
 	private static void assertInvalid(final String s) {
-		Assert.assertFalse(s, MemoryStringIDProvider.isValidId(s));
+		Assert.assertFalse(s, BaseStringIDProvider.isValidId(s));
 		Assert.assertFalse(s, gwt_matchesXydraId(s));
 	}
 

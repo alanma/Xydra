@@ -5,14 +5,14 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 
 /**
- * 
+ *
  * @author alpha
- * 
+ *
  */
 public interface BundledRes extends ClientBundle {
 	/**
 	 * The message file used for i18n
-	 * 
+	 *
 	 */
 
 	public interface Images extends ClientBundle {

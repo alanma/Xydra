@@ -13,9 +13,9 @@ import org.xydra.log.api.LoggerFactory;
 /**
  * FIXME The current maven config (pom.xml) conflicts GAE with GWT settings,
  * gae:deploy fails.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class ServletWithLogging extends HttpServlet {
 
@@ -24,7 +24,7 @@ public class ServletWithLogging extends HttpServlet {
 	private static final Logger log = LoggerFactory.getLogger(ServletWithLogging.class);
 
 	@Override
-	public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
+	public void doGet(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
 		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Starting log test ...");
 		new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
 		log();
@@ -49,7 +49,7 @@ public class ServletWithLogging extends HttpServlet {
 	}
 
 	/* Just for fun: You can also call all these logs this way */
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		log();
 	}
 

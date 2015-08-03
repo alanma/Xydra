@@ -3,9 +3,9 @@ package org.xydra.store.impl.gae.ng;
 import org.xydra.sharedutils.XyAssert;
 
 /**
- * 
+ *
  * Can safely handled end == Long.MAX_VALUE
- * 
+ *
  * @author xamde
  */
 public class Interval {
@@ -20,7 +20,7 @@ public class Interval {
 	 * @param end
 	 *            inclusive
 	 */
-	public Interval(long start, long end) {
+	public Interval(final long start, final long end) {
 		super();
 		this.start = start;
 		this.end = end;
@@ -29,10 +29,10 @@ public class Interval {
 	/**
 	 * Shrink interval by moving the start closer to the end so that it has the
 	 * required new size
-	 * 
+	 *
 	 * @param newSize
 	 */
-	public void adjustStartToFitSizeIfNecessary(long newSize) {
+	public void adjustStartToFitSizeIfNecessary(final long newSize) {
 		if (size() > newSize) {
 			this.start = this.end - newSize + 1;
 		}
@@ -56,7 +56,7 @@ public class Interval {
 	 */
 	public long size() {
 		/* avoid long overflow when start=0 or -1 and end = Long.MAX_VALUE */
-		long sizeComputed = this.end - this.start + 1;
+		final long sizeComputed = this.end - this.start + 1;
 		if (sizeComputed < 0) {
 			return Long.MAX_VALUE;
 		} else {
@@ -66,20 +66,20 @@ public class Interval {
 
 	/**
 	 * Does not change this interval.
-	 * 
+	 *
 	 * @return a non-overlapping interval of the same size, but with bigger
 	 *         numbers. I.e. the interval [4,7] (size=4) becomes [8,11]
 	 */
 	public Interval moveRight() {
-		return new Interval(this.end + 1, this.end + this.size());
+		return new Interval(this.end + 1, this.end + size());
 	}
 
 	/**
 	 * @param maxEnd
 	 * @return a potentially #empty interval
 	 */
-	public Interval moveRightAndShrinkToKeepEndMaxAt(long maxEnd) {
-		Interval i = this.moveRight();
+	public Interval moveRightAndShrinkToKeepEndMaxAt(final long maxEnd) {
+		final Interval i = moveRight();
 		if (maxEnd < i.end) {
 			i.end = maxEnd;
 		}
@@ -97,19 +97,19 @@ public class Interval {
 	 *         sub-interval of the requested size with the same start as this
 	 *         interval
 	 */
-	public Interval getSubInterval(int maxSize) {
-		if (this.size() <= maxSize) {
-			return this.copy();
+	public Interval getSubInterval(final int maxSize) {
+		if (size() <= maxSize) {
+			return copy();
 		} else {
 			return new Interval(this.start, this.start + maxSize - 1);
 		}
 	}
 
 	public Interval firstHalf() {
-		return new Interval(this.start, this.start + ((this.size() + 1) / 2) - 1);
+		return new Interval(this.start, this.start + (size() + 1) / 2 - 1);
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		System.out.println(new Interval(2, 5).getSubInterval(10));
 	}
 

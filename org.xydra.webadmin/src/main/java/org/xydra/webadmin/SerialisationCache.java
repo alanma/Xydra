@@ -3,6 +3,7 @@ package org.xydra.webadmin;
 import java.io.Serializable;
 import java.util.List;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
@@ -25,7 +26,7 @@ import com.google.apphosting.api.ApiProxy;
 
 /**
  * Stores serialised models
- * 
+ *
  * @author xamde
  */
 public class SerialisationCache {
@@ -37,13 +38,13 @@ public class SerialisationCache {
 
 	/**
 	 * A cached, serialised model
-	 * 
+	 *
 	 * Key = ModelAddress
 	 */
 	public static class ModelEntry implements Serializable {
 		private static final long serialVersionUID = -5945996390176658690L;
 
-		public void init(long rev, String serialisation) {
+		public void init(final long rev, final String serialisation) {
 			this.rev = rev;
 			this.serialisation = serialisation;
 		}
@@ -66,41 +67,41 @@ public class SerialisationCache {
 		private static final String PROP_SERIALISATION = "serial";
 
 		@Override
-		public SEntity toEntity(SKey datastoreKey, ModelEntry entry) {
-			SEntity e = XGae.get().datastore().createEntity(datastoreKey);
+		public SEntity toEntity(final SKey datastoreKey, final ModelEntry entry) {
+			final SEntity e = XGae.get().datastore().createEntity(datastoreKey);
 			e.setAttribute(PROP_REV, entry.rev);
-			SText text = XGae.get().datastore().createText(entry.serialisation);
+			final SText text = XGae.get().datastore().createText(entry.serialisation);
 			e.setAttribute(PROP_SERIALISATION, text);
 			return e;
 		}
 
 		@Override
-		public ModelEntry fromEntity(SEntity entity) {
-			ModelEntry e = new ModelEntry();
+		public ModelEntry fromEntity(final SEntity entity) {
+			final ModelEntry e = new ModelEntry();
 			e.rev = (Long) entity.getAttribute(PROP_REV);
 			e.serialisation = ((SText) entity.getAttribute(PROP_SERIALISATION)).getValue();
 			return e;
 		}
 
 		@Override
-		public Serializable toSerializable(ModelEntry entry) {
+		public Serializable toSerializable(final ModelEntry entry) {
 			return entry;
 		}
 
 		@Override
-		public ModelEntry fromSerializable(Serializable s) {
+		public ModelEntry fromSerializable(final Serializable s) {
 			return (ModelEntry) s;
 		}
 
 	}
 
-	private static String toKey(XAddress modelAddress) {
+	private static String toKey(final XAddress modelAddress) {
 		return modelAddress.toString();
 	}
 
 	/**
 	 * Makes sure all models have a serialisation in the cache
-	 * 
+	 *
 	 * @param repoId
 	 *            ..
 	 * @param modelIdList
@@ -119,8 +120,8 @@ public class SerialisationCache {
 	 * @return true if all models are now up-to-date in cache and no task queue
 	 *         is working on it
 	 */
-	public static boolean updateAllModels(final XId repoId, List<XId> modelIdList,
-			final MStyle style, boolean giveUp, boolean useTaskQueue,
+	public static boolean updateAllModels(final XId repoId, final List<XId> modelIdList,
+			final MStyle style, final boolean giveUp, final boolean useTaskQueue,
 			final boolean cacheInInstance, final boolean cacheInMemcache,
 			final boolean cacheInDatastore) {
 		log.info("Updating " + modelIdList.size() + " models. Options: useTaskQueue="
@@ -132,7 +133,7 @@ public class SerialisationCache {
 			return true;
 		}
 
-		Progress p = new Progress();
+		final Progress p = new Progress();
 		p.startTime();
 		/*
 		 * IMPROVE by adding a batch-get-current-model-rev method to xydra-gae
@@ -144,11 +145,11 @@ public class SerialisationCache {
 			// first round?
 			if (p.getProgress() > 3) {
 				// check if enough time is left
-				long msLeftToGo = p.willTakeMsUntilProgressIs(modelIdList.size());
-				long msWeRanAlready = p.getMsSinceStart();
-				long totalTimeRequired = msWeRanAlready + msLeftToGo;
+				final long msLeftToGo = p.willTakeMsUntilProgressIs(modelIdList.size());
+				final long msWeRanAlready = p.getMsSinceStart();
+				final long totalTimeRequired = msWeRanAlready + msLeftToGo;
 
-				long timeLeft = ApiProxy.getCurrentEnvironment().getRemainingMillis();
+				final long timeLeft = ApiProxy.getCurrentEnvironment().getRemainingMillis();
 				if (giveUp && totalTimeRequired + 2000 < timeLeft) {
 					log.warn("We won't make it if we continue like this. Total time required = "
 							+ totalTimeRequired + " ms. Giving up.");
@@ -161,13 +162,13 @@ public class SerialisationCache {
 				}
 			}
 			// proceed as normal
-			XAddress modelAddress = XX.resolveModel(repoId, modelId);
-			StorageOptions storeOpts = StorageOptions.create(cacheInInstance ? 1 : 0,
+			final XAddress modelAddress = Base.resolveModel(repoId, modelId);
+			final StorageOptions storeOpts = StorageOptions.create(cacheInInstance ? 1 : 0,
 					cacheInMemcache, cacheInDatastore, false);
 
 			log.info("Inspecting serialisation of " + modelAddress);
-			XydraPersistence persistence = Utils.createPersistence(repoId);
-			ModelEntry cached = MODELS.get(toKey(modelAddress), storeOpts);
+			final XydraPersistence persistence = Utils.createPersistence(repoId);
+			final ModelEntry cached = MODELS.get(toKey(modelAddress), storeOpts);
 			if (cached != null
 					&& cached.getRev() == persistence
 							.getModelRevision(
@@ -176,17 +177,17 @@ public class SerialisationCache {
 				// cache is up-to-date
 			} else {
 				// re-compute
-				UniversalTaskQueue.NamedDeferredTask task = new UniversalTaskQueue.NamedDeferredTask() {
+				final UniversalTaskQueue.NamedDeferredTask task = new UniversalTaskQueue.NamedDeferredTask() {
 
 					private static final long serialVersionUID = 1L;
 
 					@Override
 					public void run() {
-						XAddress modelAddress = XX.resolveModel(repoId, modelId);
-						StorageOptions storeOpts = StorageOptions.create(cacheInInstance ? 1 : 0,
+						final XAddress modelAddress = Base.resolveModel(repoId, modelId);
+						final StorageOptions storeOpts = StorageOptions.create(cacheInInstance ? 1 : 0,
 								cacheInMemcache, cacheInDatastore, false);
 
-						ModelEntry modelEntry = computeSerialisation(modelAddress, style);
+						final ModelEntry modelEntry = computeSerialisation(modelAddress, style);
 						MODELS.put(toKey(modelAddress), modelEntry, storeOpts);
 					}
 
@@ -207,27 +208,27 @@ public class SerialisationCache {
 		return !useTaskQueue;
 	}
 
-	private static ModelEntry computeSerialisation(XAddress modelAddress, MStyle style) {
+	private static ModelEntry computeSerialisation(final XAddress modelAddress, final MStyle style) {
 		log.info("Computing serialisation of " + modelAddress);
-		XydraPersistence persistence = Utils.createPersistence(modelAddress.getRepository());
-		XWritableModel model = persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress,
+		final XydraPersistence persistence = Utils.createPersistence(modelAddress.getRepository());
+		final XWritableModel model = persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress,
 				ModelResource.INCLUDE_TENTATIVE));
-		long rev = model.getRevisionNumber();
-		String ser = ModelResource.computeSerialisation(model, style);
+		final long rev = model.getRevisionNumber();
+		final String ser = ModelResource.computeSerialisation(model, style);
 		if (ser == null) {
 			log.warn("Serialisation of model " + modelAddress + " is null");
 		}
-		ModelEntry modelEntry = new ModelEntry();
+		final ModelEntry modelEntry = new ModelEntry();
 		modelEntry.init(rev, ser);
 		return modelEntry;
 	}
 
-	public static String getSerialisation(XAddress modelAddress, StorageOptions storeOpts) {
-		ModelEntry modelEntry = SerialisationCache.MODELS.get(toKey(modelAddress), storeOpts);
+	public static String getSerialisation(final XAddress modelAddress, final StorageOptions storeOpts) {
+		final ModelEntry modelEntry = SerialisationCache.MODELS.get(toKey(modelAddress), storeOpts);
 		if (modelEntry == null) {
 			log.debug("Cache was null for " + modelAddress + ". Options used: " + storeOpts);
 			if (storeOpts.isComputeIfNull()) {
-				ModelEntry onTheFly = computeSerialisation(modelAddress, MStyle.xml);
+				final ModelEntry onTheFly = computeSerialisation(modelAddress, MStyle.xml);
 				return onTheFly.serialisation;
 			} else {
 				return null;

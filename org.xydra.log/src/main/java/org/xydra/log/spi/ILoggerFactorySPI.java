@@ -7,7 +7,7 @@ import org.xydra.log.api.Logger;
 
 /**
  * The Service Provider Interface (SPI) for logger factory implementations
- * 
+ *
  * @author xamde
  */
 public interface ILoggerFactorySPI {
@@ -15,16 +15,16 @@ public interface ILoggerFactorySPI {
 	/**
 	 * Return an appropriate {@link Logger} instance as specified by the
 	 * <code>name</code> parameter.
-	 * 
+	 *
 	 * <p>
 	 * If the name parameter is equal to {@link Logger#ROOT_LOGGER_NAME}, that
 	 * is the string value "ROOT" (case insensitive), then the root logger of
 	 * the underlying logging system is returned.
-	 * 
+	 *
 	 * <p>
 	 * Certain extremely simple logging systems, e.g. NOP, may always return the
 	 * same logger instance regardless of the requested name.
-	 * 
+	 *
 	 * @param name
 	 *            the name of the {@link Logger} to return @NeverNull
 	 * @param logListeners
@@ -36,19 +36,19 @@ public interface ILoggerFactorySPI {
 	/**
 	 * Return an appropriate thread-safe {@link Logger} instance as specified by
 	 * the <code>name</code> parameter.
-	 * 
+	 *
 	 * Thread-safe loggers might come at an extra cost, so this provider offers
 	 * the option to return potentially unsafe loggers for performance reasons.
-	 * 
+	 *
 	 * <p>
 	 * If the name parameter is equal to {@link Logger#ROOT_LOGGER_NAME}, that
 	 * is the string value "ROOT" (case insensitive), then the root logger of
 	 * the underlying logging system is returned.
-	 * 
+	 *
 	 * <p>
 	 * Certain extremely simple logging systems, e.g. NOP, may always return the
 	 * same logger instance regardless of the requested name.
-	 * 
+	 *
 	 * @param name
 	 *            the name of the {@link Logger} to return @NeverNull
 	 * @param logListeners
@@ -59,10 +59,10 @@ public interface ILoggerFactorySPI {
 
 	/**
 	 * OPTIONAL OPERATION
-	 * 
+	 *
 	 * Thread-safe loggers might come at an extra cost, so this provider offers
 	 * the option to return potentially unsafe loggers for performance reasons.
-	 * 
+	 *
 	 * @param name
 	 *            the name of the {@link Logger} to return @NeverNull
 	 * @param fullyQualifiedNameOfDelegatingLoggerClass
@@ -74,7 +74,7 @@ public interface ILoggerFactorySPI {
 
 	/**
 	 * OPTIONAL OPERATION
-	 * 
+	 *
 	 * @param name
 	 *            the name of the {@link Logger} to return @NeverNull
 	 * @param fullyQualifiedNameOfDelegatingLoggerClass

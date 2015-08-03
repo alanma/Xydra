@@ -43,7 +43,7 @@ public class XydraLogTest {
 		log.error("error", new RuntimeException("test exception at error level"));
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		ClassPathTool.dumpCurrentClasspath();
 	}
 

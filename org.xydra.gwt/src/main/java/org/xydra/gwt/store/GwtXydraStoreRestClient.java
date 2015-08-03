@@ -17,17 +17,17 @@ public class GwtXydraStoreRestClient extends AbstractXydraStoreRestClient {
 
 		protected final Request<?> request;
 
-		public RestCallback(Request<?> request) {
+		public RestCallback(final Request<?> request) {
 			this.request = request;
 		}
 
 		@Override
-		public void onError(com.google.gwt.http.client.Request request, Throwable exception) {
+		public void onError(final com.google.gwt.http.client.Request request, final Throwable exception) {
 			this.request.onFailure(exception);
 		}
 
 		@Override
-		public void onResponseReceived(com.google.gwt.http.client.Request request, Response response) {
+		public void onResponseReceived(final com.google.gwt.http.client.Request request, final Response response) {
 			this.request.onResponse(response.getText(), response.getStatusCode(),
 					response.getStatusText());
 		}
@@ -40,8 +40,8 @@ public class GwtXydraStoreRestClient extends AbstractXydraStoreRestClient {
 	 * @param serializer
 	 * @param parser
 	 */
-	public GwtXydraStoreRestClient(String apiLocation, XydraSerializer serializer,
-			XydraParser parser) {
+	public GwtXydraStoreRestClient(final String apiLocation, final XydraSerializer serializer,
+			final XydraParser parser) {
 		super(serializer, parser);
 		this.prefix = apiLocation;
 	}
@@ -53,7 +53,7 @@ public class GwtXydraStoreRestClient extends AbstractXydraStoreRestClient {
 	 * @param req
 	 * @return a configured {@link RequestBuilder}
 	 */
-	private final RequestBuilder request(RequestBuilder.Method method, String url, Request<?> req) {
+	private final RequestBuilder request(final RequestBuilder.Method method, final String url, final Request<?> req) {
 
 		String uri = this.prefix + url;
 		if (url.contains("?")) {
@@ -63,7 +63,7 @@ public class GwtXydraStoreRestClient extends AbstractXydraStoreRestClient {
 		}
 		uri = uri + urlencode(req.actor.toString()) + "&passwordHash=" + urlencode(req.password);
 
-		RequestBuilder rb = new RequestBuilder(method, uri);
+		final RequestBuilder rb = new RequestBuilder(method, uri);
 
 		rb.setHeader(HEADER_ACCEPT, this.parser.getContentType());
 
@@ -71,25 +71,25 @@ public class GwtXydraStoreRestClient extends AbstractXydraStoreRestClient {
 	}
 
 	@Override
-	protected void get(String uri, Request<?> req) {
-		RequestBuilder rb = request(RequestBuilder.GET, uri, req);
+	protected void get(final String uri, final Request<?> req) {
+		final RequestBuilder rb = request(RequestBuilder.GET, uri, req);
 		rb.setRequestData(null);
 		send(rb, req);
 	}
 
 	@Override
-	protected void post(String uri, XydraOut data, Request<?> req) {
-		RequestBuilder rb = request(RequestBuilder.POST, uri, req);
+	protected void post(final String uri, final XydraOut data, final Request<?> req) {
+		final RequestBuilder rb = request(RequestBuilder.POST, uri, req);
 		rb.setHeader("Content-Type", data.getContentType());
 		rb.setRequestData(data.getData());
 		send(rb, req);
 	}
 
-	private static void send(RequestBuilder rb, Request<?> req) {
+	private static void send(final RequestBuilder rb, final Request<?> req) {
 		rb.setCallback(new RestCallback(req));
 		try {
 			rb.send();
-		} catch (com.google.gwt.http.client.RequestException re) {
+		} catch (final com.google.gwt.http.client.RequestException re) {
 			req.onFailure(re);
 		}
 	}

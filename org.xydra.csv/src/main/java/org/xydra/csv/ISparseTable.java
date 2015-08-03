@@ -8,26 +8,26 @@ import org.xydra.csv.impl.memory.Row;
 
 /**
  * Appends all rows, that it handles via its {@link IRowHandler}.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public interface ISparseTable extends Iterable<Row>, IRowHandler {
 
 	/**
 	 * Adds a column name which will appear in the output but not necessarily
 	 * use any space if now rows contain entries for it.
-	 * 
+	 *
 	 * @param columnName
 	 */
 	void addColumnName(String columnName);
 
 	/**
 	 * Aggregates all rows that share the same values for the given keys.
-	 * 
+	 *
 	 * Aggregation is simple: If the values can be parsed as numbers, they are
 	 * added. Otherwise string concatenation with a separator is used.
-	 * 
+	 *
 	 * Example: Aggregating a table with columns "a", "b" and "c" using
 	 * keyColumnNames=("a","b") will add all numbers of "c" where "a" and "b"
 	 * are equal. Given the table
@@ -91,9 +91,9 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 	 * <td>13</td>
 	 * </tr>
 	 * </table>
-	 * 
+	 *
 	 * Existing sorting order of table is ignored.
-	 * 
+	 *
 	 * @param keyColumnNames
 	 *            an array of column names which is used for aggregation.
 	 */
@@ -107,7 +107,7 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 
 	/**
 	 * Create a sub-table
-	 * 
+	 *
 	 * @param columnName
 	 *            to be filtered
 	 * @param value
@@ -119,7 +119,7 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 
 	/**
 	 * Create a sub-table
-	 * 
+	 *
 	 * @param columnName
 	 *            never null
 	 * @param value
@@ -139,7 +139,7 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 	/**
 	 * Returns an existing row or creates a new one. The new row is guaranteed
 	 * to be inserted into the table.
-	 * 
+	 *
 	 * @param rowName
 	 *            a String that uniquely identifies a {@link Row}. Never null.
 	 * @param create
@@ -166,7 +166,7 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 	/**
 	 * Increments a value at (row,column). Creates the cell before, if
 	 * necessary.
-	 * 
+	 *
 	 * @param row
 	 *            never null
 	 * @param column
@@ -180,9 +180,9 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 
 	/**
 	 * See also {@link Iterable#iterator()}.
-	 * 
+	 *
 	 * Remove is forbidden.
-	 * 
+	 *
 	 * Some implementations return elements sorted by row key.
 	 */
 	@Override
@@ -190,7 +190,7 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 
 	/**
 	 * Removes all rows that match the given RowFilter.
-	 * 
+	 *
 	 * @param rowFilter
 	 *            never null
 	 */
@@ -211,14 +211,14 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 	 * @param b
 	 *            if true, the table restricts itself to a size Excel can handle
 	 *            and ignores too much data. Warnings are logged in this case.
-	 * 
+	 *
 	 *            Default is false.
 	 */
 	void setParamRestrictToExcelSize(boolean b);
 
 	/**
 	 * Set an initial value to cell (rowName, columnName)
-	 * 
+	 *
 	 * @param rowName
 	 *            never null
 	 * @param columnName
@@ -236,7 +236,7 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 	 * For every change in 'colName' a new sub-table is created with the rows
 	 * having the same values for 'colName'. Sorting is always performed
 	 * automatically before executing this command.
-	 * 
+	 *
 	 * @param colName
 	 *            never null
 	 * @return a Map from String (the value of column 'colName') to
@@ -246,7 +246,7 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 
 	/**
 	 * Visit all rows with an {@link IRowVisitor}.
-	 * 
+	 *
 	 * @param rowVisitor
 	 *            never null
 	 */
@@ -254,7 +254,7 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 
 	/**
 	 * Simply return the first row
-	 * 
+	 *
 	 * @return @CanBeNull
 	 */
 	Row getHeaderRow();

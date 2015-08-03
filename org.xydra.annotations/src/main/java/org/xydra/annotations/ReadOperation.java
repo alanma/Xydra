@@ -8,14 +8,14 @@ import java.lang.annotation.Target;
 
 /**
  * This annotation exists only for clarity of documentation.
- * 
+ *
  * Methods tagged with this annotation are side-effect free read operations. In
  * REST, methods like this are mapped to GET.
- * 
+ *
  * Opposite annotation for writing/changing: {@link ModificationOperation}
- * 
+ *
  * @author xamde
- * 
+ *
  */
 @Target({ METHOD })
 @Retention(RetentionPolicy.SOURCE)

@@ -25,17 +25,17 @@ import org.xydra.sharedutils.XyAssert;
  * The execution context within a transaction. This is where things change while
  * things outside this context remain stable, so that before and after-effect
  * can be calculated.
- * 
+ *
  * @author xamde
  */
 public class ContextInTxn implements XStateWritableModel, XExists {
 
 	private static final Logger log = LoggerFactory.getLogger(ContextInTxn.class);
 
-	private ChangedModel changedModel;
+	private final ChangedModel changedModel;
 
 	@Override
-	public XStateWritableObject createObject(XId objectId) {
+	public XStateWritableObject createObject(final XId objectId) {
 		return this.changedModel.createObject(objectId);
 	}
 
@@ -50,12 +50,12 @@ public class ContextInTxn implements XStateWritableModel, XExists {
 	}
 
 	@Override
-	public boolean hasObject(XId objectId) {
+	public boolean hasObject(final XId objectId) {
 		return this.changedModel.hasObject(objectId);
 	}
 
 	@Override
-	public XStateWritableObject getObject(XId objectId) {
+	public XStateWritableObject getObject(final XId objectId) {
 		return this.changedModel.getObject(objectId);
 	}
 
@@ -75,11 +75,11 @@ public class ContextInTxn implements XStateWritableModel, XExists {
 	}
 
 	@Override
-	public boolean removeObject(XId objectId) {
+	public boolean removeObject(final XId objectId) {
 		return this.changedModel.removeObject(objectId);
 	}
 
-	public ContextInTxn(@NeverNull ContextBeforeCommand ctxBeforeCmd) {
+	public ContextInTxn(@NeverNull final ContextBeforeCommand ctxBeforeCmd) {
 		XyAssert.xyAssert(ctxBeforeCmd != null);
 		assert ctxBeforeCmd != null;
 
@@ -97,7 +97,7 @@ public class ContextInTxn implements XStateWritableModel, XExists {
 	}
 
 	@Override
-	public void setExists(boolean modelExists) {
+	public void setExists(final boolean modelExists) {
 		this.changedModel.setExists(modelExists);
 	}
 
@@ -106,12 +106,12 @@ public class ContextInTxn implements XStateWritableModel, XExists {
 		return this.changedModel.exists();
 	}
 
-	public @NeverNull List<XAtomicEvent> toEvents(XId actorId,
-			ContextBeforeCommand ctxBeforeCommand, boolean inTransaction) {
-		XyAssert.xyAssert(this.getAddress() != null);
+	public @NeverNull List<XAtomicEvent> toEvents(final XId actorId,
+			final ContextBeforeCommand ctxBeforeCommand, final boolean inTransaction) {
+		XyAssert.xyAssert(getAddress() != null);
 
-		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
-		boolean inTxn = inTransaction || this.changedModel.countCommandsNeeded(2) > 1;
+		final List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
+		final boolean inTxn = inTransaction || this.changedModel.countCommandsNeeded(2) > 1;
 		DeltaUtils.createEventsForChangedModel(events, actorId, this.changedModel, inTxn
 				|| this.changedModel.modelWasRemoved());
 		return events;

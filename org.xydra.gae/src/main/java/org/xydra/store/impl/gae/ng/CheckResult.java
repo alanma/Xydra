@@ -18,28 +18,28 @@ import org.xydra.store.impl.gae.changes.GaeChange.Status;
 
 /**
  * This class changes the TOS (Tentative Object Snapshot)
- * 
+ *
  * @author xamde
  */
 public class CheckResult {
 
 	/**
 	 * Failed preconditions.
-	 * 
+	 *
 	 * @param explanation
 	 *            helps to debug
 	 * @return the {@link CheckResult} with Status = failed
 	 */
-	public static CheckResult failed(String explanation) {
+	public static CheckResult failed(final String explanation) {
 		GaeModelPersistenceNG.log.info("Command failed. Reason: '" + explanation + "'");
 		return new CheckResult(Status.FailedPreconditions, null, null, false, explanation);
 	}
 
-	public static CheckResult successCreatedField(XObjectCommand command, long revBeforeTxn,
-			ContextInTxn ctxInTxn, GaeChange change, boolean inTransaction) {
-		XStateWritableObject objectInTxn = ctxInTxn.getObject(command.getChangedEntity()
+	public static CheckResult successCreatedField(final XObjectCommand command, final long revBeforeTxn,
+			final ContextInTxn ctxInTxn, final GaeChange change, final boolean inTransaction) {
+		final XStateWritableObject objectInTxn = ctxInTxn.getObject(command.getChangedEntity()
 				.getObject());
-		XStateWritableField newField = objectInTxn.createField(command.getChangedEntity()
+		final XStateWritableField newField = objectInTxn.createField(command.getChangedEntity()
 				.getField());
 		if (newField instanceof XRevWritableField) {
 			((XRevWritableField) newField).setRevisionNumber(revBeforeTxn);
@@ -54,8 +54,8 @@ public class CheckResult {
 	 * @param ctxInTxn
 	 * @return ..
 	 */
-	public static CheckResult successCreatedModel(XRepositoryCommand command, GaeChange change,
-			ContextInTxn ctxInTxn) {
+	public static CheckResult successCreatedModel(final XRepositoryCommand command, final GaeChange change,
+			final ContextInTxn ctxInTxn) {
 		ctxInTxn.setExists(true);
 		return new CheckResult(Status.SuccessExecuted, change.getActorId(), ctxInTxn,
 		/* Add/remove model is never part of a txn */
@@ -69,50 +69,50 @@ public class CheckResult {
 	 * @param inTransaction
 	 * @return ..
 	 */
-	public static CheckResult successCreatedObject(XModelCommand command, GaeChange change,
-			ContextInTxn ctxInTxn, boolean inTransaction) {
+	public static CheckResult successCreatedObject(final XModelCommand command, final GaeChange change,
+			final ContextInTxn ctxInTxn, final boolean inTransaction) {
 		ctxInTxn.createObject(command.getChangedEntity().getObject());
 		return new CheckResult(Status.SuccessExecuted, change.getActorId(), ctxInTxn,
 				inTransaction, null);
 	}
 
-	public static CheckResult successNoChange(String explanation) {
+	public static CheckResult successNoChange(final String explanation) {
 		GaeModelPersistenceNG.log.info("+++ NoChange. Reason: " + explanation);
 		return new CheckResult(Status.SuccessNochange, null, null, false, explanation);
 	}
 
-	public static CheckResult successRemovedField(XObjectCommand objectCommand, GaeChange change,
-			ContextInTxn ctxInTxn, boolean inTransaction) {
+	public static CheckResult successRemovedField(final XObjectCommand objectCommand, final GaeChange change,
+			final ContextInTxn ctxInTxn, final boolean inTransaction) {
 		ctxInTxn.getObject(objectCommand.getChangedEntity().getObject()).removeField(
 				objectCommand.getChangedEntity().getField());
 		return new CheckResult(Status.SuccessExecuted, change.getActorId(), ctxInTxn,
 				inTransaction, null);
 	}
 
-	public static CheckResult successRemovedModel(XRepositoryCommand command, GaeChange change,
-			ContextInTxn ctxInTxn) {
+	public static CheckResult successRemovedModel(final XRepositoryCommand command, final GaeChange change,
+			final ContextInTxn ctxInTxn) {
 		ctxInTxn.setExists(false);
 		return new CheckResult(Status.SuccessExecuted, change.getActorId(), ctxInTxn,
 		/* Add / remove model is never part of a txn */
 		false, null);
 	}
 
-	public static CheckResult successRemovedObject(XModelCommand command, GaeChange change,
-			ContextInTxn ctxInTxn, boolean inTransaction) {
+	public static CheckResult successRemovedObject(final XModelCommand command, final GaeChange change,
+			final ContextInTxn ctxInTxn, final boolean inTransaction) {
 		ctxInTxn.removeObject(command.getChangedEntity().getObject());
 		return new CheckResult(Status.SuccessExecuted, change.getActorId(), ctxInTxn,
 				inTransaction, null);
 	}
 
 	/**
-	 * 
+	 *
 	 * @param transaction
 	 * @param change
 	 * @param ctxInTxn
 	 * @return ..
 	 */
-	public static CheckResult successTransaction(XTransaction transaction, GaeChange change,
-			ContextInTxn ctxInTxn) {
+	public static CheckResult successTransaction(final XTransaction transaction, final GaeChange change,
+			final ContextInTxn ctxInTxn) {
 		return new CheckResult(ctxInTxn.hasChanges() ? Status.SuccessExecuted
 				: Status.SuccessNochange, change.getActorId(), ctxInTxn, true, null);
 	}
@@ -124,23 +124,23 @@ public class CheckResult {
 	 * @param inTransaction
 	 * @return ..
 	 */
-	public static CheckResult successValue(XFieldCommand command, GaeChange change,
-			ContextInTxn ctxInTxn, boolean inTransaction) {
-		XAddress a = command.getChangedEntity();
+	public static CheckResult successValue(final XFieldCommand command, final GaeChange change,
+			final ContextInTxn ctxInTxn, final boolean inTransaction) {
+		final XAddress a = command.getChangedEntity();
 		ctxInTxn.getObject(a.getObject()).getField(a.getField()).setValue(command.getValue());
 		return new CheckResult(Status.SuccessExecuted, change.getActorId(), ctxInTxn,
 				inTransaction, null);
 	}
 
-	private String debugHint;
+	private final String debugHint;
 
-	private ContextInTxn ctxInTxn;
+	private final ContextInTxn ctxInTxn;
 
-	private Status status;
+	private final Status status;
 
-	private XId actorId;
+	private final XId actorId;
 
-	private boolean inTransaction;
+	private final boolean inTransaction;
 
 	/**
 	 * @param status
@@ -151,8 +151,8 @@ public class CheckResult {
 	 * @param inTransaction
 	 * @param explanation
 	 */
-	public CheckResult(@NeverNull Status status, XId actorId, @CanBeNull ContextInTxn contextInTxn,
-			boolean inTransaction, @CanBeNull String explanation) {
+	public CheckResult(@NeverNull final Status status, final XId actorId, @CanBeNull final ContextInTxn contextInTxn,
+			final boolean inTransaction, @CanBeNull final String explanation) {
 		XyAssert.xyAssert(status != null);
 		assert status != null;
 		XyAssert.xyAssert(status.isCommitted(), status);

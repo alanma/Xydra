@@ -19,7 +19,7 @@ public class MethodSpec extends AbstractConstructorOrMethodSpec implements IMemb
 	 *            use to take name, returnType and returnType.componentType
 	 * @param generatedFrom
 	 */
-	public MethodSpec(Method method, String generatedFrom) {
+	public MethodSpec(final Method method, final String generatedFrom) {
 		super(method.getName(), generatedFrom);
 		if (method.getReturnType().getSimpleName().equals("void")) {
 			this.returnType = null;
@@ -29,12 +29,12 @@ public class MethodSpec extends AbstractConstructorOrMethodSpec implements IMemb
 		}
 	}
 
-	MethodSpec(String name, Class<?> type, Class<?> componentType, String generatedFrom) {
+	MethodSpec(final String name, final Class<?> type, final Class<?> componentType, final String generatedFrom) {
 		super(name, generatedFrom);
 		this.returnType = JavaTypeSpecUtils.createTypeSpec(type, componentType, generatedFrom);
 	}
 
-	MethodSpec(String name, String typePackageName, String typeName, String generatedFrom) {
+	MethodSpec(final String name, final String typePackageName, final String typeName, final String generatedFrom) {
 		super(name, generatedFrom);
 		this.returnType = new TypeSpec(typePackageName, typeName, generatedFrom);
 	}
@@ -44,13 +44,13 @@ public class MethodSpec extends AbstractConstructorOrMethodSpec implements IMemb
 	 * @param returnType
 	 * @param generatedFrom
 	 */
-	MethodSpec(String name, IType returnType, String generatedFrom) {
+	MethodSpec(final String name, final IType returnType, final String generatedFrom) {
 		super(name, generatedFrom);
 		this.returnType = returnType;
 	}
 
-	public static MethodSpec createVoid(String name, String generatedFrom) {
-		MethodSpec methodSpec = new MethodSpec(name, null, generatedFrom);
+	public static MethodSpec createVoid(final String name, final String generatedFrom) {
+		final MethodSpec methodSpec = new MethodSpec(name, null, generatedFrom);
 		return methodSpec;
 	}
 
@@ -58,37 +58,38 @@ public class MethodSpec extends AbstractConstructorOrMethodSpec implements IMemb
 		return this.returnType == null;
 	}
 
-	public FieldSpec addParam(String name, java.lang.reflect.Type t, String generatedFrom) {
-		FieldSpec fs = new FieldSpec(name, t, generatedFrom);
+	public FieldSpec addParam(final String name, final java.lang.reflect.Type t, final String generatedFrom) {
+		final FieldSpec fs = new FieldSpec(name, t, generatedFrom);
 		this.params.add(fs);
 		return fs;
 	}
 
-	public FieldSpec addParam(String name, IType typeSpec, String generatedFrom) {
-		FieldSpec fs = new FieldSpec(name, typeSpec, generatedFrom);
+	public FieldSpec addParam(final String name, final IType typeSpec, final String generatedFrom) {
+		final FieldSpec fs = new FieldSpec(name, typeSpec, generatedFrom);
 		this.params.add(fs);
 		return fs;
 	}
 
 	@Override
 	public Set<String> getRequiredImports() {
-		Set<String> req = new HashSet<String>();
+		final Set<String> req = new HashSet<String>();
 		req.addAll(super.getRequiredImports());
-		if (this.returnType != null)
+		if (this.returnType != null) {
 			req.addAll(this.returnType.getRequiredImports());
+		}
 		return req;
 	}
 
 	@Override
 	public String toString() {
 		String s = "";
-		s += "// " + this.getComment() + "\n";
-		s += "METHOD " + this.getName() + "\n";
-		s += "  returnType:[" + this.getReturnTypeString() + "]" + "\n";
-		for (FieldSpec p : this.params) {
+		s += "// " + getComment() + "\n";
+		s += "METHOD " + getName() + "\n";
+		s += "  returnType:[" + getReturnTypeString() + "]" + "\n";
+		for (final FieldSpec p : this.params) {
 			s += "  PARAM " + p.toString() + "\n";
 		}
-		for (String l : this.sourceLines) {
+		for (final String l : this.sourceLines) {
 			s += "  CODE " + l + "\n";
 		}
 		return s;

@@ -19,14 +19,14 @@ public class HtmlTool {
 	public static final ICellRenderer identityCellRenderer = new ICellRenderer() {
 
 		@Override
-		public String html(String cellContent) {
+		public String html(final String cellContent) {
 			return htmlencode(cellContent);
 		}
 	};
 
 	/**
 	 * Write the given table as simple HTML to the given writer.
-	 * 
+	 *
 	 * @param table
 	 *            a table, never null
 	 * @param sortColName
@@ -37,14 +37,14 @@ public class HtmlTool {
 	 * @throws IOException
 	 *             ...
 	 */
-	public static void writeToHtml(ISparseTable table, String sortColName, final Writer w)
+	public static void writeToHtml(final ISparseTable table, final String sortColName, final Writer w)
 			throws IOException {
 		writeToHtml(table, sortColName, w, identityCellRenderer);
 	}
 
 	/**
 	 * Write the given table as simple HTML to the given writer.
-	 * 
+	 *
 	 * @param table
 	 *            a table, never null
 	 * @param sortColName
@@ -56,29 +56,29 @@ public class HtmlTool {
 	 * @throws IOException
 	 *             ...
 	 */
-	public static void writeToHtml(ISparseTable table, String sortColName, final Writer w,
-			ICellRenderer cellRenderer) throws IOException {
+	public static void writeToHtml(final ISparseTable table, final String sortColName, final Writer w,
+			final ICellRenderer cellRenderer) throws IOException {
 		w.write("<table class='csv'>\n");
 		w.write("<tr>");
 
-		List<String> colNames = new ArrayList<String>();
+		final List<String> colNames = new ArrayList<String>();
 		colNames.addAll(table.getColumnNames());
 		// sort alphabetically
 		Collections.sort(colNames);
 
-		for (String colName : colNames) {
+		for (final String colName : colNames) {
 			w.write("<th>" + htmlencode(colName) + "</th>");
 		}
 		w.write("</tr>\n");
 
 		Iterable<Row> rows = table;
 		if (sortColName != null) {
-			rows = TableTools.sortByColumn(table, sortColName);
+			rows = TableCoreTools.sortByColumn(table, sortColName);
 		}
 
-		for (IRow row : rows) {
+		for (final IRow row : rows) {
 			w.write("<tr>");
-			for (String colName : colNames) {
+			for (final String colName : colNames) {
 				String value = row.getValue(colName);
 				value = cellRenderer.html(value);
 				w.write("<td>" + value + "</td>");
@@ -93,7 +93,7 @@ public class HtmlTool {
 	 *            any string, might contain HTML-like stuff
 	 * @return string with basic XML encoding to prevent broken HTML
 	 */
-	public static String htmlencode(String s) {
+	public static String htmlencode(final String s) {
 		return s.replace("&", "&apos;").replace("<", "&lt;").replace(">", "&gt;")
 				.replace("\"", "&quot;").replace("'", "&apos;");
 	}

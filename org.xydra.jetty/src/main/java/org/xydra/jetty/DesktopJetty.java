@@ -15,7 +15,7 @@ public class DesktopJetty extends EmbeddedJetty {
 	private static Logger log = LoggerFactory.getLogger(DesktopJetty.class);
 
 	@Override
-	protected void configureWebapp(WebAppContext webapp) {
+	protected void configureWebapp(final WebAppContext webapp) {
 		log.info("Configuring DesktopJetty");
 
 		// TODO really required?
@@ -24,12 +24,12 @@ public class DesktopJetty extends EmbeddedJetty {
 		// webapp.setClassLoader(classloader);
 
 		/* caching for desktop jetty? don't cache anything until we know better */
-		FilterHolder noCacheFilterHolder = new FilterHolder();
+		final FilterHolder noCacheFilterHolder = new FilterHolder();
 		noCacheFilterHolder.setFilter(JettyUtils.createNoCacheFilter());
 		webapp.addFilter(noCacheFilterHolder, "*.*", EnumSet.allOf(DispatcherType.class));
 
 		// IMPROVE move?
-		MimeTypes mimeTypes = new MimeTypes();
+		final MimeTypes mimeTypes = new MimeTypes();
 
 		mimeTypes.addMimeMapping("html", "text/html");
 		mimeTypes.addMimeMapping("ico", "image/x-icon");

@@ -13,7 +13,7 @@ public class MemoryConfig_GwtEmul {
 	 * @throws IllegalArgumentException
 	 *             if instance could not be created
 	 */
-	public static <T> T newInstance(Class<T> clazz) {
+	public static <T> T newInstance(final Class<T> clazz) {
 		try {
 			return clazz.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -27,10 +27,10 @@ public class MemoryConfig_GwtEmul {
 	 * @throws IllegalArgumentException
 	 *             if class could not be found
 	 */
-	public static Class<?> classForName(String className) {
+	public static Class<?> classForName(final String className) {
 		try {
 			return Class.forName(className);
-		} catch (ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			throw new IllegalArgumentException("Could not find class '" + className + "'", e);
 		}
 	}

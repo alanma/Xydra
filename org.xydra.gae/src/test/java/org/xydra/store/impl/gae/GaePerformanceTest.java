@@ -22,23 +22,23 @@ public class GaePerformanceTest extends AbstractPersistencePerformanceTest {
 	private static final Logger log = LoggerFactory.getLogger(GaePerformanceTest.class);
 
 	@Override
-	public XydraPersistence createPersistence(XId repositoryId) {
+	public XydraPersistence createPersistence(final XId repositoryId) {
 		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
 		configureLog4j();
 		InstanceContext.clear();
 		XydraRuntime.init();
-		XydraPersistence p = new GaePersistence(repositoryId);
+		final XydraPersistence p = new GaePersistence(repositoryId);
 		assert p.getManagedModelIds().isEmpty();
 		return p;
 	}
 
 	public static void configureLog4j() {
-		File file = new File("./src/test/resources/log4j.properties");
+		final File file = new File("./src/test/resources/log4j.properties");
 		if (!file.exists()) {
 			log.warn("Could not update log conf at runtime from file '" + file.getAbsolutePath()
 					+ "' -- not found");
 		}
-		Properties props = new Properties();
+		final Properties props = new Properties();
 		Reader r;
 		try {
 			r = new FileReader(file);
@@ -48,8 +48,8 @@ public class GaePerformanceTest extends AbstractPersistencePerformanceTest {
 			LogManager.resetConfiguration();
 			PropertyConfigurator.configure(props);
 			log.info("Updated local log config from " + file.getAbsolutePath());
-		} catch (FileNotFoundException e) {
-		} catch (IOException e) {
+		} catch (final FileNotFoundException e) {
+		} catch (final IOException e) {
 		}
 
 	}

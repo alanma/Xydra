@@ -16,7 +16,7 @@ import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
  * An implementation of {@link XFieldEvent} that can load the newValue
  * asynchronously from the GAE datastore without blocking before
  * {@link #getNewValue()} is called.
- * 
+ *
  * @author xamde
  * @author kaidel
  */
@@ -26,17 +26,17 @@ class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	private static final long serialVersionUID = -4274165693986851623L;
 
 	// the revision numbers before the event happened
-	private long modelRevision, objectRevision, fieldRevision;
+	private final long modelRevision, objectRevision, fieldRevision;
 
 	/*
 	 * the new value, after the event happened (never null, newValue.get()
 	 * returns null for "delete" events)
 	 */
-	private AsyncValue newValue;
+	private final AsyncValue newValue;
 
-	protected GaeFieldEvent(XId actor, XAddress target, AsyncValue newValue, ChangeType changeType,
-			long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction,
-			boolean implied) {
+	protected GaeFieldEvent(final XId actor, final XAddress target, final AsyncValue newValue, final ChangeType changeType,
+			final long modelRevision, final long objectRevision, final long fieldRevision, final boolean inTransaction,
+			final boolean implied) {
 		super(target, changeType, actor, inTransaction, implied);
 
 		assert target.getField() != null && fieldRevision >= -1;
@@ -81,7 +81,7 @@ class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	// These need to match other XFieldEvent implementations.
 
 	@Override
-	public boolean equals(Object object) {
+	public boolean equals(final Object object) {
 
 		if (!super.equals(object)) {
 			return false;
@@ -90,7 +90,7 @@ class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		if (!(object instanceof XFieldEvent)) {
 			return false;
 		}
-		XFieldEvent event = (XFieldEvent) object;
+		final XFieldEvent event = (XFieldEvent) object;
 
 		if (!XI.equals(getNewValue(), event.getNewValue())) {
 			return false;
@@ -100,9 +100,9 @@ class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 			return false;
 		}
 
-		long otherObjectRev = event.getOldObjectRevision();
+		final long otherObjectRev = event.getOldObjectRevision();
 		if (this.objectRevision != otherObjectRev) {
-			if ((this.objectRevision != XEvent.REVISION_NOT_AVAILABLE && otherObjectRev != XEvent.REVISION_NOT_AVAILABLE)) {
+			if (this.objectRevision != XEvent.REVISION_NOT_AVAILABLE && otherObjectRev != XEvent.REVISION_NOT_AVAILABLE) {
 				return false;
 			}
 		}
@@ -120,7 +120,7 @@ class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		int result = super.hashCode();
 
 		// newValue
-		result ^= (getNewValue() == null ? 0 : getNewValue().hashCode());
+		result ^= getNewValue() == null ? 0 : getNewValue().hashCode();
 
 		// old revisions
 		result += this.modelRevision;
@@ -134,36 +134,36 @@ class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 
 	/**
 	 * Format: {MOF}Event
-	 * 
+	 *
 	 * r{mRev}/{oRev}/{fRev}
-	 * 
+	 *
 	 * {'ADD'|'REMOVE'}
-	 * 
+	 *
 	 * '[' {'+'|'-'} 'inTxn]' '[' {'+'|'-'} 'implied]'
-	 * 
+	 *
 	 * @{target *{id/value}, where xRef = '-' for
 	 *          {@link RevisionConstants#REVISION_OF_ENTITY_NOT_SET} and '?' for
 	 *          {@link RevisionConstants#REVISION_NOT_AVAILABLE}.
-	 * 
+	 *
 	 *          by actor: '{actorId}'
 	 */
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append("  GaeFieldEvent");
 
 		sb.append(" rev:");
-		sb.append(rev2str(this.getRevisionNumber()));
+		sb.append(rev2str(getRevisionNumber()));
 		sb.append(" old:");
-		sb.append(rev2str(this.getOldModelRevision()));
+		sb.append(rev2str(getOldModelRevision()));
 		sb.append("/");
-		sb.append(rev2str(this.getOldObjectRevision()));
+		sb.append(rev2str(getOldObjectRevision()));
 		sb.append("/");
-		sb.append(rev2str(this.getOldFieldRevision()));
+		sb.append(rev2str(getOldFieldRevision()));
 
 		addChangeTypeAndFlags(sb);
 		sb.append(" @" + getTarget());
-		sb.append(" ->*" + this.getNewValue() + "*");
+		sb.append(" ->*" + getNewValue() + "*");
 		sb.append("                 (actor:'" + getActor() + "')");
 		return sb.toString();
 	}

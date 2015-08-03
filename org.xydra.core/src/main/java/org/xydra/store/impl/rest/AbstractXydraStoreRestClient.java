@@ -39,39 +39,39 @@ import org.xydra.store.serialize.SerializedStore;
 /**
  * Abstract base class for {@link XydraStore} implementations that connect to a
  * xydra store REST server.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
 public abstract class AbstractXydraStoreRestClient implements XydraStore {
-    
+
     protected static final String HAEDER_CONTENT_TYPE = "Content-Type";
     protected static final String HEADER_COOKIE = "Cookie";
     protected static final String HEADER_ACCEPT = "Accept";
-    
+
     protected final XydraSerializer serializer;
     protected final XydraParser parser;
-    
-    public AbstractXydraStoreRestClient(XydraSerializer serializer, XydraParser parser) {
+
+    public AbstractXydraStoreRestClient(final XydraSerializer serializer, final XydraParser parser) {
         this.serializer = serializer;
         this.parser = parser;
     }
-    
+
     protected abstract class Request<T> {
-        
+
         final public XId actor;
         final public String password;
         final private Callback<T> callback;
-        
-        protected Request(XId actor, String password, Callback<T> callback) {
-            
+
+        protected Request(final XId actor, final String password, final Callback<T> callback) {
+
             this.actor = actor;
             this.password = password;
             this.callback = callback;
-            
+
             if(actor == null) {
                 throw new IllegalArgumentException("actorId must not be null");
             }
@@ -79,25 +79,25 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
                 throw new IllegalArgumentException("passwordHash must not be null");
             }
         }
-        
-        public void onFailure(Throwable t) {
+
+        public void onFailure(final Throwable t) {
             if(this.callback != null) {
                 this.callback.onFailure(new ConnectionException(t.getMessage(), t));
             }
         }
-        
-        protected void onSuccess(T result) {
+
+        protected void onSuccess(final T result) {
             if(this.callback != null) {
                 this.callback.onSuccess(result);
             }
         }
-        
-        public void onResponse(String content, int code, String message) {
-            
+
+        public void onResponse(final String content, final int code, final String message) {
+
             if(this.callback == null) {
                 return;
             }
-            
+
             if(content == null || content.isEmpty()) {
                 this.callback.onFailure(new ConnectionException("no content, response is " + code
                         + " " + message));
@@ -114,81 +114,81 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
                         + message));
                 return;
             }
-            
+
             XydraElement element;
             try {
                 element = AbstractXydraStoreRestClient.this.parser.parse(content);
-            } catch(Throwable th) {
+            } catch(final Throwable th) {
                 this.callback.onFailure(new InternalStoreException("error parsing response", th));
                 return;
             }
-            
-            Throwable t = SerializedStore.toException(element);
+
+            final Throwable t = SerializedStore.toException(element);
             if(t != null) {
                 this.callback.onFailure(t);
                 return;
             }
-            
+
             T result;
             try {
                 result = parse(element);
-            } catch(Throwable th) {
+            } catch(final Throwable th) {
                 this.callback.onFailure(new InternalStoreException("error parsing response", th));
                 return;
             }
-            
+
             this.callback.onSuccess(result);
         }
-        
+
         protected abstract T parse(XydraElement element);
-        
+
         /**
          * @param uri
          */
-        protected void get(String uri) {
-            
+        protected void get(final String uri) {
+
             if(this.callback == null) {
                 throw new IllegalArgumentException("callback may not be null");
             }
-            
+
             AbstractXydraStoreRestClient.this.get(uri, this);
         }
-        
-        protected void post(String uri, XydraOut data) {
+
+        protected void post(final String uri, final XydraOut data) {
             AbstractXydraStoreRestClient.this.post(uri, data, this);
         }
-        
+
     }
-    
+
     /**
      * @param uri format: no slashes
      * @param req
      */
     protected abstract void get(String uri, Request<?> req);
-    
+
     /**
      * @param uri format: no slashes
      * @param data
      * @param req
      */
     protected abstract void post(String uri, XydraOut data, Request<?> req);
-    
-    private String encodeEventsRequests(GetEventsRequest[] getEventsRequests,
-            BatchedResult<XEvent[]>[] res) {
-        
+
+    private String encodeEventsRequests(final GetEventsRequest[] getEventsRequests,
+            final BatchedResult<XEvent[]>[] res) {
+
         if(getEventsRequests == null) {
             throw new IllegalArgumentException("getEventsRequests array must not be null");
         }
-        
+
         XyAssert.xyAssert(getEventsRequests.length == res.length);
-        
-        StringBuilder sb = new StringBuilder();
-        
+
+        final StringBuilder sb = new StringBuilder();
+
         boolean first = true;
-        
+
         for(int i = 0; i < getEventsRequests.length; i++) {
-            GetEventsRequest ger = getEventsRequests[i];
-            
+            final GetEventsRequest ger = getEventsRequests[i];
+
             if(ger == null) {
                 res[i] = new BatchedResult<XEvent[]>(new RequestException(
                         "GetEventsRequest must not be null"));
@@ -207,51 +207,51 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
                                 + ger.endRevision + "]"));
                 continue;
             }
-            
+
             if(first) {
                 first = false;
             } else {
                 sb.append('&');
             }
-            
+
             sb.append(XydraStoreRestInterface.ARG_ADDRESS);
             sb.append('=');
             sb.append(urlencode(ger.address.toString()));
-            
+
             sb.append('&');
             sb.append(XydraStoreRestInterface.ARG_BEGIN_REVISION);
             sb.append('=');
             sb.append(ger.beginRevision);
-            
+
             sb.append('&');
             sb.append(XydraStoreRestInterface.ARG_END_REVISION);
             if(ger.endRevision != Long.MAX_VALUE) {
                 sb.append('=');
                 sb.append(ger.endRevision);
             }
-            
+
         }
-        
+
         if(first) {
             return null;
         }
-        
+
         return sb.toString();
     }
-    
-    private <T> String encodeAddresses(GetWithAddressRequest[] getModelRevisionRequests,
-            BatchedResult<T>[] res, XType type) {
-        
+
+    private <T> String encodeAddresses(final GetWithAddressRequest[] getModelRevisionRequests,
+            final BatchedResult<T>[] res, final XType type) {
+
         XyAssert.xyAssert(res.length == getModelRevisionRequests.length);
-        
-        StringBuilder sb = new StringBuilder();
-        
+
+        final StringBuilder sb = new StringBuilder();
+
         boolean first = true;
-        
+
         for(int i = 0; i < getModelRevisionRequests.length; i++) {
-            GetWithAddressRequest getModelRevisionRequest = getModelRevisionRequests[i];
-            XAddress address = getModelRevisionRequest.address;
-            
+            final GetWithAddressRequest getModelRevisionRequest = getModelRevisionRequests[i];
+            final XAddress address = getModelRevisionRequest.address;
+
             if(address == null) {
                 res[i] = new BatchedResult<T>(new RequestException("address must not be null"));
                 continue;
@@ -260,13 +260,13 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
                         + " is not of type " + type));
                 continue;
             }
-            
+
             if(first) {
                 first = false;
             } else {
                 sb.append('&');
             }
-            
+
             sb.append(XydraStoreRestInterface.ARG_ADDRESS);
             sb.append('=');
             sb.append(urlencode(address.toString()));
@@ -275,34 +275,35 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
                 sb.append("+tentative");
             }
         }
-        
+
         if(first) {
             return null;
         }
-        
+
         return sb.toString();
     }
-    
-    protected String urlencode(String string) {
+
+    protected String urlencode(final String string) {
         return URLUtils.encode(string);
     }
-    
-    private static <T> void toBatchedResults(List<Object> snapshots, BatchedResult<T>[] result,
-            XType type) {
-        
+
+    private static <T> void toBatchedResults(final List<Object> snapshots, final BatchedResult<T>[] result,
+            final XType type) {
+
         int i = 0;
-        for(Object o : snapshots) {
-            
+        for(final Object o : snapshots) {
+
             while(result[i] != null) {
                 i++;
             }
-            
+
             XyAssert.xyAssert(i < result.length);
-            
+
             if(o == null) {
                 result[i] = new BatchedResult<T>((T)null);
             } else if(o instanceof XEntity && ((XEntity)o).getType() == type) {
                 @SuppressWarnings("unchecked")
+				final
                 T t = (T)o;
                 result[i] = new BatchedResult<T>(t);
             } else if(o instanceof Throwable) {
@@ -311,232 +312,234 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
                 result[i] = new BatchedResult<T>(new InternalStoreException("Unexpected class: "
                         + o.getClass()));
             }
-            
+
         }
-        
+
         for(; i < result.length; i++) {
             XyAssert.xyAssert(result[i] != null);
             assert result[i] != null;
         }
-        
+
     }
-    
+
     @Override
     public XydraStoreAdmin getXydraStoreAdmin() {
         return null;
     }
-    
-    protected String encodeLoginCookie(XId actorId, String passwordHash) {
+
+    protected String encodeLoginCookie(final XId actorId, final String passwordHash) {
         return XydraStoreRestInterface.ARG_ACTOR_ID + "=" + urlencode(actorId.toString()) + "; "
                 + XydraStoreRestInterface.ARG_PASSWORD_HASH + "="
                 + urlencode(passwordHash.toString());
     }
-    
-    protected String encodeLoginQuery(XId actorId, String passwordHash) {
+
+    protected String encodeLoginQuery(final XId actorId, final String passwordHash) {
         return XydraStoreRestInterface.ARG_ACTOR_ID + "=" + urlencode(actorId.toString()) + "&"
                 + XydraStoreRestInterface.ARG_PASSWORD_HASH + "="
                 + urlencode(passwordHash.toString());
     }
-    
+
     private class LoginRequest extends Request<Boolean> {
-        
-        protected LoginRequest(XId actor, String password, Callback<Boolean> callback) {
+
+        protected LoginRequest(final XId actor, final String password, final Callback<Boolean> callback) {
             super(actor, password, callback);
         }
-        
+
         protected void run() {
             get(XydraStoreRestInterface.URL_LOGIN);
         }
-        
+
         @Override
-        protected Boolean parse(XydraElement element) {
+        protected Boolean parse(final XydraElement element) {
             return SerializedStore.toAuthenticationResult(element);
         }
-        
+
     }
-    
+
     @Override
-    public void checkLogin(XId actor, String password, Callback<Boolean> callback) {
+    public void checkLogin(final XId actor, final String password, final Callback<Boolean> callback) {
         new LoginRequest(actor, password, callback).run();
     }
-    
-    protected XydraOut prepareExecuteRequest(XCommand[] commands) {
-        
+
+    protected XydraOut prepareExecuteRequest(final XCommand[] commands) {
+
         if(commands == null) {
             throw new IllegalArgumentException("commands array must not be null");
         }
-        
-        XydraOut out = this.serializer.create();
+
+        final XydraOut out = this.serializer.create();
         SerializedCommand.serialize(Arrays.asList(commands).iterator(), out, null);
-        
+
         return out;
     }
-    
+
     private class ExecuteRequest extends Request<BatchedResult<Long>[]> {
-        
+
         private final XCommand[] commands;
-        
-        protected ExecuteRequest(XId actor, String password, XCommand[] commands,
-                Callback<BatchedResult<Long>[]> callback) {
+
+        protected ExecuteRequest(final XId actor, final String password, final XCommand[] commands,
+                final Callback<BatchedResult<Long>[]> callback) {
             super(actor, password, callback);
             this.commands = commands;
         }
-        
+
         protected void run() {
-            XydraOut out = prepareExecuteRequest(this.commands);
+            final XydraOut out = prepareExecuteRequest(this.commands);
             post(XydraStoreRestInterface.URL_EXECUTE, out);
         }
-        
+
         @Override
-        protected BatchedResult<Long>[] parse(XydraElement element) {
-            
+        protected BatchedResult<Long>[] parse(final XydraElement element) {
+
             @SuppressWarnings("unchecked")
+			final
             BatchedResult<Long>[] res = new BatchedResult[this.commands.length];
-            
+
             SerializedStore.toCommandResults(element, null, res, null);
-            
+
             return res;
         }
-        
+
     }
-    
+
     @Override
-    public void executeCommands(XId actor, String password, XCommand[] commands,
-            Callback<BatchedResult<Long>[]> callback) {
+    public void executeCommands(final XId actor, final String password, final XCommand[] commands,
+            final Callback<BatchedResult<Long>[]> callback) {
         new ExecuteRequest(actor, password, commands, callback).run();
     }
-    
+
     @SuppressWarnings("unchecked")
     private static BatchedResult<XEvent[]>[] prepareEventsResultsArray(
-            GetEventsRequest[] getEventsRequests) {
+            final GetEventsRequest[] getEventsRequests) {
         if(getEventsRequests == null) {
             throw new IllegalArgumentException("getEventsRequests array must not be null");
         }
         return new BatchedResult[getEventsRequests.length];
     }
-    
+
     private class EventsRequest extends Request<BatchedResult<XEvent[]>[]> {
-        
+
         private final GetEventsRequest[] getEventsRequests;
-        private BatchedResult<XEvent[]>[] res;
-        
-        protected EventsRequest(XId actor, String password, GetEventsRequest[] getEventsRequests,
-                Callback<BatchedResult<XEvent[]>[]> callback) {
+        private final BatchedResult<XEvent[]>[] res;
+
+        protected EventsRequest(final XId actor, final String password, final GetEventsRequest[] getEventsRequests,
+                final Callback<BatchedResult<XEvent[]>[]> callback) {
             super(actor, password, callback);
             this.getEventsRequests = getEventsRequests;
             this.res = prepareEventsResultsArray(getEventsRequests);
         }
-        
+
         protected void run() {
-            
-            String req = encodeEventsRequests(this.getEventsRequests, this.res);
+
+            final String req = encodeEventsRequests(this.getEventsRequests, this.res);
             if(req == null) {
                 onSuccess(this.res);
                 return;
             }
-            
+
             get(XydraStoreRestInterface.URL_EVENTS + "?" + req);
         }
-        
+
         @Override
-        protected BatchedResult<XEvent[]>[] parse(XydraElement element) {
-            
+        protected BatchedResult<XEvent[]>[] parse(final XydraElement element) {
+
             SerializedStore.toEventResults(element, this.getEventsRequests, this.res);
-            
+
             return this.res;
         }
-        
+
     }
-    
+
     @Override
-    public void getEvents(XId actor, String password, GetEventsRequest[] getEventsRequests,
-            Callback<BatchedResult<XEvent[]>[]> callback) {
+    public void getEvents(final XId actor, final String password, final GetEventsRequest[] getEventsRequests,
+            final Callback<BatchedResult<XEvent[]>[]> callback) {
         new EventsRequest(actor, password, getEventsRequests, callback).run();
     }
-    
+
     private class ExecuteAndEventsRequest extends
             Request<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> {
-        
+
         private final XCommand[] commands;
         private final GetEventsRequest[] getEventsRequests;
         private final BatchedResult<XEvent[]>[] eventsRes;
-        
-        protected ExecuteAndEventsRequest(XId actor, String password, XCommand[] commands,
-                GetEventsRequest[] getEventsRequests,
-                Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
+
+        protected ExecuteAndEventsRequest(final XId actor, final String password, final XCommand[] commands,
+                final GetEventsRequest[] getEventsRequests,
+                final Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
             super(actor, password, callback);
             this.commands = commands;
             this.getEventsRequests = getEventsRequests;
             this.eventsRes = prepareEventsResultsArray(getEventsRequests);
         }
-        
+
         protected void run() {
-            
-            XydraOut out = prepareExecuteRequest(this.commands);
-            
-            String req = encodeEventsRequests(this.getEventsRequests, this.eventsRes);
-            
+
+            final XydraOut out = prepareExecuteRequest(this.commands);
+
+            final String req = encodeEventsRequests(this.getEventsRequests, this.eventsRes);
+
             String uri = XydraStoreRestInterface.URL_EXECUTE;
             if(req != null) {
                 uri += "?" + req;
             }
-            
+
             post(uri, out);
         }
-        
+
         @Override
-        protected Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]> parse(XydraElement element) {
-            
+        protected Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]> parse(final XydraElement element) {
+
             @SuppressWarnings("unchecked")
+			final
             BatchedResult<Long>[] commandsRes = new BatchedResult[this.commands.length];
-            
+
             SerializedStore.toCommandResults(element, this.getEventsRequests, commandsRes,
                     this.eventsRes);
-            
+
             return new Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>(commandsRes,
                     this.eventsRes);
         }
-        
+
     }
-    
+
     @Override
-    public void executeCommandsAndGetEvents(XId actor, String password, XCommand[] commands,
-            GetEventsRequest[] getEventsRequests,
-            Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
+    public void executeCommandsAndGetEvents(final XId actor, final String password, final XCommand[] commands,
+            final GetEventsRequest[] getEventsRequests,
+            final Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
         new ExecuteAndEventsRequest(actor, password, commands, getEventsRequests, callback).run();
     }
-    
+
     private class ModelIdsRequest extends Request<Set<XId>> {
-        
-        protected ModelIdsRequest(XId actor, String password, Callback<Set<XId>> callback) {
+
+        protected ModelIdsRequest(final XId actor, final String password, final Callback<Set<XId>> callback) {
             super(actor, password, callback);
         }
-        
+
         protected void run() {
             get(XydraStoreRestInterface.URL_MODEL_IDS);
         }
-        
+
         @Override
-        protected Set<XId> parse(XydraElement element) {
+        protected Set<XId> parse(final XydraElement element) {
             return SerializedStore.toModelIds(element);
         }
-        
+
     }
-    
+
     @Override
-    public void getModelIds(XId actor, String password, Callback<Set<XId>> callback) {
+    public void getModelIds(final XId actor, final String password, final Callback<Set<XId>> callback) {
         new ModelIdsRequest(actor, password, callback).run();
     }
-    
+
     private class RevisionsRequest extends Request<BatchedResult<ModelRevision>[]> {
-        
+
         private final GetWithAddressRequest[] modelAddresses;
         private final BatchedResult<ModelRevision>[] res;
-        
+
         @SuppressWarnings("unchecked")
-        protected RevisionsRequest(XId actor, String password,
-                GetWithAddressRequest[] modelAddresses,
-                Callback<BatchedResult<ModelRevision>[]> callback) {
+        protected RevisionsRequest(final XId actor, final String password,
+                final GetWithAddressRequest[] modelAddresses,
+                final Callback<BatchedResult<ModelRevision>[]> callback) {
             super(actor, password, callback);
             this.modelAddresses = modelAddresses;
             if(this.modelAddresses == null) {
@@ -544,45 +547,45 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
             }
             this.res = new BatchedResult[this.modelAddresses.length];
         }
-        
+
         protected void run() {
-            
-            String req = encodeAddresses(this.modelAddresses, this.res, XType.XMODEL);
+
+            final String req = encodeAddresses(this.modelAddresses, this.res, XType.XMODEL);
             if(req == null) {
                 onSuccess(this.res);
                 return;
             }
-            
+
             get(XydraStoreRestInterface.URL_REVISIONS + "?" + req);
         }
-        
+
         @Override
-        protected BatchedResult<ModelRevision>[] parse(XydraElement element) {
-            
+        protected BatchedResult<ModelRevision>[] parse(final XydraElement element) {
+
             SerializedStore.toModelRevisions(element, this.res);
-            
+
             return this.res;
         }
-        
+
     }
-    
+
     @Override
-    public void getModelRevisions(XId actor, String password,
-            GetWithAddressRequest[] modelRevisionRequests,
-            Callback<BatchedResult<ModelRevision>[]> callback) {
+    public void getModelRevisions(final XId actor, final String password,
+            final GetWithAddressRequest[] modelRevisionRequests,
+            final Callback<BatchedResult<ModelRevision>[]> callback) {
         new RevisionsRequest(actor, password, modelRevisionRequests, callback).run();
     }
-    
+
     private class SnapshotsRequest<T> extends Request<BatchedResult<T>[]> {
-        
+
         private final GetWithAddressRequest[] addressRequests;
         private final BatchedResult<T>[] res;
         private final XType type;
-        
+
         @SuppressWarnings("unchecked")
-        protected SnapshotsRequest(XId actor, String password,
-                GetWithAddressRequest[] modelAddressRequests,
-                Callback<BatchedResult<T>[]> callback, XType type) {
+        protected SnapshotsRequest(final XId actor, final String password,
+                final GetWithAddressRequest[] modelAddressRequests,
+                final Callback<BatchedResult<T>[]> callback, final XType type) {
             super(actor, password, callback);
             this.addressRequests = modelAddressRequests;
             if(this.addressRequests == null) {
@@ -591,70 +594,70 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
             this.res = new BatchedResult[this.addressRequests.length];
             this.type = type;
         }
-        
+
         protected void run() {
-            
-            String req = encodeAddresses(this.addressRequests, this.res, this.type);
+
+            final String req = encodeAddresses(this.addressRequests, this.res, this.type);
             if(req == null) {
                 onSuccess(this.res);
                 return;
             }
-            
+
             get(XydraStoreRestInterface.URL_SNAPSHOTS + "?" + req);
         }
-        
+
         @Override
-        protected BatchedResult<T>[] parse(XydraElement element) {
-            
-            XAddress[] addresses = new XAddress[this.addressRequests.length];
+        protected BatchedResult<T>[] parse(final XydraElement element) {
+
+            final XAddress[] addresses = new XAddress[this.addressRequests.length];
             for(int i = 0; i < addresses.length; i++) {
                 addresses[i] = this.addressRequests[i].address;
             }
-            List<Object> snapshots = SerializedStore.toSnapshots(element, addresses);
-            
+            final List<Object> snapshots = SerializedStore.toSnapshots(element, addresses);
+
             toBatchedResults(snapshots, this.res, this.type);
-            
+
             return this.res;
         }
-        
+
     }
-    
+
     @Override
-    public void getModelSnapshots(XId actor, String password,
-            GetWithAddressRequest[] modelAddressRequests,
-            Callback<BatchedResult<XReadableModel>[]> callback) {
+    public void getModelSnapshots(final XId actor, final String password,
+            final GetWithAddressRequest[] modelAddressRequests,
+            final Callback<BatchedResult<XReadableModel>[]> callback) {
         new SnapshotsRequest<XReadableModel>(actor, password, modelAddressRequests, callback,
                 XType.XMODEL).run();
     }
-    
+
     @Override
-    public void getObjectSnapshots(XId actor, String password,
-            GetWithAddressRequest[] objectAddressRequests,
-            Callback<BatchedResult<XReadableObject>[]> callback) throws IllegalArgumentException {
+    public void getObjectSnapshots(final XId actor, final String password,
+            final GetWithAddressRequest[] objectAddressRequests,
+            final Callback<BatchedResult<XReadableObject>[]> callback) throws IllegalArgumentException {
         new SnapshotsRequest<XReadableObject>(actor, password, objectAddressRequests, callback,
                 XType.XOBJECT).run();
     }
-    
+
     private class RepositoryIdRequest extends Request<XId> {
-        
-        protected RepositoryIdRequest(XId actor, String password, Callback<XId> callback) {
+
+        protected RepositoryIdRequest(final XId actor, final String password, final Callback<XId> callback) {
             super(actor, password, callback);
         }
-        
+
         protected void run() {
             get(XydraStoreRestInterface.URL_REPOSITORY_ID);
         }
-        
+
         @Override
-        protected XId parse(XydraElement element) {
+        protected XId parse(final XydraElement element) {
             return SerializedStore.toRepositoryId(element);
         }
-        
+
     }
-    
+
     @Override
-    public void getRepositoryId(XId actor, String password, Callback<XId> callback) {
+    public void getRepositoryId(final XId actor, final String password, final Callback<XId> callback) {
         new RepositoryIdRequest(actor, password, callback).run();
     }
-    
+
 }

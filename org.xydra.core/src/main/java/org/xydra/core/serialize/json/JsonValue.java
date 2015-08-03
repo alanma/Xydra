@@ -19,7 +19,7 @@ public class JsonValue extends AbstractJsonElement {
 	private final String type;
 	private final Object value;
 
-	public JsonValue(Object value, String type) {
+	public JsonValue(final Object value, final String type) {
 		this.type = type == null ? XmlEncoder.XVALUE_ELEMENT : type;
 		this.value = value;
 	}
@@ -40,12 +40,12 @@ public class JsonValue extends AbstractJsonElement {
 	}
 
 	@Override
-	public Object getContent(String name) {
+	public Object getContent(final String name) {
 		throw new ParsingException(this, "cannot get named content from JSON value");
 	}
 
 	@Override
-	public Object getAttribute(String name) {
+	public Object getAttribute(final String name) {
 		throw new ParsingException(this, "cannot get attribute from JSON value");
 	}
 
@@ -55,32 +55,32 @@ public class JsonValue extends AbstractJsonElement {
 	}
 
 	@Override
-	public XydraElement getChild(String name, String type) {
+	public XydraElement getChild(final String name, final String type) {
 		throw new ParsingException(this, "cannot get child form JSON value");
 	}
 
 	@Override
-	public Iterator<XydraElement> getChildren(String defaultType) {
+	public Iterator<XydraElement> getChildren(final String defaultType) {
 		throw new ParsingException(this, "cannot get children form JSON value");
 	}
 
 	@Override
-	public Iterator<XydraElement> getChildrenByName(String name, String defaultType) {
+	public Iterator<XydraElement> getChildrenByName(final String name, final String defaultType) {
 		throw new ParsingException(this, "cannot get children form JSON value");
 	}
 
 	@Override
-	public XydraElement getChild(String name) {
+	public XydraElement getChild(final String name) {
 		throw new ParsingException(this, "cannot get container form JSON value");
 	}
 
 	@Override
-	public Iterator<Pair<String, XydraElement>> getEntries(String attribute, String defaultType) {
+	public Iterator<Pair<String, XydraElement>> getEntries(final String attribute, final String defaultType) {
 		throw new ParsingException(this, "cannot get entries form JSON value");
 	}
 
 	@Override
-	public Object getValue(String name, int index) {
+	public Object getValue(final String name, final int index) {
 		throw new ParsingException(this, "cannot get named value form JSON value");
 	}
 
@@ -90,7 +90,7 @@ public class JsonValue extends AbstractJsonElement {
 	}
 
 	@Override
-	public Iterator<Object> getValues(String name) {
+	public Iterator<Object> getValues(final String name) {
 		throw new ParsingException(this, "cannot get values form JSON value");
 	}
 

@@ -10,7 +10,7 @@ import org.xydra.xgae.datastore.api.SKey;
 
 /**
  * @author xamde
- * 
+ *
  */
 @RunsInGWT(true)
 @RunsInAppEngine(true)
@@ -33,7 +33,7 @@ public class XGaeDebugHelper {
 	/** More readable logs on AppEngine */
 	private static final String PREFIX = "\n";
 
-	private static String timing(String s, Timing timing) {
+	private static String timing(final String s, final Timing timing) {
 		switch (timing) {
 		case Now:
 			return s;
@@ -45,61 +45,61 @@ public class XGaeDebugHelper {
 		throw new IllegalStateException();
 	}
 
-	public static String dataGet(String dataSourceName, Collection<?> keys, Map<?, ?> result,
-			Timing timing) {
+	public static String dataGet(final String dataSourceName, final Collection<?> keys, final Map<?, ?> result,
+			final Timing timing) {
 		return PREFIX
 				+ timing((result.isEmpty() ? GET_BATCH_EMPTY : GET_BATCH) + " " + dataSourceName
 						+ formatKey(keys) + " = " + DebugFormatter.format(result.values()), timing);
 	}
 
-	public static String dataGet(String dataSourceName, String key, Object value, Timing timing) {
+	public static String dataGet(final String dataSourceName, final String key, final Object value, final Timing timing) {
 		return PREFIX
 				+ timing((value == null ? GET_NULL : GET_VALUE) + " " + dataSourceName
 						+ formatKey(key) + " = " + DebugFormatter.format(value), timing);
 	}
 
-	public static String dataPut(String dataSourceName, String key, Object value, Timing timing) {
+	public static String dataPut(final String dataSourceName, final String key, final Object value, final Timing timing) {
 		return PREFIX
 				+ timing((value == null ? PUT_NULL : PUT_VALUE) + " " + dataSourceName
 						+ formatKey(key) + " -> " + DebugFormatter.format(value), timing);
 	}
 
-	public static String dataPutIfNull(String dataSourceName, Object key, Object value,
-			Timing timing) {
+	public static String dataPutIfNull(final String dataSourceName, final Object key, final Object value,
+			final Timing timing) {
 		return PREFIX
 				+ timing((value == null ? "-USELESS-" : ">ifWasNull>") + " " + dataSourceName
 						+ formatKey(key) + " -> " + DebugFormatter.format(value), timing);
 	}
 
-	public static String dataPutIfUntouched(String dataSourceName, Object key, Object oldValue,
-			Object newValue, Timing timing) {
+	public static String dataPutIfUntouched(final String dataSourceName, final Object key, final Object oldValue,
+			final Object newValue, final Timing timing) {
 		return PREFIX
 				+ timing((newValue == null ? "X-(untouched?)->" : ">>(untouched)>") + " "
 						+ dataSourceName + formatKey(key) + " ? " + DebugFormatter.format(oldValue)
 						+ " -> " + DebugFormatter.format(newValue), timing);
 	}
 
-	public static String dataPut(String dataSourceName,
-			Map<? extends Object, ? extends Object> map, Timing timing) {
+	public static String dataPut(final String dataSourceName,
+			final Map<? extends Object, ? extends Object> map, final Timing timing) {
 		return PREFIX
 				+ timing((map.isEmpty() ? PUT_BATCH_EMPTY : PUT_BATCH) + " " + dataSourceName
 						+ formatKey(map.keySet()) + " -> " + DebugFormatter.format(map.values()),
 						timing);
 	}
 
-	private static final String formatKey(Object key) {
+	private static final String formatKey(final Object key) {
 		return "{'" + DebugFormatter.format(key) + "'}";
 	}
 
-	public static String init(String dataSourceName) {
+	public static String init(final String dataSourceName) {
 		return "INIT " + dataSourceName;
 	}
 
-	public static String clear(String dataSourceName) {
+	public static String clear(final String dataSourceName) {
 		return "CLEAR " + dataSourceName;
 	}
 
-	public static String toString(SKey key) {
+	public static String toString(final SKey key) {
 		return key.getKind() + "|" + key.getName();
 	}
 

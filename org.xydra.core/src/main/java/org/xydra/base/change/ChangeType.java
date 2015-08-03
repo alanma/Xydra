@@ -3,7 +3,7 @@ package org.xydra.base.change;
 /**
  * An enumeration for discerning different types of {@link XEvent XEvents} or
  * {@link XCommand XCommands}.
- * 
+ *
  */
 public enum ChangeType {
 

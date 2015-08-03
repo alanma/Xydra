@@ -17,8 +17,8 @@ import org.xydra.oo.testtypes.MyLongBasedType;
  */
 public class TestGwtGenerator {
 
-	public static void main(String[] args) throws IOException, ClassNotFoundException {
-		TestGwtGenerator t = new TestGwtGenerator();
+	public static void main(final String[] args) throws IOException, ClassNotFoundException {
+		final TestGwtGenerator t = new TestGwtGenerator();
 		t.generateGwtClasses();
 	}
 
@@ -32,14 +32,14 @@ public class TestGwtGenerator {
 				MyLongBasedType.MAPPER);
 
 		// required setup
-		PackageSpec ps = new PackageSpec(IHasAllType.class.getPackage().getName(), false);
+		final PackageSpec ps = new PackageSpec(IHasAllType.class.getPackage().getName(), false);
 
-		ClassSpec c = GwtCodeGenerator.constructClassSpec(ps,
+		final ClassSpec c = GwtCodeGenerator.constructClassSpec(ps,
 				"org.xydra.oo.testgen.alltypes.client", IHasAllType.class.getCanonicalName(),
 				"GwtHasAllType");
 		c.dump();
 
-		File f = new File("./src/test/java");
+		final File f = new File("./src/test/java");
 		f.mkdirs();
 		SpecWriter.writePackage(ps, f);
 	}

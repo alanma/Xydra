@@ -36,7 +36,7 @@ public class XModelEditor extends Composite implements XModelEventListener {
 
 	private final Map<XId, XObjectEditor> objects = new HashMap<XId, XObjectEditor>();
 
-	public XModelEditor(XModel model) {
+	public XModelEditor(final XModel model) {
 		super();
 
 		this.model = model;
@@ -49,18 +49,18 @@ public class XModelEditor extends Composite implements XModelEventListener {
 
 		this.add.addClickHandler(new ClickHandler() {
 			@Override
-			public void onClick(ClickEvent e) {
+			public void onClick(final ClickEvent e) {
 				final PopupPanel pp = new PopupPanel(false, true);
-				HorizontalPanel layout = new HorizontalPanel();
+				final HorizontalPanel layout = new HorizontalPanel();
 				final Button add = new Button("Add Object");
 				final XIdEditor editor = new XIdEditor(null, new EditListener() {
 					@Override
-					public void newValue(XValue value) {
+					public void newValue(final XValue value) {
 						add.setEnabled(value != null && value instanceof XId
-								&& !XModelEditor.this.model.hasObject(((XId) value)));
+								&& !XModelEditor.this.model.hasObject((XId) value));
 					}
 				});
-				Button cancel = new Button("Cancel");
+				final Button cancel = new Button("Cancel");
 				layout.add(new Label("XID:"));
 				layout.add(editor);
 				layout.add(add);
@@ -68,21 +68,23 @@ public class XModelEditor extends Composite implements XModelEventListener {
 				pp.add(layout);
 				cancel.addClickHandler(new ClickHandler() {
 					@Override
-					public void onClick(ClickEvent e) {
+					public void onClick(final ClickEvent e) {
 						pp.hide();
 						pp.removeFromParent();
 					}
 				});
 				add.addClickHandler(new ClickHandler() {
 					@Override
-					public void onClick(ClickEvent e) {
+					public void onClick(final ClickEvent e) {
 						// TODO simplify this code block now that XID=XIDValue
-						XId value = editor.getValue();
-						if (value == null)
+						final XId value = editor.getValue();
+						if (value == null) {
 							return;
-						XId id = value;
-						if (XModelEditor.this.model.hasObject(id))
+						}
+						final XId id = value;
+						if (XModelEditor.this.model.hasObject(id)) {
 							return;
+						}
 						pp.hide();
 						pp.removeFromParent();
 						add(id);
@@ -97,25 +99,26 @@ public class XModelEditor extends Composite implements XModelEventListener {
 
 		setStyleName("editor-xmodel");
 
-		for (XId objectId : this.model)
+		for (final XId objectId : this.model) {
 			newObject(objectId);
+		}
 
 	}
 
-	private void newObject(XId objectId) {
-		XObject object = this.model.getObject(objectId);
+	private void newObject(final XId objectId) {
+		final XObject object = this.model.getObject(objectId);
 		if (object == null) {
 			log.warn("editor: asked to add object " + objectId + ", which doesn't exist (anymore)");
 			return;
 		}
-		XObjectEditor editor = new XObjectEditor(this.model, object);
+		final XObjectEditor editor = new XObjectEditor(this.model, object);
 		this.objects.put(objectId, editor);
 		// TODO sort
 		this.outer.add(editor);
 	}
 
-	private void objectRemoved(XId objectId) {
-		XObjectEditor editor = XModelEditor.this.objects.remove(objectId);
+	private void objectRemoved(final XId objectId) {
+		final XObjectEditor editor = XModelEditor.this.objects.remove(objectId);
 		if (editor == null) {
 			log.warn("editor: asked to remove object " + objectId + ", which isn't there");
 			return;
@@ -124,7 +127,7 @@ public class XModelEditor extends Composite implements XModelEventListener {
 	}
 
 	@Override
-	public void onChangeEvent(XModelEvent event) {
+	public void onChangeEvent(final XModelEvent event) {
 		log.info("editor: got " + event);
 		if (event.getChangeType() == ChangeType.ADD) {
 			newObject(event.getObjectId());
@@ -133,7 +136,7 @@ public class XModelEditor extends Composite implements XModelEventListener {
 		}
 	}
 
-	private void add(XId id) {
+	private void add(final XId id) {
 		this.model.executeCommand(MemoryModelCommand.createAddCommand(this.model.getAddress(),
 				true, id));
 	}

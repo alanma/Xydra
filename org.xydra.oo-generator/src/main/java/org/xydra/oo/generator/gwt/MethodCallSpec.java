@@ -5,23 +5,23 @@ import java.util.List;
 
 public class MethodCallSpec {
 
-	private String method;
-	private List<String> args = new ArrayList<String>();
-	private String packageName;
-	private String className;
+	private final String method;
+	private final List<String> args = new ArrayList<String>();
+	private final String packageName;
+	private final String className;
 
-	public MethodCallSpec(Class<?> c, String method) {
+	public MethodCallSpec(final Class<?> c, final String method) {
 		this(c.getPackage().getName(), c.getSimpleName(), method);
 	}
 
-	public MethodCallSpec(String packageName, String className, String method) {
+	public MethodCallSpec(final String packageName, final String className, final String method) {
 		super();
 		this.packageName = packageName;
 		this.className = className;
 		this.method = method;
 	}
 
-	public MethodCallSpec addParam(String p) {
+	public MethodCallSpec addParam(final String p) {
 		this.args.add(p);
 		// fluent
 		return this;

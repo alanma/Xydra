@@ -13,7 +13,7 @@ import org.xydra.store.impl.gae.changes.GaeChange;
 
 /**
  * Executed MOF-commands
- * 
+ *
  * @author xamde
  */
 public class Algorithms {
@@ -27,7 +27,7 @@ public class Algorithms {
 		 * @throws IllegalArgumentException
 		 *             if effect is neither add nor remove
 		 */
-		public static boolean modelExists(Effect effect) {
+		public static boolean modelExists(final Effect effect) {
 			if (effect == Add) {
 				return true;
 			} else if (effect == Remove) {
@@ -47,8 +47,8 @@ public class Algorithms {
 	public static Effect effectOnModelExistsFlag(@NeverNull final GaeChange change) {
 		if (change.getStatus().changedSomething()) {
 
-			List<XAtomicEvent> atomics = change.getAtomicEvents().getFirst();
-			XAtomicEvent last = atomics.get(atomics.size() - 1);
+			final List<XAtomicEvent> atomics = change.getAtomicEvents().getFirst();
+			final XAtomicEvent last = atomics.get(atomics.size() - 1);
 			return eventIndicatesModelExists(last) ? Effect.Add : Effect.Remove;
 
 			// XEvent event = change.getEvent();
@@ -75,8 +75,8 @@ public class Algorithms {
 					+ change);
 		}
 
-		List<XAtomicEvent> atomics = change.getAtomicEvents().getFirst();
-		XAtomicEvent last = atomics.get(atomics.size() - 1);
+		final List<XAtomicEvent> atomics = change.getAtomicEvents().getFirst();
+		final XAtomicEvent last = atomics.get(atomics.size() - 1);
 		return eventIndicatesModelExists(last);
 	}
 
@@ -91,7 +91,7 @@ public class Algorithms {
 		XEvent event = e;
 		if (event.getChangeType() == ChangeType.TRANSACTION) {
 			// check only last event
-			XTransactionEvent txnEvent = (XTransactionEvent) event;
+			final XTransactionEvent txnEvent = (XTransactionEvent) event;
 			XyAssert.xyAssert(txnEvent.size() >= 1);
 			event = txnEvent.getEvent(txnEvent.size() - 1);
 			XyAssert.xyAssert(event != null);
@@ -106,7 +106,7 @@ public class Algorithms {
 		return true;
 	}
 
-	public static long increaseExponentiallyWithFactorAndMaximum(long l, int f, long max) {
+	public static long increaseExponentiallyWithFactorAndMaximum(final long l, final int f, final long max) {
 		long result = l * 2;
 		if (result > max) {
 			result = max;

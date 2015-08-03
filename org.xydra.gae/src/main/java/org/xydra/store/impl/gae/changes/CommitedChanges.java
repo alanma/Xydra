@@ -16,11 +16,11 @@ import com.google.common.cache.Cache;
 /**
  * In-memory representation for some change events. Required for
  * {@link GaeChangesServiceImpl3}
- * 
+ *
  * IMPROVE Shares this cache with other threads on the same instance
- * 
+ *
  * This class is NOT thread-safe.
- * 
+ *
  * @author xamde
  */
 public class CommitedChanges {
@@ -30,13 +30,13 @@ public class CommitedChanges {
 	/** Just the debug name */
 	private static final String LOCAL_COMMITED_CHANGES_CACHENAME = "[.c1]";
 	private static final String INSTANCE_COMMITED_CHANGES_CACHENAME = "[.c2]";
-	private XAddress modelAddr;
-	private Map<Long, GaeChange> localMap = new HashMap<Long, GaeChange>();
+	private final XAddress modelAddr;
+	private final Map<Long, GaeChange> localMap = new HashMap<Long, GaeChange>();
 
 	/**
 	 * @param modelAddress
 	 */
-	public CommitedChanges(XAddress modelAddress) {
+	public CommitedChanges(final XAddress modelAddress) {
 		this.modelAddr = modelAddress;
 	}
 
@@ -45,8 +45,8 @@ public class CommitedChanges {
 	 * @return cached change for this revisions. Can be null if (1) is really
 	 *         null, (2) was just never indexed
 	 */
-	GaeChange getCachedChange(long rev) {
-		GaeChange change = this.localMap.get(rev);
+	GaeChange getCachedChange(final long rev) {
+		final GaeChange change = this.localMap.get(rev);
 		log.trace(XGaeDebugHelper.dataGet(LOCAL_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""
 				+ rev, change, Timing.Now));
 		return change;
@@ -57,9 +57,9 @@ public class CommitedChanges {
 	 * @return cached change for this revisions. Can be null if (1) is really
 	 *         null, (2) was just never indexed, (3) got removed from cache
 	 */
-	GaeChange getInstanceCachedChange(long rev) {
+	GaeChange getInstanceCachedChange(final long rev) {
 		GaeChange change;
-		Map<Long, GaeChange> committedChangeCache = getInstanceCommittedChangeCache();
+		final Map<Long, GaeChange> committedChangeCache = getInstanceCommittedChangeCache();
 		synchronized (committedChangeCache) {
 			change = committedChangeCache.get(rev);
 		}
@@ -72,19 +72,19 @@ public class CommitedChanges {
 	 * @param rev
 	 * @return true if this change is cached (and therefore committed)
 	 */
-	boolean hasCachedChange(long rev) {
+	boolean hasCachedChange(final long rev) {
 		return this.localMap.containsKey(rev);
 	}
 
 	/**
 	 * CODE SAMPLE TO HELP IMPLEMENTING INSTANCE-WIDE SHARING
-	 * 
+	 *
 	 * @param rev
 	 * @return
 	 */
 	@SuppressWarnings("unused")
-	private boolean hasInstanceCachedChange(long rev) {
-		Map<Long, GaeChange> committedChangeCache = getInstanceCommittedChangeCache();
+	private boolean hasInstanceCachedChange(final long rev) {
+		final Map<Long, GaeChange> committedChangeCache = getInstanceCommittedChangeCache();
 		synchronized (committedChangeCache) {
 			return committedChangeCache.containsKey(rev);
 		}
@@ -92,13 +92,13 @@ public class CommitedChanges {
 
 	/**
 	 * CODE SAMPLE TO HELP IMPLEMENTING INSTANCE-WIDE SHARING
-	 * 
+	 *
 	 * @return the instance-level cache of committed change objects
 	 */
 	@SuppressWarnings("unchecked")
 	private Map<Long, GaeChange> getInstanceCommittedChangeCache() {
-		String key = "changes:" + this.modelAddr;
-		Cache<String, Object> instanceCache = InstanceContext.getInstanceCache();
+		final String key = "changes:" + this.modelAddr;
+		final Cache<String, Object> instanceCache = InstanceContext.getInstanceCache();
 		Map<Long, GaeChange> committedChangeCache;
 		synchronized (instanceCache) {
 			committedChangeCache = (Map<Long, GaeChange>) instanceCache.getIfPresent(key);
@@ -113,11 +113,11 @@ public class CommitedChanges {
 
 	/**
 	 * Cache given change, if status is committed.
-	 * 
+	 *
 	 * @param change
 	 *            to be cached; must have status == committed
 	 */
-	public void cacheStableChange(GaeChange change) {
+	public void cacheStableChange(final GaeChange change) {
 		XyAssert.xyAssert(change != null);
 		assert change != null;
 		assert change.getStatus() != null;
@@ -129,21 +129,21 @@ public class CommitedChanges {
 
 	/**
 	 * CODE SAMPLE TO HELP IMPLEMENTING INSTANCE-WIDE SHARING
-	 * 
+	 *
 	 * Cache given change, if status is committed.
-	 * 
+	 *
 	 * @param change
 	 *            to be cached; must have status == committed
 	 */
 	@SuppressWarnings("unused")
-	private void cacheInstanceCommittedChange(GaeChange change) {
+	private void cacheInstanceCommittedChange(final GaeChange change) {
 		XyAssert.xyAssert(change != null);
 		assert change != null;
 		XyAssert.xyAssert(!change.getStatus().canChange());
 		assert change.getStatus() != null;
 		log.trace(XGaeDebugHelper.dataPut(INSTANCE_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""
 				+ change.rev, change, Timing.Now));
-		Map<Long, GaeChange> committedChangeCache = getInstanceCommittedChangeCache();
+		final Map<Long, GaeChange> committedChangeCache = getInstanceCommittedChangeCache();
 		synchronized (committedChangeCache) {
 			committedChangeCache.put(change.rev, change);
 		}

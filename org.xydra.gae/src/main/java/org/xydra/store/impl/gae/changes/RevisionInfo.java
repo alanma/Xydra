@@ -9,17 +9,17 @@ import org.xydra.xgae.util.XGaeDebugHelper.Timing;
 
 /**
  * This class:
- * 
+ *
  * 1) Maintains these invariants: currentRev >= lastCommitted >= lastTaken.
- * 
+ *
  * 2) Is {@link Serializable} and can be used in MemCache.
- * 
+ *
  * 3) Is thread-safe.
- * 
+ *
  * 4) ... is only relevant within the GAE implementation.
- * 
+ *
  * A defined currentRev requires a defined value for modelExists.
- * 
+ *
  * @author xamde
  */
 public class RevisionInfo implements Serializable {
@@ -45,11 +45,11 @@ public class RevisionInfo implements Serializable {
 
 	/**
 	 * Create a revision info that knows nothing.
-	 * 
+	 *
 	 * @param datasourceName
 	 *            for debugging purposes
 	 */
-	public RevisionInfo(String datasourceName) {
+	public RevisionInfo(final String datasourceName) {
 		this.datasourceName = datasourceName;
 		this.gaeModelRev = GaeModelRevision.createGaeModelRevDoesNotExistYet();
 		clear();
@@ -57,7 +57,7 @@ public class RevisionInfo implements Serializable {
 
 	/**
 	 * Create a revision info initialised with given values
-	 * 
+	 *
 	 * @param datasourceName
 	 *            for debugging purposes
 	 * @param modelRev
@@ -67,8 +67,8 @@ public class RevisionInfo implements Serializable {
 	 * @param lastTaken
 	 *            ..
 	 */
-	public RevisionInfo(String datasourceName, GaeModelRevision modelRev, long lastCommited,
-			long lastTaken) {
+	public RevisionInfo(final String datasourceName, final GaeModelRevision modelRev, final long lastCommited,
+			final long lastTaken) {
 		assert modelRev != null;
 		this.datasourceName = datasourceName;
 		this.gaeModelRev = modelRev;
@@ -92,7 +92,7 @@ public class RevisionInfo implements Serializable {
 	 */
 	public GaeModelRevision getGaeModelRevision() {
 		synchronized (this) {
-			GaeModelRevision result = this.gaeModelRev;
+			final GaeModelRevision result = this.gaeModelRev;
 			log.trace(XGaeDebugHelper.dataGet(this.datasourceName, "gaeModelRev", result,
 					Timing.Now));
 			return result;
@@ -104,7 +104,7 @@ public class RevisionInfo implements Serializable {
 	 */
 	public synchronized long getLastCommitted() {
 		synchronized (this) {
-			long result = this.lastCommitted;
+			final long result = this.lastCommitted;
 			log.trace(XGaeDebugHelper.dataGet(this.datasourceName, "lastCommitted", result,
 					Timing.Now));
 			return result;
@@ -118,7 +118,7 @@ public class RevisionInfo implements Serializable {
 	 */
 	public synchronized long getLastTaken() {
 		synchronized (this) {
-			long result = this.lastTaken;
+			final long result = this.lastTaken;
 			log.trace(XGaeDebugHelper.dataGet(this.datasourceName, "lastTaken", result, Timing.Now));
 			return result;
 		}
@@ -157,11 +157,11 @@ public class RevisionInfo implements Serializable {
 	// }
 	// }
 
-	void setDatasourceName(String datasourceName) {
+	void setDatasourceName(final String datasourceName) {
 		this.datasourceName = datasourceName;
 	}
 
-	protected void setGaeModelRev(GaeModelRevision gaeModelRev) {
+	protected void setGaeModelRev(final GaeModelRevision gaeModelRev) {
 		assert gaeModelRev != null;
 		log.debug(XGaeDebugHelper.dataPut(this.datasourceName, "gaeModelRev", gaeModelRev,
 				Timing.Now));
@@ -171,11 +171,11 @@ public class RevisionInfo implements Serializable {
 	/**
 	 * Set the given value as the new internal value only if it is higher than
 	 * the current internal value.
-	 * 
+	 *
 	 * @param lastCommitted
 	 *            ..
 	 */
-	public synchronized void setLastCommittedIfHigher(long lastCommitted) {
+	public synchronized void setLastCommittedIfHigher(final long lastCommitted) {
 		if (lastCommitted > this.lastCommitted) {
 			log.debug(XGaeDebugHelper.dataPut(this.datasourceName, "lastCommitted", lastCommitted,
 					Timing.Now));
@@ -195,11 +195,11 @@ public class RevisionInfo implements Serializable {
 	/**
 	 * Set the given value as the new internal value only if it is higher than
 	 * the current internal value.
-	 * 
+	 *
 	 * @param lastTaken
 	 *            ..
 	 */
-	public synchronized void setLastTakenIfHigher(long lastTaken) {
+	public synchronized void setLastTakenIfHigher(final long lastTaken) {
 		if (lastTaken > this.lastTaken) {
 			log.debug(XGaeDebugHelper.dataPut(this.datasourceName, "lastTaken", lastTaken,
 					Timing.Now));
@@ -213,12 +213,14 @@ public class RevisionInfo implements Serializable {
 				+ ",lastCommitted:" + getLastCommitted() + "}";
 	}
 
-	public boolean isBetterThan(RevisionInfo other) {
-		if (other == null)
+	public boolean isBetterThan(final RevisionInfo other) {
+		if (other == null) {
 			return true;
+		}
 
-		if (this.gaeModelRev.getLastSilentCommitted() > other.gaeModelRev.getLastSilentCommitted())
+		if (this.gaeModelRev.getLastSilentCommitted() > other.gaeModelRev.getLastSilentCommitted()) {
 			return true;
+		}
 
 		if (other.gaeModelRev.getModelRevision() == null) {
 			if (this.gaeModelRev.getModelRevision() != null) {
@@ -238,7 +240,7 @@ public class RevisionInfo implements Serializable {
 	 * @param gaeModelRev
 	 *            never null
 	 */
-	public void setCurrentGaeModelRevIfRevisionIsHigher(GaeModelRevision gaeModelRev) {
+	public void setCurrentGaeModelRevIfRevisionIsHigher(final GaeModelRevision gaeModelRev) {
 		assert gaeModelRev.getModelRevision() != null;
 		if (gaeModelRev.getModelRevision().revision() > this.gaeModelRev.getModelRevision()
 				.revision()) {

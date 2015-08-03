@@ -2,14 +2,14 @@ package org.xydra.csv;
 
 /**
  * A Row is a sparse representation of a table row.
- * 
+ *
  * @author xamde
  */
 public interface IRow extends IReadableRow {
 
 	/**
 	 * Add all values from the otherRow to this Row
-	 * 
+	 *
 	 * @param otherRow
 	 *            from which to add all cells
 	 */
@@ -17,7 +17,7 @@ public interface IRow extends IReadableRow {
 
 	/**
 	 * Aggregate given row into this row
-	 * 
+	 *
 	 * @param row
 	 *            never null
 	 * @param keyColumnNames

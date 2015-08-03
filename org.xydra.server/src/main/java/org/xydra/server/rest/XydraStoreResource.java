@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -53,9 +54,9 @@ import org.xydra.store.serialize.SerializedStore.EventsRequest;
 /**
  * A Restless resource exposing a REST API that allows implementing a remote
  * {@link XydraStore}.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 public class XydraStoreResource {
 
@@ -65,7 +66,7 @@ public class XydraStoreResource {
 
 		private static final long serialVersionUID = -1357932793964520833L;
 
-		public InitException(String message) {
+		public InitException(final String message) {
 			super(message);
 		}
 
@@ -79,7 +80,7 @@ public class XydraStoreResource {
 
 	private static final Pattern callbackRegex = Pattern.compile("^[a-z0-9_]+$");
 
-	public static void restless(Restless restless, String apiLocation) {
+	public static void restless(final Restless restless, final String apiLocation) {
 		log.info("Init at apiLocation=" + apiLocation);
 
 		jsonMimes.add("application/json");
@@ -96,20 +97,20 @@ public class XydraStoreResource {
 		xmlMimes.add("text/xml");
 		mimes.addAll(xmlMimes);
 
-		String prefix = apiLocation + "/";
+		final String prefix = apiLocation + "/";
 
-		RestlessParameter actorId = new RestlessParameter(XydraStoreRestInterface.ARG_ACTOR_ID);
-		RestlessParameter passwordHash = new RestlessParameter(
+		final RestlessParameter actorId = new RestlessParameter(XydraStoreRestInterface.ARG_ACTOR_ID);
+		final RestlessParameter passwordHash = new RestlessParameter(
 				XydraStoreRestInterface.ARG_PASSWORD_HASH);
 
 		restless.addMethod(prefix + XydraStoreRestInterface.URL_LOGIN, "GET",
 				XydraStoreResource.class, "checkLogin", false, actorId, passwordHash);
 
-		RestlessParameter addresses = new RestlessParameter(XydraStoreRestInterface.ARG_ADDRESS,
+		final RestlessParameter addresses = new RestlessParameter(XydraStoreRestInterface.ARG_ADDRESS,
 				true);
-		RestlessParameter from = new RestlessParameter(XydraStoreRestInterface.ARG_BEGIN_REVISION,
+		final RestlessParameter from = new RestlessParameter(XydraStoreRestInterface.ARG_BEGIN_REVISION,
 				true);
-		RestlessParameter to = new RestlessParameter(XydraStoreRestInterface.ARG_END_REVISION, true);
+		final RestlessParameter to = new RestlessParameter(XydraStoreRestInterface.ARG_END_REVISION, true);
 
 		restless.addMethod(prefix + XydraStoreRestInterface.URL_EXECUTE, "POST",
 				XydraStoreResource.class, "executeCommands", false, actorId, passwordHash,
@@ -138,14 +139,14 @@ public class XydraStoreResource {
 
 	}
 
-	public boolean onException(Throwable t, IRestlessContext context) {
+	public boolean onException(final Throwable t, final IRestlessContext context) {
 
 		XydraRuntime.finishRequest();
 
 		if (t instanceof InitException) {
 			try {
 				context.getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST, t.getMessage());
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new RuntimeException(e);
 			}
 			return true;
@@ -155,27 +156,27 @@ public class XydraStoreResource {
 			return false;
 		}
 
-		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
+		final XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 		SerializedStore.serializeException(t, out);
 		out.flush();
 
 		return true;
 	}
 
-	private static XId getActorId(String actorIdString) {
+	private static XId getActorId(final String actorIdString) {
 
 		try {
-			return XX.toId(actorIdString);
-		} catch (Throwable t) {
+			return Base.toId(actorIdString);
+		} catch (final Throwable t) {
 			throw new RequestException("invalid actor XId: " + actorIdString);
 		}
 
 	}
 
-	private static String getBestContentType(IRestlessContext context, Set<String> choices,
-			String def) {
+	private static String getBestContentType(final IRestlessContext context, final Set<String> choices,
+			final String def) {
 
-		HttpServletRequest req = context.getRequest();
+		final HttpServletRequest req = context.getRequest();
 
 		String mime = req.getParameter(XydraStoreRestInterface.ARG_ACCEPT);
 		if (mime != null) {
@@ -189,22 +190,22 @@ public class XydraStoreResource {
 		String best = def;
 		float bestScore = Float.MIN_VALUE;
 
-		Enumeration<String> headers = req.getHeaders("Accept");
+		final Enumeration<String> headers = req.getHeaders("Accept");
 
 		while (headers.hasMoreElements()) {
 
-			String accept = headers.nextElement().toLowerCase();
+			final String accept = headers.nextElement().toLowerCase();
 
-			String[] types = accept.split(",");
-			for (String type : types) {
+			final String[] types = accept.split(",");
+			for (final String type : types) {
 
-				String[] parts = type.split(";");
+				final String[] parts = type.split(";");
 				if (!choices.contains(parts[0])) {
 					continue;
 				}
 				float score = 1.f;
 				if (parts.length > 1) {
-					String[] param = parts[1].split("=");
+					final String[] param = parts[1].split("=");
 					if (param.length > 1 && param[0].trim() == "q") {
 						score = Float.parseFloat(param[1].trim());
 					}
@@ -220,11 +221,11 @@ public class XydraStoreResource {
 		return best;
 	}
 
-	private static XydraOut startOutput(IRestlessContext context, int statusCode) {
+	private static XydraOut startOutput(final IRestlessContext context, final int statusCode) {
 
-		HttpServletResponse res = context.getResponse();
+		final HttpServletResponse res = context.getResponse();
 
-		String callback = context.getRequest().getParameter(XydraStoreRestInterface.ARG_CALLBACK);
+		final String callback = context.getRequest().getParameter(XydraStoreRestInterface.ARG_CALLBACK);
 		String mime;
 		if (callback != null) {
 			// Validate the callback to prevent cross-site scripting
@@ -242,7 +243,7 @@ public class XydraStoreResource {
 		res.setContentType(mime + "; charset=UTF-8");
 		res.setCharacterEncoding("utf-8");
 		try {
-			MiniWriter writer = new MiniStreamWriter(res.getOutputStream());
+			final MiniWriter writer = new MiniStreamWriter(res.getOutputStream());
 			XydraOut out;
 			if (xmlMimes.contains(mime)) {
 				out = new XmlOut(writer);
@@ -251,40 +252,40 @@ public class XydraStoreResource {
 			} else {
 				throw new AssertionError();
 			}
-			String format = context.getRequest().getParameter("format");
+			final String format = context.getRequest().getParameter("format");
 			if ("pretty".equals(format)) {
 				out.enableWhitespace(true, true);
 			}
 			return out;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException("re-throw", e);
 		}
 	}
 
 	/**
 	 * Let caller determine login infos without executing anything else
-	 * 
+	 *
 	 * @param context
 	 * @param actorIdStr
 	 * @param passwordHash
 	 * @throws Throwable
 	 */
-	public void checkLogin(IRestlessContext context, String actorIdStr, String passwordHash)
+	public void checkLogin(final IRestlessContext context, final String actorIdStr, final String passwordHash)
 			throws Throwable {
 
 		XydraRuntime.startRequest();
 
-		XydraStore store = XydraRestServer.getStore(context.getRestless());
-		XId actorId = getActorId(actorIdStr);
+		final XydraStore store = XydraRestServer.getStore(context.getRestless());
+		final XId actorId = getActorId(actorIdStr);
 
-		WaitingCallback<Boolean> callback = new WaitingCallback<Boolean>();
+		final WaitingCallback<Boolean> callback = new WaitingCallback<Boolean>();
 		store.checkLogin(actorId, passwordHash, callback);
 
 		if (callback.getException() != null) {
 			throw callback.getException();
 		}
 
-		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
+		final XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 
 		SerializedStore.serializeAuthenticationResult(callback.getResult(), out);
 
@@ -294,8 +295,8 @@ public class XydraStoreResource {
 
 	}
 
-	public void executeCommands(IRestlessContext context, String actorIdStr, String passwordHash,
-			String[] addresses, String[] from, String[] to) throws Throwable {
+	public void executeCommands(final IRestlessContext context, final String actorIdStr, final String passwordHash,
+			final String[] addresses, final String[] from, final String[] to) throws Throwable {
 
 		if (Delay.isSimulateDelay()) {
 			Delay.ajax();
@@ -303,50 +304,50 @@ public class XydraStoreResource {
 
 		XydraRuntime.startRequest();
 
-		XydraStore store = XydraRestServer.getStore(context.getRestless());
-		XId actorId = getActorId(actorIdStr);
+		final XydraStore store = XydraRestServer.getStore(context.getRestless());
+		final XId actorId = getActorId(actorIdStr);
 
-		EventsRequest ger = parseEventsRequest(addresses, from, to);
+		final EventsRequest ger = parseEventsRequest(addresses, from, to);
 
-		WaitingCallback<XId> repoId = new WaitingCallback<XId>();
+		final WaitingCallback<XId> repoId = new WaitingCallback<XId>();
 		// implicitly check security
 		store.getRepositoryId(actorId, passwordHash, repoId);
 
 		if (repoId.getException() != null) {
 			throw repoId.getException();
 		}
-		XAddress repoAddr = XX.toAddress(repoId.getResult(), null, null, null);
+		final XAddress repoAddr = Base.toAddress(repoId.getResult(), null, null, null);
 
-		String rawCommands = XydraRestServer.readPostData(context.getRequest());
+		final String rawCommands = XydraRestServer.readPostData(context.getRequest());
 		List<XCommand> commandsList;
 		try {
 			XydraElement element;
-			String mime = context.getRequest().getContentType();
+			final String mime = context.getRequest().getContentType();
 			if (mime != null && jsonMimes.contains(mime.toLowerCase())) {
 				try {
 					element = jsonParser.parse(rawCommands);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					element = xmlParser.parse(rawCommands);
 				}
 			} else {
 				try {
 					element = xmlParser.parse(rawCommands);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					element = jsonParser.parse(rawCommands);
 				}
 			}
 			commandsList = SerializedCommand.toCommandList(element, repoAddr);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RequestException("error parsing commands list: " + e.getMessage());
 		}
-		XCommand[] commands = commandsList.toArray(new XCommand[commandsList.size()]);
+		final XCommand[] commands = commandsList.toArray(new XCommand[commandsList.size()]);
 
 		BatchedResult<Long>[] commandRes;
 		BatchedResult<XEvent[]>[] eventsRes;
 
 		if (ger.requests.length == 0) {
 
-			WaitingCallback<BatchedResult<Long>[]> callback = new WaitingCallback<BatchedResult<Long>[]>();
+			final WaitingCallback<BatchedResult<Long>[]> callback = new WaitingCallback<BatchedResult<Long>[]>();
 			store.executeCommands(actorId, passwordHash, commands, callback);
 
 			if (callback.getException() != null) {
@@ -358,7 +359,7 @@ public class XydraStoreResource {
 
 		} else {
 
-			WaitingCallback<Pair<BatchedResult<Long>[], BatchedResult<XEvent[]>[]>> callback = new WaitingCallback<Pair<BatchedResult<Long>[], BatchedResult<XEvent[]>[]>>();
+			final WaitingCallback<Pair<BatchedResult<Long>[], BatchedResult<XEvent[]>[]>> callback = new WaitingCallback<Pair<BatchedResult<Long>[], BatchedResult<XEvent[]>[]>>();
 			store.executeCommandsAndGetEvents(actorId, passwordHash, commands, ger.requests,
 					callback);
 
@@ -371,7 +372,7 @@ public class XydraStoreResource {
 			eventsRes = callback.getResult().getSecond();
 		}
 
-		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
+		final XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 
 		SerializedStore.serializeCommandResults(commandRes, ger, eventsRes, out);
 
@@ -380,7 +381,7 @@ public class XydraStoreResource {
 		XydraRuntime.finishRequest();
 	}
 
-	private static EventsRequest parseEventsRequest(String[] addresses, String[] from, String[] to) {
+	private static EventsRequest parseEventsRequest(final String[] addresses, final String[] from, final String[] to) {
 
 		if (addresses.length < from.length || addresses.length < to.length) {
 			throw new RequestException("illegal parameter combination: "
@@ -390,14 +391,14 @@ public class XydraStoreResource {
 					+ "s=" + Arrays.toString(to));
 		}
 
-		StoreException[] exceptions = new StoreException[addresses.length];
-		GetEventsRequest[] requests = new GetEventsRequest[addresses.length];
+		final StoreException[] exceptions = new StoreException[addresses.length];
+		final GetEventsRequest[] requests = new GetEventsRequest[addresses.length];
 
 		for (int i = 0; i < addresses.length; i++) {
 			XAddress address;
 			try {
-				address = XX.toAddress(addresses[i]);
-			} catch (Exception e) {
+				address = Base.toAddress(addresses[i]);
+			} catch (final Exception e) {
 				exceptions[i] = new RequestException("invalid "
 						+ XydraStoreRestInterface.ARG_ADDRESS + ": " + addresses[i]);
 				continue;
@@ -407,7 +408,7 @@ public class XydraStoreResource {
 			if (i < from.length && !from[i].isEmpty()) {
 				try {
 					begin = Long.parseLong(from[i]);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					exceptions[i] = new RequestException("invalid "
 							+ XydraStoreRestInterface.ARG_BEGIN_REVISION + ": " + from[i]);
 					continue;
@@ -416,7 +417,7 @@ public class XydraStoreResource {
 			if (i < to.length && !to[i].isEmpty()) {
 				try {
 					end = Long.parseLong(to[i]);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					exceptions[i] = new RequestException("invalid "
 							+ XydraStoreRestInterface.ARG_END_REVISION + ": " + to[i]);
 					continue;
@@ -428,8 +429,8 @@ public class XydraStoreResource {
 		return new EventsRequest(exceptions, requests);
 	}
 
-	public void getEvents(IRestlessContext context, String actorIdStr, String passwordHash,
-			String[] addresses, String[] from, String[] to) throws Throwable {
+	public void getEvents(final IRestlessContext context, final String actorIdStr, final String passwordHash,
+			final String[] addresses, final String[] from, final String[] to) throws Throwable {
 
 		if (Delay.isSimulateDelay()) {
 			Delay.ajax();
@@ -437,19 +438,19 @@ public class XydraStoreResource {
 
 		XydraRuntime.startRequest();
 
-		XydraStore store = XydraRestServer.getStore(context.getRestless());
-		XId actorId = getActorId(actorIdStr);
+		final XydraStore store = XydraRestServer.getStore(context.getRestless());
+		final XId actorId = getActorId(actorIdStr);
 
-		EventsRequest ger = parseEventsRequest(addresses, from, to);
+		final EventsRequest ger = parseEventsRequest(addresses, from, to);
 
-		WaitingCallback<BatchedResult<XEvent[]>[]> callback = new WaitingCallback<BatchedResult<XEvent[]>[]>();
+		final WaitingCallback<BatchedResult<XEvent[]>[]> callback = new WaitingCallback<BatchedResult<XEvent[]>[]>();
 		store.getEvents(actorId, passwordHash, ger.requests, callback);
 
 		if (callback.getException() != null) {
 			throw callback.getException();
 		}
 
-		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
+		final XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 
 		SerializedStore.serializeEventsResults(ger, callback.getResult(), out);
 
@@ -459,33 +460,33 @@ public class XydraStoreResource {
 
 	}
 
-	public void getModelRevisions(IRestlessContext context, String actorIdStr, String passwordHash,
-			String[] addresses) throws Throwable {
+	public void getModelRevisions(final IRestlessContext context, final String actorIdStr, final String passwordHash,
+			final String[] addresses) throws Throwable {
 
 		XydraRuntime.startRequest();
 
-		XydraStore store = XydraRestServer.getStore(context.getRestless());
-		XId actorId = getActorId(actorIdStr);
+		final XydraStore store = XydraRestServer.getStore(context.getRestless());
+		final XId actorId = getActorId(actorIdStr);
 
-		StoreException[] ex = new StoreException[addresses.length];
-		GetWithAddressRequest[] modelAddressRequests = new GetWithAddressRequest[addresses.length];
+		final StoreException[] ex = new StoreException[addresses.length];
+		final GetWithAddressRequest[] modelAddressRequests = new GetWithAddressRequest[addresses.length];
 		for (int i = 0; i < addresses.length; i++) {
 			try {
-				modelAddressRequests[i] = new GetWithAddressRequest(XX.toAddress(addresses[i]));
-			} catch (Exception e) {
+				modelAddressRequests[i] = new GetWithAddressRequest(Base.toAddress(addresses[i]));
+			} catch (final Exception e) {
 				ex[i] = new RequestException("invalid address: " + addresses[i]);
 				continue;
 			}
 		}
 
-		WaitingCallback<BatchedResult<ModelRevision>[]> callback = new WaitingCallback<BatchedResult<ModelRevision>[]>();
+		final WaitingCallback<BatchedResult<ModelRevision>[]> callback = new WaitingCallback<BatchedResult<ModelRevision>[]>();
 		store.getModelRevisions(actorId, passwordHash, modelAddressRequests, callback);
 
 		if (callback.getException() != null) {
 			throw callback.getException();
 		}
 
-		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
+		final XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 
 		SerializedStore.serializeModelRevisions(callback.getResult(), out);
 
@@ -495,30 +496,30 @@ public class XydraStoreResource {
 
 	}
 
-	public void getSnapshots(IRestlessContext context, String actorIdStr, String passwordHash,
-			String[] addressStrs) throws Throwable {
+	public void getSnapshots(final IRestlessContext context, final String actorIdStr, final String passwordHash,
+			final String[] addressStrs) throws Throwable {
 
 		XydraRuntime.startRequest();
 
-		XydraStore store = XydraRestServer.getStore(context.getRestless());
-		XId actorId = getActorId(actorIdStr);
+		final XydraStore store = XydraRestServer.getStore(context.getRestless());
+		final XId actorId = getActorId(actorIdStr);
 
-		List<XAddress> modelAddrs = new ArrayList<XAddress>();
-		List<XAddress> objectAddrs = new ArrayList<XAddress>();
+		final List<XAddress> modelAddrs = new ArrayList<XAddress>();
+		final List<XAddress> objectAddrs = new ArrayList<XAddress>();
 
-		StoreException[] ex = new StoreException[addressStrs.length];
-		boolean[] isModel = new boolean[addressStrs.length];
+		final StoreException[] ex = new StoreException[addressStrs.length];
+		final boolean[] isModel = new boolean[addressStrs.length];
 		for (int i = 0; i < addressStrs.length; i++) {
 
 			XAddress addr;
 			try {
-				addr = XX.toAddress(addressStrs[i]);
-			} catch (Exception e) {
+				addr = Base.toAddress(addressStrs[i]);
+			} catch (final Exception e) {
 				ex[i] = new RequestException("invalid address: " + addressStrs[i]);
 				continue;
 			}
 
-			XType type = addr.getAddressedType();
+			final XType type = addr.getAddressedType();
 			if (type == XType.XMODEL) {
 				modelAddrs.add(addr);
 				isModel[i] = true;
@@ -531,34 +532,34 @@ public class XydraStoreResource {
 
 		}
 
-		GetWithAddressRequest[] mreq = new GetWithAddressRequest[modelAddrs.size()];
+		final GetWithAddressRequest[] mreq = new GetWithAddressRequest[modelAddrs.size()];
 		for (int i = 0; i < mreq.length; i++) {
 			mreq[i] = new GetWithAddressRequest(modelAddrs.get(i));
 		}
 
-		GetWithAddressRequest[] oreq = new GetWithAddressRequest[objectAddrs.size()];
+		final GetWithAddressRequest[] oreq = new GetWithAddressRequest[objectAddrs.size()];
 		for (int i = 0; i < oreq.length; i++) {
 			oreq[i] = new GetWithAddressRequest(objectAddrs.get(i));
 		}
 
-		WaitingCallback<BatchedResult<XReadableModel>[]> mc = new WaitingCallback<BatchedResult<XReadableModel>[]>();
+		final WaitingCallback<BatchedResult<XReadableModel>[]> mc = new WaitingCallback<BatchedResult<XReadableModel>[]>();
 		store.getModelSnapshots(actorId, passwordHash, mreq, mc);
 		if (mc.getException() != null) {
 			throw mc.getException();
 		}
 		assert mc.getResult() != null && mc.getResult().length == mreq.length;
 
-		WaitingCallback<BatchedResult<XReadableObject>[]> oc = new WaitingCallback<BatchedResult<XReadableObject>[]>();
+		final WaitingCallback<BatchedResult<XReadableObject>[]> oc = new WaitingCallback<BatchedResult<XReadableObject>[]>();
 		store.getObjectSnapshots(actorId, passwordHash, oreq, oc);
 		if (oc.getException() != null) {
 			throw oc.getException();
 		}
 		assert oc.getResult() != null && oc.getResult().length == oreq.length;
 
-		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
+		final XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 
-		BatchedResult<XReadableModel>[] mres = mc.getResult();
-		BatchedResult<XReadableObject>[] ores = oc.getResult();
+		final BatchedResult<XReadableModel>[] mres = mc.getResult();
+		final BatchedResult<XReadableObject>[] ores = oc.getResult();
 
 		SerializedStore.serializeSnapshots(ex, isModel, mres, ores, out);
 
@@ -568,22 +569,22 @@ public class XydraStoreResource {
 
 	}
 
-	public void getModelIds(IRestlessContext context, String actorIdStr, String passwordHash)
+	public void getModelIds(final IRestlessContext context, final String actorIdStr, final String passwordHash)
 			throws Throwable {
 
 		XydraRuntime.startRequest();
 
-		XydraStore store = XydraRestServer.getStore(context.getRestless());
-		XId actorId = getActorId(actorIdStr);
+		final XydraStore store = XydraRestServer.getStore(context.getRestless());
+		final XId actorId = getActorId(actorIdStr);
 
-		WaitingCallback<Set<XId>> callback = new WaitingCallback<Set<XId>>();
+		final WaitingCallback<Set<XId>> callback = new WaitingCallback<Set<XId>>();
 		store.getModelIds(actorId, passwordHash, callback);
 
 		if (callback.getException() != null) {
 			throw callback.getException();
 		}
 
-		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
+		final XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 
 		SerializedStore.serializeModelIds(callback.getResult(), out);
 
@@ -593,22 +594,22 @@ public class XydraStoreResource {
 
 	}
 
-	public void getRepositoryId(IRestlessContext context, String actorIdStr, String passwordHash)
+	public void getRepositoryId(final IRestlessContext context, final String actorIdStr, final String passwordHash)
 			throws Throwable {
 
 		XydraRuntime.startRequest();
 
-		XydraStore store = XydraRestServer.getStore(context.getRestless());
-		XId actorId = getActorId(actorIdStr);
+		final XydraStore store = XydraRestServer.getStore(context.getRestless());
+		final XId actorId = getActorId(actorIdStr);
 
-		WaitingCallback<XId> callback = new WaitingCallback<XId>();
+		final WaitingCallback<XId> callback = new WaitingCallback<XId>();
 		store.getRepositoryId(actorId, passwordHash, callback);
 
 		if (callback.getException() != null) {
 			throw callback.getException();
 		}
 
-		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
+		final XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 
 		SerializedStore.serializeRepositoryId(callback.getResult(), out);
 

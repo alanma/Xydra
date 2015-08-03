@@ -15,11 +15,11 @@ public class SharedTypeSystem {
 
 	));
 
-	public static boolean isJavaPrimitiveType(String simpleName) {
+	public static boolean isJavaPrimitiveType(final String simpleName) {
 		return javaPrimitiveTypes.contains(simpleName);
 	}
 
-	public static SharedTypeMapping getMapping(TypeSpec type) {
+	public static SharedTypeMapping getMapping(final TypeSpec type) {
 		SharedTypeMapping mapping = SharedTypeMapping.getMapping(type);
 		if (mapping == null) {
 			// retry as mapped collection type
@@ -35,7 +35,7 @@ public class SharedTypeSystem {
 		return mapping;
 	}
 
-	public static boolean isCollection(IBaseType baseType) {
+	public static boolean isCollection(final IBaseType baseType) {
 		return baseType.getPackageName().equals("java.util")
 				&& (baseType.getSimpleName().equals("Set")
 						|| baseType.getSimpleName().equals("List") || baseType.getSimpleName()

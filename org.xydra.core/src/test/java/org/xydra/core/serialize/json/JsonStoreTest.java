@@ -6,15 +6,15 @@ import org.xydra.core.serialize.XydraSerializer;
 
 
 public class JsonStoreTest extends AbstractSerializedStoreTest {
-	
+
 	@Override
 	protected XydraParser getParser() {
 		return new JsonParser();
 	}
-	
+
 	@Override
 	protected XydraSerializer getSerializer() {
 		return new JsonSerializer();
 	}
-	
+
 }

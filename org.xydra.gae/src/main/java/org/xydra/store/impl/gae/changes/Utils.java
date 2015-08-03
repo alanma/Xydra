@@ -20,7 +20,7 @@ import org.xydra.xgae.util.XGaeDebugHelper.Timing;
 
 /**
  * Contains some static algorithms
- * 
+ *
  * @author dscharrer
  * @author xamde
  */
@@ -33,21 +33,21 @@ public class Utils {
 	 * using a clever query. The idea works like this: For finding all children
 	 * of a key 'foo' we query for all items in the range
 	 * 'foo'+lowest_possible_key until 'foo'+highest_possible_key.
-	 * 
+	 *
 	 * TODO Implementation note: Using a High Redundancy data store on
 	 * AppEngine, this method may return and out-dated children list.
-	 * 
+	 *
 	 * @param address
 	 *            a repository, model or object address. Fields have no
 	 *            children.
 	 * @return the XIds of all children
 	 */
 	@XGaeOperation(datastoreRead = true)
-	public static Set<XId> findChildren(XAddress address) {
+	public static Set<XId> findChildren(final XAddress address) {
 		assert address.getRepository() != null;
 		assert address.getField() == null;
 
-		StringBuffer uri = new StringBuffer();
+		final StringBuffer uri = new StringBuffer();
 		uri.append('/');
 		uri.append(address.getRepository().toString());
 		uri.append('/');
@@ -60,16 +60,16 @@ public class Utils {
 			}
 		}
 
-		Set<XId> childIds = new HashSet<XId>();
+		final Set<XId> childIds = new HashSet<XId>();
 
-		String kind = address.getAddressedType().getChildType().toString();
-		String low = uri.toString();
-		String high = low + "\uFFFF";
-		SPreparedQuery preparedQuery = XGae.get().datastore().sync()
+		final String kind = address.getAddressedType().getChildType().toString();
+		final String low = uri.toString();
+		final String high = low + "\uFFFF";
+		final SPreparedQuery preparedQuery = XGae.get().datastore().sync()
 				.prepareRangeQuery(kind, true, low, high);
 
-		for (SEntity e : preparedQuery.asIterable()) {
-			XAddress childAddr = KeyStructure.toAddress(e.getKey());
+		for (final SEntity e : preparedQuery.asIterable()) {
+			final XAddress childAddr = KeyStructure.toAddress(e.getKey());
 			assert address.equals(childAddr.getParent());
 			childIds.add(getEntityId(childAddr));
 		}
@@ -78,7 +78,7 @@ public class Utils {
 		return childIds;
 	}
 
-	private static XId getEntityId(XAddress address) {
+	private static XId getEntityId(final XAddress address) {
 		if (address.getField() != null) {
 			return address.getField();
 		}
@@ -97,7 +97,7 @@ public class Utils {
 		 * __key__ < KEY('XCHANGE', '1')
 		 */
 
-		SPreparedQuery preparedQuery = XGae.get().datastore().sync()
+		final SPreparedQuery preparedQuery = XGae.get().datastore().sync()
 				.prepareRangeQuery(KeyStructure.KIND_XCHANGE, true, null, "1");
 		final Iterator<SEntity> it = preparedQuery.asIterable().iterator();
 
@@ -105,7 +105,7 @@ public class Utils {
 				new ITransformer<SEntity, XAddress>() {
 
 					@Override
-					public XAddress transform(SEntity in) {
+					public XAddress transform(final SEntity in) {
 						return KeyStructure.getAddressFromChangeKey(in.getKey());
 					}
 				});

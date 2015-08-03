@@ -29,7 +29,7 @@ public class CsvCoreTable extends SparseTable implements Iterable<Row> {
 	 *            spaces.
 	 * @return a String in LaTeX-safe encoding
 	 */
-	static String latexEncode(String s, int fieldLength) {
+	static String latexEncode(final String s, final int fieldLength) {
 		String s2 = s;
 		if (s == null) {
 			s2 = "";
@@ -53,24 +53,24 @@ public class CsvCoreTable extends SparseTable implements Iterable<Row> {
 	 *            if true, the insertion order of columns is maintained. If
 	 *            false, the default automatic alphabetic sorting is on.
 	 */
-	public CsvCoreTable(boolean maintainColumnInsertionOrder) {
+	public CsvCoreTable(final boolean maintainColumnInsertionOrder) {
 		super(maintainColumnInsertionOrder);
 	}
 
-	
-	public void setParamReadMaxRows(int readMaxRows) {
+
+	public void setParamReadMaxRows(final int readMaxRows) {
 		this.readMaxRows = readMaxRows;
 	}
 
-	
-	public void setParamSplitWhenWritingLargeFiles(boolean b) {
+
+	public void setParamSplitWhenWritingLargeFiles(final boolean b) {
 		this.splitWhenWritingLargeFiles = b;
 	}
 
-	public void writeTo(IRowHandler rowHandler) throws IOException {
+	public void writeTo(final IRowHandler rowHandler) throws IOException {
 		rowHandler.handleHeaderRow(getColumnNames());
-		for (String rowName : this.rowNamesIterable()) {
-			IRow row = this.getOrCreateRow(rowName, false);
+		for (final String rowName : rowNamesIterable()) {
+			final IRow row = getOrCreateRow(rowName, false);
 			rowHandler.handleRow(rowName, row);
 		}
 	}

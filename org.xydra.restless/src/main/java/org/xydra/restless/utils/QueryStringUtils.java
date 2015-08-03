@@ -15,7 +15,7 @@ import org.xydra.annotations.LicenseApache;
 
 /**
  * Code taken from Apache HttpComponents library, then adapted
- * 
+ *
  * @author xamde
  */
 @LicenseApache(project = "Apache HttpComponents")
@@ -61,7 +61,7 @@ public class QueryStringUtils {
 
 	/**
 	 * With UTF-8
-	 * 
+	 *
 	 * @param queryString @CanBeNull
 	 * @return
 	 */

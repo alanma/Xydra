@@ -25,7 +25,7 @@ public class CookieUtils {
 
 	/**
 	 * Dumps cookies as a piece of HTML code
-	 * 
+	 *
 	 * @param req
 	 *            where to read cookies @NeverNull
 	 * @param w
@@ -33,7 +33,7 @@ public class CookieUtils {
 	 * @throws IOException
 	 *             ...
 	 */
-	public static void dumpCookies(@NeverNull HttpServletRequest req, @NeverNull Writer w)
+	public static void dumpCookies(@NeverNull final HttpServletRequest req, @NeverNull final Writer w)
 			throws IOException {
 		w.write("<style>" +
 
@@ -46,10 +46,10 @@ public class CookieUtils {
 				+ "<th>Value</th>" + "<th>MaxAge</th>" + "<th>Comment</th>" + "<th>Version</th>"
 				+ "</tr>");
 
-		Cookie[] cookies = req.getCookies();
+		final Cookie[] cookies = req.getCookies();
 
 		if (cookies != null) {
-			for (Cookie cookie : cookies) {
+			for (final Cookie cookie : cookies) {
 
 				if (cookie != null) {
 					w.write("<tr>"
@@ -86,14 +86,14 @@ public class CookieUtils {
 	 * @return the current cookie value with given name in the given request or
 	 *         null
 	 */
-	public static String getCookie(@NeverNull HttpServletRequest req, @NeverNull String name) {
+	public static String getCookie(@NeverNull final HttpServletRequest req, @NeverNull final String name) {
 		if (req.getCookies() == null) {
 			return null;
 		}
 
-		Cookie[] cookies = req.getCookies();
+		final Cookie[] cookies = req.getCookies();
 		if (cookies != null) {
-			for (Cookie cookie : cookies) {
+			for (final Cookie cookie : cookies) {
 
 				if (cookie.getName().equals(name)) {
 					return cookie.getValue();
@@ -109,11 +109,11 @@ public class CookieUtils {
 	 * @param cookieName
 	 * @return the {@link Cookie} object for the given cookie name
 	 */
-	public static Cookie getCookieObject(HttpServletRequest req, String cookieName) {
+	public static Cookie getCookieObject(final HttpServletRequest req, final String cookieName) {
 		if (req.getCookies() == null) {
 			return null;
 		}
-		for (Cookie cookie : req.getCookies()) {
+		for (final Cookie cookie : req.getCookies()) {
 			if (cookie.getName().equals(cookieName)) {
 				return cookie;
 			}
@@ -129,15 +129,15 @@ public class CookieUtils {
 	 * @return true if the request contains a cookie with the given name which
 	 *         is non-empty
 	 */
-	public static boolean hasCookie(@NeverNull HttpServletRequest req, @NeverNull String name) {
+	public static boolean hasCookie(@NeverNull final HttpServletRequest req, @NeverNull final String name) {
 		if (req.getCookies() == null) {
 			return false;
 		}
 
-		Cookie[] cookies = req.getCookies();
+		final Cookie[] cookies = req.getCookies();
 
 		if (cookies != null) {
-			for (Cookie cookie : cookies) {
+			for (final Cookie cookie : cookies) {
 
 				if (cookie != null) {
 
@@ -164,14 +164,14 @@ public class CookieUtils {
 	 *            .. @NeverNull
 	 * @return a list of (potentially duplicate) cookie names
 	 */
-	public static List<String> listCookieNames(@NeverNull HttpServletRequest req) {
+	public static List<String> listCookieNames(@NeverNull final HttpServletRequest req) {
 
-		List<String> cookieNames = new LinkedList<String>();
+		final List<String> cookieNames = new LinkedList<String>();
 
-		Cookie[] cookies = req.getCookies();
+		final Cookie[] cookies = req.getCookies();
 
 		if (cookies != null) {
-			for (Cookie cookie : cookies) {
+			for (final Cookie cookie : cookies) {
 
 				assert cookie != null;
 				cookieNames.add(cookie.getName());
@@ -183,7 +183,7 @@ public class CookieUtils {
 
 	/**
 	 * Remove the cookie with the given name from the users browser, if present.
-	 * 
+	 *
 	 * @param req
 	 *            .. @NeverNull
 	 * @param res
@@ -194,11 +194,11 @@ public class CookieUtils {
 	 *            can be null. Should in any case be the same value as was used
 	 *            to set the cookie. @CanBeNull
 	 */
-	public static void removeCookieIfPresent(@NeverNull HttpServletRequest req,
-			@NeverNull HttpServletResponse res, @NeverNull String name, @CanBeNull String domain) {
+	public static void removeCookieIfPresent(@NeverNull final HttpServletRequest req,
+			@NeverNull final HttpServletResponse res, @NeverNull final String name, @CanBeNull final String domain) {
 		assert req != null;
 
-		Cookie[] cookies = req.getCookies();
+		final Cookie[] cookies = req.getCookies();
 
 		if (cookies != null) {
 			if (hasCookie(req, name)) {
@@ -226,8 +226,8 @@ public class CookieUtils {
 	 *            {@value #MANY_DAYS}. If false, creates a session cookie, which
 	 *            is deleted when the user closes the browser.
 	 */
-	public static void setCookie(HttpServletResponse res, String name, String value, String domain,
-			String comment, boolean persist) {
+	public static void setCookie(final HttpServletResponse res, final String name, final String value, final String domain,
+			final String comment, final boolean persist) {
 		setCookie(res, name, value, domain, comment, persist ? MANY_DAYS : -1);
 	}
 
@@ -247,15 +247,15 @@ public class CookieUtils {
 	 * @param maxAge
 	 *            in seconds @NeverNull
 	 */
-	public static void setCookie(@NeverNull HttpServletResponse res, @NeverNull String name,
-			@NeverNull String value, @CanBeNull String domain, @CanBeNull String comment, int maxAge) {
+	public static void setCookie(@NeverNull final HttpServletResponse res, @NeverNull final String name,
+			@NeverNull final String value, @CanBeNull final String domain, @CanBeNull final String comment, final int maxAge) {
 		if (name == null || name.equals("")) {
 			throw new IllegalArgumentException("name is null or empty");
 		}
 		if (value == null) {
 			throw new IllegalArgumentException("value is null");
 		}
-		Cookie cookie = new Cookie(name, value);
+		final Cookie cookie = new Cookie(name, value);
 		/*
 		 * A session cookie is created when no Expires directive is provided
 		 * when the cookie is created. Pos. value: expiry time. Neg value:
@@ -275,7 +275,7 @@ public class CookieUtils {
 
 	/**
 	 * Set the cookie only if not present yet
-	 * 
+	 *
 	 * @param req
 	 *            ..
 	 * @param res
@@ -291,9 +291,9 @@ public class CookieUtils {
 	 * @param comment
 	 *            can be null
 	 */
-	public static void setCookieIfNecessary(HttpServletRequest req, HttpServletResponse res,
-			String name, String value, String domain, String comment) {
-		String currentCuid = getCookie(req, name);
+	public static void setCookieIfNecessary(final HttpServletRequest req, final HttpServletResponse res,
+			final String name, final String value, final String domain, final String comment) {
+		final String currentCuid = getCookie(req, name);
 		if (currentCuid == null || !currentCuid.equals(value)) {
 			setCookie(res, name, value, domain, comment, true);
 		}

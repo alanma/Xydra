@@ -22,9 +22,9 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * For table fields with existing content
- * 
+ *
  * @author kahmann
- * 
+ *
  */
 public class FieldWidget extends Composite implements TableFieldWidget {
 
@@ -39,9 +39,9 @@ public class FieldWidget extends Composite implements TableFieldWidget {
 	@UiField
 	VerticalPanel mainPanel;
 
-	private XFieldEditor fieldEditor;
+	private final XFieldEditor fieldEditor;
 
-	public FieldWidget(RowPresenter rowPresenter, XId fieldId) {
+	public FieldWidget(final RowPresenter rowPresenter, final XId fieldId) {
 		super();
 
 		initWidget(uiBinder.createAndBindUi(this));
@@ -52,7 +52,7 @@ public class FieldWidget extends Composite implements TableFieldWidget {
 		this.addDomHandler(new MouseOverHandler() {
 
 			@Override
-			public void onMouseOver(MouseOverEvent event) {
+			public void onMouseOver(final MouseOverEvent event) {
 				FieldWidget.this.fieldEditor.showButtons();
 
 			}
@@ -61,7 +61,7 @@ public class FieldWidget extends Composite implements TableFieldWidget {
 		this.addDomHandler(new MouseOutHandler() {
 
 			@Override
-			public void onMouseOut(MouseOutEvent event) {
+			public void onMouseOut(final MouseOutEvent event) {
 				FieldWidget.this.fieldEditor.hideButtons();
 
 			}
@@ -70,10 +70,10 @@ public class FieldWidget extends Composite implements TableFieldWidget {
 
 	@Override
 	public void scrollToMe() {
-		Document.get().setScrollLeft(this.getAbsoluteLeft() - (Window.getClientWidth() / 2 - 50));
-		this.addStyleName("fadeOut");
+		Document.get().setScrollLeft(getAbsoluteLeft() - (Window.getClientWidth() / 2 - 50));
+		addStyleName("fadeOut");
 
-		Timer timer1 = new Timer() {
+		final Timer timer1 = new Timer() {
 			@Override
 			public void run() {
 				FieldWidget.this.addStyleName("highlightStyle");
@@ -83,7 +83,7 @@ public class FieldWidget extends Composite implements TableFieldWidget {
 
 		timer1.schedule(500);
 
-		Timer timer2 = new Timer() {
+		final Timer timer2 = new Timer() {
 			@Override
 			public void run() {
 				FieldWidget.this.removeStyleName("highlightStyle");

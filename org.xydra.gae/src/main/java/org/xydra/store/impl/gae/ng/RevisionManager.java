@@ -10,11 +10,11 @@ import org.xydra.store.impl.gae.ng.GaeModelRevInfo.Precision;
 
 /**
  * TODO make thread-safe
- * 
+ *
  * TODO share among threads
- * 
- * 
- * 
+ *
+ *
+ *
  * @author xamde
  */
 public class RevisionManager {
@@ -23,13 +23,13 @@ public class RevisionManager {
 
 	public static final long WRITE_REV_EVERY = 16;
 
-	private XAddress modelAddress;
+	private final XAddress modelAddress;
 
 	private GaeModelRevInfo revision;
 
-	private UniCache<GaeModelRevInfo> uniRevCache;
+	private final UniCache<GaeModelRevInfo> uniRevCache;
 
-	public RevisionManager(XAddress modelAddress) {
+	public RevisionManager(final XAddress modelAddress) {
 		this.modelAddress = modelAddress;
 		this.revision = null;
 		this.uniRevCache = new UniCache<GaeModelRevInfo>(
@@ -38,15 +38,15 @@ public class RevisionManager {
 
 	/**
 	 * Takes cares of degrating precision
-	 * 
+	 *
 	 * @param change
 	 */
-	public void foundNewHigherCommitedChange(GaeChange change) {
+	public void foundNewHigherCommitedChange(final GaeChange change) {
 		XyAssert.xyAssert(!change.getStatus().canChange());
 
 		if (change.getStatus().changedSomething()) {
 			if (this.revision.getLastStableCommitted() + 1 == change.rev) {
-				boolean modelExists = Algorithms.changeIndicatesModelExists(change);
+				final boolean modelExists = Algorithms.changeIndicatesModelExists(change);
 				// IMPROVE use exact change read time instead of NOW
 				this.revision.incrementLastStableSuccessChange(change.rev, modelExists,
 						System.currentTimeMillis());
@@ -67,7 +67,7 @@ public class RevisionManager {
 		}
 	}
 
-	public void foundNewLastTaken(long rev) {
+	public void foundNewLastTaken(final long rev) {
 		this.revision.incrementLastTaken(rev);
 	}
 
@@ -101,9 +101,9 @@ public class RevisionManager {
 	}
 
 	public void readFromDatastoreAndMemcache() {
-		boolean memcache = true;
-		boolean datastore = true;
-		GaeModelRevInfo value = this.uniRevCache.get("" + this.modelAddress,
+		final boolean memcache = true;
+		final boolean datastore = true;
+		final GaeModelRevInfo value = this.uniRevCache.get("" + this.modelAddress,
 				UniCache.StorageOptions.create(0, memcache, datastore, false));
 		if (value != null) {
 			if (this.revision == null) {
@@ -122,8 +122,8 @@ public class RevisionManager {
 		if (this.revision == null) {
 			readFromDatastoreAndMemcache();
 		}
-		boolean memcache = true;
-		boolean datastore = this.revision.getLastStableSuccessChange() % WRITE_REV_EVERY == 0;
+		final boolean memcache = true;
+		final boolean datastore = this.revision.getLastStableSuccessChange() % WRITE_REV_EVERY == 0;
 		this.uniRevCache.put("" + this.modelAddress, this.revision,
 				UniCache.StorageOptions.create(0, memcache, datastore, false));
 	}

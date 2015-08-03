@@ -9,11 +9,12 @@ public class XStringEditor extends AtomicXValueEditor<XStringValue> {
 
 	private final TextBox editor = new TextBox();
 
-	public XStringEditor(String oldValue, EditListener listener) {
+	public XStringEditor(final String oldValue, final EditListener listener) {
 		super(listener);
 
-		if (oldValue != null)
+		if (oldValue != null) {
 			this.editor.setText(oldValue);
+		}
 
 		initWidget(this.editor);
 	}

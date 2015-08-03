@@ -10,7 +10,7 @@ public class RemovedObjectListener implements XModelEventListener {
 							// removed from the XModel
 
 	@Override
-	public void onChangeEvent(XModelEvent event) {
+	public void onChangeEvent(final XModelEvent event) {
 		if (event.getChangeType() == ChangeType.REMOVE) {
 			this.counter++; // only increment the counter if an XObject is
 							// removed!

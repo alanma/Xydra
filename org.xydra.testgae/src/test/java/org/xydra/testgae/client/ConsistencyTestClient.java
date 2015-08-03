@@ -19,9 +19,9 @@ import com.gargoylesoftware.htmlunit.WebClient;
 /**
  * A thread doing requests to a GAE-deployed app which exposes a
  * {@link ConsistencyTestResource} at URL '/consistency'
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class ConsistencyTestClient extends Thread {
 
@@ -37,7 +37,7 @@ public class ConsistencyTestClient extends Thread {
 
 	/**
 	 * Page format:
-	 * 
+	 *
 	 * <pre>
 	 * <div style='font-family: "Courier New", Courier, monospace;font-size: 13px;'>
 	 * instanceId=OgkCF8E1I+=21-'Request E03D9CBC'<br/>
@@ -50,15 +50,15 @@ public class ConsistencyTestClient extends Thread {
 	 * ----<br/>
 	 * More HTML here for human users
 	 * </pre>
-	 * 
+	 *
 	 * @param list
 	 * @return the page parsed as a list of items
 	 * @throws IOException
 	 */
-	private static List<String> getIds(Page list) throws IOException {
-		List<String> result = new ArrayList<String>();
-		String s = list.getWebResponse().getContentAsString();
-		BufferedReader br = new BufferedReader(new StringReader(s));
+	private static List<String> getIds(final Page list) throws IOException {
+		final List<String> result = new ArrayList<String>();
+		final String s = list.getWebResponse().getContentAsString();
+		final BufferedReader br = new BufferedReader(new StringReader(s));
 		String line = br.readLine();
 		assert line != null;
 		// skip headers, if any
@@ -68,6 +68,7 @@ public class ConsistencyTestClient extends Thread {
 		}
 		assert line.startsWith("instanceId") : line;
 		@SuppressWarnings("unused")
+		final
 		String instance = line;
 		line = br.readLine();
 		assert line != null : "line was null, page is \n" + s;
@@ -88,7 +89,7 @@ public class ConsistencyTestClient extends Thread {
 		String sizeStr = line.substring(5);
 		// strip trailing <br/>
 		sizeStr = sizeStr.substring(0, sizeStr.length() - "<br/>".length());
-		int size = Integer.parseInt(sizeStr);
+		final int size = Integer.parseInt(sizeStr);
 		assert result.size() == size : result.size() + " - " + size + " url=" + list.getUrl();
 		// ignore all following lines
 		br.close();
@@ -100,9 +101,9 @@ public class ConsistencyTestClient extends Thread {
 	 * @return instanceId extracted from Page
 	 * @throws IOException
 	 */
-	private static String getInstance(Page page) throws IOException {
-		String s = page.getWebResponse().getContentAsString();
-		BufferedReader br = new BufferedReader(new StringReader(s));
+	private static String getInstance(final Page page) throws IOException {
+		final String s = page.getWebResponse().getContentAsString();
+		final BufferedReader br = new BufferedReader(new StringReader(s));
 		String line = br.readLine();
 		// skip header, if any
 		while (!line.startsWith("instanceId")) {
@@ -111,18 +112,18 @@ public class ConsistencyTestClient extends Thread {
 		}
 		assert line != null;
 		assert line.startsWith("instanceId") : line;
-		String instance = line;
+		final String instance = line;
 		br.close();
 		return instance;
 	}
 
 	/**
 	 * Helps to find parse errors
-	 * 
+	 *
 	 * @param listPage
 	 * @param createPage
 	 */
-	private static void info(Page listPage, Page createPage) {
+	private static void info(final Page listPage, final Page createPage) {
 		log.info("Url was: " + listPage.getUrl());
 		log.info("Load time was:" + listPage.getWebResponse().getLoadTime());
 		log.info("Verify Content was: " + listPage.getWebResponse().getContentAsString());
@@ -133,25 +134,25 @@ public class ConsistencyTestClient extends Thread {
 
 	private int rounds;
 
-	private String serverRootUrl;
+	private final String serverRootUrl;
 
-	private WebClient webClient;
+	private final WebClient webClient;
 
 	/**
 	 * @param serverRootUrl
 	 * @param name
 	 * @param rounds
 	 */
-	public ConsistencyTestClient(String serverRootUrl, String name, int rounds) {
+	public ConsistencyTestClient(final String serverRootUrl, final String name, final int rounds) {
 		this.serverRootUrl = serverRootUrl;
-		BrowserVersion bv = BrowserVersion.getDefault();
+		final BrowserVersion bv = BrowserVersion.getDefault();
 		bv.setApplicationName("ConsistencyTestClient");
 		bv.setApplicationCodeName("TestGae");
 		bv.setApplicationVersion("20110914");
 		bv.setUserAgent("ConsistencyTestClient");
 		this.webClient = new WebClient(bv);
 		this.webClient.setJavaScriptEnabled(false);
-		this.setName(name);
+		setName(name);
 		this.rounds = rounds;
 	}
 
@@ -162,27 +163,27 @@ public class ConsistencyTestClient extends Thread {
 	 * @return Page for calling create
 	 * @throws Exception
 	 */
-	public Page create(String id, String traceId) throws Exception {
+	public Page create(final String id, final String traceId) throws Exception {
 		final Page page = getPage(this.serverRootUrl + "/consistency?create=" + id + "&traceId="
 				+ traceId + "~create", 5, true);
 		return page;
 	}
 
 	public Page doGetAddIdVerifyRead() throws Exception {
-		log.info(this.getName() + " get-add-verify");
+		log.info(getName() + " get-add-verify");
 		// read
-		Page pageList = getList("init");
+		final Page pageList = getList("init");
 		String instanceCreate = getInstance(pageList);
-		List<String> ids = getIds(pageList);
-		int before = ids.size();
-		String newId = this.getName() + ids.size() + "-" + UUID.uuid(8);
+		final List<String> ids = getIds(pageList);
+		final int before = ids.size();
+		final String newId = getName() + ids.size() + "-" + UUID.uuid(8);
 
 		// create
-		Page pageCreate = create(newId, instanceCreate);
+		final Page pageCreate = create(newId, instanceCreate);
 		instanceCreate = getInstance(pageCreate);
 
 		// read again & verify
-		Page list = verifyListContains(instanceCreate, newId, before, pageCreate);
+		final Page list = verifyListContains(instanceCreate, newId, before, pageCreate);
 		return list;
 	}
 
@@ -192,7 +193,7 @@ public class ConsistencyTestClient extends Thread {
 	 * @return a Page obtained by HTTP GET
 	 * @throws Exception
 	 */
-	public Page getList(String trace) throws Exception {
+	public Page getList(final String trace) throws Exception {
 		final Page page = getPage(this.serverRootUrl + "/consistency?trace=" + trace + "~getList",
 				10, false);
 		return page;
@@ -200,7 +201,7 @@ public class ConsistencyTestClient extends Thread {
 
 	/**
 	 * Worker
-	 * 
+	 *
 	 * @param url
 	 * @param tries
 	 *            retry count
@@ -209,7 +210,7 @@ public class ConsistencyTestClient extends Thread {
 	 * @return a Page obtained by HTTP GET
 	 * @throws FailingHttpStatusCodeException
 	 */
-	private Page getPage(String url, int tries, boolean writeAccess)
+	private Page getPage(final String url, final int tries, final boolean writeAccess)
 			throws FailingHttpStatusCodeException {
 		Page page = null;
 		int code = 0;
@@ -219,15 +220,15 @@ public class ConsistencyTestClient extends Thread {
 				page = this.webClient.getPage(url);
 				code = page.getWebResponse().getStatusCode();
 				retries++;
-			} catch (Exception e) {
-				log.warn("Thread " + this.getName() + " got exception", e);
+			} catch (final Exception e) {
+				log.warn("Thread " + getName() + " got exception", e);
 				if (writeAccess) {
 					failedWrites++;
 				} else {
 					failedReads++;
 				}
 			}
-		} while (page == null || (code == 500 && retries <= tries));
+		} while (page == null || code == 500 && retries <= tries);
 		if (retries == tries) {
 			throw new RuntimeException("Retried URL '" + url + "' for " + tries
 					+ " times, always got 500er");
@@ -241,8 +242,8 @@ public class ConsistencyTestClient extends Thread {
 		// each thread stops after first error
 		while (run && !error && this.rounds > 0) {
 			try {
-				this.doGetAddIdVerifyRead();
-			} catch (Throwable e) {
+				doGetAddIdVerifyRead();
+			} catch (final Throwable e) {
 				error = true;
 				run = false;
 				log.warn("------ERROR", e);
@@ -259,16 +260,16 @@ public class ConsistencyTestClient extends Thread {
 		this.webClient.closeAllWindows();
 	}
 
-	private Page verifyListContains(String instanceCreate, String newId, int before, Page creatPage)
+	private Page verifyListContains(final String instanceCreate, final String newId, final int before, final Page creatPage)
 			throws Exception {
-		String trace = instanceCreate + "&newid=" + newId;
-		Page listPage = getList(trace);
-		String instanceVerify = getInstance(listPage);
-		List<String> ids = getIds(listPage);
-		int after = ids.size();
+		final String trace = instanceCreate + "&newid=" + newId;
+		final Page listPage = getList(trace);
+		final String instanceVerify = getInstance(listPage);
+		final List<String> ids = getIds(listPage);
+		final int after = ids.size();
 		// FIXME GAE !!!!!!!!!! HERE
 		if (after < before) {
-			String info = " createdOn " + instanceCreate + " verifiedOn " + instanceVerify;
+			final String info = " createdOn " + instanceCreate + " verifiedOn " + instanceVerify;
 			log.error("before:" + before + " after:" + after + info + " trace=" + trace);
 			info(listPage, creatPage);
 			failedWrites++;

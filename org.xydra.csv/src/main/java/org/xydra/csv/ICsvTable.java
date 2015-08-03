@@ -10,7 +10,7 @@ public interface ICsvTable extends ISparseTable {
 
 	/**
 	 * Dump table to System.out
-	 * 
+	 *
 	 * @throws IOException
 	 *             from System.out
 	 */
@@ -18,7 +18,7 @@ public interface ICsvTable extends ISparseTable {
 
 	/**
 	 * Dump table to System.out in LaTeX syntax
-	 * 
+	 *
 	 * @throws IOException
 	 *             from System.out
 	 */
@@ -27,10 +27,10 @@ public interface ICsvTable extends ISparseTable {
 	/**
 	 * Add the content given in the reader as CSV to this CvsTable. Multiple
 	 * CvsTable can be read in, the result is a merge.
-	 * 
+	 *
 	 * The first row of the CVS file is interpreted as header names. The first
 	 * column is interpreted as row names.
-	 * 
+	 *
 	 * @param f
 	 *            from which to read
 	 * @throws IOException
@@ -41,10 +41,10 @@ public interface ICsvTable extends ISparseTable {
 	/**
 	 * Add the content given in the reader as CSV to this CvsTable. Multiple
 	 * CvsTable can be read in, the result is a merge.
-	 * 
+	 *
 	 * The first row of the CVS file is interpreted as header names. The first
 	 * column is interpreted as row names.
-	 * 
+	 *
 	 * @param r
 	 *            from which to read
 	 * @param create
@@ -59,7 +59,7 @@ public interface ICsvTable extends ISparseTable {
 	/**
 	 * How many rows should maximally be read? Default is -1 = unlimited. Note
 	 * that more rows can be added later.
-	 * 
+	 *
 	 * @param readMaxRows
 	 *            set to -1 for unlimited (default)
 	 */
@@ -78,7 +78,7 @@ public interface ICsvTable extends ISparseTable {
 
 	/**
 	 * Writes a non-sparse CSV version of this tables contents
-	 * 
+	 *
 	 * @param w
 	 *            to which to write the CSV
 	 * @throws IOException
@@ -91,7 +91,7 @@ public interface ICsvTable extends ISparseTable {
 	/**
 	 * Writes a non-sparse CSV version of this tables contents. Writes only the
 	 * data in [startRow,endRow).
-	 * 
+	 *
 	 * @param w
 	 *            to which to write the CSV
 	 * @param startRow
@@ -138,7 +138,7 @@ public interface ICsvTable extends ISparseTable {
 	 *            x-mswin-936 x-PCK x-SJIS_0213 x-UTF-16LE-BOM X-UTF-32BE-BOM
 	 *            X-UTF-32LE-BOM x-windows-50220 x-windows-50221 x-windows-874
 	 *            x-windows-949 x-windows-950 x-windows-iso2022jp UTF-8
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	void readFrom(File f, String encoding) throws IOException;

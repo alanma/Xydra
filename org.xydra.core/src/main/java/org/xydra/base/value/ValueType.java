@@ -11,10 +11,10 @@ import org.xydra.base.XId;
 
 /**
  * The type system of Xydra XValues.
- * 
+ *
  * Xydra types can be distinguished into collection types (..Set, ..List) and
  * single types.
- * 
+ *
  * Here are all primitive Java types with a corresponding Xydra types:
  * <table>
  * <tr>
@@ -38,7 +38,7 @@ import org.xydra.base.XId;
  * <td> {@link XLongValue}</td>
  * </tr>
  * </table>
- * 
+ *
  * These are all arrays of primitive Java types with a corresponding Xydra types
  * (yes, its just one):
  * <table>
@@ -51,7 +51,7 @@ import org.xydra.base.XId;
  * <td> {@link XBinaryValue}</td>
  * </tr>
  * </table>
- * 
+ *
  * And this is the mapping for all Java object types:
  * <table>
  * <tr>
@@ -79,7 +79,7 @@ import org.xydra.base.XId;
  * <td> {@link XStringValue}</td>
  * </tr>
  * </table>
- * 
+ *
  * And these types map really only onto themselves:
  * <table>
  * <tr>
@@ -95,7 +95,7 @@ import org.xydra.base.XId;
  * <td> {@link XAddress}</td>
  * </tr>
  * </table>
- * 
+ *
  * And finally, these are currently all Xydra collection types and their Java
  * equivalents:
  * <table>
@@ -144,7 +144,7 @@ import org.xydra.base.XId;
  * <td> {@link XLongListValue}</td>
  * </tr>
  * </table>
- * 
+ *
  * @author xamde
  */
 public enum ValueType {
@@ -249,9 +249,9 @@ public enum ValueType {
 	 * @param isSortedCollection
 	 * @param isNumeric
 	 */
-	ValueType(@NeverNull Class<?> xydraInterface, Class<?> javaClass,
-			@CanBeNull ValueType componentValueType, boolean isSet, boolean isSortedCollection,
-			boolean isNumeric) {
+	ValueType(@NeverNull final Class<?> xydraInterface, final Class<?> javaClass,
+			@CanBeNull final ValueType componentValueType, final boolean isSet, final boolean isSortedCollection,
+			final boolean isNumeric) {
 		assert componentValueType != null || !(isSet || isSortedCollection) : xydraInterface
 				.getName();
 		assert !isNumeric || componentValueType == null : xydraInterface.getName();
@@ -295,7 +295,7 @@ public enum ValueType {
 	 * @throws IllegalArgumentException
 	 *             if class could not be recognised as a ValueType
 	 */
-	public static ValueType valueType(Class<?> xydraInterface) {
+	public static ValueType valueType(final Class<?> xydraInterface) {
 		assert xydraInterface != null;
 		if (xydraInterface.equals(XAddressListValue.class)) {
 			return AddressList;

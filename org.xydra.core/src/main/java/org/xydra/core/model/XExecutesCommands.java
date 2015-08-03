@@ -10,14 +10,14 @@ import org.xydra.base.change.XEvent;
  * {@link XCommand XCommands}.
  */
 public interface XExecutesCommands {
-    
+
     /**
      * Execute the given {@link XCommand} if possible.
-     * 
+     *
      * Not all implementations will be able to execute all commands.
-     * 
+     *
      * @param command The {@link XCommand} which is to be executed
-     * 
+     *
      * @return {@link XCommand#FAILED} if the command failed,
      *         {@link XCommand#NOCHANGE} if the command didn't change anything
      *         or the revision number of the {@link XEvent} caused by the
@@ -26,5 +26,5 @@ public interface XExecutesCommands {
      */
     @ModificationOperation
     long executeCommand(XCommand command);
-    
+
 }

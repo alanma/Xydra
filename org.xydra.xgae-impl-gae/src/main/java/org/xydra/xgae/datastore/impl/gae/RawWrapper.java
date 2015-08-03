@@ -8,19 +8,20 @@ import org.xydra.xgae.datastore.api.SWrapper;
 
 /**
  * Design decision for nulls: Don't wrap nulls
- * 
+ *
  * @author xamde
- * 
+ *
  * @param <R>
  * @param <S>
  */
 public class RawWrapper<R, S extends SWrapper> {
 
-	private R raw;
+	private final R raw;
 
-	public RawWrapper(R raw) {
-		if (raw == null)
+	public RawWrapper(final R raw) {
+		if (raw == null) {
 			throw new IllegalArgumentException();
+		}
 
 		this.raw = raw;
 	}
@@ -31,12 +32,12 @@ public class RawWrapper<R, S extends SWrapper> {
 
 	private static class UnwrappedIterable<R, S extends SWrapper> implements Iterable<R> {
 
-		public UnwrappedIterable(Iterable<S> it) {
+		public UnwrappedIterable(final Iterable<S> it) {
 			super();
 			this.iterable = it;
 		}
 
-		private Iterable<S> iterable;
+		private final Iterable<S> iterable;
 
 		@Override
 		public Iterator<R> iterator() {
@@ -45,7 +46,7 @@ public class RawWrapper<R, S extends SWrapper> {
 
 						@SuppressWarnings("unchecked")
 						@Override
-						public R transform(S in) {
+						public R transform(final S in) {
 							return (R) in.raw();
 						}
 					});
@@ -53,7 +54,7 @@ public class RawWrapper<R, S extends SWrapper> {
 
 	}
 
-	protected static <R, S extends SWrapper> Iterable<R> _unwrap(Iterable<S> it) {
+	protected static <R, S extends SWrapper> Iterable<R> _unwrap(final Iterable<S> it) {
 		return new UnwrappedIterable<R, S>(it);
 	}
 

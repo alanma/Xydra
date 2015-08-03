@@ -9,51 +9,52 @@ import org.xydra.sharedutils.GServiceLoader;
 
 /**
  * Singleton.
- * 
+ *
  * @author xamde
  */
 public class DebugFormatter {
-    
+
     public static final String LINE_END = "  <br/>\n";
-    
+
     public static final int MAX_VALUE_STR_LEN = 40;
-    
+
     private static List<IDebugFormatter> debugFormatters;
-    
-    public static synchronized String format(Object object) {
+
+    public static synchronized String format(final Object object) {
         // handle nulls
-        if(object == null)
-            return "-null-";
-        
+        if(object == null) {
+			return "-null-";
+		}
+
         // look in registered handlers
         ensureHandlersAreLoaded();
-        for(IDebugFormatter df : debugFormatters) {
-            String s = df.format(object);
+        for(final IDebugFormatter df : debugFormatters) {
+            final String s = df.format(object);
             if(s != null) {
                 return s;
             }
         }
-        
+
         throw new IllegalStateException("Could not format object of type '"
                 + object.getClass().getName() + "'");
     }
-    
+
     private static void ensureHandlersAreLoaded() {
         if(debugFormatters == null) {
             debugFormatters = new ArrayList<IDebugFormatter>();
-            
-            Collection<IDebugFormatter> set = GServiceLoader
+
+            final Collection<IDebugFormatter> set = GServiceLoader
                     .getAllImplementations(IDebugFormatter.class);
             debugFormatters.addAll(set);
             debugFormatters.add(new GenericDebugFormatter());
         }
     }
-    
-    public static String formatString(String s) {
+
+    public static String formatString(final String s) {
         return formatString(s, MAX_VALUE_STR_LEN, false);
     }
-    
-    public static String formatString(String s, int maxLen, boolean encodeAngleBrackets) {
+
+    public static String formatString(final String s, final int maxLen, final boolean encodeAngleBrackets) {
         String res;
         if(s.length() <= maxLen) {
             res = s;
@@ -67,5 +68,5 @@ public class DebugFormatter {
             return res;
         }
     }
-    
+
 }

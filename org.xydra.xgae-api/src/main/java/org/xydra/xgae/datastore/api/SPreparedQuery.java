@@ -24,11 +24,12 @@ public interface SPreparedQuery extends SWrapper {
 	 * @return a list of SEntites
 	 * @deprecated Was just a shorthand for setChunkSize & asList
 	 */
+	@Deprecated
 	List<SEntity> asListWithChunkSize(int chunkSize);
 
 	/**
 	 * Implementation-dependent if this limit is enforced
-	 * 
+	 *
 	 * @param limit
 	 */
 	void setLimit(int limit);

@@ -10,22 +10,25 @@ import org.xydra.base.value.XV;
 
 public class XIdListEditor extends XCollectionEditor<XId, XIdListValue> {
 
-	public XIdListEditor(Iterator<XId> value, EditListener listener) {
+	public XIdListEditor(final Iterator<XId> value, final EditListener listener) {
 		super(listener);
 
-		if (value == null)
+		if (value == null) {
 			return;
+		}
 
-		while (value.hasNext())
+		while (value.hasNext()) {
 			add(new XIdEditor(value.next(), this));
+		}
 
 	}
 
 	@Override
-	protected XIdListValue asCollectionValue(Iterator<XId> entries) {
-		List<XId> lst = new ArrayList<XId>();
-		while (entries.hasNext())
+	protected XIdListValue asCollectionValue(final Iterator<XId> entries) {
+		final List<XId> lst = new ArrayList<XId>();
+		while (entries.hasNext()) {
 			lst.add(entries.next());
+		}
 		return XV.toIdListValue(lst);
 	}
 

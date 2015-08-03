@@ -3,6 +3,8 @@ package org.xydra.store;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.xydra.base.Base;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.X;
@@ -22,7 +24,7 @@ public class GaeAllowAllStoreWriteMethodsTest extends AbstractAllowAllStoreWrite
 
 	@Override
 	protected XCommandFactory getCommandFactory() {
-		return X.getCommandFactory();
+		return BaseRuntime.getCommandFactory();
 	}
 
 	@Override
@@ -40,7 +42,7 @@ public class GaeAllowAllStoreWriteMethodsTest extends AbstractAllowAllStoreWrite
 	@Override
 	protected XydraStore createStore() {
 		if (this.store == null) {
-			this.store = getNewStore(new GaePersistence(XX.toId("data")));
+			this.store = getNewStore(new GaePersistence(Base.toId("data")));
 		}
 
 		return this.store;

@@ -6,6 +6,8 @@ import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
+import org.xydra.base.Base;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
@@ -23,9 +25,9 @@ import org.xydra.store.impl.rest.XydraStoreRestClient;
 
 /**
  * Abstract test framework for Xydra REST APIs
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 public abstract class AbstractRestClientReadMethodsTest extends AbstractStoreReadMethodsTest {
 
@@ -55,7 +57,7 @@ public abstract class AbstractRestClientReadMethodsTest extends AbstractStoreRea
 		return this.serializer.create();
 	}
 
-	protected XydraElement parse(String data) {
+	protected XydraElement parse(final String data) {
 		return this.parser.parse(data);
 	}
 
@@ -75,15 +77,15 @@ public abstract class AbstractRestClientReadMethodsTest extends AbstractStoreRea
 
 	@After
 	public void after() {
-		SynchronousCallbackWithOneResult<Set<XId>> mids = new SynchronousCallbackWithOneResult<Set<XId>>();
+		final SynchronousCallbackWithOneResult<Set<XId>> mids = new SynchronousCallbackWithOneResult<Set<XId>>();
 		this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
 		assertEquals(SynchronousCallbackWithOneResult.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
-		XAddress repoAddr = XX.toAddress(getRepositoryId(), null, null, null);
-		for (XId modelId : mids.effect) {
+		final XAddress repoAddr = Base.toAddress(getRepositoryId(), null, null, null);
+		for (final XId modelId : mids.effect) {
 			if (modelId.toString().startsWith("internal--")) {
 				continue;
 			}
-			XCommand removeCommand = MemoryRepositoryCommand.createRemoveCommand(repoAddr,
+			final XCommand removeCommand = MemoryRepositoryCommand.createRemoveCommand(repoAddr,
 					XCommand.FORCED, modelId);
 			this.store.executeCommands(getCorrectUser(), getCorrectUserPasswordHash(),
 					new XCommand[] { removeCommand }, null);
@@ -92,7 +94,7 @@ public abstract class AbstractRestClientReadMethodsTest extends AbstractStoreRea
 
 	@Override
 	protected XCommandFactory getCommandFactory() {
-		return X.getCommandFactory();
+		return BaseRuntime.getCommandFactory();
 	}
 
 	@Override
@@ -107,7 +109,7 @@ public abstract class AbstractRestClientReadMethodsTest extends AbstractStoreRea
 
 	@Override
 	protected XId getIncorrectUser() {
-		return XX.toId("wrongbob");
+		return Base.toId("wrongbob");
 	}
 
 	@Override

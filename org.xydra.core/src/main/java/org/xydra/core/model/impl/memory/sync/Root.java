@@ -30,9 +30,9 @@ import org.xydra.core.model.impl.memory.sync.ISyncLog.ChangeRecordMode;
  * course, R-M-O-F can also be just R, i.e. a {@link XRepository} is not
  * required to have children. All such trees use a single {@link Root} instance.
  * This simplified implementing sync algorithms.
- * 
+ *
  * The root manages event sending.
- * 
+ *
  * @author xamde
  */
 public class Root implements XRoot, Serializable {
@@ -42,7 +42,7 @@ public class Root implements XRoot, Serializable {
 	 * @param syncLog
 	 * @param sessionActor
 	 */
-	public Root(MemoryEventBus eventBus, ISyncLog syncLog, XId sessionActor) {
+	public Root(final MemoryEventBus eventBus, final ISyncLog syncLog, final XId sessionActor) {
 		this.eventBus = eventBus;
 		this.syncLog = syncLog;
 		this.sessionActor = sessionActor;
@@ -60,61 +60,61 @@ public class Root implements XRoot, Serializable {
 
 	private String sessionPasswordHash;
 
-	private ISyncLog syncLog;
+	private final ISyncLog syncLog;
 
 	@Override
 	public String getSessionPasswordHash() {
 		return this.sessionPasswordHash;
 	}
 
-	public void setSessionPasswordHash(String sessionPasswordHash) {
+	public void setSessionPasswordHash(final String sessionPasswordHash) {
 		this.sessionPasswordHash = sessionPasswordHash;
 	}
 
-	public boolean addListenerForFieldEvents(XAddress entityAddress,
-			XFieldEventListener changeListener) {
+	public boolean addListenerForFieldEvents(final XAddress entityAddress,
+			final XFieldEventListener changeListener) {
 		synchronized (this.eventBus) {
 			return this.eventBus.addListener(EventType.FieldChange, entityAddress, changeListener);
 		}
 	}
 
-	public boolean addListenerForModelEvents(XAddress entityAddress,
-			XModelEventListener changeListener) {
+	public boolean addListenerForModelEvents(final XAddress entityAddress,
+			final XModelEventListener changeListener) {
 		synchronized (this.eventBus) {
 			return this.eventBus.addListener(EventType.ModelChange, entityAddress, changeListener);
 		}
 	}
 
-	public boolean addListenerForObjectEvents(XAddress entityAddress,
-			XObjectEventListener changeListener) {
+	public boolean addListenerForObjectEvents(final XAddress entityAddress,
+			final XObjectEventListener changeListener) {
 		synchronized (this.eventBus) {
 			return this.eventBus.addListener(EventType.ObjectChange, entityAddress, changeListener);
 		}
 	}
 
-	public boolean addListenerForRepositoryEvents(XAddress entityAddress,
-			XRepositoryEventListener changeListener) {
+	public boolean addListenerForRepositoryEvents(final XAddress entityAddress,
+			final XRepositoryEventListener changeListener) {
 		synchronized (this.eventBus) {
 			return this.eventBus.addListener(EventType.RepositoryChange, entityAddress,
 					changeListener);
 		}
 	}
 
-	public boolean addListenerForSyncEvents(XAddress entityAddress, XSyncEventListener syncListener) {
+	public boolean addListenerForSyncEvents(final XAddress entityAddress, final XSyncEventListener syncListener) {
 		synchronized (this.eventBus) {
 			return this.eventBus.addListener(EventType.Sync, entityAddress, syncListener);
 		}
 	}
 
-	public boolean addListenerForTransactionEvents(XAddress entityAddress,
-			XTransactionEventListener changeListener) {
+	public boolean addListenerForTransactionEvents(final XAddress entityAddress,
+			final XTransactionEventListener changeListener) {
 		synchronized (this.eventBus) {
 			return this.eventBus.addListener(EventType.TransactionChange, entityAddress,
 					changeListener);
 		}
 	}
 
-	public void fireFieldEvent(XAddress entityAddress, XFieldEvent event) {
+	public void fireFieldEvent(final XAddress entityAddress, final XFieldEvent event) {
 		synchronized (this.eventBus) {
 			assert entityAddress.getAddressedType() == XType.XFIELD;
 			this.eventBus.fireEvent(EventType.FieldChange, entityAddress, event);
@@ -132,12 +132,12 @@ public class Root implements XRoot, Serializable {
 		}
 	}
 
-	public void fireModelEvent(XAddress entityAddress, XModelEvent event) {
+	public void fireModelEvent(final XAddress entityAddress, final XModelEvent event) {
 		synchronized (this.eventBus) {
 			assert entityAddress.getAddressedType() == XType.XMODEL;
 			this.eventBus.fireEvent(EventType.ModelChange, entityAddress, event);
 			// repository
-			XAddress parent = entityAddress.getParent();
+			final XAddress parent = entityAddress.getParent();
 
 			if (this.repositoryEventBus != null) {
 				this.repositoryEventBus.fireEvent(EventType.ModelChange, parent, event);
@@ -145,7 +145,7 @@ public class Root implements XRoot, Serializable {
 		}
 	}
 
-	public void fireObjectEvent(XAddress entityAddress, XObjectEvent event) {
+	public void fireObjectEvent(final XAddress entityAddress, final XObjectEvent event) {
 		synchronized (this.eventBus) {
 			assert entityAddress.getAddressedType() == XType.XOBJECT : "type is "
 					+ entityAddress.getAddressedType();
@@ -162,63 +162,63 @@ public class Root implements XRoot, Serializable {
 		}
 	}
 
-	public void fireRepositoryEvent(XAddress entityAddress, XRepositoryEvent event) {
+	public void fireRepositoryEvent(final XAddress entityAddress, final XRepositoryEvent event) {
 		synchronized (this.eventBus) {
 			this.eventBus.fireEvent(EventType.RepositoryChange, entityAddress, event);
 		}
 	}
 
-	public void fireSyncEvent(XAddress entityAddress, XSyncEvent event) {
+	public void fireSyncEvent(final XAddress entityAddress, final XSyncEvent event) {
 		synchronized (this.eventBus) {
 			this.eventBus.fireEvent(EventType.Sync, entityAddress, event);
 		}
 	}
 
-	public void fireTransactionEvent(XAddress entityAddress, XTransactionEvent event) {
+	public void fireTransactionEvent(final XAddress entityAddress, final XTransactionEvent event) {
 		this.eventBus.fireEvent(EventType.TransactionChange, entityAddress, event);
 	}
 
-	public boolean removeListenerForFieldEvents(XAddress entityAddress,
-			XFieldEventListener changeListener) {
+	public boolean removeListenerForFieldEvents(final XAddress entityAddress,
+			final XFieldEventListener changeListener) {
 		synchronized (this.eventBus) {
 			return this.eventBus.removeListener(EventType.FieldChange, entityAddress,
 					changeListener);
 		}
 	}
 
-	public boolean removeListenerForModelEvents(XAddress entityAddress,
-			XModelEventListener changeListener) {
+	public boolean removeListenerForModelEvents(final XAddress entityAddress,
+			final XModelEventListener changeListener) {
 		synchronized (this.eventBus) {
 			return this.eventBus.removeListener(EventType.ModelChange, entityAddress,
 					changeListener);
 		}
 	}
 
-	public boolean removeListenerForObjectEvents(XAddress entityAddress,
-			XObjectEventListener changeListener) {
+	public boolean removeListenerForObjectEvents(final XAddress entityAddress,
+			final XObjectEventListener changeListener) {
 		synchronized (this.eventBus) {
 			return this.eventBus.removeListener(EventType.ObjectChange, entityAddress,
 					changeListener);
 		}
 	}
 
-	public boolean removeListenerForRepositoryEvents(XAddress entityAddress,
-			XRepositoryEventListener changeListener) {
+	public boolean removeListenerForRepositoryEvents(final XAddress entityAddress,
+			final XRepositoryEventListener changeListener) {
 		synchronized (this.eventBus) {
 			return this.eventBus.removeListener(EventType.RepositoryChange, entityAddress,
 					changeListener);
 		}
 	}
 
-	public boolean removeListenerForSyncEvents(XAddress entityAddress,
-			XSyncEventListener syncListener) {
+	public boolean removeListenerForSyncEvents(final XAddress entityAddress,
+			final XSyncEventListener syncListener) {
 		synchronized (this.eventBus) {
 			return this.eventBus.removeListener(EventType.Sync, entityAddress, syncListener);
 		}
 	}
 
-	public boolean removeListenerForTransactionEvents(XAddress entityAddress,
-			XTransactionEventListener changeListener) {
+	public boolean removeListenerForTransactionEvents(final XAddress entityAddress,
+			final XTransactionEventListener changeListener) {
 		synchronized (this.eventBus) {
 			return this.eventBus.removeListener(EventType.TransactionChange, entityAddress,
 					changeListener);
@@ -229,7 +229,7 @@ public class Root implements XRoot, Serializable {
 		return this.isTransactionInProgress;
 	}
 
-	public void setTransactionInProgress(boolean b) {
+	public void setTransactionInProgress(final boolean b) {
 		this.isTransactionInProgress = b;
 	}
 
@@ -240,22 +240,22 @@ public class Root implements XRoot, Serializable {
 
 	/**
 	 * Set a new actor to be used when building commands for changes.
-	 * 
+	 *
 	 * @param actor for this field.
 	 */
-	public void setSessionActor(XId actor) {
+	public void setSessionActor(final XId actor) {
 		this.sessionActor = actor;
 	}
 
 	/**
 	 * Set a new actor to be used when building commands for changes to this
 	 * entity and its children.
-	 * 
+	 *
 	 * @param actorId for this entity and its children, if any.
 	 * @param passwordHash the password for the given actor.
 	 */
 	@Override
-	public void setSessionActor(XId actorId, String passwordHash) {
+	public void setSessionActor(final XId actorId, final String passwordHash) {
 		setSessionActor(actorId);
 		setSessionPasswordHash(passwordHash);
 	}
@@ -266,7 +266,7 @@ public class Root implements XRoot, Serializable {
 	 * @param changeLogBaseRevision
 	 * @return ...
 	 */
-	public static Root createWithActor(XId actorId, XAddress baseAddress, long changeLogBaseRevision) {
+	public static Root createWithActor(final XId actorId, final XAddress baseAddress, final long changeLogBaseRevision) {
 		return new Root(new MemoryEventBus(), MemorySyncLog.create(baseAddress,
 				changeLogBaseRevision), actorId);
 	}
@@ -277,9 +277,9 @@ public class Root implements XRoot, Serializable {
 	 * @param changeLogState @CanBeNull
 	 * @return ...
 	 */
-	public static Root createWithActorAndChangeLogState(XId actorId, XAddress baseAddress,
-			XChangeLogState changeLogState) {
-		XChangeLogState usedChangeLogState = changeLogState == null ? new MemoryChangeLogState(
+	public static Root createWithActorAndChangeLogState(final XId actorId, final XAddress baseAddress,
+			final XChangeLogState changeLogState) {
+		final XChangeLogState usedChangeLogState = changeLogState == null ? new MemoryChangeLogState(
 				baseAddress) : changeLogState;
 
 		return new Root(
@@ -332,7 +332,7 @@ public class Root implements XRoot, Serializable {
 		return this.syncLog.getSynchronizedRevision();
 	}
 
-	public void registerRepositoryEventBus(MemoryEventBus repoBus) {
+	public void registerRepositoryEventBus(final MemoryEventBus repoBus) {
 		this.repositoryEventBus = repoBus;
 	}
 
@@ -344,27 +344,27 @@ public class Root implements XRoot, Serializable {
 
 	@Override
 	public XChangeLog getChangeLog() {
-		return this.getSyncLog();
+		return getSyncLog();
 	}
 
 	@Override
-	public boolean addListenerForSyncEvents(XSyncEventListener syncListener) {
+	public boolean addListenerForSyncEvents(final XSyncEventListener syncListener) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean removeListenerForSyncEvents(XSyncEventListener syncListener) {
+	public boolean removeListenerForSyncEvents(final XSyncEventListener syncListener) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	/**
 	 * See doc of {@link ChangeRecordMode}.
-	 * 
+	 *
 	 * @param changeRecordMode
 	 */
-	public void setChangeRecordMode(ChangeRecordMode changeRecordMode) {
+	public void setChangeRecordMode(final ChangeRecordMode changeRecordMode) {
 		this.syncLog.setChangeRecordMode(changeRecordMode);
 	}
 

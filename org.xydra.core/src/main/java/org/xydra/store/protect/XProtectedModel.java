@@ -22,20 +22,20 @@ import org.xydra.core.model.XObject;
  * if a method is called and only executes the method, if the actor is allowed
  * to execute it (otherwise {@link AccessException XAccessExceptions} will be
  * thrown).
- * 
+ *
  * All change operations like adding new {@link XField XFields} executed on an
  * XProtectedModel will directly affect the wrapped {@link XModel}.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 public interface XProtectedModel extends XLoggedModel, XExecutesCommands {
-    
+
     /**
      * Creates a new {@link XObject} with the given {@link XId} and adds it to
      * this XProtecedModel or returns the already existing {@link XObject} if
      * the given {@link XId} was already taken.
-     * 
+     *
      * @param id The {@link XId} for the {@link XObject} which is to be created
      * @return the newly created {@link XObject} or the already existing
      *         {@link XObject} if the given {@link XId} was already taken as an
@@ -48,10 +48,10 @@ public interface XProtectedModel extends XLoggedModel, XExecutesCommands {
     @Override
     @ModificationOperation
     XProtectedObject createObject(@NeverNull XId id);
-    
+
     /**
      * Executes the given {@link XModelCommand} if possible.
-     * 
+     *
      * This method will fail if, the given {@link XModelCommand} cannot be
      * executed which may occur in the following cases:
      * <ul>
@@ -63,7 +63,7 @@ public interface XProtectedModel extends XLoggedModel, XExecutesCommands {
      * <li>the model-{@link XId} in the {@link XModelCommand} does not concur
      * with the {@link XId} of this XModel
      * </ul>
-     * 
+     *
      * @param command The {@link XModelCommand} which is to be executed
      * @return {@link XCommand#FAILED} if executing the {@link XModelCommand}
      *         failed, {@link XCommand#NOCHANGE} if executing the
@@ -76,19 +76,19 @@ public interface XProtectedModel extends XLoggedModel, XExecutesCommands {
      */
     @ModificationOperation
     long executeModelCommand(XModelCommand command);
-    
+
     /**
      * @return the actor that is represented by this interface. This is the
      *         actor that is recorded for change operations. Operations will
      *         only succeed if this actor has access.
      */
     XId getActor();
-    
+
     /**
      * Returns the {@link XObject} contained in this model with the given
      * {@link XId} wrapped as an {@link XProtectedObject} linked with the actor
      * of this XProtectedModel.
-     * 
+     *
      * @param id The {@link XId} of the {@link XObject} which is to be returned
      * @return The {@link XObject} with the given {@link XId} or null, if no
      *         corresponding {@link XObject} exists
@@ -99,5 +99,5 @@ public interface XProtectedModel extends XLoggedModel, XExecutesCommands {
     @Override
     @ReadOperation
     XProtectedObject getObject(@NeverNull XId objectId);
-    
+
 }

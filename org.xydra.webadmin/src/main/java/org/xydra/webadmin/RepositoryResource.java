@@ -19,6 +19,8 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.base.Base;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
@@ -39,6 +41,7 @@ import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.FileDownloadUtils;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.Progress;
+import org.xydra.restless.utils.SharedHtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.store.impl.gae.InstanceContext;
 import org.xydra.store.impl.gae.UniCache.StorageOptions;
@@ -51,7 +54,7 @@ import org.xydra.xgae.gaeutils.UniversalUrlFetch;
 
 /**
  * Can list all models in a repo; provides import/export for a whole model.
- * 
+ *
  * @author xamde
  */
 public class RepositoryResource {
@@ -65,7 +68,7 @@ public class RepositoryResource {
 
 	private static XId actorId = XX.toId("_RepositoryResource");
 
-	public static void restless(Restless restless, String prefix) {
+	public static void restless(final Restless restless, final String prefix) {
 		URL = prefix + "/repo";
 		ObjectResource.restless(restless, URL);
 		ModelResource.restless(restless, URL);
@@ -138,29 +141,29 @@ public class RepositoryResource {
 	 * @throws IOException
 	 *             ...
 	 */
-	public static void foreach(String repoId, String foreachmodel, String username,
-			String password, HttpServletResponse res) throws IOException {
+	public static void foreach(final String repoId, final String foreachmodel, final String username,
+			final String password, final HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = Utils.startPage(res, PAGE_NAME, "For each model");
+		final Writer w = Utils.startPage(res, PAGE_NAME, "For each model");
 
 		w.write("For-each model in repo " + repoId + " use param " + foreachmodel + "<br/>\n");
 		w.flush();
-		XId repositoryId = XX.toId(repoId);
-		XydraPersistence p = Utils.createPersistence(repositoryId);
-		List<XId> modelIdList = new ArrayList<XId>(p.getManagedModelIds());
+		final XId repositoryId = Base.toId(repoId);
+		final XydraPersistence p = Utils.createPersistence(repositoryId);
+		final List<XId> modelIdList = new ArrayList<XId>(p.getManagedModelIds());
 		Collections.sort(modelIdList);
-		Progress progress = new Progress();
+		final Progress progress = new Progress();
 		progress.startTime();
-		for (XId modelId : modelIdList) {
-			XAddress modelAddress = XX.resolveModel(repositoryId, modelId);
-			String urlStr = foreachmodel + "?modelAddress=" + modelAddress;
+		for (final XId modelId : modelIdList) {
+			final XAddress modelAddress = Base.resolveModel(repositoryId, modelId);
+			final String urlStr = foreachmodel + "?modelAddress=" + modelAddress;
 			w.write("Calling " + urlStr + " ... ");
 			w.flush();
-			int result = UniversalUrlFetch.callUrl(urlStr, username, password, true);
+			final int result = UniversalUrlFetch.callUrl(urlStr, username, password, true);
 			progress.makeProgress(1);
 			w.write(" => " + result + ". Seconds left: "
-					+ (progress.willTakeMsUntilProgressIs(modelIdList.size()) / 1000) + "<br/>\n");
+					+ progress.willTakeMsUntilProgressIs(modelIdList.size()) / 1000 + "<br/>\n");
 			w.flush();
 		}
 		w.write("Done with all.<br/>\n");
@@ -181,70 +184,70 @@ public class RepositoryResource {
 	 * @throws IOException
 	 *             ...
 	 */
-	public static void index(String repoIdStr, String styleStr, String useTaskQueueStr,
-			String cacheInInstanceStr, String cacheInMemcacheStr, String cacheInDatastoreStr,
-			HttpServletResponse res) throws IOException {
+	public static void index(final String repoIdStr, final String styleStr, final String useTaskQueueStr,
+			final String cacheInInstanceStr, final String cacheInMemcacheStr, final String cacheInDatastoreStr,
+			final HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		log.info("index");
 		log.trace("logtest: trace");
 		log.debug("logtest: debug");
 		log.info("logtest: info");
 
-		boolean useTaskQueue = ConfigUtils.isTrue(useTaskQueueStr);
-		boolean cacheInInstance = ConfigUtils.isTrue(cacheInInstanceStr);
-		boolean cacheInMemcache = ConfigUtils.isTrue(cacheInMemcacheStr);
-		boolean cacheInDatastore = ConfigUtils.isTrue(cacheInDatastoreStr);
+		final boolean useTaskQueue = ConfigUtils.isTrue(useTaskQueueStr);
+		final boolean cacheInInstance = ConfigUtils.isTrue(cacheInInstanceStr);
+		final boolean cacheInMemcache = ConfigUtils.isTrue(cacheInMemcacheStr);
+		final boolean cacheInDatastore = ConfigUtils.isTrue(cacheInDatastoreStr);
 
-		StorageOptions storeOpts = StorageOptions.create(cacheInInstance ? 1 : 0, cacheInMemcache,
+		final StorageOptions storeOpts = StorageOptions.create(cacheInInstance ? 1 : 0, cacheInMemcache,
 				cacheInDatastore,
 				/* always allow on the-fly-computation */
 				true);
 
-		Clock c = new Clock().start();
-		XAddress repoAddress = XX.resolveRepository(XX.toId(repoIdStr));
-		RStyle style = RStyle.valueOf(styleStr);
-		XId repoId = XX.toId(repoIdStr);
-		XydraPersistence p = Utils.createPersistence(repoId);
+		final Clock c = new Clock().start();
+		final XAddress repoAddress = Base.resolveRepository(Base.toId(repoIdStr));
+		final RStyle style = RStyle.valueOf(styleStr);
+		final XId repoId = Base.toId(repoIdStr);
+		final XydraPersistence p = Utils.createPersistence(repoId);
 		if (style == RStyle.xmlzip || style == RStyle.xmldump) {
-			List<XId> modelIdList = new ArrayList<XId>(p.getManagedModelIds());
+			final List<XId> modelIdList = new ArrayList<XId>(p.getManagedModelIds());
 			// IMPROVE we can use paging here to split work; BUT number of
 			// models
 			// might change.
 			Collections.sort(modelIdList);
-			boolean allUpToDate = SerialisationCache.updateAllModels(repoId, modelIdList,
+			final boolean allUpToDate = SerialisationCache.updateAllModels(repoId, modelIdList,
 					MStyle.xml, false, useTaskQueue, cacheInInstance, cacheInMemcache,
 					cacheInDatastore);
 			if (allUpToDate) {
 				log.info("All model serialisations are up-to-date, generating zip");
-				String archivename = Utils.filenameOfNow("repo-" + repoId);
+				final String archivename = Utils.filenameOfNow("repo-" + repoId);
 				if (style == RStyle.xmlzip) {
 					if (modelIdList.size() == 0) {
 						log.info("No models, no zip");
 						return;
 					}
-					ZipOutputStream zos = FileDownloadUtils.toZipFileDownload(res, archivename);
-					for (XId modelId : modelIdList) {
-						XAddress modelAddress = XX.resolveModel(repoId, modelId);
-						String serialisation = SerialisationCache.getSerialisation(modelAddress,
+					final ZipOutputStream zos = FileDownloadUtils.toZipFileDownload(res, archivename);
+					for (final XId modelId : modelIdList) {
+						final XAddress modelAddress = Base.resolveModel(repoId, modelId);
+						final String serialisation = SerialisationCache.getSerialisation(modelAddress,
 								storeOpts);
 						ModelResource.writeToZipstreamDirectly(modelId, MStyle.xml, serialisation,
 								zos);
 					}
 					zos.finish();
 				} else {
-					Writer w = Utils
+					final Writer w = Utils
 							.startPage(res, PAGE_NAME, "Xyadmin XML dump of repo " + repoId);
-					for (XId modelId : modelIdList) {
-						XAddress modelAddress = XX.resolveModel(repoId, modelId);
-						String serialisation = SerialisationCache.getSerialisation(modelAddress,
+					for (final XId modelId : modelIdList) {
+						final XAddress modelAddress = Base.resolveModel(repoId, modelId);
+						final String serialisation = SerialisationCache.getSerialisation(modelAddress,
 								storeOpts);
 						w.write(serialisation);
 					}
 				}
 			} else {
-				Writer w = Utils.startPage(res, PAGE_NAME, "Xyadmin Repo " + repoId);
+				final Writer w = Utils.startPage(res, PAGE_NAME, "Xyadmin Repo " + repoId);
 				w.write("Generating serialisations took too long. Watch task queue to finish and consider using different caching params.<br/>\n");
-				w.write(HtmlUtils.form(METHOD.GET, "").withHiddenInputText("", repoIdStr)
+				w.write(SharedHtmlUtils.form(METHOD.GET, "").withHiddenInputText("", repoIdStr)
 						.withHiddenInputText("style", styleStr)
 						.withInputText("useTaskQueue", useTaskQueueStr)
 						.withInputText("cacheInInstance", cacheInInstanceStr)
@@ -254,37 +257,37 @@ public class RepositoryResource {
 			}
 		} else {
 			// style HTML
-			Writer w = Utils.startPage(res, PAGE_NAME, "" + repoAddress);
+			final Writer w = Utils.startPage(res, PAGE_NAME, "" + repoAddress);
 			w.write(
 
-			HtmlUtils.link(link(repoId) + "?style=" + RStyle.htmlrevs.name(), "With Revs")
+			SharedHtmlUtils.link(link(repoId) + "?style=" + RStyle.htmlrevs.name(), "With Revs")
 
 					+ " | "
-					+ HtmlUtils.link(link(repoId) + "?style=" + RStyle.xmlzip.name(),
+					+ SharedHtmlUtils.link(link(repoId) + "?style=" + RStyle.xmlzip.name(),
 							"Download as xml.zip")
 
 					+ " | "
-					+ HtmlUtils.link(link(repoId) + "?style=" + RStyle.xmldump.name(),
+					+ SharedHtmlUtils.link(link(repoId) + "?style=" + RStyle.xmldump.name(),
 							"Dump as xml")
 
 					+ "<br/>\n");
 
 			// upload form
-			w.write(HtmlUtils.form(METHOD.POST, link(repoId) + "?replace=true")
+			w.write(SharedHtmlUtils.form(METHOD.POST, link(repoId) + "?replace=true")
 					.withInputFile("backupfile")
 					.withInputSubmit("Upload and force set as current state").toString());
-			w.write(HtmlUtils.form(METHOD.POST, link(repoId)).withInputFile("backupfile")
+			w.write(SharedHtmlUtils.form(METHOD.POST, link(repoId)).withInputFile("backupfile")
 					.withInputSubmit("Upload and update to this as current state").toString());
 
 			// killer
-			w.write(HtmlUtils.link(link(repoId) + "?command=deleteAllModels", "Delete all models"));
+			w.write(SharedHtmlUtils.link(link(repoId) + "?command=deleteAllModels", "Delete all models"));
 
-			List<XId> modelIdList = new ArrayList<XId>(p.getManagedModelIds());
+			final List<XId> modelIdList = new ArrayList<XId>(p.getManagedModelIds());
 			Collections.sort(modelIdList);
-			for (XId modelId : modelIdList) {
+			for (final XId modelId : modelIdList) {
 				w.write("<h2>Model: " + modelId + "</h2>\n");
 				w.flush();
-				XAddress modelAddress = XX.toAddress(repoId, modelId, null, null);
+				final XAddress modelAddress = Base.toAddress(repoId, modelId, null, null);
 
 				// do we have enough time left?
 				if (c.getDurationSinceStart() > 10000) {
@@ -304,17 +307,17 @@ public class RepositoryResource {
 
 	private static final String passwordPropertyNameInWebXml = "org.xydra.webadmin.RepositoryResource.password";
 
-	public static void deleteAllModels(String repoIdStr, String commandStr, String confirmParam,
-			HttpServletRequest req, HttpServletResponse res, IRestlessContext context)
+	public static void deleteAllModels(final String repoIdStr, final String commandStr, final String confirmParam,
+			final HttpServletRequest req, final HttpServletResponse res, final IRestlessContext context)
 			throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 
 		AdminAuthUtils.setTempAuthCookie(context, passwordPropertyNameInWebXml);
 
-		Writer w = Utils.startPage(res, PAGE_NAME, "Delete All Models");
-		Clock c = new Clock().start();
+		final Writer w = Utils.startPage(res, PAGE_NAME, "Delete All Models");
+		final Clock c = new Clock().start();
 
-		String password = context.getRestless().getInitParameter(passwordPropertyNameInWebXml);
+		final String password = context.getRestless().getInitParameter(passwordPropertyNameInWebXml);
 		w.write("Password is '"
 				+ password
 				+ "' it must match the URL param 'confirm' and the cookie. Setting cookie for 120 seconds ..."
@@ -329,18 +332,18 @@ public class RepositoryResource {
 		w.close();
 	}
 
-	private static void doDeleteAllData(Writer w, String repoIdStr) throws IOException {
-		XId repoId = XX.toId(repoIdStr);
-		XydraPersistence p = Utils.createPersistence(repoId);
-		for (XId modelId : p.getManagedModelIds()) {
+	private static void doDeleteAllData(final Writer w, final String repoIdStr) throws IOException {
+		final XId repoId = Base.toId(repoIdStr);
+		final XydraPersistence p = Utils.createPersistence(repoId);
+		for (final XId modelId : p.getManagedModelIds()) {
 			w.write("Deleting model " + modelId);
 			w.flush();
-			XWritableModel model = new WritableModelOnPersistence(p, actorId, modelId);
-			Collection<XId> objectIds = Iterators.addAll(model.iterator(), new HashSet<XId>());
-			for (XId objectId : objectIds) {
-				XCommand command = X.getCommandFactory().createForcedRemoveObjectCommand(repoId,
+			final XWritableModel model = new WritableModelOnPersistence(p, actorId, modelId);
+			final Collection<XId> objectIds = Iterators.addAll(model.iterator(), new HashSet<XId>());
+			for (final XId objectId : objectIds) {
+				final XCommand command = BaseRuntime.getCommandFactory().createForcedRemoveObjectCommand(repoId,
 						modelId, objectId);
-				long l = p.executeCommand(actorId, command);
+				final long l = p.executeCommand(actorId, command);
 				w.write(" ... result = " + l + "<br/>\n");
 			}
 			w.flush();
@@ -358,21 +361,21 @@ public class RepositoryResource {
 	 * @param upload
 	 * @throws IOException
 	 */
-	public static void update(String repoIdStr, String replaceModelsStr, byte[] upload,
+	public static void update(final String repoIdStr, final String replaceModelsStr, final byte[] upload,
 
-	HttpServletRequest req, HttpServletResponse res) throws IOException {
+	final HttpServletRequest req, final HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = Utils.startPage(res, PAGE_NAME, "Restore Repository");
+		final Writer w = Utils.startPage(res, PAGE_NAME, "Restore Repository");
 
-		XId repoId = XX.toId(repoIdStr);
-		boolean replaceModels = replaceModelsStr != null
+		final XId repoId = Base.toId(repoIdStr);
+		final boolean replaceModels = replaceModelsStr != null
 				&& replaceModelsStr.equalsIgnoreCase("true");
 
 		w.write("Processing upload... replace=" + replaceModelsStr + "</br>");
 		w.flush();
 
 		assert upload != null;
-		InputStream fis = new ByteArrayInputStream(upload);
+		final InputStream fis = new ByteArrayInputStream(upload);
 		// InputStream fis = Utils.getMultiPartContentFileAsInputStream(w, req);
 		assert fis != null;
 
@@ -394,10 +397,10 @@ public class RepositoryResource {
 	 *            DOCU =?
 	 * @throws IOException
 	 */
-	public static void updateFromZippedInputStream(InputStream fis, XId repoId, Writer w,
-			boolean replaceModels) throws IOException {
-		Clock c = new Clock().start();
-		ZipInputStream zis = new ZipInputStream(fis);
+	public static void updateFromZippedInputStream(final InputStream fis, final XId repoId, final Writer w,
+			final boolean replaceModels) throws IOException {
+		final Clock c = new Clock().start();
+		final ZipInputStream zis = new ZipInputStream(fis);
 		w.write("... open zip stream ...</br>");
 		w.flush();
 
@@ -427,7 +430,7 @@ public class RepositoryResource {
 			w.write("... applied to server repository " + result + "</br>");
 			w.flush();
 		}
-		String stats = "Restored: " + restored + ", existed before: " + modelExisted
+		final String stats = "Restored: " + restored + ", existed before: " + modelExisted
 				+ ", noChangesIn:" + modelsWithChanges;
 		w.write(stats + " " + c.getStats() + "</br>");
 		log.trace("Stats: " + stats + " " + c.getStats());
@@ -439,7 +442,7 @@ public class RepositoryResource {
 	 * @param repoId
 	 * @return relative admin link with no slash at the end
 	 */
-	public static String link(XId repoId) {
+	public static String link(final XId repoId) {
 		return "/admin" + URL + "/" + repoId;
 	}
 
@@ -449,18 +452,18 @@ public class RepositoryResource {
 	 *            should be in a directory that exists already
 	 * @throws IOException
 	 */
-	public static void saveRepositoryToZipFile(XydraPersistence p, File zipFile) throws IOException {
-		FileOutputStream fos = new FileOutputStream(zipFile);
-		List<XId> modelIdList = new ArrayList<XId>(p.getManagedModelIds());
-		ZipOutputStream zos = new ZipOutputStream(fos);
-		for (XId modelId : modelIdList) {
-			XAddress modelAddress = XX.resolveModel(p.getRepositoryId(), modelId);
-			XWritableModel model = p.getModelSnapshot(new GetWithAddressRequest(modelAddress,
+	public static void saveRepositoryToZipFile(final XydraPersistence p, final File zipFile) throws IOException {
+		final FileOutputStream fos = new FileOutputStream(zipFile);
+		final List<XId> modelIdList = new ArrayList<XId>(p.getManagedModelIds());
+		final ZipOutputStream zos = new ZipOutputStream(fos);
+		for (final XId modelId : modelIdList) {
+			final XAddress modelAddress = Base.resolveModel(p.getRepositoryId(), modelId);
+			final XWritableModel model = p.getModelSnapshot(new GetWithAddressRequest(modelAddress,
 					ModelResource.INCLUDE_TENTATIVE));
 			if (model == null) {
 				log.warn("Could not find model " + modelAddress + " - it might have been deleted");
 			} else {
-				String serialisation = ModelResource.computeSerialisation(model, MStyle.xml);
+				final String serialisation = ModelResource.computeSerialisation(model, MStyle.xml);
 
 				ModelResource.writeToZipstreamDirectly(modelId, MStyle.xml, serialisation, zos);
 			}
@@ -471,7 +474,7 @@ public class RepositoryResource {
 
 	/**
 	 * First completely wipes out the current repository, then loads from file
-	 * 
+	 *
 	 * @param zipFile
 	 *            from where to load
 	 * @param repoId
@@ -481,7 +484,7 @@ public class RepositoryResource {
 	 *            {@link OutputStreamWriter} wrapped around System.out.
 	 * @throws IOException
 	 */
-	public static void loadRepositoryFromZipFile(File zipFile, XId repoId, Writer w)
+	public static void loadRepositoryFromZipFile(final File zipFile, final XId repoId, final Writer w)
 			throws IOException {
 		// was "deleteOneByOne", I wonder why
 		XGae.get().datastore().sync().clear();
@@ -489,7 +492,7 @@ public class RepositoryResource {
 		XGae.get().memcache().clear();
 		InstanceContext.clear();
 
-		FileInputStream fis = new FileInputStream(zipFile);
+		final FileInputStream fis = new FileInputStream(zipFile);
 		RepositoryResource.updateFromZippedInputStream(fis, repoId, w, true);
 	}
 

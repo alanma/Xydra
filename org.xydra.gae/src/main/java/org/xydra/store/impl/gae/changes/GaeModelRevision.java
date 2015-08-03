@@ -6,9 +6,9 @@ import org.xydra.persistence.ModelRevision;
 
 /**
  * Contains a {@link ModelRevision} and a lastSilentCommit number
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class GaeModelRevision implements Serializable {
 
@@ -43,7 +43,7 @@ public class GaeModelRevision implements Serializable {
 	 * @param modelRev
 	 *            can be null if not known
 	 */
-	public GaeModelRevision(long lastSilentCommitted, ModelRevision modelRev) {
+	public GaeModelRevision(final long lastSilentCommitted, final ModelRevision modelRev) {
 		assert lastSilentCommitted >= -1;
 		assert modelRev != null;
 		this.lastSilentCommitted = lastSilentCommitted;
@@ -65,7 +65,7 @@ public class GaeModelRevision implements Serializable {
 		return this.modelRev;
 	}
 
-	void setLastSilentCommittedIfHigher(long lastSilentCommitted) {
+	void setLastSilentCommittedIfHigher(final long lastSilentCommitted) {
 		if (lastSilentCommitted > this.lastSilentCommitted) {
 			this.lastSilentCommitted = lastSilentCommitted;
 		}
@@ -80,7 +80,7 @@ public class GaeModelRevision implements Serializable {
 	 * @param modelRev
 	 *            never null
 	 */
-	void setCurrentModelRevisionIfRevIsHigher(ModelRevision modelRev) {
+	void setCurrentModelRevisionIfRevIsHigher(final ModelRevision modelRev) {
 		assert modelRev != null;
 		if (this.modelRev == null) {
 			this.modelRev = modelRev;

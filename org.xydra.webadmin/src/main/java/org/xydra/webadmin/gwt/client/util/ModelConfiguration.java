@@ -10,7 +10,7 @@ public class ModelConfiguration {
 	public XId modelId;
 	public long revisionNumber;
 
-	public ModelConfiguration(XyAdmin adminObject, XId repoId, XId modelId) {
+	public ModelConfiguration(final XyAdmin adminObject, final XId repoId, final XId modelId) {
 
 		this.adminObject = adminObject;
 		this.repoId = repoId;

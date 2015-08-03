@@ -1,6 +1,7 @@
 package org.xydra.base.id;
 
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.base.XIdProvider;
 import org.xydra.core.XX;
@@ -241,7 +242,7 @@ public class XidCodec {
 		}
 
 		final String encString = enc.toString();
-		assert MemoryStringIDProvider.isValidId(encString) : "Failed to encode '" + s + "' as '"
+		assert BaseStringIDProvider.isValidId(encString) : "Failed to encode '" + s + "' as '"
 		+ encString + "'";
 		return encString;
 	}
@@ -269,7 +270,7 @@ public class XidCodec {
 
 		final String encString = encode(s, maxLen);
 		// IMPROVE do without checks
-		return XX.toId(encString);
+		return Base.toId(encString);
 	}
 
 	// // combine truncated (=easy debugging) + hash (=better

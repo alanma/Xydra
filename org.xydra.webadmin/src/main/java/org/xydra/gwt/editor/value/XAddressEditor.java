@@ -1,5 +1,6 @@
 package org.xydra.gwt.editor.value;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.core.XX;
 
@@ -24,11 +25,12 @@ public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyP
 
 	private final TextBox editor = new TextBox();
 
-	public XAddressEditor(XAddress value, EditListener listener) {
+	public XAddressEditor(final XAddress value, final EditListener listener) {
 		super(listener);
 
-		if (value != null)
+		if (value != null) {
 			this.editor.setText(value.toString());
+		}
 
 		this.editor.addKeyPressHandler(this);
 		this.editor.addKeyDownHandler(this);
@@ -36,18 +38,19 @@ public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyP
 		initWidget(this.editor);
 	}
 
-	public void setValue(XAddress value) {
-		if (value != null)
+	public void setValue(final XAddress value) {
+		if (value != null) {
 			this.editor.setText(value.toString());
+		}
 	}
 
 	@Override
 	public XAddress getValue() {
-		String text = this.editor.getText();
+		final String text = this.editor.getText();
 		if (text.equals("")) {
 			return null;
 		}
-		XAddress address = XX.toAddress(text);
+		final XAddress address = Base.toAddress(text);
 		if (address == null) {
 			return null;
 		}
@@ -55,7 +58,7 @@ public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyP
 	}
 
 	@Override
-	public void onKeyPress(KeyPressEvent e) {
+	public void onKeyPress(final KeyPressEvent e) {
 
 		// char cc = e.getCharCode();
 		//
@@ -91,7 +94,7 @@ public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyP
 	}
 
 	@Override
-	public void onKeyDown(KeyDownEvent e) {
+	public void onKeyDown(final KeyDownEvent e) {
 		// boolean allowed = true;
 		//
 		// switch(e.getNativeKeyCode()) {

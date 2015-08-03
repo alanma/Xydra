@@ -12,9 +12,9 @@ import org.xydra.base.value.XCollectionValue;
 
 /**
  * A typed, modifiable Xydra-backed List
- * 
+ *
  * @author xamde
- * 
+ *
  * @param <X>
  * @param <T>
  * @param <J>
@@ -30,8 +30,8 @@ public class ArrayProxy<X extends XCollectionValue<T>, T, J, C> extends Collecti
 	 * @param componentTransformer
 	 *            @NeverNull
 	 */
-	public ArrayProxy(XWritableObject xo, XId fieldId,
-			CollectionProxy.IComponentTransformer<X, T, J, C> componentTransformer) {
+	public ArrayProxy(final XWritableObject xo, final XId fieldId,
+			final CollectionProxy.IComponentTransformer<X, T, J, C> componentTransformer) {
 		super(xo, fieldId, componentTransformer);
 	}
 
@@ -41,38 +41,38 @@ public class ArrayProxy<X extends XCollectionValue<T>, T, J, C> extends Collecti
 	}
 
 	@Override
-	public <R> R[] toArray(R[] a) {
+	public <R> R[] toArray(final R[] a) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
 	@Override
-	public boolean containsAll(Collection<?> c) {
+	public boolean containsAll(final Collection<?> c) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends C> c) {
-		Iterator<? extends C> it = c.iterator();
+	public boolean addAll(final Collection<? extends C> c) {
+		final Iterator<? extends C> it = c.iterator();
 		boolean changed = false;
 		while (it.hasNext()) {
-			C cItem = it.next();
+			final C cItem = it.next();
 			changed |= super.add(cItem);
 		}
 		return changed;
 	}
 
 	@Override
-	public boolean addAll(int index, Collection<? extends C> c) {
+	public boolean addAll(final int index, final Collection<? extends C> c) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c) {
+	public boolean removeAll(final Collection<?> c) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c) {
+	public boolean retainAll(final Collection<?> c) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
@@ -82,32 +82,32 @@ public class ArrayProxy<X extends XCollectionValue<T>, T, J, C> extends Collecti
 	}
 
 	@Override
-	public C get(int index) {
+	public C get(final int index) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
 	@Override
-	public C set(int index, C element) {
+	public C set(final int index, final C element) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
 	@Override
-	public void add(int index, C element) {
+	public void add(final int index, final C element) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
 	@Override
-	public C remove(int index) {
+	public C remove(final int index) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
 	@Override
-	public int indexOf(Object o) {
+	public int indexOf(final Object o) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
 	@Override
-	public int lastIndexOf(Object o) {
+	public int lastIndexOf(final Object o) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
@@ -117,12 +117,12 @@ public class ArrayProxy<X extends XCollectionValue<T>, T, J, C> extends Collecti
 	}
 
 	@Override
-	public ListIterator<C> listIterator(int index) {
+	public ListIterator<C> listIterator(final int index) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
 	@Override
-	public List<C> subList(int fromIndex, int toIndex) {
+	public List<C> subList(final int fromIndex, final int toIndex) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 

@@ -15,72 +15,72 @@ import org.xydra.base.value.XIdSortedSetValue;
 
 /**
  * An implementation of {@link XIdSortedSetValue}
- * 
+ *
  * @author dscharrer, voelkel
- * 
+ *
  */
 public class MemoryAddressSortedSetValue extends MemoryAddressListValue implements
         XAddressSortedSetValue, Serializable {
-	
+
 	private static final long serialVersionUID = -83885798275571937L;
-	
+
 	// empty constructor for GWT-Serializable
 	protected MemoryAddressSortedSetValue() {
 	}
-	
-	public MemoryAddressSortedSetValue(Collection<XAddress> contents) {
+
+	public MemoryAddressSortedSetValue(final Collection<XAddress> contents) {
 		super(contents);
 	}
-	
-	public MemoryAddressSortedSetValue(XAddress[] contents) {
+
+	public MemoryAddressSortedSetValue(final XAddress[] contents) {
 		super(contents);
 	}
-	
+
 	@Override
-	public MemoryAddressSortedSetValue add(XAddress entry) {
-		if(this.contains(entry)) {
+	public MemoryAddressSortedSetValue add(final XAddress entry) {
+		if(contains(entry)) {
 			// no need to add it
 			return this;
 		} else {
-			XAddress[] newList = MemoryAddressListValue.createArrayWithEntryInsertedAtPosition(
-			        this.contents(), this.contents().length, entry);
+			final XAddress[] newList = MemoryAddressListValue.createArrayWithEntryInsertedAtPosition(
+			        contents(), contents().length, entry);
 			return new MemoryAddressSortedSetValue(newList);
 		}
 	}
-	
+
 	@Override
 	public ValueType getType() {
 		return ValueType.AddressSortedSet;
 	}
-	
+
 	@Override
-	public MemoryAddressSortedSetValue remove(XAddress entry) {
+	public MemoryAddressSortedSetValue remove(final XAddress entry) {
 		// find it
-		int index = this.indexOf(entry);
+		final int index = indexOf(entry);
 		if(index == -1) {
 			// not possible to remove it
 			return this;
 		} else {
-			XAddress[] newList = MemoryAddressListValue.createArrayWithEntryRemovedAtPosition(
-			        this.contents(), index);
+			final XAddress[] newList = MemoryAddressListValue.createArrayWithEntryRemovedAtPosition(
+			        contents(), index);
 			return new MemoryAddressSortedSetValue(newList);
 		}
 	}
-	
+
 	@Override
 	public Set<XAddress> toSet() {
-		Set<XAddress> copy = new HashSet<XAddress>();
-		XAddress[] list = this.contents();
+		final Set<XAddress> copy = new HashSet<XAddress>();
+		final XAddress[] list = contents();
 		for(int i = 0; i < list.length; i++) {
 			copy.add(list[i]);
 		}
 		return copy;
 	}
-	
+
 	@Override
 	public SortedSet<XAddress> toSortedSet() {
-		SortedSet<XAddress> copy = new TreeSet<XAddress>();
-		XAddress[] list = this.contents();
+		final SortedSet<XAddress> copy = new TreeSet<XAddress>();
+		final XAddress[] list = contents();
 		for(int i = 0; i < list.length; i++) {
 			copy.add(list[i]);
 		}

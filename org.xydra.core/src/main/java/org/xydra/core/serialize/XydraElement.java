@@ -8,9 +8,9 @@ import org.xydra.index.query.Pair;
 /**
  * A minimal abstraction API to access XML/JSON elements created with
  * {@link XydraOut}.
- * 
+ *
  * Concepts: attribute, child, content, element, entry, type, value
- * 
+ *
  * @author xamde
  * @author dscharrer
  */
@@ -18,14 +18,14 @@ public interface XydraElement {
 
 	/**
 	 * Get an attribute of this element.
-	 * 
+	 *
 	 * @param name XML: The name of the attribute to get. JSON: the property
 	 *            name.
 	 * @return the attribute value or null if it does not exist
-	 * 
+	 *
 	 *         This may be a {@link String}, a {@link Boolean} or a
 	 *         {@link Number}.
-	 * 
+	 *
 	 *         The type of the returned object may differ from that used for
 	 *         writing via {@link XydraOut#attribute(String, Object)}
 	 */
@@ -38,13 +38,13 @@ public interface XydraElement {
 
 	/**
 	 * Get this element's text content.
-	 * 
+	 *
 	 * @return the contained character data. If this element contains additional
 	 *         children, the return value is undefined.
-	 * 
+	 *
 	 *         This may be null, a {@link String}, a {@link Boolean} or a
 	 *         {@link Number}.
-	 * 
+	 *
 	 *         The type of the returned object may differ from that used for
 	 *         writing via {@link XydraOut#content(String, Object)}
 	 */
@@ -52,16 +52,16 @@ public interface XydraElement {
 
 	/**
 	 * Get this element's text content.
-	 * 
+	 *
 	 * @param name The name under which the content is saved. This is not used
 	 *            for XML. For JSON this is the same as
 	 *            {@link #getAttribute(String)}.
 	 * @return return the contained character data. If this element contains
 	 *         additional children, the return value is undefined.
-	 * 
+	 *
 	 *         This may be null, a {@link String}, a {@link Boolean} or a
 	 *         {@link Number}.
-	 * 
+	 *
 	 *         The type of the returned object may differ from that used for
 	 *         writing via {@link XydraOut#content(String, Object)}
 	 */
@@ -80,17 +80,17 @@ public interface XydraElement {
 
 	/**
 	 * Get all child elements.
-	 * 
+	 *
 	 * For XML this returns all child elements.
-	 * 
+	 *
 	 * For JSON this returns the value of that property. If the property value
 	 * is an array, the array elements are returned. If the property value is an
 	 * object, that object is returned.
-	 * 
+	 *
 	 * This method is meant to be used for retrieving elements or arrays that
 	 * have been added using {@link XydraOut#open(String)} or
 	 * {@link XydraOut#beginArray()} to an untyped multiple-item context.
-	 * 
+	 *
 	 * @param name The name under which the children are saved. This is not used
 	 *            for XML. For JSON this determines the property name.
 	 * @return all child elements in document order
@@ -106,17 +106,17 @@ public interface XydraElement {
 
 	/**
 	 * Get all child elements of a specific type.
-	 * 
+	 *
 	 * For XML this returns all child elements with the given type.
-	 * 
+	 *
 	 * For JSON this returns the value of that property. If the property value
 	 * is an array, the array elements are returned. If the property value is an
 	 * object, that object is returned.
-	 * 
+	 *
 	 * This method is meant to be used for retrieving elements or arrays that
 	 * have been added using {@link XydraOut#open(String)} or
 	 * {@link XydraOut#beginArray()} to a typed multiple-item context.
-	 * 
+	 *
 	 * @param name The name under which the children are saved. This is not used
 	 *            for XML. For JSON this determines the property name.
 	 * @param type Only get elements with the specified type. This is not used
@@ -128,18 +128,18 @@ public interface XydraElement {
 
 	/**
 	 * Get the first child element.
-	 * 
+	 *
 	 * For XML this returns the first child.
-	 * 
+	 *
 	 * For JSON this returns the value of that property, but only if it is an
 	 * object or array.
-	 * 
+	 *
 	 * If this element wraps a JSON array, this throws an error.
-	 * 
+	 *
 	 * This method is meant to be used for retrieving elements or arrays that
 	 * have been added using {@link XydraOut#open(String)} or
 	 * {@link XydraOut#beginArray()} to an untyped single-item context.
-	 * 
+	 *
 	 * @param name The name under which the child is saved. This is not used for
 	 *            XML. For JSON this determines the property name.
 	 * @return the first child element in document order
@@ -148,18 +148,18 @@ public interface XydraElement {
 
 	/**
 	 * Get the i'th child element.
-	 * 
+	 *
 	 * For XML this returns the i'th child.
-	 * 
+	 *
 	 * For JSON this is equivalent to {@link #getElement(String)}.
-	 * 
+	 *
 	 * If this element wraps a JSON array, this throws an error.
-	 * 
+	 *
 	 * This method is meant to be used for retrieving elements or arrays that
 	 * have been added using {@link XydraOut#open(String)} or
 	 * {@link XydraOut#beginArray()} to an untyped single-item context where the
 	 * type is not unique for the containing element.
-	 * 
+	 *
 	 * @param name The name under which the child is saved. This is not used for
 	 *            XML. For JSON this determines the property name.
 	 * @param index The index of the child element to get. This is not used for
@@ -170,18 +170,18 @@ public interface XydraElement {
 
 	/**
 	 * Get the first child element of a specific type.
-	 * 
+	 *
 	 * For XML this returns the first child of that type.
-	 * 
+	 *
 	 * For JSON this returns the value of that property, but only if it is an
 	 * object or array.
-	 * 
+	 *
 	 * If this element wraps a JSON array, this throws an error.
-	 * 
+	 *
 	 * This method is meant to be used for retrieving elements or arrays that
 	 * have been added using {@link XydraOut#open(String)} or
 	 * {@link XydraOut#beginArray()} to a typed single-item context.
-	 * 
+	 *
 	 * @param name The name under which the child is saved. This is not used for
 	 *            XML. For JSON this determines the property name.
 	 * @param type Only get elements with the specified type. This is not used
@@ -193,9 +193,9 @@ public interface XydraElement {
 
 	/**
 	 * @return The type of this element.
-	 * 
+	 *
 	 *         Sample values: null, xarray, ...
-	 * 
+	 *
 	 *         In XML: the tag name
 	 */
 	public @NeverNull String getType();
@@ -207,16 +207,16 @@ public interface XydraElement {
 
 	/**
 	 * Get all values.
-	 * 
+	 *
 	 * For XML this returns all child elements, interpreted as values.
-	 * 
+	 *
 	 * For JSON this returns the value of that property, but only if it is an
 	 * array. If the array contains objects or array, the result is undefined.
-	 * 
+	 *
 	 * This method is meant to be used for retrieving values that have been
 	 * added using {@link XydraOut#value(Object)} to an untyped multiple-item
 	 * context.
-	 * 
+	 *
 	 * @param name The name under which the values are saved. This is not used
 	 *            for XML. For JSON this determines the property name.
 	 * @return all values in document order
@@ -225,17 +225,17 @@ public interface XydraElement {
 
 	/**
 	 * Get all values of a specific type.
-	 * 
+	 *
 	 * For XML this returns all child elements with the given type, interpreted
 	 * as values.
-	 * 
+	 *
 	 * For JSON this returns the value of that property, but only if it is an
 	 * array. If the array contains objects or array, the result is undefined.
-	 * 
+	 *
 	 * This method is meant to be used for retrieving values that have been
 	 * added using {@link XydraOut#value(Object)} to a typed multiple-item
 	 * context.
-	 * 
+	 *
 	 * @param name The name under which the values are saved. This is not used
 	 *            for XML. For JSON this determines the property name.
 	 * @param type Only get values with the specified type. This is not used for
@@ -247,18 +247,18 @@ public interface XydraElement {
 
 	/**
 	 * Get the i'th value.
-	 * 
+	 *
 	 * For XML this returns the i'th child interpreted as a value.
-	 * 
+	 *
 	 * For JSON this returns the value of that property, but only if it is no
 	 * object or array.
-	 * 
+	 *
 	 * If this element wraps a JSON array, this throws an error.
-	 * 
+	 *
 	 * This method is meant to be used for retrieving values that have been
 	 * added using {@link XydraOut#value(Object)} to an untyped single-item
 	 * context where the type is not unique for the containing element.
-	 * 
+	 *
 	 * @param name The name under which the value is saved. This is not used for
 	 *            XML. For JSON this determines the property name.
 	 * @param index The index of the value to get. This is not used for JSON.
@@ -268,18 +268,18 @@ public interface XydraElement {
 
 	/**
 	 * Get the first child value of a specific type.
-	 * 
+	 *
 	 * For XML this returns the first child of that type, interpreted as a
 	 * value.
-	 * 
+	 *
 	 * For JSON this returns the value of that property, but only if it is no
 	 * object or array.
-	 * 
+	 *
 	 * If this element wraps a JSON array, this throws an error.
-	 * 
+	 *
 	 * This method is meant to be used for retrieving value that have been added
 	 * using {@link XydraOut#value(Object)} to a typed single-item context.
-	 * 
+	 *
 	 * @param name The name under which the value is saved. This is not used for
 	 *            XML. For JSON this determines the property name.
 	 * @param type Only get elements with the specified type. This is not used

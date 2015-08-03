@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.xydra.base.Base;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommandUtils;
@@ -47,23 +49,23 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
  * Performs logic for {@link EditorPanel}s. So it:
- * 
+ *
  * <ul>
  * <li>processes the presentation of models via starting the
  * {@link TablePresenter}
  * <li>fulfills requests given via the {@link ModelControlPanel}
  * <li>has Listeners to {@link ModelChangedEvent}s and {@link CommittingEvent}s
  * </ul>
- * 
+ *
  * The listeners react, when
  * <ul>
  * <li>a model with the appropriate address is indexed (fetched from the server
  * and locally indexed),
  * <li>the model is removed
  * </ul>
- * 
+ *
  * @author kahmann
- * 
+ *
  */
 public class EditorPanelPresenter extends Presenter {
 
@@ -73,7 +75,7 @@ public class EditorPanelPresenter extends Presenter {
 
 	private static final Logger log = LoggerFactory.getLogger(EditorPanelPresenter.class);
 
-	private IEditorPanel editorPanel;
+	private final IEditorPanel editorPanel;
 	private XAddress currentModelAddress;
 	private TablePresenter tablePresenter;
 
@@ -81,7 +83,7 @@ public class EditorPanelPresenter extends Presenter {
 
 	private HandlerRegistration commitHandlerRegistration;
 
-	public EditorPanelPresenter(IEditorPanel editorPanel) {
+	public EditorPanelPresenter(final IEditorPanel editorPanel) {
 		this.editorPanel = editorPanel;
 
 	}
@@ -90,10 +92,10 @@ public class EditorPanelPresenter extends Presenter {
 		this.editorPanel.init();
 	}
 
-	public void presentModel(XAddress address) {
+	public void presentModel(final XAddress address) {
 		this.currentModelAddress = address;
 
-		this.buildModelView();
+		buildModelView();
 	}
 
 	public void buildModelView() {
@@ -102,9 +104,9 @@ public class EditorPanelPresenter extends Presenter {
 
 		this.editorPanel.clear();
 
-		ModelControlPanel modelControlPanel = new ModelControlPanel(this);
+		final ModelControlPanel modelControlPanel = new ModelControlPanel(this);
 
-		ModelInformationPanel modelInformationPanel = new ModelInformationPanel(
+		final ModelInformationPanel modelInformationPanel = new ModelInformationPanel(
 				this.currentModelAddress.getModel().toString());
 		this.tablePresenter = new TablePresenter(this, modelInformationPanel);
 		this.tablePresenter.generateTableOrShowInformation();
@@ -115,7 +117,7 @@ public class EditorPanelPresenter extends Presenter {
 				new IModelChangedEventHandler() {
 
 					@Override
-					public void onModelChange(ModelChangedEvent event) {
+					public void onModelChange(final ModelChangedEvent event) {
 						if (event.getStatus().equals(EntityStatus.DELETED)) {
 							resetView();
 
@@ -124,7 +126,7 @@ public class EditorPanelPresenter extends Presenter {
 						}
 
 						else if (event.getStatus().equals(EntityStatus.INDEXED)) {
-							if (event.getMoreInfos().equals(XX.toId("removed"))) {
+							if (event.getMoreInfos().equals(Base.toId("removed"))) {
 								resetView();
 							} else {
 								EditorPanelPresenter.this.tablePresenter
@@ -139,7 +141,7 @@ public class EditorPanelPresenter extends Presenter {
 
 	private void resetView() {
 		this.editorPanel.clear();
-		Label noModelLabel = new Label("choose model via selection tree");
+		final Label noModelLabel = new Label("choose model via selection tree");
 		this.editorPanel.add(noModelLabel);
 	}
 
@@ -149,22 +151,23 @@ public class EditorPanelPresenter extends Presenter {
 
 	public void handleFetchIDs() {
 		@SuppressWarnings("unused")
+		final
 		WarningDialog warning = new WarningDialog("not yet Implemented!");
 	}
 
-	void openCommitDialog(ModelControlPanel modelControlPanel) {
+	void openCommitDialog(final ModelControlPanel modelControlPanel) {
 
 		// TODO research how this could have been better with explicit UI
 		// components
 
-		SessionCachedModel model = this.getCurrentModel();
-		VerticalPanel changesPanel = new VerticalPanel();
+		final SessionCachedModel model = getCurrentModel();
+		final VerticalPanel changesPanel = new VerticalPanel();
 		changesPanel.addStyleName("changesPanelStyle");
 
 		/* if the model was added */
 		if (XyAdmin.getInstance().getModel().getRepo(this.currentModelAddress.getRepository())
 				.isAddedModel(this.currentModelAddress.getModel())) {
-			HTML addedModelHTML = new HTML("ADDED MODEL " + this.currentModelAddress.toString());
+			final HTML addedModelHTML = new HTML("ADDED MODEL " + this.currentModelAddress.toString());
 			addedModelHTML.getElement().setAttribute("style", "font-size : 20px");
 			addedModelHTML.setStyleName("addedEntityStyle");
 			changesPanel.add(addedModelHTML);
@@ -174,8 +177,8 @@ public class EditorPanelPresenter extends Presenter {
 		}
 
 		/* for all added objects */
-		List<XId> addedList = new ArrayList<XId>();
-		for (XReadableObject object : this.getCurrentModel().getAdded()) {
+		final List<XId> addedList = new ArrayList<XId>();
+		for (final XReadableObject object : getCurrentModel().getAdded()) {
 			addedList.add(object.getId());
 		}
 
@@ -185,50 +188,51 @@ public class EditorPanelPresenter extends Presenter {
 		count = compileObjectInfos(changesPanel, addedList, count, objectsStatus);
 
 		/* for deleted objects */
-		List<XId> removedList = new ArrayList<XId>(model.getRemoved());
+		final List<XId> removedList = new ArrayList<XId>(model.getRemoved());
 		Collections.sort(removedList, XidComparator.INSTANCE);
 		objectsStatus = this.REMOVED;
 		count = compileObjectInfos(changesPanel, removedList, count, objectsStatus);
 
 		/* for all changed objects */
-		List<XId> changedList = new ArrayList<XId>();
-		for (IObjectDiff object : model.getPotentiallyChanged()) {
+		final List<XId> changedList = new ArrayList<XId>();
+		for (final IObjectDiff object : model.getPotentiallyChanged()) {
 			changedList.add(object.getId());
 		}
 		Collections.sort(changedList, XidComparator.INSTANCE);
 		objectsStatus = this.CHANGED;
 		count = compileObjectInfos(changesPanel, changedList, count, objectsStatus);
 
-		CommittingDialog committingDialog = new CommittingDialog(this, changesPanel);
+		final CommittingDialog committingDialog = new CommittingDialog(this, changesPanel);
 		committingDialog.show();
 
 	}
 
-	private int compileObjectInfos(VerticalPanel changesPanel, List<XId> changedObjectList,
-			int count, String objectsStatus) {
+	private int compileObjectInfos(final VerticalPanel changesPanel, final List<XId> changedObjectList,
+			final int count, final String objectsStatus) {
 		int count2 = count;
-		for (XId currentObject : changedObjectList) {
+		for (final XId currentObject : changedObjectList) {
 
-			String[] backgroundColors = new String[] { "darkgray", "lightgray" };
-			String backgroundColor = backgroundColors[count2 % 2];
+			final String[] backgroundColors = new String[] { "darkgray", "lightgray" };
+			final String backgroundColor = backgroundColors[count2 % 2];
 
-			HorizontalPanel objectIdPanel = new HorizontalPanel();
+			final HorizontalPanel objectIdPanel = new HorizontalPanel();
 			objectIdPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 			objectIdPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-			Label objectIdLabel = new Label(currentObject.toString());
+			final Label objectIdLabel = new Label(currentObject.toString());
 			if (!objectsStatus.equals(this.CHANGED)) {
 				String statussStyle = "addedEntityStyle";
-				if (objectsStatus.equals(this.REMOVED))
+				if (objectsStatus.equals(this.REMOVED)) {
 					statussStyle = "removedEntityStyle";
-				VerticalPanel objectIdStatusCombination = new VerticalPanel();
+				}
+				final VerticalPanel objectIdStatusCombination = new VerticalPanel();
 				objectIdStatusCombination
 						.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 				objectIdStatusCombination.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 				objectIdStatusCombination.add(objectIdLabel);
-				HTML breakHTML = new HTML("<br>");
+				final HTML breakHTML = new HTML("<br>");
 				breakHTML.setStyleName("breakStyle");
 				objectIdStatusCombination.add(breakHTML);
-				Label statusLabel = new Label(objectsStatus);
+				final Label statusLabel = new Label(objectsStatus);
 				statusLabel.addStyleName(statussStyle);
 				statusLabel.getElement().setAttribute("style", "font-size: 16px");
 				objectIdStatusCombination.add(statusLabel);
@@ -237,7 +241,7 @@ public class EditorPanelPresenter extends Presenter {
 				objectIdPanel.add(objectIdLabel);
 			}
 
-			VerticalPanel fieldChangesPanel = compileFieldChanges(currentObject, objectsStatus);
+			final VerticalPanel fieldChangesPanel = compileFieldChanges(currentObject, objectsStatus);
 
 			changesPanel.add(new ObjectChangesPanel(backgroundColor, objectIdPanel,
 					fieldChangesPanel));
@@ -247,18 +251,18 @@ public class EditorPanelPresenter extends Presenter {
 		return count2;
 	}
 
-	private VerticalPanel compileFieldChanges(XId objectsId, String objectsStatus) {
-		VerticalPanel fieldChangesPanel = new VerticalPanel();
+	private VerticalPanel compileFieldChanges(final XId objectsId, final String objectsStatus) {
+		final VerticalPanel fieldChangesPanel = new VerticalPanel();
 
 		if (objectsStatus.equals(this.ADDED)) {
-			for (XId fieldId : this.getCurrentModel().getObject(objectsId)) {
-				XWritableField field = this.getCurrentModel().getObject(objectsId)
+			for (final XId fieldId : getCurrentModel().getObject(objectsId)) {
+				final XWritableField field = getCurrentModel().getObject(objectsId)
 						.getField(fieldId);
 
 				fieldChangesPanel.add(buildFieldInfo(objectsStatus, fieldId));
-				XValue value = field.getValue();
+				final XValue value = field.getValue();
 				if (value != null) {
-					HTML fieldChangeElement = new HTML("--> changed value of " + fieldId.toString()
+					final HTML fieldChangeElement = new HTML("--> changed value of " + fieldId.toString()
 							+ " to \"" + value.toString() + "\" (" + value.getType().toString()
 							+ ")");
 					fieldChangesPanel.add(fieldChangeElement);
@@ -292,45 +296,46 @@ public class EditorPanelPresenter extends Presenter {
 
 				fieldChangesPanel.add(new HTML());
 			}
-		} else if (objectsStatus.equals((this.CHANGED))) {
-			Collection<? extends IObjectDiff> potentiallyChangedObjects = this.getCurrentModel()
+		} else if (objectsStatus.equals(this.CHANGED)) {
+			final Collection<? extends IObjectDiff> potentiallyChangedObjects = getCurrentModel()
 					.getPotentiallyChanged();
-			for (IObjectDiff iObjectDiff : potentiallyChangedObjects) {
+			for (final IObjectDiff iObjectDiff : potentiallyChangedObjects) {
 				if (iObjectDiff.getId().equals(objectsId)) {
 					String fieldStatus = this.ADDED;
-					Collection<? extends XReadableField> addedFields = iObjectDiff.getAdded();
-					for (XReadableField addedField : addedFields) {
+					final Collection<? extends XReadableField> addedFields = iObjectDiff.getAdded();
+					for (final XReadableField addedField : addedFields) {
 						fieldChangesPanel.add(buildFieldInfo(fieldStatus, addedField.getId()));
-						XValue value = addedField.getValue();
+						final XValue value = addedField.getValue();
 						if (value != null) {
-							HTML fieldChangeElement = new HTML("--> changed value of "
+							final HTML fieldChangeElement = new HTML("--> changed value of "
 									+ addedField.getId().toString() + " to \"" + value.toString()
 									+ "\" (" + value.getType().toString() + ")");
 							fieldChangesPanel.add(fieldChangeElement);
 						}
 					}
 					fieldStatus = this.CHANGED;
-					Collection<? extends IFieldDiff> changedFields = iObjectDiff
+					final Collection<? extends IFieldDiff> changedFields = iObjectDiff
 							.getPotentiallyChanged();
-					for (IFieldDiff iFieldDiff : changedFields) {
+					for (final IFieldDiff iFieldDiff : changedFields) {
 						fieldChangesPanel.add(buildFieldInfo(fieldStatus, iFieldDiff.getId()));
-						XValue value = iFieldDiff.getValue();
-						String valueString = value.toString();
-						XValue oldValue = iFieldDiff.getInitialValue();
+						final XValue value = iFieldDiff.getValue();
+						final String valueString = value.toString();
+						final XValue oldValue = iFieldDiff.getInitialValue();
 						String oldValueString = "";
-						if (oldValue == null)
+						if (oldValue == null) {
 							oldValueString = "null";
-						else
+						} else {
 							oldValueString = oldValue.toString();
-						String valueTypeString = value.getType().toString();
-						HTML fieldChangeElement = new HTML("--> changed value of "
+						}
+						final String valueTypeString = value.getType().toString();
+						final HTML fieldChangeElement = new HTML("--> changed value of "
 								+ iFieldDiff.getId().toString() + " from \"" + oldValueString
 								+ "\" to \"" + valueString + "\" (" + valueTypeString + ")");
 						fieldChangesPanel.add(fieldChangeElement);
 					}
 					fieldStatus = this.REMOVED;
-					Collection<XId> removedFields = iObjectDiff.getRemoved();
-					for (XId removedFieldId : removedFields) {
+					final Collection<XId> removedFields = iObjectDiff.getRemoved();
+					for (final XId removedFieldId : removedFields) {
 						fieldChangesPanel.add(buildFieldInfo(fieldStatus, removedFieldId));
 						// XValue fieldsValue =
 						// this.getCurrentModel().getObject(objectsId)
@@ -350,20 +355,20 @@ public class EditorPanelPresenter extends Presenter {
 		return fieldChangesPanel;
 	}
 
-	private HTML buildFieldInfo(String fieldsStatus, XId fieldsId) {
+	private HTML buildFieldInfo(final String fieldsStatus, final XId fieldsId) {
 		String style = "addedEntityStyle";
 		if (fieldsStatus.equals(this.REMOVED)) {
 			style = "removedEntityStyle";
 		} else if (fieldsStatus.equals(this.CHANGED)) {
 			style = "changedEntityStyle";
 		}
-		HTML containerDiv = new HTML("");
-		HTML fieldStatusDiv = new HTML(fieldsStatus);
+		final HTML containerDiv = new HTML("");
+		final HTML fieldStatusDiv = new HTML(fieldsStatus);
 		fieldStatusDiv.getElement().setAttribute("style", "display: inline");
 		fieldStatusDiv.addStyleName(style);
 		containerDiv.getElement().appendChild(fieldStatusDiv.getElement());
-		String fieldInfoString = " field \"" + fieldsId.toString() + "\"";
-		HTML infoHtml = new HTML(fieldInfoString);
+		final String fieldInfoString = " field \"" + fieldsId.toString() + "\"";
+		final HTML infoHtml = new HTML(fieldInfoString);
 		infoHtml.getElement().setAttribute("style", "display: inline");
 		containerDiv.getElement().appendChild(infoHtml.getElement());
 		return containerDiv;
@@ -375,7 +380,7 @@ public class EditorPanelPresenter extends Presenter {
 		new ConfirmationDialog(this, "discard all Changes");
 	}
 
-	public void expandAll(String expandButtonText) {
+	public void expandAll(final String expandButtonText) {
 		this.tablePresenter.expandAll(expandButtonText);
 	}
 
@@ -384,7 +389,7 @@ public class EditorPanelPresenter extends Presenter {
 	}
 
 	public SessionCachedModel getCurrentModel() {
-		SessionCachedModel selectedModel = XyAdmin.getInstance().getModel()
+		final SessionCachedModel selectedModel = XyAdmin.getInstance().getModel()
 				.getRepo(this.currentModelAddress.getRepository())
 				.getModel(this.currentModelAddress.getModel());
 		return selectedModel;
@@ -394,7 +399,7 @@ public class EditorPanelPresenter extends Presenter {
 		XRepositoryCommand addModelCommand = null;
 		if (XyAdmin.getInstance().getModel().getRepo(this.currentModelAddress.getRepository())
 				.isAddedModel(this.currentModelAddress.getModel())) {
-			addModelCommand = X.getCommandFactory().createAddModelCommand(
+			addModelCommand = BaseRuntime.getCommandFactory().createAddModelCommand(
 					this.currentModelAddress.getRepository(), this.currentModelAddress.getModel(),
 					true);
 		}
@@ -404,7 +409,7 @@ public class EditorPanelPresenter extends Presenter {
 			modelTransactions = XyAdmin.getInstance().getModel()
 					.getRepo(this.currentModelAddress.getRepository())
 					.getModelChanges(null, this.currentModelAddress).build();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// just no changes
 		}
 		XyAdmin.getInstance().getController()
@@ -414,16 +419,16 @@ public class EditorPanelPresenter extends Presenter {
 				this.currentModelAddress, new ICommitEventHandler() {
 
 					@Override
-					public void onCommit(CommittingEvent event) {
+					public void onCommit(final CommittingEvent event) {
 						processCommitResponse(committingDialog, event);
 					}
 				});
 	}
 
 	private void processCommitResponse(final CommittingDialog committingDialog,
-			CommittingEvent event) {
+			final CommittingEvent event) {
 		String message = "";
-		long responseRevisionNumber = event.getNewRevision();
+		final long responseRevisionNumber = event.getNewRevision();
 
 		if (event.getStatus().equals(CommittingEvent.CommitStatus.SUCCESSANDPROCEED)) {
 
@@ -468,12 +473,12 @@ public class EditorPanelPresenter extends Presenter {
 
 	public void discardChanges() {
 		log.info("now discarding all changes and building a new model view!");
-		this.getCurrentModel().discardAllChanges();
-		this.buildModelView();
+		getCurrentModel().discardAllChanges();
+		buildModelView();
 
 	}
 
-	public void showObjectAndField(XAddress desiredAddress) {
+	public void showObjectAndField(final XAddress desiredAddress) {
 		this.tablePresenter.showObjectAndField(desiredAddress);
 
 	}

@@ -18,9 +18,9 @@ import org.xydra.xgae.datastore.api.SKey;
 /**
  * Internal helper class used by {@link IGaeChangesService} to access the
  * current model state.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 abstract public class InternalGaeXEntity implements XEntity {
 
@@ -29,18 +29,18 @@ abstract public class InternalGaeXEntity implements XEntity {
 	/**
 	 * Remove an {@link XModel}, {@link XObject} or {@link XField} from the GAE
 	 * datastore.
-	 * 
+	 *
 	 * It is up to the caller to acquire enough locks to cover the whole entity
 	 * being removed. To remove an entity, the whole entity itself will need to
 	 * be locked.
-	 * 
+	 *
 	 * @param modelOrObjectOrFieldAddr
 	 *            The address of the entity to remove.
 	 * @param locks
 	 *            The locks held by the current process. These are used to
 	 *            assert that we are actually allowed to remove the entity.
 	 */
-	protected static Future<Void> remove(XAddress modelOrObjectOrFieldAddr, GaeLocks locks) {
+	protected static Future<Void> remove(final XAddress modelOrObjectOrFieldAddr, final GaeLocks locks) {
 		assert locks.canRemove(modelOrObjectOrFieldAddr);
 		assert modelOrObjectOrFieldAddr.getAddressedType() == XType.XMODEL
 				|| modelOrObjectOrFieldAddr.getAddressedType() == XType.XOBJECT
@@ -49,10 +49,10 @@ abstract public class InternalGaeXEntity implements XEntity {
 				.deleteEntity(KeyStructure.createEntityKey(modelOrObjectOrFieldAddr));
 	}
 
-	public static boolean exists(XAddress address) {
-		SKey key = KeyStructure.createEntityKey(address);
-		SEntity entity = XGae.get().datastore().sync().getEntity(key);
-		return (entity != null);
+	public static boolean exists(final XAddress address) {
+		final SKey key = KeyStructure.createEntityKey(address);
+		final SEntity entity = XGae.get().datastore().sync().getEntity(key);
+		return entity != null;
 	}
 
 }

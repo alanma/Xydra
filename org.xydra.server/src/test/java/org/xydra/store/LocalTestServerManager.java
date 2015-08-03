@@ -3,6 +3,7 @@ package org.xydra.store;
 import java.io.File;
 import java.net.URI;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.core.XX;
 import org.xydra.log.api.Logger;
@@ -18,15 +19,15 @@ public class LocalTestServerManager extends TestServer {
 
 	/**
 	 * Start a local testserver that exposes the store API at '/xydra/store/v1/'
-	 * 
+	 *
 	 * @param serverConfig
 	 *            config to reach and use the test server
 	 * @return the started testserver instance
 	 */
-	public static TestServer start(ServerConfig serverConfig) {
-		TestServer server = new TestServer(8973);
+	public static TestServer start(final ServerConfig serverConfig) {
+		final TestServer server = new TestServer(8973);
 
-		URI apiprefix = server.startServer("/xydra", new File("src/main/webapp"));
+		final URI apiprefix = server.startServer("/xydra", new File("src/main/webapp"));
 
 		log.info("Using apiprefix = " + apiprefix.toASCIIString());
 
@@ -35,16 +36,16 @@ public class LocalTestServerManager extends TestServer {
 		 * a '/'. However, local urls starting with a slash '/' are resolved as
 		 * the webapp root. Therefore we leave the slash out here.
 		 */
-		URI storeapi = apiprefix.resolve("store/v1/");
+		final URI storeapi = apiprefix.resolve("store/v1/");
 		log.info("Using store API url = " + storeapi.toASCIIString());
 
-		XydraStore store = server.getStore();
+		final XydraStore store = server.getStore();
 
-		XydraStoreAdmin admin = store.getXydraStoreAdmin();
-		XAuthenticationDatabase auth = admin.getAccessControlManager().getAuthenticationDatabase();
+		final XydraStoreAdmin admin = store.getXydraStoreAdmin();
+		final XAuthenticationDatabase auth = admin.getAccessControlManager().getAuthenticationDatabase();
 		auth.setPasswordHash(serverConfig.testerActor, serverConfig.testerPasswordHash);
-		XAuthorisationManager access = admin.getAccessControlManager().getAuthorisationManager();
-		XAddress repoAddr = XX.toAddress(admin.getRepositoryId(), null, null, null);
+		final XAuthorisationManager access = admin.getAccessControlManager().getAuthorisationManager();
+		final XAddress repoAddr = Base.toAddress(admin.getRepositoryId(), null, null, null);
 		access.getAuthorisationDatabase().setAccess(serverConfig.testerActor, repoAddr,
 				XA.ACCESS_READ, true);
 		access.getAuthorisationDatabase().setAccess(serverConfig.testerActor, repoAddr,
@@ -53,15 +54,15 @@ public class LocalTestServerManager extends TestServer {
 		return server;
 	}
 
-	public static void stop(TestServer server, ServerConfig serverConfig) {
-		XydraStore store = server.getStore();
+	public static void stop(final TestServer server, final ServerConfig serverConfig) {
+		final XydraStore store = server.getStore();
 
 		// cleanup access rights
-		XydraStoreAdmin admin = store.getXydraStoreAdmin();
-		XAuthenticationDatabase auth = admin.getAccessControlManager().getAuthenticationDatabase();
+		final XydraStoreAdmin admin = store.getXydraStoreAdmin();
+		final XAuthenticationDatabase auth = admin.getAccessControlManager().getAuthenticationDatabase();
 		auth.setPasswordHash(serverConfig.testerActor, null);
-		XAuthorisationManager access = admin.getAccessControlManager().getAuthorisationManager();
-		XAddress repoAddr = XX.toAddress(admin.getRepositoryId(), null, null, null);
+		final XAuthorisationManager access = admin.getAccessControlManager().getAuthorisationManager();
+		final XAddress repoAddr = Base.toAddress(admin.getRepositoryId(), null, null, null);
 		access.getAuthorisationDatabase().resetAccess(serverConfig.testerActor, repoAddr,
 				XA.ACCESS_READ);
 		access.getAuthorisationDatabase().resetAccess(serverConfig.testerActor, repoAddr,

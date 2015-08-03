@@ -33,7 +33,7 @@ import org.xydra.xgae.datastore.api.STransaction;
 
 /**
  * Knows how to access the change log in the datastore. Maintain its integrity.
- * 
+ *
  * @author xamde
  * @since 2012-05
  */
@@ -44,13 +44,13 @@ public class ChangeLogManager {
 	@Setting("")
 	static final int MAXIMAL_CHANGES_FETCH_SIZE = 256;
 
-	private XAddress modelAddress;
+	private final XAddress modelAddress;
 
 	/**
 	 * @param modelAddress
 	 *            required to compute keys in datastore
 	 */
-	public ChangeLogManager(@NeverNull XAddress modelAddress) {
+	public ChangeLogManager(@NeverNull final XAddress modelAddress) {
 		XyAssert.xyAssert(modelAddress != null);
 		this.modelAddress = modelAddress;
 	}
@@ -61,7 +61,7 @@ public class ChangeLogManager {
 	 * @param status
 	 *            must be a terminal state, i.e. not 'Creating'
 	 */
-	public void commitAndClearLocks(GaeChange change, Status status) {
+	public void commitAndClearLocks(final GaeChange change, final Status status) {
 		XyAssert.xyAssert(!status.canChange());
 		XyAssert.xyAssert(change.getStatus().canChange());
 
@@ -70,42 +70,42 @@ public class ChangeLogManager {
 		XyAssert.xyAssert(change.getStatus() == status);
 	}
 
-	public @CanBeNull GaeChange getChange(long rev) {
-		SKey key = KeyStructure.createChangeKey(this.modelAddress, rev);
-		SEntity entityFromGae = XGae.get().datastore().sync().getEntity(key);
+	public @CanBeNull GaeChange getChange(final long rev) {
+		final SKey key = KeyStructure.createChangeKey(this.modelAddress, rev);
+		final SEntity entityFromGae = XGae.get().datastore().sync().getEntity(key);
 		if (entityFromGae == null) {
 			return null;
 		}
-		GaeChange change = new GaeChange(this.modelAddress, rev, entityFromGae);
+		final GaeChange change = new GaeChange(this.modelAddress, rev, entityFromGae);
 		return change;
 	}
 
 	/**
 	 * Going down to the data store and fetch the actual content of a models
 	 * change log
-	 * 
+	 *
 	 * @param maxSingleBatchFetchRange
 	 *            for which to fetch changes
 	 * @return a map of revision number -> GaeChange
 	 */
-	private @NeverNull Map<Long, GaeChange> getChangesInBatch(Interval maxSingleBatchFetchRange) {
+	private @NeverNull Map<Long, GaeChange> getChangesInBatch(final Interval maxSingleBatchFetchRange) {
 		/* prepare keys for batch request */
-		List<SKey> keys = new ArrayList<SKey>();
+		final List<SKey> keys = new ArrayList<SKey>();
 		for (long rev = maxSingleBatchFetchRange.start; rev <= maxSingleBatchFetchRange.end; rev++) {
-			SKey key = KeyStructure.createChangeKey(this.modelAddress, rev);
+			final SKey key = KeyStructure.createChangeKey(this.modelAddress, rev);
 			keys.add(key);
 		}
 		/* execute batch request */
-		Map<SKey, SEntity> entities = XGae.get().datastore().sync().getEntities(keys);
+		final Map<SKey, SEntity> entities = XGae.get().datastore().sync().getEntities(keys);
 
 		/* process result */
-		Map<Long, GaeChange> changes = new HashMap<Long, GaeChange>();
-		for (Entry<SKey, SEntity> entry : entities.entrySet()) {
-			SKey key = entry.getKey();
-			long rev = KeyStructure.getRevisionFromChangeKey(key);
-			SEntity entity = entry.getValue();
+		final Map<Long, GaeChange> changes = new HashMap<Long, GaeChange>();
+		for (final Entry<SKey, SEntity> entry : entities.entrySet()) {
+			final SKey key = entry.getKey();
+			final long rev = KeyStructure.getRevisionFromChangeKey(key);
+			final SEntity entity = entry.getValue();
 			if (entity != null) {
-				GaeChange change = new GaeChange(this.modelAddress, rev, entity);
+				final GaeChange change = new GaeChange(this.modelAddress, rev, entity);
 				changes.put(rev, change);
 			}
 		}
@@ -120,8 +120,8 @@ public class ChangeLogManager {
 	 * @param fetchRange
 	 * @return a map of revision number -> GaeChange
 	 */
-	public @NeverNull Map<Long, GaeChange> getChanges(Interval fetchRange) {
-		Map<Long, GaeChange> changes = new HashMap<Long, GaeChange>();
+	public @NeverNull Map<Long, GaeChange> getChanges(final Interval fetchRange) {
+		final Map<Long, GaeChange> changes = new HashMap<Long, GaeChange>();
 
 		if (!fetchRange.isEmpty()) {
 			/**
@@ -132,12 +132,12 @@ public class ChangeLogManager {
 			boolean hadNullChanges = false;
 			do {
 				try {
-					Map<Long, GaeChange> newChanges = getChangesInBatch(singleBatchFetchRange);
+					final Map<Long, GaeChange> newChanges = getChangesInBatch(singleBatchFetchRange);
 					changes.putAll(newChanges);
 					if (newChanges.size() < singleBatchFetchRange.size()) {
 						hadNullChanges = true;
 					}
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					log.warn("Could not read a change interval " + singleBatchFetchRange, t);
 					singleBatchFetchRange = singleBatchFetchRange.firstHalf();
 				}
@@ -148,14 +148,15 @@ public class ChangeLogManager {
 		return changes;
 	}
 
-	public @NeverNull List<XEvent> getEventsInInterval(Interval interval) {
+	public @NeverNull List<XEvent> getEventsInInterval(final Interval interval) {
 		log.debug("Getting events from changes in " + interval + " for " + this.modelAddress);
-		LinkedList<XEvent> events = new LinkedList<XEvent>();
-		Map<Long, GaeChange> changes = getChanges(interval);
+		final LinkedList<XEvent> events = new LinkedList<XEvent>();
+		final Map<Long, GaeChange> changes = getChanges(interval);
 		for (long rev = interval.start; rev <= interval.end; rev++) {
-			GaeChange change = changes.get(rev);
-			if (change == null)
+			final GaeChange change = changes.get(rev);
+			if (change == null) {
 				break;
+			}
 
 			if (change.getStatus().changedSomething()) {
 				events.add(change.getEvent());
@@ -170,25 +171,25 @@ public class ChangeLogManager {
 		return this.modelAddress;
 	}
 
-	public GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XId actorId, long start,
-			@NeverNull RevisionManager revisionManager) {
+	public GaeChange grabRevisionAndRegisterLocks(final GaeLocks locks, final XId actorId, final long start,
+			@NeverNull final RevisionManager revisionManager) {
 		for (long rev = start;; rev++) {
 
 			// Try to grab this revision.
-			SKey key = KeyStructure.createChangeKey(this.modelAddress, rev);
+			final SKey key = KeyStructure.createChangeKey(this.modelAddress, rev);
 			/* use txn to do: avoid overwriting existing change entities */
-			STransaction trans = XGae.get().datastore().sync().beginTransaction();
+			final STransaction trans = XGae.get().datastore().sync().beginTransaction();
 
-			SEntity changeEntity = XGae.get().datastore().sync().getEntity(key, trans);
+			final SEntity changeEntity = XGae.get().datastore().sync().getEntity(key, trans);
 
 			if (changeEntity == null) {
 
-				GaeChange newChange = new GaeChange(this.modelAddress, rev, locks, actorId);
+				final GaeChange newChange = new GaeChange(this.modelAddress, rev, locks, actorId);
 				newChange.save(trans);
 
 				try {
 					XGae.get().datastore().sync().endTransaction(trans);
-				} catch (ConcurrentModificationException cme) {
+				} catch (final ConcurrentModificationException cme) {
 					/*
 					 * One possible cause: 'too much contention on these
 					 * datastore entities. please try again.'
@@ -205,14 +206,14 @@ public class ChangeLogManager {
 					// Check this revision again
 					rev--;
 					continue;
-				} catch (DatastoreTimeoutException dte) {
+				} catch (final DatastoreTimeoutException dte) {
 					log.info("failed to take revision: " + key
 							+ " GA?category=error&action=DatastoreTimeout", dte);
 
 					// try this revision again
 					rev--;
 					continue;
-				} catch (DatastoreFailureException dfe) {
+				} catch (final DatastoreFailureException dfe) {
 					/*
 					 * Some forums report this happens for read-only entities
 					 * that got stuck in a wrong state after scheduled
@@ -225,7 +226,7 @@ public class ChangeLogManager {
 					// loop!
 					rev--;
 					continue;
-				} catch (CommittedButStillApplyingException csa) {
+				} catch (final CommittedButStillApplyingException csa) {
 					log.warn("CommittedButStillApplyingException on " + key
 							+ " GA?category=error&action=CommittedButStillApplyingException");
 					/* We believe the commit worked */
@@ -240,7 +241,7 @@ public class ChangeLogManager {
 			} else {
 				// Revision already taken.
 
-				GaeChange change = new GaeChange(this.modelAddress, rev, changeEntity);
+				final GaeChange change = new GaeChange(this.modelAddress, rev, changeEntity);
 				XGae.get().datastore().sync().endTransaction(trans);
 				revisionManager.foundNewLastTaken(rev);
 
@@ -254,19 +255,19 @@ public class ChangeLogManager {
 
 	/**
 	 * Check if change is timed-out and then move to status
-	 * 
+	 *
 	 * @param change
 	 *            @NeverNull
 	 * @param revisionManager
 	 *            @NeverNull
 	 * @return true if change was timed-out and hence progressed
 	 */
-	public boolean progressChangeIfTimedOut(@NeverNull GaeChange change,
-			@NeverNull RevisionManager revisionManager) {
+	public boolean progressChangeIfTimedOut(@NeverNull final GaeChange change,
+			@NeverNull final RevisionManager revisionManager) {
 		XyAssert.xyAssert(change != null);
 		assert change != null;
 
-		Status status = change.getStatus();
+		final Status status = change.getStatus();
 		if (status.canChange()) {
 			log.debug("Trying to progress change " + change);
 			if (change.isTimedOut()) {
@@ -277,7 +278,7 @@ public class ChangeLogManager {
 					return true;
 				} else if (status == Status.SuccessExecuted) {
 					// record changes to signal other threads we work on it
-					Future<SKey> f = change.save();
+					final Future<SKey> f = change.save();
 					SKey key;
 					try {
 						key = f.get();
@@ -285,8 +286,8 @@ public class ChangeLogManager {
 							GaeModelPersistenceNG.rollForward_updateTentativeObjectStates(
 									this.modelAddress, change, revisionManager.getInfo(), this);
 						}
-					} catch (InterruptedException e) {
-					} catch (ExecutionException e) {
+					} catch (final InterruptedException e) {
+					} catch (final ExecutionException e) {
 					}
 				}
 			}

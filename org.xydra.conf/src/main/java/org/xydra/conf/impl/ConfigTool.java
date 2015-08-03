@@ -199,7 +199,7 @@ public class ConfigTool {
 		}
 
 		final Class<? extends Annotation> annotationClass = annotationInstance.annotationType();
-		final Set<Method> methods = Reflections.getAllMethods(annotationClass, withName("value"));
+		final Set<Method> methods = ReflectionUtils.getAllMethods(annotationClass, withName("value"));
 		Object result;
 		try {
 			assert methods.size() == 1;

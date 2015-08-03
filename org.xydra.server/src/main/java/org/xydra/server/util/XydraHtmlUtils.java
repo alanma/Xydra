@@ -23,7 +23,7 @@ public class XydraHtmlUtils {
 
 	/**
 	 * Write events as HTML table to writer. Does not flush.
-	 * 
+	 *
 	 * @param events
 	 *            never null
 	 * @param w
@@ -31,7 +31,7 @@ public class XydraHtmlUtils {
 	 * @throws IOException
 	 *             ...
 	 */
-	public static void writeEvents(@NeverNull List<XEvent> events, Writer w) throws IOException {
+	public static void writeEvents(@NeverNull final List<XEvent> events, final Writer w) throws IOException {
 		XyAssert.xyAssert(events != null);
 		assert events != null;
 
@@ -54,13 +54,13 @@ public class XydraHtmlUtils {
 		+ "<th>implied</th>"
 
 		+ "</tr>");
-		for (XEvent e : events) {
+		for (final XEvent e : events) {
 			writeEventRow(e, w);
 			w.flush();
 			if (e.getChangeType() == ChangeType.TRANSACTION) {
-				assert (e instanceof XTransactionEvent);
-				XTransactionEvent te = (XTransactionEvent) e;
-				for (XEvent child : te) {
+				assert e instanceof XTransactionEvent;
+				final XTransactionEvent te = (XTransactionEvent) e;
+				for (final XEvent child : te) {
 					writeEventRow(child, w);
 					w.flush();
 				}
@@ -69,7 +69,7 @@ public class XydraHtmlUtils {
 		w.write("</table>");
 	}
 
-	private static void writeEventRow(XEvent e, Writer w) throws IOException {
+	private static void writeEventRow(final XEvent e, final Writer w) throws IOException {
 		w.write("<tr>"
 
 		+ "<td>" + e.getRevisionNumber() + "</td>"
@@ -96,25 +96,25 @@ public class XydraHtmlUtils {
 	 *            to be rendered as HTML
 	 * @return an HTML String representation of the given XObject
 	 */
-	public static String toHtml(XReadableObject xo) {
-		StringBuffer buf = new StringBuffer();
+	public static String toHtml(final XReadableObject xo) {
+		final StringBuffer buf = new StringBuffer();
 		buf.append("<b>Object '");
 		buf.append(xo.getAddress());
 		buf.append("' <span class='rev'>");
 		buf.append(xo.getRevisionNumber());
 		buf.append("</span></b>\n");
-		SortedMap<String, String> map = new TreeMap<String, String>();
-		Iterator<XId> fieldIt = xo.iterator();
+		final SortedMap<String, String> map = new TreeMap<String, String>();
+		final Iterator<XId> fieldIt = xo.iterator();
 		while (fieldIt.hasNext()) {
-			XId fieldId = fieldIt.next();
-			XReadableField field = xo.getField(fieldId);
+			final XId fieldId = fieldIt.next();
+			final XReadableField field = xo.getField(fieldId);
 			assert field != null;
-			XValue value = field.getValue();
+			final XValue value = field.getValue();
 			map.put(fieldId.toString(),
 					(value == null ? "null" : SharedHtmlUtils.sanitize(value.toString()))
 							+ " <span class='rev'>" + field.getRevisionNumber() + "</span>");
 		}
-		return buf + HtmlUtils.toDefinitionList(map);
+		return buf + SharedHtmlUtils.toDefinitionList(map);
 	}
 
 }

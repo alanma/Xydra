@@ -7,6 +7,7 @@ import java.util.List;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.util.DumpUtilsBase;
 import org.xydra.base.util.DumpUtilsBase.XidComparator;
 import org.xydra.core.model.delta.IFieldDiff;
 import org.xydra.core.model.delta.IModelDiff;
@@ -51,14 +52,14 @@ public class CommittingDialog extends DialogBox {
 	@UiField(provided = true)
 	ButtonPanel buttonPanel;
 
-	public CommittingDialog(final EditorPanelPresenter presenter, VerticalPanel changes) {
+	public CommittingDialog(final EditorPanelPresenter presenter, final VerticalPanel changes) {
 
 		super();
 
-		ClickHandler okHandler = new ClickHandler() {
+		final ClickHandler okHandler = new ClickHandler() {
 
 			@Override
-			public void onClick(ClickEvent event) {
+			public void onClick(final ClickEvent event) {
 
 				presenter.commit(CommittingDialog.this);
 
@@ -80,22 +81,22 @@ public class CommittingDialog extends DialogBox {
 
 		setWidget(uiBinder.createAndBindUi(this));
 		this.setStyleName("dialogStyle");
-		this.setText("check changes of model "
+		setText("check changes of model "
 				+ presenter.getCurrentModelAddress().getModel().toString());
-		this.center();
+		center();
 	}
 
-	public void addText(String message) {
+	public void addText(final String message) {
 		this.mainPanel.add(new Label(message));
 	}
 
 	public void addCloseOKButton() {
-		Button okButton = new Button("ok");
+		final Button okButton = new Button("ok");
 		CommittingDialog.this.setText("commit ended");
 		okButton.addClickHandler(new ClickHandler() {
 
 			@Override
-			public void onClick(ClickEvent event) {
+			public void onClick(final ClickEvent event) {
 				CommittingDialog.this.removeFromParent();
 			}
 		});
@@ -103,22 +104,22 @@ public class CommittingDialog extends DialogBox {
 	}
 
 	public static StringBuilder changesToString(final IModelDiff changedModel) {
-		StringBuilder sb = new StringBuilder();
-		List<XReadableObject> addedList = new ArrayList<XReadableObject>(changedModel.getAdded());
+		final StringBuilder sb = new StringBuilder();
+		final List<XReadableObject> addedList = new ArrayList<XReadableObject>(changedModel.getAdded());
 		Collections.sort(addedList, XidComparator.INSTANCE);
-		for (XReadableObject addedObject : addedList) {
+		for (final XReadableObject addedObject : addedList) {
 			sb.append("<br><br>=== ADDED   Object '" + addedObject.getId() + "' ===<br/>\n");
-			sb.append(DumpUtils.toStringBuffer(addedObject).toString());
+			sb.append(DumpUtilsBase.toStringBuffer(addedObject).toString());
 		}
-		List<XId> removedList = new ArrayList<XId>(changedModel.getRemoved());
+		final List<XId> removedList = new ArrayList<XId>(changedModel.getRemoved());
 		Collections.sort(removedList, XidComparator.INSTANCE);
-		for (XId removedObjectId : removedList) {
+		for (final XId removedObjectId : removedList) {
 			sb.append("<br><br>=== REMOVED Object '" + removedObjectId + "' ===<br/>\n");
 		}
-		List<IObjectDiff> potentiallyChangedList = new ArrayList<IObjectDiff>(
+		final List<IObjectDiff> potentiallyChangedList = new ArrayList<IObjectDiff>(
 				changedModel.getPotentiallyChanged());
 		Collections.sort(potentiallyChangedList, XidComparator.INSTANCE);
-		for (IObjectDiff changedObject : potentiallyChangedList) {
+		for (final IObjectDiff changedObject : potentiallyChangedList) {
 			if (changedObject.hasChanges()) {
 				sb.append("<br><br>=== CHANGED Object '" + changedObject.getId() + "' === <br/>\n");
 				sb.append(changesToString(changedObject).toString());
@@ -128,22 +129,22 @@ public class CommittingDialog extends DialogBox {
 	}
 
 	public static StringBuilder changesToString(final IObjectDiff changedObject) {
-		StringBuilder sb = new StringBuilder();
-		List<XReadableField> addedList = new ArrayList<XReadableField>(changedObject.getAdded());
+		final StringBuilder sb = new StringBuilder();
+		final List<XReadableField> addedList = new ArrayList<XReadableField>(changedObject.getAdded());
 		Collections.sort(addedList, XidComparator.INSTANCE);
-		for (XReadableField field : addedList) {
+		for (final XReadableField field : addedList) {
 			sb.append("--- ADDED Field '" + field.getId() + "' ---<br/>\n");
-			sb.append(DumpUtils.toStringBuffer(field));
+			sb.append(DumpUtilsBase.toStringBuffer(field));
 		}
-		List<XId> removedList = new ArrayList<XId>(changedObject.getRemoved());
+		final List<XId> removedList = new ArrayList<XId>(changedObject.getRemoved());
 		Collections.sort(removedList, XidComparator.INSTANCE);
-		for (XId objectId : changedObject.getRemoved()) {
+		for (final XId objectId : changedObject.getRemoved()) {
 			sb.append("--- REMOVED Field '" + objectId + "' ---<br/>\n");
 		}
-		List<IFieldDiff> potentiallyChangedList = new ArrayList<IFieldDiff>(
+		final List<IFieldDiff> potentiallyChangedList = new ArrayList<IFieldDiff>(
 				changedObject.getPotentiallyChanged());
 		Collections.sort(potentiallyChangedList, XidComparator.INSTANCE);
-		for (IFieldDiff changedField : potentiallyChangedList) {
+		for (final IFieldDiff changedField : potentiallyChangedList) {
 			if (changedField.isChanged()) {
 				sb.append("--- CHANGED Field '" + changedField.getId() + "' ---<br/>\n");
 				sb.append(changesToString(changedField).toString());
@@ -153,7 +154,7 @@ public class CommittingDialog extends DialogBox {
 	}
 
 	public static StringBuilder changesToString(final IFieldDiff changedField) {
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		sb.append("'" + changedField.getInitialValue() + "' ==> '" + changedField.getValue()
 				+ "' \n");
 		return sb;

@@ -1,5 +1,6 @@
 package org.xydra.webadmin.gwt.client.widgets.selectiontree;
 
+import org.xydra.base.Base;
 import org.xydra.core.XX;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
@@ -21,12 +22,12 @@ public class AddRepoWidget extends Composite {
 
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
 
-	private SelectionTreePresenter presenter;
+	private final SelectionTreePresenter presenter;
 
-	public AddRepoWidget(SelectionTreePresenter presenter) {
+	public AddRepoWidget(final SelectionTreePresenter presenter) {
 
 		this.presenter = presenter;
-		this.buildComponents();
+		buildComponents();
 	}
 
 	private void buildComponents() {
@@ -36,8 +37,8 @@ public class AddRepoWidget extends Composite {
 	}
 
 	@UiHandler("addRepoButton")
-	void onClickAdd(ClickEvent event) {
+	void onClickAdd(final ClickEvent event) {
 
-		this.presenter.openAddElementDialog(XX.toAddress("/noRepo"), "enter Repository ID");
+		this.presenter.openAddElementDialog(Base.toAddress("/noRepo"), "enter Repository ID");
 	}
 }

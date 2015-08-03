@@ -1,6 +1,7 @@
 package org.xydra.oo.runtime.shared;
 
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
@@ -12,7 +13,7 @@ import org.xydra.log.api.LoggerFactory;
 
 /**
  * A runtime proxy object that is backed by a generic XObject
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(true)
@@ -21,10 +22,10 @@ public class SharedProxy {
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(SharedProxy.class);
 
-	private XWritableModel model;
-	private XId objectId;
+	private final XWritableModel model;
+	private final XId objectId;
 
-	public SharedProxy(XWritableModel model, XId objectId) {
+	public SharedProxy(final XWritableModel model, final XId objectId) {
 		this.model = model;
 		this.objectId = objectId;
 	}
@@ -45,32 +46,40 @@ public class SharedProxy {
 		return this.model.hasObject(this.objectId);
 	}
 
-	public XValue getValue(String fieldId) {
-		if (fieldId == null)
+	public XValue getValue(final String fieldId) {
+		if (fieldId == null) {
 			throw new IllegalArgumentException("field id was null");
-		if (fieldId.length() == 0)
+		}
+		if (fieldId.length() == 0) {
 			throw new IllegalArgumentException("field id empty string");
+		}
 
-		if (!hasXObject())
+		if (!hasXObject()) {
 			return null;
-		XWritableField field = this.getXObject().getField(XX.toId(fieldId));
-		if (field == null)
+		}
+		final XWritableField field = getXObject().getField(Base.toId(fieldId));
+		if (field == null) {
 			return null;
+		}
 		return field.getValue();
 	}
 
-	public <X extends XValue> void setValue(String fieldId, X v) {
-		if (fieldId == null)
+	public <X extends XValue> void setValue(final String fieldId, final X v) {
+		if (fieldId == null) {
 			throw new IllegalArgumentException("field id was null");
-		if (fieldId.length() == 0)
+		}
+		if (fieldId.length() == 0) {
 			throw new IllegalArgumentException("field id empty string");
+		}
 
-		if (!hasXObject())
+		if (!hasXObject()) {
 			throw new IllegalStateException("XObject '" + this.objectId + "' does not exist");
+		}
 
-		XWritableField field = this.getXObject().getField(XX.toId(fieldId));
-		if (field == null)
-			field = this.getXObject().createField(XX.toId(fieldId));
+		XWritableField field = getXObject().getField(Base.toId(fieldId));
+		if (field == null) {
+			field = getXObject().createField(Base.toId(fieldId));
+		}
 
 		field.setValue(v);
 	}

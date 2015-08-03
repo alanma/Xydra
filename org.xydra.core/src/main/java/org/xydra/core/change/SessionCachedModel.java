@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.xydra.annotations.NeverNull;
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -21,6 +22,7 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.util.DumpUtilsBase;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
@@ -41,17 +43,17 @@ import org.xydra.sharedutils.XyAssert;
  * existent and non-existent requests. Allows write changes of all kinds, which
  * are kept in an internal buffer. This internal buffer is used to answer
  * queries.
- * 
+ *
  * Unable to report correct revision numbers. Instead, the constant
  * {@value #UNDEFINED} ( {@link #UNDEFINED}) is returned.
- * 
+ *
  * A SessionModels state looks like this: <li>knowsAllObjects?</li> <li>For each
  * object: one {@link EntityState} or Unknown</li>.
- * 
+ *
  * The SessionModel gets to know its state only via
  * {@link #indexModel(XReadableModel)} and {@link #indexObject(XReadableObject)}
  * .
- * 
+ *
  * @author xamde
  */
 public class SessionCachedModel implements XWritableModel, IModelDiff {
@@ -59,10 +61,10 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 	private long rev = UNDEFINED;
 
 	private static class CachedEntity {
-		private XAddress address;
+		private final XAddress address;
 		protected EntityState state;
 
-		public CachedEntity(XAddress address, EntityState state) {
+		public CachedEntity(final XAddress address, final EntityState state) {
 			XyAssert.xyAssert(address != null);
 			assert address != null;
 			XyAssert.xyAssert(state != null);
@@ -100,7 +102,7 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 		private XValue current;
 		private XValue initial;
 
-		public CachedField(XAddress address, EntityState state, XValue initialValue) {
+		public CachedField(final XAddress address, final EntityState state, final XValue initialValue) {
 			super(address, state);
 			this.initial = initialValue;
 			this.current = this.initial;
@@ -141,9 +143,9 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 		}
 
 		public boolean isValueChanged() {
-			return (this.initial == null && this.current != null)
-					|| (this.initial != null && this.current == null)
-					|| (this.initial != null && !this.initial.equals(this.current));
+			return this.initial == null && this.current != null
+					|| this.initial != null && this.current == null
+					|| this.initial != null && !this.initial.equals(this.current);
 		}
 
 		public boolean isValueRemoved() {
@@ -151,14 +153,14 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 		}
 
 		@Override
-		public boolean setValue(XValue value) {
+		public boolean setValue(final XValue value) {
 			this.current = value;
 			return isValueChanged();
 		}
 
 		@Override
 		public String toString() {
-			return "F:" + this.getId() + " {\n" + DumpUtils.toStringBuffer(this) + "Changes: \n"
+			return "F:" + getId() + " {\n" + DumpUtilsBase.toStringBuffer(this) + "Changes: \n"
 					+ DumpUtils.changesToString(this).toString() + "}";
 		}
 
@@ -170,17 +172,17 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 	private static class CachedObject extends CachedEntity implements XWritableObject, IObjectDiff {
 		/** FieldId -> CachedObject */
-		private Map<XId, CachedField> cachedFields;
+		private final Map<XId, CachedField> cachedFields;
 
-		public CachedObject(XAddress address, EntityState state) {
+		public CachedObject(final XAddress address, final EntityState state) {
 			super(address, state);
 			this.cachedFields = new HashMap<XId, SessionCachedModel.CachedField>(2);
 		}
 
 		@Override
-		public CachedField createField(XId fieldId) {
+		public CachedField createField(final XId fieldId) {
 			// first, consult caches
-			CachedField cf = this.cachedFields.get(fieldId);
+			final CachedField cf = this.cachedFields.get(fieldId);
 			if (cf != null) {
 				// create only if possible
 				if (cf.state == EntityState.NotPresent) {
@@ -198,8 +200,8 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 		@Override
 		public Collection<? extends XReadableField> getAdded() {
-			List<XReadableField> list = new LinkedList<XReadableField>();
-			for (CachedField cf : this.cachedFields.values()) {
+			final List<XReadableField> list = new LinkedList<XReadableField>();
+			for (final CachedField cf : this.cachedFields.values()) {
 				if (cf.isAdded()) {
 					list.add(cf);
 				}
@@ -209,10 +211,10 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 		@SuppressWarnings("unused")
 		@Override
-		public CachedField getField(XId fieldId) {
-			CachedField cf = this.cachedFields.get(fieldId);
+		public CachedField getField(final XId fieldId) {
+			final CachedField cf = this.cachedFields.get(fieldId);
 			if (WARN_ON_UNCACHED_ACCESS && WARN_ON_FIELDS && cf == null) {
-				log.warn("Field '" + fieldId + "' not prefetched in " + this.getAddress()
+				log.warn("Field '" + fieldId + "' not prefetched in " + getAddress()
 						+ ". Return getField=null.");
 			}
 			if (cf != null && !cf.isPresent()) {
@@ -228,8 +230,8 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 		@Override
 		public Collection<? extends IFieldDiff> getPotentiallyChanged() {
-			List<IFieldDiff> list = new LinkedList<IFieldDiff>();
-			for (CachedField cf : this.cachedFields.values()) {
+			final List<IFieldDiff> list = new LinkedList<IFieldDiff>();
+			for (final CachedField cf : this.cachedFields.values()) {
 				if (cf.isChanged() && !cf.isAdded() && !cf.isRemoved()) {
 					list.add(cf);
 				}
@@ -239,8 +241,8 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 		@Override
 		public Collection<XId> getRemoved() {
-			List<XId> list = new LinkedList<XId>();
-			for (CachedField cf : this.cachedFields.values()) {
+			final List<XId> list = new LinkedList<XId>();
+			for (final CachedField cf : this.cachedFields.values()) {
 				if (cf.isRemoved()) {
 					list.add(cf.getId());
 				}
@@ -258,7 +260,7 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 			if (this.state.isChanged()) {
 				return true;
 			}
-			for (CachedField cf : this.cachedFields.values()) {
+			for (final CachedField cf : this.cachedFields.values()) {
 				if (cf.isChanged()) {
 					return true;
 				}
@@ -268,13 +270,13 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 		@SuppressWarnings("unused")
 		@Override
-		public boolean hasField(XId fieldId) {
-			CachedField cf = this.cachedFields.get(fieldId);
+		public boolean hasField(final XId fieldId) {
+			final CachedField cf = this.cachedFields.get(fieldId);
 			if (cf != null) {
 				return cf.isPresent();
 			}
 			if (WARN_ON_UNCACHED_ACCESS && WARN_ON_FIELDS && cf == null) {
-				log.warn("Field '" + fieldId + "' not prefetched in " + this.getAddress()
+				log.warn("Field '" + fieldId + "' not prefetched in " + getAddress()
 						+ ". Return hasField=false.");
 			}
 			return false;
@@ -282,14 +284,14 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 		/**
 		 * Does not overwrite already changed fields
-		 * 
+		 *
 		 * @param baseObject base object
 		 */
-		public void indexFieldsFrom(XReadableObject baseObject) {
-			for (XId fieldId : baseObject) {
+		public void indexFieldsFrom(final XReadableObject baseObject) {
+			for (final XId fieldId : baseObject) {
 				CachedField cf = this.cachedFields.get(fieldId);
-				XReadableField baseField = baseObject.getField(fieldId);
-				XValue baseValue = baseField.getValue();
+				final XReadableField baseField = baseObject.getField(fieldId);
+				final XValue baseValue = baseField.getValue();
 				if (cf == null) {
 					cf = setFieldState(fieldId, EntityState.Present, baseValue);
 				} else {
@@ -304,7 +306,7 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 		@Override
 		public boolean isEmpty() {
-			for (CachedField cf : this.cachedFields.values()) {
+			for (final CachedField cf : this.cachedFields.values()) {
 				if (cf.isPresent()) {
 					return false;
 				}
@@ -320,13 +322,13 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 			new AbstractFilteringIterator<Map.Entry<XId, CachedField>>(this.cachedFields.entrySet()
 					.iterator()) {
 				@Override
-				protected boolean matchesFilter(Map.Entry<XId, CachedField> entry) {
+				protected boolean matchesFilter(final Map.Entry<XId, CachedField> entry) {
 					return entry.getValue().isPresent();
 				}
 			}, new ITransformer<Map.Entry<XId, CachedField>, XId>() {
 
 				@Override
-				public XId transform(Map.Entry<XId, CachedField> entry) {
+				public XId transform(final Map.Entry<XId, CachedField> entry) {
 					return entry.getKey();
 				}
 			});
@@ -334,24 +336,24 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 		@SuppressWarnings("unused")
 		@Override
-		public boolean removeField(XId fieldId) {
-			CachedField cf = this.cachedFields.get(fieldId);
+		public boolean removeField(final XId fieldId) {
+			final CachedField cf = this.cachedFields.get(fieldId);
 			if (cf == null) {
 				setFieldState(fieldId, EntityState.Removed, null);
 				if (WARN_ON_UNCACHED_ACCESS && WARN_ON_FIELDS && WARN_ON_REMOVES) {
-					log.warn("Field '" + fieldId + "' not prefetched in " + this.getAddress()
+					log.warn("Field '" + fieldId + "' not prefetched in " + getAddress()
 							+ ". Removing anyway.");
 				}
 				return false;
 			} else {
-				boolean b = cf.isPresent();
+				final boolean b = cf.isPresent();
 				cf.state = EntityState.Removed;
 				return b;
 			}
 		}
 
-		private CachedField setFieldState(XId fieldId, EntityState state, XValue initialValue) {
-			CachedField cf = new CachedField(XX.resolveField(getAddress(), fieldId), state,
+		private CachedField setFieldState(final XId fieldId, final EntityState state, final XValue initialValue) {
+			final CachedField cf = new CachedField(Base.resolveField(getAddress(), fieldId), state,
 					initialValue);
 			this.cachedFields.put(fieldId, cf);
 			return cf;
@@ -359,20 +361,20 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 		@Override
 		public String toString() {
-			return "O:" + this.getId() + " {\n" + DumpUtils.toStringBuffer(this) + "Changes: \n"
+			return "O:" + getId() + " {\n" + DumpUtilsBase.toStringBuffer(this) + "Changes: \n"
 					+ DumpUtils.changesToString(this).toString() + "}";
 		}
 
 		public void discardChanges() {
-			Set<XId> fieldsToDelete = new HashSet<XId>();
+			final Set<XId> fieldsToDelete = new HashSet<XId>();
 
-			Iterator<XId> iterator = this.cachedFields.keySet().iterator();
+			final Iterator<XId> iterator = this.cachedFields.keySet().iterator();
 			while (iterator.hasNext()) {
-				XId key = iterator.next();
-				CachedField cf = this.cachedFields.get(key);
+				final XId key = iterator.next();
+				final CachedField cf = this.cachedFields.get(key);
 				if (cf.isAdded()) {
 					fieldsToDelete.add(key);
-				} else if (cf.isRemoved() || cf.isChanged())
+				} else if (cf.isRemoved() || cf.isChanged()) {
 					if (cf.isRemoved()) {
 						if (cf.getRevisionNumber() < 0) {
 							fieldsToDelete.add(key);
@@ -380,11 +382,12 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 							cf.state = EntityState.Present;
 						}
 					}
+				}
 
 				cf.discardChanges();
 			}
 
-			for (XId xid : fieldsToDelete) {
+			for (final XId xid : fieldsToDelete) {
 				this.cachedFields.remove(xid);
 			}
 		}
@@ -398,39 +401,39 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 		/**
 		 * Added. Not present in base model; added later.
-		 * 
+		 *
 		 * Object: Implies: knows all fields. All fields can only be: Added, Not
 		 * present. Object has a number of fields.
-		 * 
+		 *
 		 * Field: Value can be: Added, Not present
 		 */
 		Added,
 
 		/**
 		 * Not present in base model and not added.
-		 * 
+		 *
 		 * Object: Implies: There are 0 fields.
-		 * 
+		 *
 		 * Field: Implies: Value not present.
 		 */
 		NotPresent,
 
 		/**
 		 * Present. Was present in base model and has not been removed.
-		 * 
+		 *
 		 * Object: (IMPROVE Distinguish: knows all fields or not). This state
 		 * includes changed objects, in which only fields or values changed. Has
 		 * a number of fields.
-		 * 
+		 *
 		 * Field: Value can be: Present, Added, Changed, Removed, Not present
 		 */
 		Present,
 
 		/**
 		 * Removed. Was present in base model; removed later.
-		 * 
+		 *
 		 * Object: Implies: There are 0 fields.
-		 * 
+		 *
 		 * Field: Implies: Value not present.
 		 */
 		Removed;
@@ -463,7 +466,7 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 		private static final long serialVersionUID = 8681544474510411429L;
 
-		public PrefetchException(String msg) {
+		public PrefetchException(final String msg) {
 			super(msg);
 		}
 
@@ -483,32 +486,32 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 	 */
 	private static final boolean WARN_ON_UNCACHED_ACCESS = false;
 
-	private XAddress address;
+	private final XAddress address;
 
 	/** ObjectId -> CachedObject */
-	private Map<XId, CachedObject> cachedObjects;
+	private final Map<XId, CachedObject> cachedObjects;
 
 	private boolean knowsAllObjectIds = false;
 
-	public SessionCachedModel(XAddress address) {
+	public SessionCachedModel(final XAddress address) {
 		this.address = address;
 		this.cachedObjects = new HashMap<XId, SessionCachedModel.CachedObject>(2);
 	}
 
 	/**
 	 * Does not change the sessionCachedModel itself.
-	 * 
+	 *
 	 * @param txnBuilder
 	 */
-	public void commitTo(XTransactionBuilder txnBuilder) {
-		for (CachedObject co : this.cachedObjects.values()) {
+	public void commitTo(final XTransactionBuilder txnBuilder) {
+		for (final CachedObject co : this.cachedObjects.values()) {
 			if (co.state == EntityState.Added) {
 				txnBuilder.addObjectForced(getAddress(), co);
 			} else if (co.state == EntityState.Removed) {
 				txnBuilder.removeObject(getAddress(), XCommand.FORCED, co.getId());
 			} else {
 				// fields might have changed
-				for (CachedField cf : co.cachedFields.values()) {
+				for (final CachedField cf : co.cachedFields.values()) {
 					if (cf.state == EntityState.Added) {
 						txnBuilder.addFieldForced(co.getAddress(), cf);
 					} else if (cf.state == EntityState.Removed) {
@@ -528,25 +531,25 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 		}
 	}
 
-	public void commitTo(XWritableModel writableModel) {
-		for (CachedObject co : this.cachedObjects.values()) {
+	public void commitTo(final XWritableModel writableModel) {
+		for (final CachedObject co : this.cachedObjects.values()) {
 			if (co.state == EntityState.Added) {
-				XWritableObject writableObject = writableModel.createObject(co.getId());
+				final XWritableObject writableObject = writableModel.createObject(co.getId());
 				XCopyUtils.copyData(co, writableObject);
 			} else if (co.state == EntityState.Removed) {
 				writableModel.removeObject(co.getId());
 			} else {
-				XWritableObject writableObject = writableModel.getObject(co.getId());
+				final XWritableObject writableObject = writableModel.getObject(co.getId());
 				assert writableObject != null : "base model should know object " + co.getId();
 				// fields might have changed
-				for (CachedField cf : co.cachedFields.values()) {
+				for (final CachedField cf : co.cachedFields.values()) {
 					if (cf.state == EntityState.Added) {
-						XWritableField writableField = writableObject.createField(cf.getId());
+						final XWritableField writableField = writableObject.createField(cf.getId());
 						XCopyUtils.copyData(cf, writableField);
 					} else if (cf.state == EntityState.Removed) {
 						writableObject.removeField(cf.getId());
 					} else {
-						XWritableField writableField = writableObject.getField(cf.getId());
+						final XWritableField writableField = writableObject.getField(cf.getId());
 						// value might have changed
 						if (cf.isValueAdded()) {
 							writableField.setValue(cf.getValue());
@@ -562,9 +565,9 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 	}
 
 	@Override
-	public XWritableObject createObject(@NeverNull XId objectId) {
+	public XWritableObject createObject(@NeverNull final XId objectId) {
 		// first, consult caches
-		CachedObject co = this.cachedObjects.get(objectId);
+		final CachedObject co = this.cachedObjects.get(objectId);
 		if (co != null) {
 			// create only if possible
 			if (co.state == EntityState.NotPresent) {
@@ -582,8 +585,8 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 	@Override
 	public Collection<? extends XReadableObject> getAdded() {
-		List<XReadableObject> list = new LinkedList<XReadableObject>();
-		for (CachedObject co : this.cachedObjects.values()) {
+		final List<XReadableObject> list = new LinkedList<XReadableObject>();
+		for (final CachedObject co : this.cachedObjects.values()) {
 			if (co.isAdded()) {
 				list.add(co);
 			}
@@ -603,10 +606,10 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 	@SuppressWarnings("unused")
 	@Override
-	public XWritableObject getObject(@NeverNull XId objectId) {
-		XWritableObject xo = this.cachedObjects.get(objectId);
+	public XWritableObject getObject(@NeverNull final XId objectId) {
+		final XWritableObject xo = this.cachedObjects.get(objectId);
 		if (WARN_ON_UNCACHED_ACCESS && xo == null) {
-			log.warn("Object '" + objectId + "' not prefetched in " + this.getAddress()
+			log.warn("Object '" + objectId + "' not prefetched in " + getAddress()
 					+ ". Return getObject=null.");
 		}
 		return xo;
@@ -614,8 +617,8 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 	@Override
 	public Collection<? extends IObjectDiff> getPotentiallyChanged() {
-		List<IObjectDiff> list = new LinkedList<IObjectDiff>();
-		for (CachedObject co : this.cachedObjects.values()) {
+		final List<IObjectDiff> list = new LinkedList<IObjectDiff>();
+		for (final CachedObject co : this.cachedObjects.values()) {
 			if (!co.isAdded() && !co.isRemoved() && co.hasChanges()) {
 				list.add(co);
 			}
@@ -625,8 +628,8 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 	@Override
 	public Collection<XId> getRemoved() {
-		List<XId> list = new LinkedList<XId>();
-		for (CachedObject co : this.cachedObjects.values()) {
+		final List<XId> list = new LinkedList<XId>();
+		for (final CachedObject co : this.cachedObjects.values()) {
 			if (co.isRemoved()) {
 				list.add(co.getId());
 			}
@@ -645,7 +648,7 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 	}
 
 	public boolean hasChanges() {
-		for (CachedObject co : this.cachedObjects.values()) {
+		for (final CachedObject co : this.cachedObjects.values()) {
 			if (co.hasChanges()) {
 				return true;
 			}
@@ -655,15 +658,15 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 	@SuppressWarnings("unused")
 	@Override
-	public boolean hasObject(@NeverNull XId objectId) {
+	public boolean hasObject(@NeverNull final XId objectId) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
-		CachedObject co = this.cachedObjects.get(objectId);
+		final CachedObject co = this.cachedObjects.get(objectId);
 		if (co != null) {
 			return co.isPresent();
 		}
 		if (WARN_ON_UNCACHED_ACCESS && co == null) {
-			log.warn("Object '" + objectId + "' not prefetched in " + this.getAddress()
+			log.warn("Object '" + objectId + "' not prefetched in " + getAddress()
 					+ ". Return hasObject=false.");
 		}
 		return false;
@@ -672,12 +675,12 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 	/**
 	 * Set the objects in the baseModel as the current state, not overwriting
 	 * the state of already changed objects.
-	 * 
+	 *
 	 * @param baseModel
 	 */
-	public void indexModel(XReadableModel baseModel) {
+	public void indexModel(final XReadableModel baseModel) {
 		long c = 0;
-		for (XId id : baseModel) {
+		for (final XId id : baseModel) {
 			indexObject(baseModel.getObject(id));
 			c++;
 		}
@@ -686,13 +689,14 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 		this.knowsAllObjectIds = true;
 	}
 
-	public void indexObject(XReadableObject baseObject) {
+	public void indexObject(final XReadableObject baseObject) {
 		CachedObject co = this.cachedObjects.get(baseObject.getId());
 		if (co == null) {
 			co = setObjectState(baseObject.getId(), EntityState.Present);
 		} else {
-			if (log.isTraceEnabled())
+			if (log.isTraceEnabled()) {
 				log.trace("Avoid re-indexing object " + baseObject.getAddress());
+			}
 		}
 
 		co.indexFieldsFrom(baseObject);
@@ -705,7 +709,7 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 			return true;
 		}
 		// else
-		for (Map.Entry<XId, CachedObject> e : this.cachedObjects.entrySet()) {
+		for (final Map.Entry<XId, CachedObject> e : this.cachedObjects.entrySet()) {
 			if (e.getValue().isPresent()) {
 				return false;
 			}
@@ -736,13 +740,13 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 		new AbstractFilteringIterator<Map.Entry<XId, CachedObject>>(this.cachedObjects.entrySet()
 				.iterator()) {
 			@Override
-			protected boolean matchesFilter(Map.Entry<XId, CachedObject> entry) {
+			protected boolean matchesFilter(final Map.Entry<XId, CachedObject> entry) {
 				return entry.getValue().isPresent();
 			}
 		}, new ITransformer<Map.Entry<XId, CachedObject>, XId>() {
 
 			@Override
-			public XId transform(Map.Entry<XId, CachedObject> entry) {
+			public XId transform(final Map.Entry<XId, CachedObject> entry) {
 				return entry.getKey();
 			}
 		});
@@ -753,9 +757,9 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 	 * read-cache.
 	 */
 	public void markAsCommitted() {
-		for (CachedObject co : this.cachedObjects.values()) {
+		for (final CachedObject co : this.cachedObjects.values()) {
 			co.state = co.state.afterSuccesfullCommit();
-			for (CachedField cf : co.cachedFields.values()) {
+			for (final CachedField cf : co.cachedFields.values()) {
 				cf.state = cf.state.afterSuccesfullCommit();
 				cf.initial = cf.current;
 			}
@@ -764,17 +768,17 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 	@SuppressWarnings("unused")
 	@Override
-	public boolean removeObject(@NeverNull XId objectId) {
-		CachedObject co = this.cachedObjects.get(objectId);
+	public boolean removeObject(@NeverNull final XId objectId) {
+		final CachedObject co = this.cachedObjects.get(objectId);
 		if (co == null) {
 			if (WARN_ON_UNCACHED_ACCESS && WARN_ON_REMOVES) {
-				log.warn("Object '" + objectId + "' not prefetched in " + this.getAddress()
+				log.warn("Object '" + objectId + "' not prefetched in " + getAddress()
 						+ ". Removing anyway.");
 			}
 			setObjectState(objectId, EntityState.Removed);
 			return false;
 		} else {
-			boolean b = co.isPresent();
+			final boolean b = co.isPresent();
 			co.state = EntityState.Removed;
 			return b;
 		}
@@ -786,16 +790,16 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 	 * objects should have been indexed via
 	 * {@link #indexObject(XReadableObject)}. Everything else will be considered
 	 * non-existent.
-	 * 
+	 *
 	 * @param b
 	 */
-	public void setKnowsAllObjectIds(boolean b) {
+	public void setKnowsAllObjectIds(final boolean b) {
 		XyAssert.xyAssert(b || !this.knowsAllObjectIds);
 		this.knowsAllObjectIds = b;
 	}
 
-	private CachedObject setObjectState(XId id, EntityState objectState) {
-		CachedObject co = new CachedObject(XX.resolveObject(getAddress(), id), objectState);
+	private CachedObject setObjectState(final XId id, final EntityState objectState) {
+		final CachedObject co = new CachedObject(Base.resolveObject(getAddress(), id), objectState);
 		this.cachedObjects.put(id, co);
 		XyAssert.xyAssert(co.getId().equals(id));
 		return co;
@@ -803,13 +807,13 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 
 	@Override
 	public String toString() {
-		return "State including changes:\nM:" + this.getId() + " {\n"
-				+ DumpUtils.toStringBuffer(this) + "Changes: \n"
+		return "State including changes:\nM:" + getId() + " {\n"
+				+ DumpUtilsBase.toStringBuffer(this) + "Changes: \n"
 				+ DumpUtils.changesToString(this).toString() + "}";
 	}
 
-	public boolean isKnownObject(XId objectId) {
-		CachedObject co = this.cachedObjects.get(objectId);
+	public boolean isKnownObject(final XId objectId) {
+		final CachedObject co = this.cachedObjects.get(objectId);
 		return co != null;
 	}
 
@@ -823,11 +827,11 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 	 */
 	public void discardAllChanges() {
 
-		Set<XId> objectsToDelete = new HashSet<XId>();
+		final Set<XId> objectsToDelete = new HashSet<XId>();
 
-		for (Entry<XId, CachedObject> e : this.cachedObjects.entrySet()) {
-			XId key = e.getKey();
-			CachedObject co = e.getValue();
+		for (final Entry<XId, CachedObject> e : this.cachedObjects.entrySet()) {
+			final XId key = e.getKey();
+			final CachedObject co = e.getValue();
 
 			if (co.isAdded()) {
 				objectsToDelete.add(key);
@@ -843,7 +847,7 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
 			}
 		}
 
-		for (XId xid : objectsToDelete) {
+		for (final XId xid : objectsToDelete) {
 			this.cachedObjects.remove(xid);
 		}
 	}

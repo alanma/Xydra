@@ -24,7 +24,7 @@ abstract public class XCollectionEditor<E extends XValue, V extends XCollectionV
 	private final List<AtomicXValueEditor<E>> editors = new ArrayList<AtomicXValueEditor<E>>();
 	protected XAddress dummyAddress = XX.toAddress("/a/-/-/-");
 
-	public XCollectionEditor(EditListener listener) {
+	public XCollectionEditor(final EditListener listener) {
 		super();
 		this.listener = listener;
 
@@ -37,11 +37,11 @@ abstract public class XCollectionEditor<E extends XValue, V extends XCollectionV
 	public void add(final AtomicXValueEditor<E> editor) {
 		final HorizontalPanel entry = new HorizontalPanel();
 		entry.add(editor);
-		Button remove = new Button("-");
+		final Button remove = new Button("-");
 		entry.add(remove);
 		remove.addClickHandler(new ClickHandler() {
 			@Override
-			public void onClick(ClickEvent e) {
+			public void onClick(final ClickEvent e) {
 				remove(entry, editor);
 			}
 		});
@@ -49,14 +49,14 @@ abstract public class XCollectionEditor<E extends XValue, V extends XCollectionV
 		this.editors.add(editor);
 	}
 
-	protected void remove(HorizontalPanel entry, AtomicXValueEditor<E> editor) {
+	protected void remove(final HorizontalPanel entry, final AtomicXValueEditor<E> editor) {
 		this.list.remove(entry);
 		this.editors.remove(editor);
 		changed();
 	}
 
 	@Override
-	public void newValue(XValue value) {
+	public void newValue(final XValue value) {
 		changed();
 	}
 
@@ -65,7 +65,7 @@ abstract public class XCollectionEditor<E extends XValue, V extends XCollectionV
 		return asCollectionValue(new AbstractTransformingIterator<AtomicXValueEditor<E>, E>(
 				this.editors.iterator()) {
 			@Override
-			public E transform(AtomicXValueEditor<E> in) {
+			public E transform(final AtomicXValueEditor<E> in) {
 				return in.getValue();
 			}
 		});

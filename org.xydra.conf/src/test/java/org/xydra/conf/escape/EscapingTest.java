@@ -65,7 +65,7 @@ public class EscapingTest {
 		}
 	}
 
-	private static void testMaterialiseEscape(int i, String s) {
+	private static void testMaterialiseEscape(final int i, final String s) {
 		log.info("Testing key " + i + " ='" + s + "' " + Escaping.toCodepoints(s));
 
 		boolean escapeColonSpaceEqual = true;
@@ -81,8 +81,8 @@ public class EscapingTest {
 		testMaterialiseEscape(s, escapeColonSpaceEqual, swallowBaskslashNewline);
 	}
 
-	private static void testMaterialiseEscape(String s, boolean escapeColonSpaceEqual,
-			boolean swallowBaskslashNewline) {
+	private static void testMaterialiseEscape(final String s, final boolean escapeColonSpaceEqual,
+			final boolean swallowBaskslashNewline) {
 
 		Escaping.materializeEscapes(s, swallowBaskslashNewline, escapeColonSpaceEqual);
 		// no bug? we're happy
@@ -91,7 +91,7 @@ public class EscapingTest {
 	@Test
 	public void test() {
 		for (int i = 0; i < keys.size(); i++) {
-			String k = keys.get(i);
+			final String k = keys.get(i);
 			testRoundtrip(i, k);
 		}
 	}
@@ -101,7 +101,7 @@ public class EscapingTest {
 	 *            to help debugging, some index
 	 * @param s
 	 */
-	private static void testRoundtrip(int i, String s) {
+	private static void testRoundtrip(final int i, final String s) {
 		log.info("Testing key " + i + " ='" + s + "' " + Escaping.toCodepoints(s));
 
 		boolean escapeColonSpaceEqual = true;
@@ -117,18 +117,18 @@ public class EscapingTest {
 		testRoundtrip(s, escapeColonSpaceEqual, swallowBaskslashNewline);
 	}
 
-	private static void testRoundtrip(String s, boolean escapeColonSpaceEqual,
-			boolean swallowBaskslashNewline) {
-		String escaped = Escaping.escape(s, escapeColonSpaceEqual, false);
+	private static void testRoundtrip(final String s, final boolean escapeColonSpaceEqual,
+			final boolean swallowBaskslashNewline) {
+		final String escaped = Escaping.escape(s, escapeColonSpaceEqual, false);
 		log.info("Escaped as '" + escaped + "' " + Escaping.toCodepoints(escaped));
-		String unescaped = Escaping.materializeEscapes(escaped, swallowBaskslashNewline,
+		final String unescaped = Escaping.materializeEscapes(escaped, swallowBaskslashNewline,
 				escapeColonSpaceEqual);
 		assertEquals(
 				"expected=\n" + Escaping.toCodepoints(s) + "\nreceived=\n "
 						+ Escaping.toCodepoints(unescaped), s, unescaped);
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		System.out.println(Escaping.toCodepoints("foo\nbar"));
 	}
 

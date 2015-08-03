@@ -6,25 +6,25 @@ import org.xydra.index.query.Pair;
 
 
 public abstract class AbstractXydraElement implements XydraElement {
-	
+
 	@Override
-	public XydraElement getElement(String name) {
+	public XydraElement getElement(final String name) {
 		return getElement(name, 0);
 	}
-	
+
 	@Override
 	public Iterator<XydraElement> getChildren() {
 		return getChildren(null);
 	}
-	
+
 	@Override
-	public Iterator<XydraElement> getChildrenByName(String name) {
+	public Iterator<XydraElement> getChildrenByName(final String name) {
 		return getChildrenByName(name, null);
 	}
-	
+
 	@Override
-	public Iterator<Pair<String,XydraElement>> getEntries(String attribute) {
+	public Iterator<Pair<String,XydraElement>> getEntries(final String attribute) {
 		return getEntries(attribute, null);
 	}
-	
+
 }

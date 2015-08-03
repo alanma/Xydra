@@ -14,7 +14,7 @@ public interface ITaskList extends IBaseList {
 
 	/**
 	 * For GWT-internal use only [generated from: 'toClassSpec 1']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'toClassSpec 2']
 	 * @param id
@@ -25,7 +25,7 @@ public interface ITaskList extends IBaseList {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.TaskList']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("tasks")

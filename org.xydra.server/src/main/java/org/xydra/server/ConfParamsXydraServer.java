@@ -1,5 +1,6 @@
 package org.xydra.server;
 
+import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.conf.IConfig;
 import org.xydra.conf.IConfigProvider;
@@ -15,8 +16,8 @@ public class ConfParamsXydraServer implements IConfigProvider {
 	public static final String repoId = "xydra-repoId";
 
 	@Override
-	public void configureDefaults(IConfig conf) {
-		conf.setDefault(ConfParamsXydraServer.repoId, XX.toId("data"), true);
+	public void configureDefaults(final IConfig conf) {
+		conf.setDefault(ConfParamsXydraServer.repoId, Base.toId("data"), true);
 	}
 
 }

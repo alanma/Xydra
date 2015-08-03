@@ -22,7 +22,7 @@ import org.xydra.oo.runtime.shared.SharedTypeMapping;
 
 /**
  * Specific reflection for Java proxy objects and generated/annotated methods.
- * 
+ *
  * @author xamde
  */
 public class OOReflectionUtils {
@@ -37,30 +37,31 @@ public class OOReflectionUtils {
 	 *            value type
 	 * @return ...
 	 */
-	public static XValue convertToXydra(Class<?> type, Class<?> componentType, Object value) {
+	public static XValue convertToXydra(final Class<?> type, final Class<?> componentType, final Object value) {
 		if (value instanceof IHasXId) {
-			IHasXId hasXid = (IHasXId) value;
+			final IHasXId hasXid = (IHasXId) value;
 			return hasXid.getId();
 		}
 
 		SharedTypeMapping mapping = OOReflectionUtils.getMapping(type, componentType);
 		if (mapping == null) {
 			// try via interfaces
-			for (Class<?> interfaze : type.getInterfaces()) {
+			for (final Class<?> interfaze : type.getInterfaces()) {
 				mapping = OOReflectionUtils.getMapping(interfaze, componentType);
-				if (mapping != null)
+				if (mapping != null) {
 					break;
+				}
 			}
 		}
 		if (mapping != null) {
 			// assert mapping.getJavaType().equals(paramType);
-			XValue v = mapping.toXydra(value);
+			final XValue v = mapping.toXydra(value);
 			return v;
 		}
 
 		// auto-convert Enum<->String
 		if (type.isEnum() && componentType == null) {
-			String s = ((Enum<?>) value).name();
+			final String s = ((Enum<?>) value).name();
 			return XV.toValue(s);
 		}
 
@@ -74,11 +75,11 @@ public class OOReflectionUtils {
 	 * @return the Xydra fieldId extracted from the name of the method. This is
 	 *         a bit fragile, so better use {@link Field} annotations.
 	 */
-	public static String extractFieldIdFromMethod(Method method) {
+	public static String extractFieldIdFromMethod(final Method method) {
 		String fieldId = OOReflectionUtils.getAnnotatedFieldId(method);
 		if (fieldId == null) {
-			String name = method.getName();
-			for (KindOfMethod m : KindOfMethod.values()) {
+			final String name = method.getName();
+			for (final KindOfMethod m : KindOfMethod.values()) {
 				if (m.prefix != null && name.startsWith(m.prefix)) {
 					fieldId = name.substring(m.prefix.length());
 					fieldId = NameUtils.firstLetterLowercased(fieldId);
@@ -104,10 +105,10 @@ public class OOReflectionUtils {
 	 * @param method
 	 * @return the kind of a method, i.e. Get, Set, Is, or GetCollection
 	 */
-	public static KindOfMethod extractKindOfMethod(Method method) {
-		String name = method.getName();
+	public static KindOfMethod extractKindOfMethod(final Method method) {
+		final String name = method.getName();
 		assert name != null;
-		for (KindOfMethod m : KindOfMethod.values()) {
+		for (final KindOfMethod m : KindOfMethod.values()) {
 			if (m.prefix != null && name.startsWith(m.prefix)) {
 				return m;
 			}
@@ -120,17 +121,19 @@ public class OOReflectionUtils {
 		}
 	}
 
-	public static String getAnnotatedFieldId(Class<?> c) {
-		org.xydra.oo.Field annot = c.getAnnotation(org.xydra.oo.Field.class);
-		if (annot == null)
+	public static String getAnnotatedFieldId(final Class<?> c) {
+		final org.xydra.oo.Field annot = c.getAnnotation(org.xydra.oo.Field.class);
+		if (annot == null) {
 			return null;
+		}
 		return annot.value();
 	}
 
-	public static String getAnnotatedFieldId(Method method) {
-		org.xydra.oo.Field annot = method.getAnnotation(org.xydra.oo.Field.class);
-		if (annot == null)
+	public static String getAnnotatedFieldId(final Method method) {
+		final org.xydra.oo.Field annot = method.getAnnotation(org.xydra.oo.Field.class);
+		if (annot == null) {
 			return null;
+		}
 		return annot.value();
 	}
 
@@ -139,10 +142,11 @@ public class OOReflectionUtils {
 	 * @return true iff type is mapped indirectly via an XId to the Xydra type
 	 *         system (has an 'XId getId()' method)
 	 */
-	public static boolean hasAnId(IBaseType baseTypeSpec) {
-		Class<?> c = JavaReflectionUtils.forName(baseTypeSpec);
-		if (c == null)
+	public static boolean hasAnId(final IBaseType baseTypeSpec) {
+		final Class<?> c = JavaReflectionUtils.forName(baseTypeSpec);
+		if (c == null) {
 			return false;
+		}
 		return hasAnId(c);
 	}
 
@@ -151,15 +155,15 @@ public class OOReflectionUtils {
 	 * @return true iff type is mapped indirectly via an XId to the Xydra type
 	 *         system (has an 'XId getId()' method)
 	 */
-	public static boolean hasAnId(Class<?> type) {
+	public static boolean hasAnId(final Class<?> type) {
 		assert type != null;
 		Method m;
 		try {
 			m = type.getMethod("getId");
 			return m != null && m.getReturnType().equals(XId.class);
-		} catch (NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
 			return false;
-		} catch (SecurityException e) {
+		} catch (final SecurityException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -169,33 +173,35 @@ public class OOReflectionUtils {
 	 * @return true iff type is a Java proxy type mapped via XId to a Xydra
 	 *         object
 	 */
-	public static boolean isProxyType(@CanBeNull Class<?> type) {
-		if (type == null)
+	public static boolean isProxyType(@CanBeNull final Class<?> type) {
+		if (type == null) {
 			return false;
+		}
 		try {
-			Method method = type.getMethod("getId");
+			final Method method = type.getMethod("getId");
 			return method != null && method.getReturnType().equals(XId.class);
-		} catch (NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
 			return false;
-		} catch (SecurityException e) {
+		} catch (final SecurityException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public static boolean isProxyType(IType type) {
+	public static boolean isProxyType(final IType type) {
 		assert type != null;
 		try {
-			Class<?> c = Class.forName(type.getBaseType().getCanonicalName());
+			final Class<?> c = Class.forName(type.getBaseType().getCanonicalName());
 			return isProxyType(c);
-		} catch (ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			return false;
 		}
 	}
 
-	public static boolean isProxyType(IBaseType baseTypeSpec) {
-		Class<?> c = JavaReflectionUtils.forName(baseTypeSpec);
-		if (c == null)
+	public static boolean isProxyType(final IBaseType baseTypeSpec) {
+		final Class<?> c = JavaReflectionUtils.forName(baseTypeSpec);
+		if (c == null) {
 			return false;
+		}
 		return isProxyType(c);
 	}
 
@@ -205,7 +211,7 @@ public class OOReflectionUtils {
 	 *            can be a proxy object or any XValue type
 	 * @return a mapping or null
 	 */
-	public static SharedTypeMapping getMapping(Class<?> type, Class<?> componentType) {
+	public static SharedTypeMapping getMapping(final Class<?> type, final Class<?> componentType) {
 		assert type != null;
 		if (isProxyType(componentType)) {
 			// mapping is always a kind of XId
@@ -216,9 +222,9 @@ public class OOReflectionUtils {
 		}
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		System.out.println("All types");
-		for (ValueType v : ValueType.values()) {
+		for (final ValueType v : ValueType.values()) {
 			System.out.println(v.name());
 		}
 		assert OOReflectionUtils.isTranslatableSingleType(byte[].class);
@@ -231,9 +237,9 @@ public class OOReflectionUtils {
 	 * @param componentType
 	 * @return ...
 	 */
-	public static XCollectionValue<XValue> createCollection(Class<?> type, Class<?> componentType) {
+	public static XCollectionValue<XValue> createCollection(final Class<?> type, final Class<?> componentType) {
 		if (XydraReflectionUtils.isCollectionType(type)) {
-			SharedTypeMapping mapping = getMapping(type, componentType);
+			final SharedTypeMapping mapping = getMapping(type, componentType);
 			if (mapping == null) {
 				throw new RuntimeException("Not yet handling type=" + type.getCanonicalName()
 						+ " compType=" + componentType);
@@ -250,17 +256,18 @@ public class OOReflectionUtils {
 	 * @return true iff we can generate getters and setters that map the given
 	 *         type to a defined Xydra type, includes all enum types
 	 */
-	public static boolean isTranslatableSingleType(Class<?> type) {
+	public static boolean isTranslatableSingleType(final Class<?> type) {
 		assert type != null;
 
-		if (type.isEnum())
+		if (type.isEnum()) {
 			assertEnumHasRightPackage(type);
+		}
 
 		return XydraReflectionUtils.isTranslatableSingleType(type) || isProxyType(type)
 				|| type.isEnum() || JavaTypeSpecUtils.getMapping(type, null) != null;
 	}
 
-	static void assertEnumHasRightPackage(Class<?> enumClass) {
+	static void assertEnumHasRightPackage(final Class<?> enumClass) {
 		assert enumClass.isEnum() : "check applies only to enums";
 		if (!enumClass.getPackage().getName().contains(".shared")) {
 			log.error("Enum type " + enumClass.getCanonicalName()
@@ -269,7 +276,7 @@ public class OOReflectionUtils {
 		}
 	}
 
-	public static boolean isKnownTranslatableCollectionType(Class<?> type, Class<?> componentType) {
+	public static boolean isKnownTranslatableCollectionType(final Class<?> type, final Class<?> componentType) {
 		// check collection type
 		if (XydraReflectionUtils.isCollectionType(type)) {
 			// check component type of collection
@@ -291,17 +298,19 @@ public class OOReflectionUtils {
 	 * @return a Java instance of type T backed by a dynamic proxy that
 	 *         delegates persistence to a Xydra object
 	 */
-	public static <T> T toJavaInstance(Class<T> interfaze, XWritableModel model, XId id) {
-		if (log.isTraceEnabled())
+	public static <T> T toJavaInstance(final Class<T> interfaze, final XWritableModel model, final XId id) {
+		if (log.isTraceEnabled()) {
 			log.trace("Creating proxy for " + interfaze.getCanonicalName());
+		}
 
 		@SuppressWarnings("unchecked")
+		final
 		T instance = (T) Proxy.newProxyInstance(interfaze.getClassLoader(), new Class<?>[] {
 				interfaze, ICanDump.class }, new OOJavaOnlyProxy(model, id));
 		return instance;
 	}
 
-	public static boolean isTranslatableCollectionType(Class<?> type, Class<?> compType) {
+	public static boolean isTranslatableCollectionType(final Class<?> type, final Class<?> compType) {
 		return XydraReflectionUtils.isCollectionType(type) && isTranslatableSingleType(compType);
 	}
 
@@ -311,13 +320,14 @@ public class OOReflectionUtils {
 	 * @param toBeGeneratedTypes
 	 * @return false for array types
 	 */
-	static boolean isToBeGeneratedCollectionType(Class<?> type, Class<?> componentType,
-			Set<Class<?>> toBeGeneratedTypes) {
+	static boolean isToBeGeneratedCollectionType(final Class<?> type, final Class<?> componentType,
+			final Set<Class<?>> toBeGeneratedTypes) {
 		if (!type.isArray() && XydraReflectionUtils.isCollectionType(type)) {
-			boolean componentOk = toBeGeneratedTypes.contains(componentType);
-			if (!componentOk)
+			final boolean componentOk = toBeGeneratedTypes.contains(componentType);
+			if (!componentOk) {
 				log.warn("Translatable collection type (" + type
 						+ ") with untranslatable component type: " + componentType);
+			}
 			return componentOk;
 		} else {
 			return false;
@@ -329,10 +339,10 @@ public class OOReflectionUtils {
 	 * @param toBeGeneratedTypes
 	 * @return false for array types
 	 */
-	public static boolean isToBeGeneratedCollectionType(Field field,
-			Set<Class<?>> toBeGeneratedTypes) {
-		Class<?> type = field.getType();
-		Class<?> compType = JavaReflectionUtils.getComponentType(field);
+	public static boolean isToBeGeneratedCollectionType(final Field field,
+			final Set<Class<?>> toBeGeneratedTypes) {
+		final Class<?> type = field.getType();
+		final Class<?> compType = JavaReflectionUtils.getComponentType(field);
 		return isToBeGeneratedCollectionType(type, compType, toBeGeneratedTypes);
 	}
 

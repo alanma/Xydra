@@ -17,13 +17,13 @@ import org.xydra.core.serialize.XydraParser;
 
 /**
  * {@link XydraParser} implementation that uses a standard java XML parser.
- * 
+ *
  * This parser CANNOT handle XML mixed content, such as
  * '<foo>hello<world>bar</world>baz</foo>' -- the inner text nodes 'hello' and
  * 'baz' will just be silently dropped.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 @RunsInGWT(false)
 @RequiresAppEngine(false)
@@ -33,7 +33,7 @@ public class XmlParser implements XydraParser {
 
 	private synchronized static DocumentBuilder getParser() throws ParserConfigurationException {
 		if (parser == null) {
-			DocumentBuilderFactory fac = DocumentBuilderFactory.newInstance();
+			final DocumentBuilderFactory fac = DocumentBuilderFactory.newInstance();
 			fac.setIgnoringComments(true);
 			fac.setNamespaceAware(false);
 			fac.setValidating(false);
@@ -44,12 +44,12 @@ public class XmlParser implements XydraParser {
 	}
 
 	@Override
-	public synchronized XydraElement parse(String string) {
-		InputSource is = new InputSource(new StringReader(string));
+	public synchronized XydraElement parse(final String string) {
+		final InputSource is = new InputSource(new StringReader(string));
 		Document document;
 		try {
 			document = getParser().parse(is);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new IllegalArgumentException(e);
 		}
 		return XmlElement.wrap(document.getDocumentElement());
@@ -61,13 +61,13 @@ public class XmlParser implements XydraParser {
 	}
 
 	@Override
-	public XydraElement parse(MiniReader miniReader) throws IllegalArgumentException {
-		MiniReaderToReader reader = new MiniReaderToReader(miniReader);
-		InputSource is = new InputSource(reader);
+	public XydraElement parse(final MiniReader miniReader) throws IllegalArgumentException {
+		final MiniReaderToReader reader = new MiniReaderToReader(miniReader);
+		final InputSource is = new InputSource(reader);
 		Document document;
 		try {
 			document = getParser().parse(is);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new IllegalArgumentException(e);
 		}
 		return XmlElement.wrap(document.getDocumentElement());

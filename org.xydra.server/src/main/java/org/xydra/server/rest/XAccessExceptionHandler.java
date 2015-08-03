@@ -14,12 +14,12 @@ import org.xydra.restless.RestlessExceptionHandler;
 public class XAccessExceptionHandler implements RestlessExceptionHandler {
 
 	@Override
-	public boolean handleException(Throwable t, IRestlessContext context) {
+	public boolean handleException(final Throwable t, final IRestlessContext context) {
 
 		if (t instanceof AccessException) {
 			try {
 				context.getResponse().sendError(HttpServletResponse.SC_FORBIDDEN);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new RuntimeException("Error while sending response for XAccessException", e);
 			}
 		}

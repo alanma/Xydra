@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 /**
  * The annotated method or class can be accessed by several threads at the same
  * time without causing errors.
- * 
+ *
  * @author xamde
  */
 @Documented

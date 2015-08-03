@@ -7,18 +7,18 @@ import org.junit.Test;
 
 
 public class MemoryStringIDProviderTest {
-    
+
     @Test
     public void testIsValidId() {
         // 'ß' in UTF8 is 'ÃŸ' (second char is invisible control character)
-        assertFalse(MemoryStringIDProvider.isValidId("GenuÃrechte"));
+        assertFalse(BaseStringIDProvider.isValidId("GenuÃrechte"));
         // contains an invisible control characters before the 'r'
-        String evil = "Genußrechte";
+        final String evil = "Genußrechte";
         assert evil.length() == 12;
-        assertFalse(MemoryStringIDProvider.isValidId(evil));
-        String normal = "Genußrechte";
+        assertFalse(BaseStringIDProvider.isValidId(evil));
+        final String normal = "Genußrechte";
         assert normal.length() == 11;
-        assertTrue(MemoryStringIDProvider.isValidId(normal));
+        assertTrue(BaseStringIDProvider.isValidId(normal));
     }
-    
+
 }

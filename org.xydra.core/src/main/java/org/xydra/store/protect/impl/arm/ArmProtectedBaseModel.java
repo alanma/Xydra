@@ -16,104 +16,104 @@ import org.xydra.store.access.XAuthorisationManager;
 /**
  * An {@link XReadableModel} that wraps an {@link XReadableModel} for a specific
  * actor and checks all access against an {@link XAuthorisationManager}.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 public class ArmProtectedBaseModel implements XReadableModel {
-    
+
     protected final XId actor;
     protected final XAuthorisationManager arm;
     private final XReadableModel model;
-    
-    public ArmProtectedBaseModel(XReadableModel model, XAuthorisationManager arm, XId actor) {
+
+    public ArmProtectedBaseModel(final XReadableModel model, final XAuthorisationManager arm, final XId actor) {
         this.model = model;
         this.arm = arm;
         this.actor = actor;
-        
+
         XyAssert.xyAssert(model != null);
         assert model != null;
         XyAssert.xyAssert(arm != null);
         assert arm != null;
     }
-    
-    protected void checkCanKnowAboutObject(XId objectId) {
+
+    protected void checkCanKnowAboutObject(final XId objectId) {
         if(!this.arm.canKnowAboutObject(this.actor, getAddress(), objectId)) {
             throw new AccessException(this.actor + " cannot read object " + objectId + " in "
                     + getAddress());
         }
     }
-    
+
     protected void checkReadAccess() throws AccessException {
         // IMPROVE cache this
         if(!this.arm.canRead(this.actor, getAddress())) {
             throw new AccessException(this.actor + " cannot read " + getAddress());
         }
     }
-    
+
     public XId getActor() {
         return this.actor;
     }
-    
+
     @Override
     public XAddress getAddress() {
         return this.model.getAddress();
     }
-    
+
     @Override
     public XId getId() {
         return this.model.getId();
     }
-    
+
     @Override
-    public XReadableObject getObject(@NeverNull XId objectId) {
-        
+    public XReadableObject getObject(@NeverNull final XId objectId) {
+
         checkCanKnowAboutObject(objectId);
-        
-        XReadableObject object = this.model.getObject(objectId);
-        
+
+        final XReadableObject object = this.model.getObject(objectId);
+
         if(object == null) {
             return null;
         }
-        
+
         return new ArmProtectedBaseObject(object, this.arm, this.actor);
     }
-    
+
     @Override
     public long getRevisionNumber() {
-        
+
         checkReadAccess();
-        
+
         return this.model.getRevisionNumber();
     }
-    
+
     @Override
-    public boolean hasObject(@NeverNull XId objectId) {
-        
+    public boolean hasObject(@NeverNull final XId objectId) {
+
         checkReadAccess();
-        
+
         return this.model.hasObject(objectId);
     }
-    
+
     @Override
     public boolean isEmpty() {
-        
+
         checkReadAccess();
-        
+
         return this.model.isEmpty();
     }
-    
+
     @Override
     public Iterator<XId> iterator() {
-        
+
         checkReadAccess();
-        
+
         return this.model.iterator();
     }
-    
+
     @Override
     public XType getType() {
         return XType.XMODEL;
     }
-    
+
 }

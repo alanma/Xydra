@@ -29,7 +29,7 @@ public class ConfParamsJetty implements IConfigProvider {
 	public static String _WEBROOT_MARKER_FILE = "webroot.marker";
 
 	@Override
-	public void configureDefaults(IConfig conf) {
+	public void configureDefaults(final IConfig conf) {
 		conf.setDefault(PORT, 8888, true);
 		conf.setDefault(CONTEXT_PATH, "/", true);
 		// set no default for DOC_ROOT

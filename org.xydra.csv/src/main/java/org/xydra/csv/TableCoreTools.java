@@ -24,15 +24,15 @@ public class TableCoreTools {
 
 	/**
 	 * Represents a compound key consisting of <i>n</i> columns.
-	 * 
+	 *
 	 * The order of keys implies a sorting order.
-	 * 
+	 *
 	 * @author xamde
 	 */
 	private static class CompoundKey implements Iterable<String>, Comparable<CompoundKey> {
 		final List<String> keyParts;
 
-		public CompoundKey(List<String> keys) {
+		public CompoundKey(final List<String> keys) {
 			this.keyParts = keys;
 		}
 
@@ -42,13 +42,14 @@ public class TableCoreTools {
 		// }
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(final Object other) {
 			if (other instanceof CompoundKey) {
-				CompoundKey otherKey = (CompoundKey) other;
+				final CompoundKey otherKey = (CompoundKey) other;
 				if (otherKey.keyParts.size() == this.keyParts.size()) {
 					for (int i = 0; i < this.keyParts.size(); i++) {
-						if (!this.keyParts.get(i).equals(otherKey.keyParts.get(i)))
+						if (!this.keyParts.get(i).equals(otherKey.keyParts.get(i))) {
 							return false;
+						}
 					}
 					return true;
 				}
@@ -72,7 +73,7 @@ public class TableCoreTools {
 
 		@Override
 		public String toString() {
-			StringBuffer buf = new StringBuffer();
+			final StringBuffer buf = new StringBuffer();
 			for (int i = 0; i < this.keyParts.size(); i++) {
 				buf.append(this.keyParts.get(i));
 				if (i + 1 < this.keyParts.size()) {
@@ -83,15 +84,15 @@ public class TableCoreTools {
 		}
 
 		@Override
-		public int compareTo(CompoundKey other) {
-			return ALPHA_NUMERIC_COMPARATOR.compare(this.toString(), other.toString());
+		public int compareTo(final CompoundKey other) {
+			return ALPHA_NUMERIC_COMPARATOR.compare(toString(), other.toString());
 		}
 	}
 
 	public static Comparator<String> ALPHA_NUMERIC_COMPARATOR = new Comparator<String>() {
 
 		@Override
-		public int compare(String a, String b) {
+		public int compare(final String a, final String b) {
 			if (a == null) {
 				if (b == null) {
 					return 0;
@@ -104,10 +105,10 @@ public class TableCoreTools {
 
 			// experimental: try to treat both as numbers
 			try {
-				long aNum = Long.parseLong(a);
-				long bNum = Long.parseLong(b);
+				final long aNum = Long.parseLong(a);
+				final long bNum = Long.parseLong(b);
 				return (int) (aNum - bNum);
-			} catch (NumberFormatException e) {
+			} catch (final NumberFormatException e) {
 			}
 
 			// else
@@ -117,21 +118,21 @@ public class TableCoreTools {
 
 	/**
 	 * Represents a compound key consisting of two columns.
-	 * 
+	 *
 	 * @author xamde
-	 * 
+	 *
 	 */
 	private static class TwoKey {
 		final String a;
 		final String b;
 
-		public TwoKey(String a, String b) {
+		public TwoKey(final String a, final String b) {
 			this.a = a;
 			this.b = b;
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(final Object other) {
 			return other instanceof TwoKey && this.a.equals(((TwoKey) other).a)
 					&& this.b.equals(((TwoKey) other).b);
 		}
@@ -144,7 +145,7 @@ public class TableCoreTools {
 
 	/**
 	 * IMPROVE generalize into n keys
-	 * 
+	 *
 	 * @param keyColumnName1 never null
 	 * @param keyColumnName2 never null
 	 * @return an {@link IRowInsertionHandler} that aggregates all rows into one
@@ -155,7 +156,7 @@ public class TableCoreTools {
 	 */
 	public static IRowInsertionHandler createGroupByTwoKeysRowInsertionHandler(
 			final String keyColumnName1, final String keyColumnName2) {
-		IRowInsertionHandler rowInsertionHandler = new IRowInsertionHandler() {
+		final IRowInsertionHandler rowInsertionHandler = new IRowInsertionHandler() {
 
 			long aggregated = 0;
 			// temporary index of occurring keys and their row
@@ -165,11 +166,11 @@ public class TableCoreTools {
 			long processed = 0;
 
 			@Override
-			public void afterRowInsertion(IRow row) {
+			public void afterRowInsertion(final IRow row) {
 			}
 
 			@Override
-			public boolean beforeRowInsertion(Row row) {
+			public boolean beforeRowInsertion(final Row row) {
 				this.processed++;
 				if (this.processed % 1000 == 0) {
 					log.info("Read aggregating processed " + this.processed + " rows, aggregated "
@@ -180,20 +181,20 @@ public class TableCoreTools {
 				 * Calculate compound key of this row. If one or several of the
 				 * key-columns are empty, then this row is deleted.
 				 */
-				String valueA = row.getValue(this.keyColumnNames.a);
+				final String valueA = row.getValue(this.keyColumnNames.a);
 				if (valueA == null) {
 					return false;
 				}
-				String valueB = row.getValue(this.keyColumnNames.b);
+				final String valueB = row.getValue(this.keyColumnNames.b);
 				if (valueB == null) {
 					return false;
 				}
-				TwoKey compoundKey = new TwoKey(valueA, valueB);
+				final TwoKey compoundKey = new TwoKey(valueA, valueB);
 
 				/* If we have previously seen a row with the same compundKey... */
 				if (this.compoundKeys2row.containsKey(compoundKey)) {
 					/* ... we aggregate this row into the existing row */
-					IRow masterRow = this.compoundKeys2row.get(compoundKey);
+					final IRow masterRow = this.compoundKeys2row.get(compoundKey);
 					masterRow.aggregate(row, new String[] {
 
 					keyColumnName1, keyColumnName2
@@ -219,40 +220,40 @@ public class TableCoreTools {
 	 * and D a groupBy with keyList= A and B would result in a map with
 	 * {@link CompoundKey} consisting of A and B and sub-tables containing only
 	 * columns C and D.
-	 * 
+	 *
 	 * There are as many resulting tables as there are different combinations of
 	 * A-B pairs.
-	 * 
+	 *
 	 * @param sourceTable which table to process
 	 * @param keyList create groups of rows where columns have same values
 	 * @return a Map with the resulting tables. The resulting tables have the
 	 *         columns listed in keyList merged into the {@link CompoundKey} and
 	 *         have been removed from the sub-tables.
 	 */
-	public static Map<CompoundKey, CsvTable> groupBy(ICsvTable sourceTable, List<String> keyList) {
-		CompoundKey keys = new CompoundKey(keyList);
+	public static Map<CompoundKey, CsvTable> groupBy(final ICsvTable sourceTable, final List<String> keyList) {
+		final CompoundKey keys = new CompoundKey(keyList);
 
 		log.info("Re-sorting table into group tables.");
 		/* re-sort table into group tables */
 		long serialNumber = 1;
-		Map<CompoundKey, CsvTable> groups = new TreeMap<CompoundKey, CsvTable>();
-		for (IRow sourceRow : sourceTable) {
+		final Map<CompoundKey, CsvTable> groups = new TreeMap<CompoundKey, CsvTable>();
+		for (final IRow sourceRow : sourceTable) {
 			/* create compound key */
-			List<String> compoundRowNameList = new LinkedList<String>();
-			for (String key : keys) {
+			final List<String> compoundRowNameList = new LinkedList<String>();
+			for (final String key : keys) {
 				compoundRowNameList.add(sourceRow.getValue(key));
 			}
-			CompoundKey compoundRowName = new CompoundKey(compoundRowNameList);
+			final CompoundKey compoundRowName = new CompoundKey(compoundRowNameList);
 			CsvTable groupTable = groups.get(compoundRowName);
 			if (groupTable == null) {
 				groupTable = new CsvTable();
 				groups.put(compoundRowName, groupTable);
 			}
 			/* copy all columns which will later be used */
-			Set<String> relevantCols = new HashSet<String>();
+			final Set<String> relevantCols = new HashSet<String>();
 			relevantCols.addAll(sourceTable.getColumnNames());
-			IRow groupRow = groupTable.getOrCreateRow("" + serialNumber++, true);
-			for (String relevantCol : relevantCols) {
+			final IRow groupRow = groupTable.getOrCreateRow("" + serialNumber++, true);
+			for (final String relevantCol : relevantCols) {
 				groupRow.setValue(relevantCol, sourceRow.getValue(relevantCol), true);
 			}
 		}
@@ -262,12 +263,12 @@ public class TableCoreTools {
 	/**
 	 * Group sourceTable by keys. For each group, calculate sum, average and
 	 * count for the given columns.
-	 * 
+	 *
 	 * TODO improve docu for this function
-	 * 
+	 *
 	 * Only columns listed in sum, average, or range list are present in
 	 * resulting table.
-	 * 
+	 *
 	 * @param sourceTable which table to process
 	 * @param keyList create groups of rows where columns have same values
 	 * @param sumList sum these columns up, for each group
@@ -276,70 +277,70 @@ public class TableCoreTools {
 	 * @param targetTable to which to write the result (which is a much smaller
 	 *            table, with one row for each used combination of keys)
 	 */
-	public static void groupBy(ICsvTable sourceTable, List<String> keyList, List<String> sumList,
-			List<String> averageList, List<String> rangeList, ICsvTable targetTable) {
-		CompoundKey keys = new CompoundKey(keyList);
-		CompoundKey sum = new CompoundKey(sumList);
-		CompoundKey average = new CompoundKey(averageList);
-		CompoundKey range = new CompoundKey(rangeList);
+	public static void groupBy(final ICsvTable sourceTable, final List<String> keyList, final List<String> sumList,
+			final List<String> averageList, final List<String> rangeList, final ICsvTable targetTable) {
+		final CompoundKey keys = new CompoundKey(keyList);
+		final CompoundKey sum = new CompoundKey(sumList);
+		final CompoundKey average = new CompoundKey(averageList);
+		final CompoundKey range = new CompoundKey(rangeList);
 
 		log.info("Re-sorting table into group tables.");
 		/* re-sort table into group tables */
 		long serialNumber = 1;
-		Map<CompoundKey, CsvTable> groups = new TreeMap<CompoundKey, CsvTable>();
-		for (IRow sourceRow : sourceTable) {
+		final Map<CompoundKey, CsvTable> groups = new TreeMap<CompoundKey, CsvTable>();
+		for (final IRow sourceRow : sourceTable) {
 			/* create compound key */
-			List<String> compoundRowNameList = new LinkedList<String>();
-			for (String key : keys) {
+			final List<String> compoundRowNameList = new LinkedList<String>();
+			for (final String key : keys) {
 				compoundRowNameList.add(sourceRow.getValue(key));
 			}
-			CompoundKey compoundRowName = new CompoundKey(compoundRowNameList);
+			final CompoundKey compoundRowName = new CompoundKey(compoundRowNameList);
 			CsvTable groupTable = groups.get(compoundRowName);
 			if (groupTable == null) {
 				groupTable = new CsvTable();
 				groups.put(compoundRowName, groupTable);
 			}
 			/* copy all columns which will later be used */
-			Set<String> relevantCols = new HashSet<String>();
+			final Set<String> relevantCols = new HashSet<String>();
 			relevantCols.addAll(sum.keyParts);
 			relevantCols.addAll(average.keyParts);
 			relevantCols.addAll(range.keyParts);
-			IRow groupRow = groupTable.getOrCreateRow("" + serialNumber++, true);
-			for (String relevantCol : relevantCols) {
+			final IRow groupRow = groupTable.getOrCreateRow("" + serialNumber++, true);
+			for (final String relevantCol : relevantCols) {
 				groupRow.setValue(relevantCol, sourceRow.getValue(relevantCol), true);
 			}
 		}
 
 		log.info("Aggregate group tables to target table.");
 		/* aggregate to targetTable */
-		for (CompoundKey groupKey : groups.keySet()) {
+		for (final CompoundKey groupKey : groups.keySet()) {
 			log.info("Use groupKey " + groupKey);
-			IRow targetRow = targetTable.getOrCreateRow(groupKey.toString(), true);
+			final IRow targetRow = targetTable.getOrCreateRow(groupKey.toString(), true);
 			// set key parts
 			for (int i = 0; i < keys.keyParts.size(); i++) {
 				targetRow.setValue(keys.keyParts.get(i), groupKey.keyParts.get(i), true);
 			}
-			ICsvTable groupTable = groups.get(groupKey);
+			final ICsvTable groupTable = groups.get(groupKey);
 			// count
 			targetRow.setValue("count", groupTable.rowCount(), true);
 
 			// sum
-			for (String sumCol : sum) {
+			for (final String sumCol : sum) {
 				long longResult = 0;
 				double doubleResult = 0;
-				for (IRow groupRow : groupTable) {
+				for (final IRow groupRow : groupTable) {
 					try {
 						longResult += groupRow.getValueAsLong(sumCol);
-					} catch (WrongDatatypeException e) {
+					} catch (final WrongDatatypeException e) {
 						try {
 							doubleResult += groupRow.getValueAsDouble(sumCol);
-						} catch (WrongDatatypeException e2) {
+						} catch (final WrongDatatypeException e2) {
 							log.warn("Could not calculate sum in col " + sumCol, e2);
 						}
 					}
 				}
 				if (doubleResult == 0) {
-					targetRow.setValue(sumCol + "--sum", "" + ((long) (longResult + doubleResult)),
+					targetRow.setValue(sumCol + "--sum", "" + (long) (longResult + doubleResult),
 							true);
 				} else {
 					targetRow.setValue(sumCol + "--sum", "" + (longResult + doubleResult), true);
@@ -347,25 +348,25 @@ public class TableCoreTools {
 
 			}
 			// average + stdev
-			for (String averageCol : average) {
+			for (final String averageCol : average) {
 				// average
 				long longResult = 0;
 				double doubleResult = 0;
-				for (IRow groupRow : groupTable) {
+				for (final IRow groupRow : groupTable) {
 					try {
 						longResult += groupRow.getValueAsLong(averageCol);
-					} catch (WrongDatatypeException e) {
+					} catch (final WrongDatatypeException e) {
 						try {
 							doubleResult += groupRow.getValueAsDouble(averageCol);
-						} catch (WrongDatatypeException e2) {
+						} catch (final WrongDatatypeException e2) {
 							log.warn("Could not calculate average in col " + averageCol, e2);
 						}
 					}
 				}
-				double ave = (longResult + doubleResult) / groupTable.rowCount();
+				final double ave = (longResult + doubleResult) / groupTable.rowCount();
 
 				// rounding to #.### format
-				long rAve = (long) (ave * 1000);
+				final long rAve = (long) (ave * 1000);
 
 				targetRow.setValue(averageCol + "--average", "" + rAve / 1000 + "." + rAve % 1000,
 						true);
@@ -373,34 +374,34 @@ public class TableCoreTools {
 				// standard derivation
 				double _sum = 0;
 				long n = 0;
-				for (IRow groupRow : groupTable) {
+				for (final IRow groupRow : groupTable) {
 					n++;
 					double delta = 0;
 					try {
 						delta = groupRow.getValueAsLong(averageCol) - ave;
-					} catch (WrongDatatypeException e) {
+					} catch (final WrongDatatypeException e) {
 						try {
 							delta = groupRow.getValueAsDouble(averageCol) - ave;
-						} catch (WrongDatatypeException e2) {
+						} catch (final WrongDatatypeException e2) {
 							log.warn("Could not calculate average in col " + averageCol, e2);
 						}
 					}
 					delta = delta * delta;
 					_sum += delta;
 				}
-				double stdev = Math.sqrt(_sum / n);
+				final double stdev = Math.sqrt(_sum / n);
 
 				// rounding to #.### format
-				long rStdev = (long) (stdev * 1000);
+				final long rStdev = (long) (stdev * 1000);
 
 				targetRow.setValue(averageCol + "--stdev",
 						"" + rStdev / 1000 + "." + rStdev % 1000, true);
 
 			}
 			// count value range
-			for (String rangeCol : range) {
-				Set<String> seenValues = new HashSet<String>();
-				for (IRow groupRow : groupTable) {
+			for (final String rangeCol : range) {
+				final Set<String> seenValues = new HashSet<String>();
+				for (final IRow groupRow : groupTable) {
 					seenValues.add(groupRow.getValue(rangeCol));
 				}
 				targetRow.setValue(rangeCol + "--range", "" + seenValues.size(), true);
@@ -408,20 +409,20 @@ public class TableCoreTools {
 		}
 	}
 
-	public static void transpose(SparseTable sourceTable, SparseTable targetTable) {
-		for (String sourceColumnName : sourceTable.getColumnNames()) {
-			for (IRow sourceRow : sourceTable) {
-				String value = sourceRow.getValue(sourceColumnName);
-				IRow targetRow = targetTable.getOrCreateRow(sourceColumnName, true);
+	public static void transpose(final SparseTable sourceTable, final SparseTable targetTable) {
+		for (final String sourceColumnName : sourceTable.getColumnNames()) {
+			for (final IRow sourceRow : sourceTable) {
+				final String value = sourceRow.getValue(sourceColumnName);
+				final IRow targetRow = targetTable.getOrCreateRow(sourceColumnName, true);
 				targetRow.setValue(sourceRow.getKey(), value, true);
 			}
 		}
 	}
 
-	public static List<Row> sortByColumn(ISparseTable table, String sortKey) {
+	public static List<Row> sortByColumn(final ISparseTable table, final String sortKey) {
 		// get all rows
-		List<Row> rowList = new ArrayList<Row>();
-		for (Row row : table) {
+		final List<Row> rowList = new ArrayList<Row>();
+		for (final Row row : table) {
 			rowList.add(row);
 		}
 		Collections.sort(rowList, new RowByColumnComparator(sortKey));
@@ -430,17 +431,17 @@ public class TableCoreTools {
 
 	public static class RowByColumnComparator implements Comparator<IRow> {
 
-		public RowByColumnComparator(String sortCol) {
+		public RowByColumnComparator(final String sortCol) {
 			this.sortCol = sortCol;
 		}
 
-		private String sortCol;
+		private final String sortCol;
 
 		@Override
-		public int compare(IRow a, IRow b) {
-			String aVal = a.getValue(this.sortCol);
-			String bVal = b.getValue(this.sortCol);
-			return TableTools.ALPHA_NUMERIC_COMPARATOR.compare(aVal, bVal);
+		public int compare(final IRow a, final IRow b) {
+			final String aVal = a.getValue(this.sortCol);
+			final String bVal = b.getValue(this.sortCol);
+			return TableCoreTools.ALPHA_NUMERIC_COMPARATOR.compare(aVal, bVal);
 		}
 
 	}

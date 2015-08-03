@@ -8,9 +8,9 @@ import org.xydra.log.api.LoggerFactory;
 
 /**
  * A Maven Mojo.
- * 
+ *
  * Copy compiled GWT javascript to the webapp folder so that it gets deployed.
- * 
+ *
  * @goal copygwt
  */
 public class CopyGwt extends AbstractMojo {
@@ -19,14 +19,14 @@ public class CopyGwt extends AbstractMojo {
 
 	/**
 	 * artifactId
-	 * 
+	 *
 	 * @parameter expression="${project.artifactId}"
 	 */
 	private String artifactId;
 
 	/**
 	 * versionId
-	 * 
+	 *
 	 * @parameter expression="${project.version}"
 	 */
 	private String versionId;
@@ -43,7 +43,7 @@ public class CopyGwt extends AbstractMojo {
 		try {
 			this.warPath = "./target/" + this.artifactId + "-" + this.versionId;
 			copyGwt();
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			throw new MojoExecutionException("There was an error", t);
 		}
 
@@ -56,7 +56,7 @@ public class CopyGwt extends AbstractMojo {
 			showHelp();
 			return;
 		}
-		for (String moduleName : this.gwtModuleNames) {
+		for (final String moduleName : this.gwtModuleNames) {
 			GwtBuildHelper.copyCompiledGwtModule(this.warPath, moduleName);
 		}
 	}

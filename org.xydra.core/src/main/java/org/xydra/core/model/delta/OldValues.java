@@ -17,51 +17,53 @@ public class OldValues {
 
 	/**
 	 * Returns the old value of a remove-event or change-event.
-	 * 
+	 *
 	 * @param fieldEvent
 	 * @param changeLog
 	 * @param baseSnapshotModel @CanBeNull is used if the changeLog does not
 	 *            start at revision 0
 	 * @return @CanBeNull
 	 */
-	public static XValue getOldValue(XFieldEvent fieldEvent, XChangeLog changeLog,
-			XReadableModel baseSnapshotModel) {
+	public static XValue getOldValue(final XFieldEvent fieldEvent, final XChangeLog changeLog,
+			final XReadableModel baseSnapshotModel) {
 		assert fieldEvent.getChangeType() == ChangeType.REMOVE
 				|| fieldEvent.getChangeType() == ChangeType.CHANGE;
 
 		if (fieldEvent instanceof XReversibleFieldEvent) {
-			XReversibleFieldEvent rfe = (XReversibleFieldEvent) fieldEvent;
+			final XReversibleFieldEvent rfe = (XReversibleFieldEvent) fieldEvent;
 			// we need the previous value here
 			return rfe.getOldValue();
 		} else {
-			long revisionNumber = fieldEvent.getOldFieldRevision();
-			XEvent oldEvent = changeLog.getEventAt(revisionNumber);
+			final long revisionNumber = fieldEvent.getOldFieldRevision();
+			final XEvent oldEvent = changeLog.getEventAt(revisionNumber);
 			if (oldEvent == null) {
 				// read from last known snapshot
 				if (baseSnapshotModel == null) {
 					return null;
 				}
-				XId objectId = fieldEvent.getObjectId();
-				XReadableObject baseSnapshotObject = baseSnapshotModel.getObject(objectId);
-				if (baseSnapshotObject == null)
+				final XId objectId = fieldEvent.getObjectId();
+				final XReadableObject baseSnapshotObject = baseSnapshotModel.getObject(objectId);
+				if (baseSnapshotObject == null) {
 					return null;
-				XReadableField baseSnapshotField = baseSnapshotObject.getField(fieldEvent
+				}
+				final XReadableField baseSnapshotField = baseSnapshotObject.getField(fieldEvent
 						.getFieldId());
-				if (baseSnapshotField == null)
+				if (baseSnapshotField == null) {
 					return null;
-				XValue value = baseSnapshotField.getValue();
+				}
+				final XValue value = baseSnapshotField.getValue();
 				return value;
 			} else if (oldEvent instanceof XFieldEvent) {
-				XFieldEvent oldFieldEvent = (XFieldEvent) oldEvent;
+				final XFieldEvent oldFieldEvent = (XFieldEvent) oldEvent;
 				return oldFieldEvent.getNewValue();
 			} else if (oldEvent instanceof XTransactionEvent) {
-				XTransactionEvent xte = (XTransactionEvent) oldEvent;
+				final XTransactionEvent xte = (XTransactionEvent) oldEvent;
 				// find right atomic event
-				for (XAtomicEvent ae : xte) {
+				for (final XAtomicEvent ae : xte) {
 					if (ae instanceof XFieldEvent
 							&& ae.getChangedEntity().equals(fieldEvent.getChangedEntity())) {
 						// we found it
-						XFieldEvent oldFieldEvent = (XFieldEvent) ae;
+						final XFieldEvent oldFieldEvent = (XFieldEvent) ae;
 						return oldFieldEvent.getNewValue();
 					}
 				}

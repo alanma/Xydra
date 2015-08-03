@@ -10,15 +10,15 @@ import org.xydra.oo.runtime.shared.SharedTypeMapping;
 
 /**
  * Use during development of {@link SharedTypeMapping}
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class OOValueType_DevTool {
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		System.out.println("// trivial mappings for built-in Xydra types");
-		for (ValueType v : ValueType.values()) {
+		for (final ValueType v : ValueType.values()) {
 			if (v.isSingle()) {
 				dumpEnumValue(v.name(), v.getXydraInterface(), null, v.getXydraInterface());
 			} else {
@@ -43,10 +43,11 @@ public class OOValueType_DevTool {
 		}
 	}
 
-	public static void dumpEnumValue(String enumName, Class<?> javaType,
-			@CanBeNull Class<?> javaComponentType, Class<?> xydraType) {
+	public static void dumpEnumValue(final String enumName, final Class<?> javaType,
+			@CanBeNull final Class<?> javaComponentType, final Class<?> xydraType) {
 
 		@SuppressWarnings("unused")
+		final
 		String javaTypeVariable = javaType.getSimpleName();
 		if (XydraReflectionUtils.isCollectionType(javaType)) {
 			assert javaComponentType != null;

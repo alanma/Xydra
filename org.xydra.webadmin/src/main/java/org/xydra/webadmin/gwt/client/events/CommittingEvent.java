@@ -7,7 +7,7 @@ import com.google.web.bindery.event.shared.Event;
 
 /**
  * Model has been committed
- * 
+ *
  * @author Andreas
  */
 public class CommittingEvent extends Event<ICommitEventHandler> {
@@ -16,11 +16,11 @@ public class CommittingEvent extends Event<ICommitEventHandler> {
 		SUCCESS, SUCCESSANDPROCEED, FAILED;
 	}
 
-	private XAddress modelAddress;
+	private final XAddress modelAddress;
 
-	private CommitStatus status;
+	private final CommitStatus status;
 
-	private long newRevisionnumber;
+	private final long newRevisionnumber;
 
 	public static final Type<ICommitEventHandler> TYPE = new Type<ICommitEventHandler>();
 
@@ -28,7 +28,7 @@ public class CommittingEvent extends Event<ICommitEventHandler> {
 		void onCommit(CommittingEvent event);
 	}
 
-	public CommittingEvent(XAddress modelAddress, CommitStatus status, Long revisionNumber) {
+	public CommittingEvent(final XAddress modelAddress, final CommitStatus status, final Long revisionNumber) {
 		this.modelAddress = modelAddress;
 		this.status = status;
 		this.newRevisionnumber = revisionNumber;
@@ -39,7 +39,7 @@ public class CommittingEvent extends Event<ICommitEventHandler> {
 	}
 
 	@Override
-	protected void dispatch(ICommitEventHandler handler) {
+	protected void dispatch(final ICommitEventHandler handler) {
 		handler.onCommit(this);
 	}
 

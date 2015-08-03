@@ -9,7 +9,7 @@ import java.util.Map;
  * {@value #PARAM_PROGRESS_TOKEN}), which it can use to retrieve progress
  * information from the server. This parameter should be supplied as any
  * out-of-body data (cookie,url param, query string param).
- * 
+ *
  * @author xamde
  */
 public interface IMultipartFormDataHandler {
@@ -17,7 +17,7 @@ public interface IMultipartFormDataHandler {
 	/**
 	 * Callback interface to report upload/processing progress to the server --
 	 * which can relay it to clients
-	 * 
+	 *
 	 * @author xamde
 	 */
 	public static interface IProgressReporter {
@@ -34,7 +34,7 @@ public interface IMultipartFormDataHandler {
 
 	/**
 	 * This is called for each content part within the multi-part request
-	 * 
+	 *
 	 * @param contentName
 	 * @param fieldName
 	 * @param headerMap request headers of this one item of the multi-part request
@@ -47,7 +47,7 @@ public interface IMultipartFormDataHandler {
 
 	/**
 	 * This is called for each simple part within the multi-part request
-	 * 
+	 *
 	 * @param fieldName
 	 * @param contentName
 	 * @param headerMap request headers of this one item of the multi-part
@@ -61,9 +61,9 @@ public interface IMultipartFormDataHandler {
 
 	/**
 	 * This is called once at the end.
-	 * 
+	 *
 	 * Usually should do a redirect. Could also generate directly a response.
-	 * 
+	 *
 	 * @param ctx
 	 * @param progress
 	 * @throws IOException

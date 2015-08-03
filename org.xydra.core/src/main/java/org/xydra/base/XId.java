@@ -6,12 +6,12 @@ import org.xydra.base.value.XValue;
 
 /**
  * A identification object that can be serialised.
- * 
+ *
  * See {@link XIdProvider} for limits.
- * 
+ *
  * <em>Important:</em> Implementations of XId must implement <tt>equals()</tt>
  * and <tt>hashCode</tt> correctly.
- * 
+ *
  * @author xamde
  */
 public interface XId extends XValue, Serializable, Comparable<XId>, IHasXId {
@@ -25,7 +25,7 @@ public interface XId extends XValue, Serializable, Comparable<XId>, IHasXId {
 
 	/**
 	 * To convert this XId to a byte[] representation use the ByteUtils (TBD).
-	 * 
+	 *
 	 * @return a compact String which can be turned into an XId again via. The
 	 *         length of the string SHOULD be at most 100 characters for maximal
 	 *         compatibility with all kinds of back-ends such as Google
@@ -36,7 +36,7 @@ public interface XId extends XValue, Serializable, Comparable<XId>, IHasXId {
 
 	/**
 	 * The id as a binary representation
-	 * 
+	 *
 	 * @return a byte array, in which no byte is 00 (NUL)
 	 */
 	byte[] toBytes();

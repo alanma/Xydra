@@ -35,7 +35,7 @@ public class EditorPanel extends Composite implements IEditorPanel {
 	}
 
 	@Override
-	public void add(Widget widget) {
+	public void add(final Widget widget) {
 		this.mainPanel.add(widget);
 
 	}

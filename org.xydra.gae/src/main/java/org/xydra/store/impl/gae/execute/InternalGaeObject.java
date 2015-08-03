@@ -1,11 +1,12 @@
 /**
- * 
+ *
  */
 package org.xydra.store.impl.gae.execute;
 
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.Future;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -28,9 +29,9 @@ import org.xydra.xgae.datastore.api.STransaction;
 /**
  * Internal helper class used by {@link IGaeChangesService} to access the
  * current object state.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> implements
 		XReadableObject {
@@ -42,11 +43,11 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	/**
 	 * Construct a read-only interface to an {@link XObject} in the GAE
 	 * datastore.
-	 * 
+	 *
 	 * {@link InternalGaeObject}s are not constructed directly by
 	 * {@link IGaeChangesService} but through
 	 * {@link InternalGaeModel#getObject(XId)}.
-	 * 
+	 *
 	 * @param locks
 	 *            The locks held by the current process. These are used to
 	 *            assert that we have enough locks when reading fields as well
@@ -54,14 +55,14 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	 *            we have to return {@link XEvent#REVISION_NOT_AVAILABLE}
 	 *            instead.
 	 */
-	protected InternalGaeObject(IGaeChangesService changesService, XAddress objectAddr,
-			SEntity objectEntity, GaeLocks locks) {
+	protected InternalGaeObject(final IGaeChangesService changesService, final XAddress objectAddr,
+			final SEntity objectEntity, final GaeLocks locks) {
 		super(changesService, objectAddr, getSavedRevison(objectAddr, objectEntity, locks), locks);
 		assert KeyStructure.toAddress(objectEntity.getKey()).equals(objectAddr);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
 	}
 
-	private static long getSavedRevison(XAddress objectAddr, SEntity objectEntity, GaeLocks locks) {
+	private static long getSavedRevison(final XAddress objectAddr, final SEntity objectEntity, final GaeLocks locks) {
 		long objectRev;
 		if (locks.canWrite(objectAddr)) {
 			// We need the whole object, including all fields to be in a
@@ -94,10 +95,10 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 		// There may be fields with a newer revision.
 		if (this.objectRev == XEvent.REVISION_NOT_AVAILABLE) {
 
-			for (XId fieldId : this) {
-				XReadableField field = getField(fieldId);
+			for (final XId fieldId : this) {
+				final XReadableField field = getField(fieldId);
 				assert field != null;
-				long fieldRev = field.getRevisionNumber();
+				final long fieldRev = field.getRevisionNumber();
 				assert fieldRev >= 0;
 				if (fieldRev > rev) {
 					rev = fieldRev;
@@ -116,31 +117,31 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	}
 
 	@Override
-	public InternalGaeField getField(XId fieldId) {
+	public InternalGaeField getField(final XId fieldId) {
 		return getChild(fieldId);
 	}
 
 	@Override
-	public boolean hasField(XId fieldId) {
+	public boolean hasField(final XId fieldId) {
 		return hasChild(fieldId);
 	}
 
 	@Override
-	protected InternalGaeField loadChild(XAddress childAddr, SEntity childEntity) {
+	protected InternalGaeField loadChild(final XAddress childAddr, final SEntity childEntity) {
 		return new InternalGaeField(getChangesService(), childAddr, childEntity);
 	}
 
 	@Override
-	protected XAddress resolveChild(XAddress addr, XId childId) {
-		return XX.resolveField(addr, childId);
+	protected XAddress resolveChild(final XAddress addr, final XId childId) {
+		return Base.resolveField(addr, childId);
 	}
 
 	/**
 	 * Create an {@link XObject} in the GAE datastore.
-	 * 
+	 *
 	 * It is up to the caller to acquire enough locks: The whole {@link XObject}
 	 * needs to be locked while adding it.
-	 * 
+	 *
 	 * @param objectAddr
 	 *            The address of the object to add.
 	 * @param locks
@@ -151,12 +152,12 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	 *            The revision number of the current change. This will be saved
 	 *            to the object entity.
 	 */
-	static Future<SKey> createObject(XAddress objectAddr, GaeLocks locks, long rev) {
+	static Future<SKey> createObject(final XAddress objectAddr, final GaeLocks locks, final long rev) {
 		assert locks.canWrite(objectAddr);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
 
-		SKey key = KeyStructure.createEntityKey(objectAddr);
-		SEntity e = XGae.get().datastore().createEntity(key);
+		final SKey key = KeyStructure.createEntityKey(objectAddr);
+		final SEntity e = XGae.get().datastore().createEntity(key);
 		e.setAttribute(PROP_REVISION, rev);
 		return XGae.get().datastore().async().putEntity(e);
 	}
@@ -167,13 +168,13 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	 * the same transaction or changed another field). In all other cases, the
 	 * actual object revision can be calculated from the revision numbers of all
 	 * fields.
-	 * 
+	 *
 	 * This function ensures that two processes trying to update the revision of
 	 * the same object are properly synchronized. It is however the
 	 * responsibility of the caller to hold sufficient locks so that the object
 	 * is not removed for the duration of the call. A lock to any contained
 	 * field will suffice.
-	 * 
+	 *
 	 * @param objectAddr
 	 *            The object who'se revision needs to be updated.
 	 * @param locks
@@ -183,21 +184,21 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	 *            The new revision number of the object. The objects revision
 	 *            number will not be lowered if it is already higher than this.
 	 */
-	static void updateObjectRev(XAddress objectAddr, GaeLocks locks, long rev) {
+	static void updateObjectRev(final XAddress objectAddr, final GaeLocks locks, final long rev) {
 
 		// We only care that that object won't be removed, so a read lock
 		// suffices.
 		assert locks.canRead(objectAddr);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
-		IDatastoreSync syncDb = XGae.get().datastore().sync();
+		final IDatastoreSync syncDb = XGae.get().datastore().sync();
 
-		SKey key = KeyStructure.createEntityKey(objectAddr);
+		final SKey key = KeyStructure.createEntityKey(objectAddr);
 
 		while (true) {
-			STransaction txn = syncDb.beginTransaction();
-			SEntity e = syncDb.getEntity(key, txn);
+			final STransaction txn = syncDb.beginTransaction();
+			final SEntity e = syncDb.getEntity(key, txn);
 			assert e != null : "should not be removed while we hold a lock to a contained field";
-			long oldRev = (Long) e.getAttribute(PROP_REVISION);
+			final long oldRev = (Long) e.getAttribute(PROP_REVISION);
 
 			// Check that no other process has set a higher object revision.
 			assert oldRev != rev;
@@ -220,7 +221,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 				// Update successful.
 				return;
 
-			} catch (ConcurrentModificationException cme) {
+			} catch (final ConcurrentModificationException cme) {
 				/*
 				 * Another process touched the object entity during our
 				 * transaction. This is normal behavior and we should just try
@@ -233,7 +234,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 					// Sleep a minimal amount of time.
 					// TODO @Daniel sleep longer to prevent busy loop?
 					Thread.sleep(0);
-				} catch (InterruptedException e1) {
+				} catch (final InterruptedException e1) {
 					// ignore
 				}
 

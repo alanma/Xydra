@@ -7,9 +7,9 @@ import org.xydra.core.XX;
 
 /**
  * Configuration for a server used in tests.
- * 
+ *
  * Required for both server and client side.
- * 
+ *
  */
 public class ServerConfig {
 
@@ -31,8 +31,8 @@ public class ServerConfig {
 	 * @param mainRepositoryId
 	 *            as configured for the server
 	 */
-	public ServerConfig(URI absoluteURI, XId testerActor, String testerPasswordHash,
-			XId mainRepositoryId) {
+	public ServerConfig(final URI absoluteURI, final XId testerActor, final String testerPasswordHash,
+			final XId mainRepositoryId) {
 		this.absoluteURI = absoluteURI;
 		this.testerActor = testerActor;
 		this.testerPasswordHash = testerPasswordHash;

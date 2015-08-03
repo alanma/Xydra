@@ -22,92 +22,93 @@ import org.xydra.store.XydraStore;
 /**
  * {@link XydraStore} implementation that connects to a xydra store REST server
  * using synchronous network operations.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 @RunsInGWT(false)
 public class XydraStoreRestClient extends AbstractXydraStoreRestClient {
-	
+
 	private final URI prefix;
-	
+
 	/**
 	 * @param apiLocation absolute url of Xydra REST endpoint
 	 * @param serializer ..
 	 * @param parser ..
 	 */
-	public XydraStoreRestClient(URI apiLocation, XydraSerializer serializer, XydraParser parser) {
+	public XydraStoreRestClient(final URI apiLocation, final XydraSerializer serializer, final XydraParser parser) {
 		super(serializer, parser);
 		XyAssert.xyAssert(apiLocation != null); assert apiLocation != null;
 		this.prefix = apiLocation;
 	}
-	
-	private static String readAll(InputStream stream) throws IOException {
-		StringBuilder sb = new StringBuilder();
-		char[] buf = new char[4096];
-		Reader reader = new InputStreamReader(stream, "UTF-8");
+
+	private static String readAll(final InputStream stream) throws IOException {
+		final StringBuilder sb = new StringBuilder();
+		final char[] buf = new char[4096];
+		final Reader reader = new InputStreamReader(stream, "UTF-8");
 		int nRead;
-		while((nRead = reader.read(buf)) != -1)
+		while((nRead = reader.read(buf)) != -1) {
 			sb.append(buf, 0, nRead);
+		}
 		return sb.toString();
 	}
-	
-	private HttpURLConnection connect(String uri, Request<?> req) throws IOException {
-		
+
+	private HttpURLConnection connect(final String uri, final Request<?> req) throws IOException {
+
 		URL url;
 		try {
 			url = this.prefix.resolve(uri).toURL();
-		} catch(MalformedURLException e1) {
+		} catch(final MalformedURLException e1) {
 			throw new RuntimeException(e1);
 		}
-		
-		HttpURLConnection con = (HttpURLConnection)url.openConnection();
-		
+
+		final HttpURLConnection con = (HttpURLConnection)url.openConnection();
+
 		con.setRequestProperty(HEADER_COOKIE, encodeLoginCookie(req.actor, req.password));
-		
+
 		con.setRequestProperty(HEADER_ACCEPT, this.parser.getContentType());
-		
+
 		return con;
 	}
-	
-	private static void request(HttpURLConnection con, Request<?> req) throws IOException {
-		
+
+	private static void request(final HttpURLConnection con, final Request<?> req) throws IOException {
+
 		con.connect();
-		
-		String content = readAll((InputStream)con.getContent());
-		
+
+		final String content = readAll((InputStream)con.getContent());
+
 		req.onResponse(content, con.getResponseCode(), con.getResponseMessage());
 	}
-	
+
 	@Override
-	protected void get(String uri, Request<?> req) {
-		
+	protected void get(final String uri, final Request<?> req) {
+
 		try {
 			request(connect(uri, req), req);
-		} catch(IOException e) {
+		} catch(final IOException e) {
 			req.onFailure(e);
 		}
 	}
-	
+
 	@Override
-	protected void post(String uri, XydraOut data, Request<?> req) {
-		
+	protected void post(final String uri, final XydraOut data, final Request<?> req) {
+
 		try {
-			
-			HttpURLConnection con = connect(uri, req);
-			
+
+			final HttpURLConnection con = connect(uri, req);
+
 			con.setDoOutput(true);
 			con.setRequestMethod("POST");
 			con.setRequestProperty(HAEDER_CONTENT_TYPE, data.getContentType());
-			Writer w = new OutputStreamWriter(con.getOutputStream(), "UTF-8");
+			final Writer w = new OutputStreamWriter(con.getOutputStream(), "UTF-8");
 			w.write(data.getData());
 			w.flush();
-			
+
 			request(con, req);
-			
-		} catch(IOException e) {
+
+		} catch(final IOException e) {
 			req.onFailure(e);
 		}
 	}
-	
+
 }

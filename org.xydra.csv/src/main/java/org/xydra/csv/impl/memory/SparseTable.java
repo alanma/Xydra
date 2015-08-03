@@ -28,9 +28,9 @@ import org.xydra.log.api.LoggerFactory;
 
 /**
  * Maintains a sparse table, organised by rows and columns.
- * 
+ *
  * Insertion order is preserved.
- * 
+ *
  * @author xamde
  */
 public class SparseTable implements ISparseTable {
@@ -56,28 +56,29 @@ public class SparseTable implements ISparseTable {
 	// ----------------- row handling
 
 	/* maintain any row insertion order */
-	private List<String> rowNames = new LinkedList<String>();
+	private final List<String> rowNames = new LinkedList<String>();
 
 	/* automatically sorted */
-	private Map<String, Row> table = new TreeMap<String, Row>();
+	private final Map<String, Row> table = new TreeMap<String, Row>();
 
-	private void insertRow(String rowName, Row row) {
-		if (this.rowCount() == EXCEL_MAX_ROWS) {
+	private void insertRow(final String rowName, final Row row) {
+		if (rowCount() == EXCEL_MAX_ROWS) {
 			log.warn("Adding the " + EXCEL_MAX_ROWS + "th row - that is Excels limit");
-			if (this.restrictToExcelSize)
+			if (this.restrictToExcelSize) {
 				throw new ExcelLimitException("Row limit reached");
+			}
 		}
 
 		/* new key? */
 		if (this.table.containsKey(rowName)) {
 			assert this.rowNames.contains(rowName);
 			// attempt a merge
-			IRow existingRow = this.getOrCreateRow(rowName, false);
+			final IRow existingRow = getOrCreateRow(rowName, false);
 
-			for (Map.Entry<String, ICell> entry : row.entrySet()) {
+			for (final Map.Entry<String, ICell> entry : row.entrySet()) {
 				try {
 					existingRow.setValue(entry.getKey(), entry.getValue().getValue(), true);
-				} catch (IllegalStateException ex) {
+				} catch (final IllegalStateException ex) {
 					throw new IllegalStateException("Table contains already a row named '"
 							+ rowName + "' and for key '" + entry.getKey()
 							+ "' there was already a value.", ex);
@@ -94,7 +95,7 @@ public class SparseTable implements ISparseTable {
 		return this.rowNames;
 	}
 
-	protected Iterator<String> subIterator(int startRow, int endRow) {
+	protected Iterator<String> subIterator(final int startRow, final int endRow) {
 		return this.rowNames.subList(startRow, endRow).iterator();
 	}
 
@@ -105,7 +106,7 @@ public class SparseTable implements ISparseTable {
 
 	@Override
 	public Iterator<Row> getDataRows() {
-		Iterator<Row> it = this.table.values().iterator();
+		final Iterator<Row> it = this.table.values().iterator();
 		if (it.hasNext()) {
 			it.next();
 			return new ReadOnlyIterator<Row>(it);
@@ -130,7 +131,7 @@ public class SparseTable implements ISparseTable {
 	 *            columns is maintained. If false, the default automatic
 	 *            alphabetic sorting is on.
 	 */
-	public SparseTable(boolean maintainColumnInsertionOrder) {
+	public SparseTable(final boolean maintainColumnInsertionOrder) {
 		if (maintainColumnInsertionOrder) {
 			this.columnNames = new LinkedHashSet<String>();
 		} else {
@@ -140,64 +141,64 @@ public class SparseTable implements ISparseTable {
 
 	/**
 	 * Add all values from the other table into this table
-	 * 
+	 *
 	 * @param other never null
 	 */
-	public void addAll(SparseTable other) {
-		for (Entry<String, Row> entry : other.table.entrySet()) {
-			Row thisRow = this.getOrCreateRow(entry.getKey(), true);
-			for (Entry<String, ICell> rowEntry : entry.getValue().entrySet()) {
+	public void addAll(final SparseTable other) {
+		for (final Entry<String, Row> entry : other.table.entrySet()) {
+			final Row thisRow = getOrCreateRow(entry.getKey(), true);
+			for (final Entry<String, ICell> rowEntry : entry.getValue().entrySet()) {
 				thisRow.setValue(rowEntry.getKey(), rowEntry.getValue().getValue());
 			}
 		}
 	}
 
 	@Override
-	public void addColumnName(String columnName) {
+	public void addColumnName(final String columnName) {
 		this.columnNames.add(columnName);
 	}
 
 	/**
 	 * Add if {@link IRowInsertionHandler} null or does not object
-	 * 
+	 *
 	 * @param rowName
 	 * @param row
 	 */
-	protected void addRow(String rowName, Row row) {
+	protected void addRow(final String rowName, final Row row) {
 		boolean insert = true;
 		if (this.rowInsertionHandler != null) {
 			insert &= this.rowInsertionHandler.beforeRowInsertion(row);
 		}
 		if (insert) {
-			this.insertRow(rowName, row);
+			insertRow(rowName, row);
 		}
 	}
 
 	@Override
-	public void aggregate(String[] keyColumnNames) {
+	public void aggregate(final String[] keyColumnNames) {
 		// temporary index of occurring keys and their row
-		Map<String, Row> compoundKeys2row = new HashMap<String, Row>(this.rowCount());
-		Iterator<Row> rowIt = this.table.values().iterator();
+		final Map<String, Row> compoundKeys2row = new HashMap<String, Row>(rowCount());
+		final Iterator<Row> rowIt = this.table.values().iterator();
 		// Collection<String> rowKeysToBeRemoved = new LinkedList<String>();
 		long processed = 0;
 		long aggregated = 0;
 		while (rowIt.hasNext()) {
-			Row row = rowIt.next();
+			final Row row = rowIt.next();
 
 			// calculate compound key
 			// IMPROVE performance takes 50% of performance
-			StringBuffer compoundKeyBuffer = new StringBuffer(100);
-			for (String keyColumnName : keyColumnNames) {
-				String value = row.getValue(keyColumnName);
+			final StringBuffer compoundKeyBuffer = new StringBuffer(100);
+			for (final String keyColumnName : keyColumnNames) {
+				final String value = row.getValue(keyColumnName);
 				if (value != null) {
 					compoundKeyBuffer.append(value);
 				}
 			}
-			String compoundKey = compoundKeyBuffer.toString();
+			final String compoundKey = compoundKeyBuffer.toString();
 
 			if (compoundKeys2row.containsKey(compoundKey)) {
 				// aggregate row into existing row
-				IRow masterRow = compoundKeys2row.get(compoundKey);
+				final IRow masterRow = compoundKeys2row.get(compoundKey);
 				masterRow.aggregate(row, keyColumnNames);
 				aggregated++;
 
@@ -214,20 +215,20 @@ public class SparseTable implements ISparseTable {
 				log.info("Aggregate processed " + processed + " rows, aggregated " + aggregated);
 			}
 		}
-		log.info(this.rowCount() + " rows with aggregated data remain");
+		log.info(rowCount() + " rows with aggregated data remain");
 	}
 
 	/**
 	 * Used only by tests.
-	 * 
+	 *
 	 * @param row
 	 * @param column
 	 * @param s
 	 * @param maximalFieldLength
 	 */
-	void appendString(String row, String column, String s, int maximalFieldLength) {
-		Row r = getOrCreateRow(row, true);
-		ICell c = r.getOrCreateCell(column, true);
+	void appendString(final String row, final String column, final String s, final int maximalFieldLength) {
+		final Row r = getOrCreateRow(row, true);
+		final ICell c = r.getOrCreateCell(column, true);
 		c.appendString(s, maximalFieldLength);
 	}
 
@@ -242,14 +243,14 @@ public class SparseTable implements ISparseTable {
 	}
 
 	@Override
-	public ISparseTable dropColumn(String columnName, String value) {
-		ISparseTable target = new SparseTable();
-		for (String rowName : this.rowNames) {
-			IRow sourceRow = this.getOrCreateRow(rowName, false);
+	public ISparseTable dropColumn(final String columnName, final String value) {
+		final ISparseTable target = new SparseTable();
+		for (final String rowName : this.rowNames) {
+			final IRow sourceRow = getOrCreateRow(rowName, false);
 			if (!sourceRow.getValue(columnName).equals(value)) {
 				// copy row
-				IRow targetRow = target.getOrCreateRow(rowName, true);
-				for (String colName : sourceRow.getColumnNames()) {
+				final IRow targetRow = target.getOrCreateRow(rowName, true);
+				for (final String colName : sourceRow.getColumnNames()) {
 					targetRow.setValue(colName, sourceRow.getValue(colName), true);
 				}
 			}
@@ -258,14 +259,14 @@ public class SparseTable implements ISparseTable {
 	}
 
 	@Override
-	public ISparseTable filter(String key, String value) {
-		ISparseTable target = new SparseTable();
-		for (String rowName : this.rowNames) {
-			IRow sourceRow = this.getOrCreateRow(rowName, false);
+	public ISparseTable filter(final String key, final String value) {
+		final ISparseTable target = new SparseTable();
+		for (final String rowName : this.rowNames) {
+			final IRow sourceRow = getOrCreateRow(rowName, false);
 			if (sourceRow.getValue(key).equals(value)) {
 				// copy row
-				IRow targetRow = target.getOrCreateRow(rowName, true);
-				for (String colName : sourceRow.getColumnNames()) {
+				final IRow targetRow = target.getOrCreateRow(rowName, true);
+				for (final String colName : sourceRow.getColumnNames()) {
 					targetRow.setValue(colName, sourceRow.getValue(colName), true);
 				}
 			}
@@ -279,13 +280,13 @@ public class SparseTable implements ISparseTable {
 	}
 
 	@Override
-	public Row getOrCreateRow(String rowName, boolean create) {
+	public Row getOrCreateRow(final String rowName, final boolean create) {
 		Row row = this.table.get(rowName);
 		if (row == null) {
 			assert !this.rowNames.contains(rowName);
 			if (create) {
 				row = new Row(rowName, this);
-				this.insertRow(rowName, row);
+				insertRow(rowName, row);
 			}
 		}
 		return row;
@@ -302,12 +303,12 @@ public class SparseTable implements ISparseTable {
 	}
 
 	@Override
-	public String getValue(String row, String column) {
-		Row r = getOrCreateRow(row, false);
+	public String getValue(final String row, final String column) {
+		final Row r = getOrCreateRow(row, false);
 		if (r == null) {
 			return null;
 		}
-		ICell c = r.getOrCreateCell(column, false);
+		final ICell c = r.getOrCreateCell(column, false);
 		if (c == null) {
 			return null;
 		}
@@ -315,19 +316,19 @@ public class SparseTable implements ISparseTable {
 	}
 
 	@Override
-	public void incrementValue(String row, String column, int increment)
+	public void incrementValue(final String row, final String column, final int increment)
 			throws WrongDatatypeException {
-		Row r = getOrCreateRow(row, true);
-		ICell c = r.getOrCreateCell(column, true);
+		final Row r = getOrCreateRow(row, true);
+		final ICell c = r.getOrCreateCell(column, true);
 		c.incrementValue(increment);
 	}
 
 	@Override
-	public void removeRowsMatching(RowFilter rowFilter) {
-		Iterator<Entry<String, Row>> it = this.table.entrySet().iterator();
+	public void removeRowsMatching(final RowFilter rowFilter) {
+		final Iterator<Entry<String, Row>> it = this.table.entrySet().iterator();
 		while (it.hasNext()) {
-			Map.Entry<String, Row> entry = it.next();
-			String rowName = entry.getKey();
+			final Map.Entry<String, Row> entry = it.next();
+			final String rowName = entry.getKey();
 			if (rowFilter.matches(entry.getValue())) {
 				it.remove();
 				this.rowNames.remove(rowName);
@@ -341,47 +342,47 @@ public class SparseTable implements ISparseTable {
 	}
 
 	@Override
-	public void setParamAggregateStrings(boolean aggregateStrings) {
+	public void setParamAggregateStrings(final boolean aggregateStrings) {
 		this.aggregateStrings = aggregateStrings;
 	}
 
 	@Override
-	public void setParamRestrictToExcelSize(boolean b) {
+	public void setParamRestrictToExcelSize(final boolean b) {
 		this.restrictToExcelSize = b;
 	}
 
 	/**
 	 * Set an {@link IRowInsertionHandler} which is called before and after each
 	 * row insertion (either during read or create).
-	 * 
+	 *
 	 * @see IRowInsertionHandler
 	 * @param rowInsertionHandler never null
 	 */
-	public void setRowInsertionHandler(IRowInsertionHandler rowInsertionHandler) {
+	public void setRowInsertionHandler(final IRowInsertionHandler rowInsertionHandler) {
 		this.rowInsertionHandler = rowInsertionHandler;
 	}
 
 	@Override
-	public void setValueInitial(String rowName, String columnName, String value)
+	public void setValueInitial(final String rowName, final String columnName, final String value)
 			throws IllegalStateException {
-		IRow row = getOrCreateRow(rowName, true);
+		final IRow row = getOrCreateRow(rowName, true);
 		row.setValue(columnName, value, true);
 	}
 
 	@Override
-	public void setValueInitial(String rowName, String columnName, long value)
+	public void setValueInitial(final String rowName, final String columnName, final long value)
 			throws IllegalStateException {
-		IRow row = getOrCreateRow(rowName, true);
+		final IRow row = getOrCreateRow(rowName, true);
 		row.setValue(columnName, value, true);
 	}
 
 	@Override
-	public Map<String, SparseTable> split(String colName) {
-		Map<String, SparseTable> map = new HashMap<String, SparseTable>();
+	public Map<String, SparseTable> split(final String colName) {
+		final Map<String, SparseTable> map = new HashMap<String, SparseTable>();
 
-		for (String rowName : this.rowNames) {
-			IRow row = this.getOrCreateRow(rowName, false);
-			String currentValue = row.getValue(colName);
+		for (final String rowName : this.rowNames) {
+			final IRow row = getOrCreateRow(rowName, false);
+			final String currentValue = row.getValue(colName);
 
 			SparseTable table = map.get(currentValue);
 			if (table == null) {
@@ -389,7 +390,7 @@ public class SparseTable implements ISparseTable {
 				map.put(currentValue, table);
 			}
 
-			IRow copyRow = table.getOrCreateRow(rowName, true);
+			final IRow copyRow = table.getOrCreateRow(rowName, true);
 			copyRow.addAll(row);
 		}
 
@@ -397,20 +398,20 @@ public class SparseTable implements ISparseTable {
 	}
 
 	@Override
-	public void visitRows(IRowVisitor rowVisitor) {
-		for (IRow row : this) {
+	public void visitRows(final IRowVisitor rowVisitor) {
+		for (final IRow row : this) {
 			rowVisitor.visit(row);
 		}
 	}
 
 	@Override
-	public void handleRow(String rowName, IReadableRow readableRow) {
-		Row row = new Row(rowName, this);
+	public void handleRow(final String rowName, final IReadableRow readableRow) {
+		final Row row = new Row(rowName, this);
 		// copy content
-		for (Entry<String, ICell> entry : readableRow.entrySet()) {
+		for (final Entry<String, ICell> entry : readableRow.entrySet()) {
 			row.setValue(entry.getKey(), entry.getValue().getValue());
 		}
-		this.addRow(rowName, row);
+		addRow(rowName, row);
 	}
 
 	@Override
@@ -423,7 +424,7 @@ public class SparseTable implements ISparseTable {
 	}
 
 	@Override
-	public void handleHeaderRow(Collection<String> columnNames) {
+	public void handleHeaderRow(final Collection<String> columnNames) {
 		this.columnNames.addAll(columnNames);
 	}
 }

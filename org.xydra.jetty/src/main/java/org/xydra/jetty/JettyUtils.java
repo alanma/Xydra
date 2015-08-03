@@ -44,21 +44,21 @@ public class JettyUtils {
 			private IdentityService service;
 
 			@Override
-			public boolean validate(UserIdentity user) {
+			public boolean validate(final UserIdentity user) {
 				return user.getUserPrincipal().getName().equalsIgnoreCase("admin");
 			}
 
 			@Override
-			public void setIdentityService(IdentityService service) {
+			public void setIdentityService(final IdentityService service) {
 				this.service = service;
 			}
 
 			@Override
-			public void logout(UserIdentity user) {
+			public void logout(final UserIdentity user) {
 			}
 
 			@Override
-			public UserIdentity login(final String username, Object credentials) {
+			public UserIdentity login(final String username, final Object credentials) {
 				this.name = username;
 				return new UserIdentity() {
 
@@ -79,7 +79,7 @@ public class JettyUtils {
 					}
 
 					@Override
-					public boolean isUserInRole(String role, Scope scope) {
+					public boolean isUserInRole(final String role, final Scope scope) {
 						return username.equalsIgnoreCase("admin");
 					}
 				};
@@ -159,7 +159,7 @@ public class JettyUtils {
 	/**
 	 * Use with caution, it'S very hard to get the resources out of the cache --
 	 * usually needs clear cache in browser
-	 * 
+	 *
 	 * @return a servlet filter which set response headers for 1 year caching
 	 */
 	public static Filter createOneYearCachingFilter() {
@@ -171,10 +171,10 @@ public class JettyUtils {
 			}
 
 			@Override
-			public void doFilter(ServletRequest request, ServletResponse response,
-					FilterChain filterChain) throws IOException, ServletException {
+			public void doFilter(final ServletRequest request, final ServletResponse response,
+					final FilterChain filterChain) throws IOException, ServletException {
 				log.debug("JETTY Image GET " + ((HttpServletRequest) request).getRequestURI());
-				HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
+				final HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
 						(HttpServletResponse) response);
 
 				// Modify the servlet which serves png and gif files so that
@@ -186,14 +186,14 @@ public class JettyUtils {
 				// caching recommendations mentioned in the previous
 				// section.
 
-				Calendar cal = Calendar.getInstance();
+				final Calendar cal = Calendar.getInstance();
 				cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) + 1);
 
-				SimpleDateFormat dateFormatter = new SimpleDateFormat(
+				final SimpleDateFormat dateFormatter = new SimpleDateFormat(
 						"EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-				TimeZone tz = TimeZone.getTimeZone("GMT");
+				final TimeZone tz = TimeZone.getTimeZone("GMT");
 				dateFormatter.setTimeZone(tz);
-				String rfc1123 = dateFormatter.format(cal.getTime());
+				final String rfc1123 = dateFormatter.format(cal.getTime());
 				((HttpServletResponse) response).addHeader("Expires", rfc1123);
 				((HttpServletResponse) response).addHeader("Cache-Control",
 						"public; max-age=31536000");
@@ -201,7 +201,7 @@ public class JettyUtils {
 			}
 
 			@Override
-			public void init(FilterConfig filterConfig) {
+			public void init(final FilterConfig filterConfig) {
 				// do nothing
 			}
 		};
@@ -216,10 +216,10 @@ public class JettyUtils {
 			}
 
 			@Override
-			public void doFilter(ServletRequest request, ServletResponse response,
-					FilterChain filterChain) throws IOException, ServletException {
+			public void doFilter(final ServletRequest request, final ServletResponse response,
+					final FilterChain filterChain) throws IOException, ServletException {
 				log.debug("Don't cache " + ((HttpServletRequest) request).getRequestURI());
-				HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
+				final HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
 						(HttpServletResponse) response);
 
 				// Modify the servlet which serves png and gif files so that it
@@ -228,15 +228,15 @@ public class JettyUtils {
 				// removed. The Expires header should be set according to the
 				// caching recommendations mentioned in the previous section.
 
-				Calendar cal = Calendar.getInstance();
+				final Calendar cal = Calendar.getInstance();
 				// one year in the past
 				cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) - 1);
 
-				SimpleDateFormat dateFormatter = new SimpleDateFormat(
+				final SimpleDateFormat dateFormatter = new SimpleDateFormat(
 						"EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-				TimeZone tz = TimeZone.getTimeZone("GMT");
+				final TimeZone tz = TimeZone.getTimeZone("GMT");
 				dateFormatter.setTimeZone(tz);
-				String rfc1123 = dateFormatter.format(cal.getTime());
+				final String rfc1123 = dateFormatter.format(cal.getTime());
 				((HttpServletResponse) response).addHeader("Expires", rfc1123);
 				log.debug("Set expire to " + rfc1123);
 				((HttpServletResponse) response).addHeader("Cache-Control",
@@ -245,23 +245,25 @@ public class JettyUtils {
 				// remove IF-MODIFIED-SINCE Header to prevent Jetty from
 				// cleverly
 				// serving it
-				HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(
+				final HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(
 						(HttpServletRequest) request) {
 
 					@Override
-					public String getHeader(String name) {
-						if (name.equals(HttpHeaders.IF_MODIFIED_SINCE))
+					public String getHeader(final String name) {
+						if (name.equals(HttpHeaders.IF_MODIFIED_SINCE)) {
 							return null;
-						else
+						} else {
 							return super.getHeader(name);
+						}
 					}
 
 					@Override
-					public long getDateHeader(String name) {
-						if (name.equals(HttpHeaders.IF_MODIFIED_SINCE))
+					public long getDateHeader(final String name) {
+						if (name.equals(HttpHeaders.IF_MODIFIED_SINCE)) {
 							return -1;
-						else
+						} else {
 							return super.getDateHeader(name);
+						}
 					}
 
 				};
@@ -270,13 +272,13 @@ public class JettyUtils {
 			}
 
 			@Override
-			public void init(FilterConfig filterConfig) {
+			public void init(final FilterConfig filterConfig) {
 				// do nothing
 			}
 		};
 	}
 
-	public static long timeSinceStart(long startTime) {
+	public static long timeSinceStart(final long startTime) {
 		return System.currentTimeMillis() - startTime;
 	}
 
@@ -291,7 +293,7 @@ public class JettyUtils {
 			/** counter for request numbering, helps debugging */
 			private int requests = 0;
 
-			private long startTime = System.currentTimeMillis();
+			private final long startTime = System.currentTimeMillis();
 
 			@Override
 			public void destroy() {
@@ -299,11 +301,11 @@ public class JettyUtils {
 			}
 
 			@Override
-			public void doFilter(ServletRequest req, ServletResponse response,
-					FilterChain filterChain) throws IOException, ServletException {
+			public void doFilter(final ServletRequest req, final ServletResponse response,
+					final FilterChain filterChain) throws IOException, ServletException {
 				this.requests++;
 				if (req instanceof HttpServletRequest) {
-					HttpServletRequest hreq = (HttpServletRequest) req;
+					final HttpServletRequest hreq = (HttpServletRequest) req;
 					log.info("_____JETTY #" + this.requests + " " + hreq.getMethod() + " "
 							+ hreq.getRequestURL() + " @" + timeSinceStart(this.startTime));
 				} else {
@@ -314,7 +316,7 @@ public class JettyUtils {
 			}
 
 			@Override
-			public void init(FilterConfig filterConfig) {
+			public void init(final FilterConfig filterConfig) {
 				// do nothing
 			}
 		};
@@ -333,14 +335,14 @@ public class JettyUtils {
 			}
 
 			@Override
-			public void doFilter(ServletRequest req, ServletResponse response,
-					FilterChain filterChain) throws IOException, ServletException {
+			public void doFilter(final ServletRequest req, final ServletResponse response,
+					final FilterChain filterChain) throws IOException, ServletException {
 				Delay.servePage();
 				filterChain.doFilter(req, response);
 			}
 
 			@Override
-			public void init(FilterConfig filterConfig) {
+			public void init(final FilterConfig filterConfig) {
 				// do nothing
 			}
 		};

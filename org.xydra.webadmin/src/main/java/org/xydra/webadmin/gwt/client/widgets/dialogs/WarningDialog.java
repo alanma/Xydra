@@ -34,14 +34,14 @@ public class WarningDialog extends DialogBox {
 	@UiField(provided = true)
 	ButtonPanel buttonPanel;
 
-	public WarningDialog(String message) {
+	public WarningDialog(final String message) {
 
 		super();
 
-		ClickHandler okHandler = new ClickHandler() {
+		final ClickHandler okHandler = new ClickHandler() {
 
 			@Override
-			public void onClick(ClickEvent event) {
+			public void onClick(final ClickEvent event) {
 				WarningDialog.this.removeFromParent();
 			}
 		};
@@ -51,11 +51,11 @@ public class WarningDialog extends DialogBox {
 		setWidget(uiBinder.createAndBindUi(this));
 
 		this.setStyleName("dialogStyle");
-		this.setText("Warning");
+		setText("Warning");
 		this.infoText.setText(message);
-		this.getElement().setId("removeDialog");
+		getElement().setId("removeDialog");
 
-		this.center();
+		center();
 	}
 
 }

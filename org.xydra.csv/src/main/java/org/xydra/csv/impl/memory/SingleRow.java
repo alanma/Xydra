@@ -14,7 +14,7 @@ public class SingleRow extends AbstractReadableRow implements IReadableRow {
 
 	private static final long serialVersionUID = -7970004628196813272L;
 
-	private Map<String, ICell> map = new HashMap<String, ICell>();
+	private final Map<String, ICell> map = new HashMap<String, ICell>();
 
 	/**
 	 * @param key
@@ -24,17 +24,17 @@ public class SingleRow extends AbstractReadableRow implements IReadableRow {
 		super(key);
 	}
 
-	public SingleRow(final String key, String[][] arrayOfPairs) {
+	public SingleRow(final String key, final String[][] arrayOfPairs) {
 		this(key);
-		for (String[] pair : arrayOfPairs) {
+		for (final String[] pair : arrayOfPairs) {
 			assert pair.length == 2;
 			this.map.put(pair[0], new Cell(pair[1]));
 		}
 	}
 
-	public SingleRow(final String key, Map<String, String> map) {
+	public SingleRow(final String key, final Map<String, String> map) {
 		this(key);
-		for (Entry<String, String> entry : map.entrySet()) {
+		for (final Entry<String, String> entry : map.entrySet()) {
 			this.map.put(entry.getKey(), new Cell(entry.getValue()));
 		}
 	}
@@ -49,12 +49,12 @@ public class SingleRow extends AbstractReadableRow implements IReadableRow {
 		return this.map.values().iterator();
 	}
 
-	protected void removeValue(String colName) {
+	protected void removeValue(final String colName) {
 		this.map.remove(colName);
 	}
 
 	@Override
-	public ICell getOrCreateCell(String columnName, boolean create) {
+	public ICell getOrCreateCell(final String columnName, final boolean create) {
 		ICell cell = this.map.get(columnName);
 		if (cell == null && create) {
 			cell = new Cell();
@@ -68,14 +68,14 @@ public class SingleRow extends AbstractReadableRow implements IReadableRow {
 		return this.map.entrySet();
 	}
 
-	public void setValue(String columnName, String value, boolean initial) {
+	public void setValue(final String columnName, final String value, final boolean initial) {
 		if (value == null) {
 			// nothing to set, keep table sparse
 		} else {
-			ICell cell = getOrCreateCell(columnName, true);
+			final ICell cell = getOrCreateCell(columnName, true);
 			try {
 				cell.setValue(value, initial);
-			} catch (IllegalStateException e) {
+			} catch (final IllegalStateException e) {
 				throw new IllegalStateException("Could not set value in column (" + columnName
 						+ ")", e);
 			}

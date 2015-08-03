@@ -10,14 +10,14 @@ import org.xydra.persistence.XydraPersistence;
 
 
 public class StoreUtils {
-    
+
     private static final Logger log = LoggerFactory.getLogger(StoreUtils.class);
-    
-    public static void dumpChangeLog(XydraPersistence pers, XAddress modelAddress) {
-        List<XEvent> events = pers.getEvents(modelAddress, 0, Long.MAX_VALUE);
-        for(XEvent event : events) {
+
+    public static void dumpChangeLog(final XydraPersistence pers, final XAddress modelAddress) {
+        final List<XEvent> events = pers.getEvents(modelAddress, 0, Long.MAX_VALUE);
+        for(final XEvent event : events) {
             log.info("Event " + event.getRevisionNumber() + ": " + event);
         }
     }
-    
+
 }

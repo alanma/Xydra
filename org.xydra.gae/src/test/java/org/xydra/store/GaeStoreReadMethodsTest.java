@@ -7,6 +7,7 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
@@ -52,12 +53,12 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
 		SynchronousCallbackWithOneResult<Set<XId>> mids = new SynchronousCallbackWithOneResult<Set<XId>>();
 		this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
 		assertEquals(SynchronousCallbackWithOneResult.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
-		XAddress repoAddr = XX.toAddress(getRepositoryId(), null, null, null);
-		for (XId modelId : mids.effect) {
+		final XAddress repoAddr = Base.toAddress(getRepositoryId(), null, null, null);
+		for (final XId modelId : mids.effect) {
 			if (modelId.toString().startsWith("internal--")) {
 				continue;
 			}
-			XCommand removeCommand = MemoryRepositoryCommand.createRemoveCommand(repoAddr,
+			final XCommand removeCommand = MemoryRepositoryCommand.createRemoveCommand(repoAddr,
 					XCommand.FORCED, modelId);
 			this.store.executeCommands(getCorrectUser(), getCorrectUserPasswordHash(),
 					new XCommand[] { removeCommand }, null);
@@ -68,8 +69,8 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
 		assert mids.effect.size() == 0 : mids.effect.size();
 	}
 
-	public static void main(String[] args) {
-		GaeStoreReadMethodsTest t = new GaeStoreReadMethodsTest();
+	public static void main(final String[] args) {
+		final GaeStoreReadMethodsTest t = new GaeStoreReadMethodsTest();
 		t.setUp();
 		t.setUp();
 	}

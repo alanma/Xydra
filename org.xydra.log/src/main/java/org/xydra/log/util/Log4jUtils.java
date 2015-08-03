@@ -22,7 +22,7 @@ import org.xydra.log.api.LoggerFactory;
  * folder), then the first log4j.properties found on the classpath is used. To
  * fix that, this class allows to explicitly load a local file from
  * /src/main/resources and apply the config listed in there.
- * 
+ *
  * @author xamde
  */
 public class Log4jUtils {
@@ -43,7 +43,7 @@ public class Log4jUtils {
 			log.warn("Logging: Could not update log conf at runtime from file '"
 					+ file.getAbsolutePath() + "' -- not found");
 		}
-		Properties props = new Properties();
+		final Properties props = new Properties();
 		Reader r;
 		try {
 			r = new FileReader(file);
@@ -51,42 +51,42 @@ public class Log4jUtils {
 			r.close();
 			PropertyConfigurator.configure(props);
 			log.info("Logging: Updated local log config from " + file.getAbsolutePath());
-		} catch (FileNotFoundException e) {
-		} catch (IOException e) {
+		} catch (final FileNotFoundException e) {
+		} catch (final IOException e) {
 		}
 
 	}
 
 	/**
 	 * Dump log4j.properties resource from classpath to System.out
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	public static void listConfigFromClasspath() throws IOException {
-		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		final ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		final String name = "log4j.properties";
-		InputStream in = cl.getResourceAsStream(name);
+		final InputStream in = cl.getResourceAsStream(name);
 		if (in == null) {
 			System.out.println("System.out: Found not log4j.properties on classpath.");
 			return;
 		}
 		// found!
-		URL url = cl.getResource(name);
+		final URL url = cl.getResource(name);
 		System.out.println("Found in " + url.toString());
-		Reader r = new InputStreamReader(in, "utf-8");
-		String s = toString(r);
+		final Reader r = new InputStreamReader(in, "utf-8");
+		final String s = toString(r);
 		System.out.println("System.out: Found config:\n" + s);
 	}
 
 	/**
 	 * This is not fast (hence not public) and only used to dump an internal
 	 * config
-	 * 
+	 *
 	 * @param r
 	 * @return
 	 */
-	private static String toString(Reader r) {
-		StringBuilder b = new StringBuilder();
+	private static String toString(final Reader r) {
+		final StringBuilder b = new StringBuilder();
 		int c;
 		try {
 			do {
@@ -96,12 +96,12 @@ public class Log4jUtils {
 				}
 			} while (c >= 0);
 			return b.toString();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(final String[] args) throws IOException {
 		listConfigFromClasspath();
 	}
 
@@ -115,15 +115,15 @@ public class Log4jUtils {
 
 	/**
 	 * Tweak log level at runtime
-	 * 
+	 *
 	 * @param clazz
 	 * @param log4jLevel
 	 */
-	public static void setLevel(Class<?> clazz, Level log4jLevel) {
+	public static void setLevel(final Class<?> clazz, final Level log4jLevel) {
 		LogManager.getLogger(clazz).setLevel(log4jLevel);
 	}
 
-	public static void setRootLevel(Level log4jLevel) {
+	public static void setRootLevel(final Level log4jLevel) {
 		LogManager.getRootLogger().setLevel(log4jLevel);
 	}
 }

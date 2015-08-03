@@ -9,10 +9,10 @@ import org.xydra.base.XIdProvider;
 public class RefIdProvider extends BaseStringIDProvider implements XIdProvider {
 
 	/** A single map storing ALL ids at runtime */
-	private Map<String, XId> allIds = new HashMap<String, XId>();
+	private final Map<String, XId> allIds = new HashMap<String, XId>();
 
 	@Override
-	protected XId createInstance(String string) {
+	protected XId createInstance(final String string) {
 		XId id = this.allIds.get(string);
 		if (id == null) {
 			id = new RefId(string);

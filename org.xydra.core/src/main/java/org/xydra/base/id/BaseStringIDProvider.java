@@ -17,7 +17,7 @@ import org.xydra.log.api.LoggerFactory;
 
 /**
  * An implementation of {@link XIdProvider}
- * 
+ *
  * @author xamde
  * @author kaidel
  */
@@ -30,7 +30,7 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 
 	/**
 	 * Notable excludes: [-.0-9]
-	 * 
+	 *
 	 * Some notable includes: [:_öä]
 	 */
 	public static final String nameStartChar = // .
@@ -79,11 +79,11 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 		RANGEINDEX_nameChar.index(hex("203F"), hex("2040"));
 	}
 
-	private static int hex(String s) {
+	private static int hex(final String s) {
 		return Integer.parseInt(s, 16);
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		System.out.println(hex("C0"));
 		System.out.println(hex("00F8"));
 	}
@@ -95,13 +95,13 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 
 	/**
 	 * Notable excludes: ' ;<=>?@[\]^{|}~§°´%!"#$%&'()*+,-./ '
-	 * 
+	 *
 	 * Notable includes: [-:_äö0-9]
-	 * 
+	 *
 	 * ':' is used in XML namespaces
-	 * 
+	 *
 	 * Random XIds are UUIDs which match [-0-9a-z]
-	 * 
+	 *
 	 * This leaves '_' as the only reasonable escape character
 	 * */
 	public static final String nameChar = // .
@@ -123,19 +123,19 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 
 	/**
 	 * Without any checks.
-	 * 
+	 *
 	 * @param string
 	 * @return
 	 */
 	protected abstract XId createInstance(String string);
 
 	@Override
-	public XAddress fromAddress(String address) {
+	public XAddress fromAddress(final String address) {
 
 		if (address == null) {
 			throw new IllegalArgumentException("address may not be null");
 		}
-		String[] components = address.split("/");
+		final String[] components = address.split("/");
 		// Note: this strips any trailing slashes
 
 		if (components.length > 5) {
@@ -176,18 +176,18 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 			.createWithFastWeakEntrySets();
 
 	@Override
-	public XAddress fromComponents(XId repositoryId, XId modelId, XId objectId, XId fieldId) {
+	public XAddress fromComponents(final XId repositoryId, final XId modelId, final XId objectId, final XId fieldId) {
 
-		int hash = (repositoryId == null ? 0 : repositoryId.hashCode())
+		final int hash = (repositoryId == null ? 0 : repositoryId.hashCode())
 				+ (modelId == null ? 0 : modelId.hashCode())
 				+ (objectId == null ? 0 : objectId.hashCode())
 				+ (fieldId == null ? 0 : fieldId.hashCode());
 
-		IEntrySet<XAddress> addressSet = this.addressIndex.lookup(hash);
+		final IEntrySet<XAddress> addressSet = this.addressIndex.lookup(hash);
 		if (addressSet != null) {
-			Iterator<XAddress> it = addressSet.iterator();
+			final Iterator<XAddress> it = addressSet.iterator();
 			while (it.hasNext()) {
-				XAddress addr = it.next();
+				final XAddress addr = it.next();
 
 				if (XX.isSameAddress(addr, repositoryId, modelId, objectId, fieldId)) {
 					return addr;
@@ -195,7 +195,7 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 			}
 		}
 
-		XAddress addr = new MemoryAddress(repositoryId, modelId, objectId, fieldId);
+		final XAddress addr = new MemoryAddress(repositoryId, modelId, objectId, fieldId);
 
 		this.addressIndex.index(hash, addr);
 
@@ -206,7 +206,7 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 	 * @param s @NeverNull
 	 * @return true if valid XId string
 	 */
-	public static boolean isValidId(String s) {
+	public static boolean isValidId(final String s) {
 		if (s == null) {
 			throw new IllegalArgumentException("s is null");
 		}
@@ -218,28 +218,29 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 			log.trace("Too short");
 			return false;
 		}
-		int firstCodePoint = s.codePointAt(0);
-		int i = Character.charCount(firstCodePoint);
+		final int firstCodePoint = s.codePointAt(0);
+		final int i = Character.charCount(firstCodePoint);
 
-		if (!RANGEINDEX_nameStartChar.isInInterval(firstCodePoint))
+		if (!RANGEINDEX_nameStartChar.isInInterval(firstCodePoint)) {
 			return false;
+		}
 
 		return IntegerRangeIndex.isAllCharactersInIntervals(RANGEINDEX_nameChar, s.substring(i));
 	}
 
 	/**
 	 * Alternative, slower implementation
-	 * 
+	 *
 	 * @param s
 	 * @return true if valid XId string
 	 */
-	public static boolean isValidId_versionB(String s) {
+	public static boolean isValidId_versionB(final String s) {
 		// slower ?
 		return MemoryStringIdRegexGwtEmul.matchesXydraId(s);
 	}
 
 	@Override
-	public XId fromString(String uriString) {
+	public XId fromString(final String uriString) {
 		if (uriString == null) {
 			throw new IllegalArgumentException("'" + uriString + "' is null - cannot create XId");
 		}

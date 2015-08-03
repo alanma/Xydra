@@ -12,13 +12,13 @@ import org.xydra.oo.runtime.shared.SharedTypeMapping;
 
 /**
  * @author xamde
- * 
+ *
  */
 public class JavaTypeMapping {
 
 	/**
 	 * Creates a new mapping and adds it to the list of known mappings.
-	 * 
+	 *
 	 * @param javaBaseType
 	 *            Mapping from this Java type @NeverNull
 	 * @param javaComponentType
@@ -30,15 +30,15 @@ public class JavaTypeMapping {
 	 * @param factory
 	 *            @NeverNull
 	 */
-	public static <J, C, X extends XValue> void addCollectionTypeMapping(Class<J> javaBaseType,
-			@NeverNull Class<C> javaComponentType, ValueType xydraBaseValueType,
-			@NeverNull IMapper<C, X> mapper, IXydraCollectionFactory factory) {
+	public static <J, C, X extends XValue> void addCollectionTypeMapping(final Class<J> javaBaseType,
+			@NeverNull final Class<C> javaComponentType, final ValueType xydraBaseValueType,
+			@NeverNull final IMapper<C, X> mapper, final IXydraCollectionFactory factory) {
 		createMapping(javaBaseType, javaComponentType, xydraBaseValueType, mapper, factory);
 	}
 
 	/**
 	 * Creates a new mapping and adds it to the list of known mappings.
-	 * 
+	 *
 	 * @param javaBaseType
 	 *            Mapping from this Java type @NeverNull
 	 * @param xydraBaseValueType
@@ -46,14 +46,14 @@ public class JavaTypeMapping {
 	 * @param mapper
 	 *            @NeverNull for Xydra types
 	 */
-	public static <J, C, X extends XValue> void addSingleTypeMapping(Class<J> javaBaseType,
-			ValueType xydraBaseValueType, @NeverNull IMapper<J, X> mapper) {
+	public static <J, C, X extends XValue> void addSingleTypeMapping(final Class<J> javaBaseType,
+			final ValueType xydraBaseValueType, @NeverNull final IMapper<J, X> mapper) {
 		createMapping(javaBaseType, null, xydraBaseValueType, mapper, null);
 	}
 
 	/**
 	 * Creates a new mapping and adds it to the list of known mappings.
-	 * 
+	 *
 	 * @param enumClass
 	 *            @NeverNull
 	 */
@@ -62,13 +62,13 @@ public class JavaTypeMapping {
 		createMapping(enumClass, null, ValueType.String, new IMapper<T, XStringValue>() {
 
 			@Override
-			public T toJava(XStringValue x) {
-				return (T) Enum.valueOf(enumClass, XV.toString(x));
+			public T toJava(final XStringValue x) {
+				return Enum.valueOf(enumClass, XV.toString(x));
 			}
 
 			@Override
-			public XStringValue toXydra(T j) {
-				return (XStringValue) XV.toValue(((Enum<T>) j).name());
+			public XStringValue toXydra(final T j) {
+				return XV.toValue(((Enum<T>) j).name());
 			}
 
 			@Override
@@ -88,7 +88,7 @@ public class JavaTypeMapping {
 	 * @param mapping
 	 * @return the component type as a Java class or null if none defined
 	 */
-	public static Class<?> getJavaComponentType(SharedTypeMapping mapping) {
+	public static Class<?> getJavaComponentType(final SharedTypeMapping mapping) {
 		return JavaReflectionUtils.forName(mapping.getTypeSpec().getComponentType());
 	}
 
@@ -96,13 +96,13 @@ public class JavaTypeMapping {
 	 * @param mapping
 	 * @return the Java class of the base type. @NeverNull
 	 */
-	public static Class<?> getJavaBaseType(SharedTypeMapping mapping) {
+	public static Class<?> getJavaBaseType(final SharedTypeMapping mapping) {
 		return JavaReflectionUtils.forName(mapping.getTypeSpec().getBaseType());
 	}
 
 	/**
 	 * Creates a new mapping and adds it to the list of known mappings.
-	 * 
+	 *
 	 * @param javaBaseType
 	 *            Mapping from this Java type @NeverNull
 	 * @param javaComponentType
@@ -115,9 +115,9 @@ public class JavaTypeMapping {
 	 *            @CanBeNull for non-collection types
 	 * @return ...
 	 */
-	public static SharedTypeMapping createMapping(Class<?> javaBaseType,
-			@CanBeNull Class<?> javaComponentType, ValueType xydraBaseValueType,
-			@CanBeNull IMapper<?, ? extends XValue> mapper, IXydraCollectionFactory factory) {
+	public static SharedTypeMapping createMapping(final Class<?> javaBaseType,
+			@CanBeNull final Class<?> javaComponentType, final ValueType xydraBaseValueType,
+			@CanBeNull final IMapper<?, ? extends XValue> mapper, final IXydraCollectionFactory factory) {
 		return SharedTypeMapping.createAndAdd(
 				JavaTypeSpecUtils.createTypeSpec(javaBaseType, javaComponentType),
 				xydraBaseValueType, mapper, factory);

@@ -10,27 +10,27 @@ import org.xydra.sharedutils.ReflectionUtils;
 
 /**
  * @author xamde
- * 
+ *
  */
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 public class XydraDebugFormatter implements IDebugFormatter {
-    
+
     @Override
-	public String format(Object value) {
+	public String format(final Object value) {
         assert value != null;
         if(value instanceof XId) {
             return "'" + value.toString() + "'";
         } else if(value instanceof XAddress) {
             return "'" + value.toString() + "'";
         } else if(value instanceof XCommand) {
-            XCommand c = (XCommand)value;
+            final XCommand c = (XCommand)value;
             return "Command {" + DebugFormatter.formatString(c.toString(), 140, false) + "}";
         } else if(value instanceof Long) {
             return "{" + value + "}";
         } else {
-            String s = ReflectionUtils.getCanonicalName(value.getClass());
-            String v = DebugFormatter.formatString(value.toString());
+            final String s = ReflectionUtils.getCanonicalName(value.getClass());
+            final String v = DebugFormatter.formatString(value.toString());
             if(v.length() > 10) {
                 return s + " = {" + DebugFormatter.LINE_END + v + "}";
             } else {
@@ -38,5 +38,5 @@ public class XydraDebugFormatter implements IDebugFormatter {
             }
         }
     }
-    
+
 }

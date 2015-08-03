@@ -1,5 +1,6 @@
 package org.xydra.doc;
 
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XId;
 import org.xydra.base.XIdProvider;
 import org.xydra.base.value.XIntegerValue;
@@ -13,42 +14,42 @@ import org.xydra.core.model.XRepository;
 
 public class X5MinuteTutorial {
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		// getting an XIdProvider will save us the work of creating XIds
 		// ourselves
-		XIdProvider idProvider = X.getIDProvider();
+		final XIdProvider idProvider = BaseRuntime.getIDProvider();
 		// instead of creating a random XId, we will create one from a String
-		XId actorID = idProvider.fromString("exampleActor");
+		final XId actorID = idProvider.fromString("exampleActor");
 
-		XRepository exampleRepo = X.createMemoryRepository(actorID);
+		final XRepository exampleRepo = X.createMemoryRepository(actorID);
 
 		// creating a random and unique XId for our phonebook XModel
-		XId phonebookID = idProvider.createUniqueId();
+		final XId phonebookID = idProvider.createUniqueId();
 
-		XModel phonebook = exampleRepo.createModel(phonebookID);
+		final XModel phonebook = exampleRepo.createModel(phonebookID);
 
 		// adding an object representing an entry in the phonebook for a person
 		// named "John"
-		XId johnID = idProvider.fromString("john");
-		XObject johnEntry = phonebook.createObject(johnID);
+		final XId johnID = idProvider.fromString("john");
+		final XObject johnEntry = phonebook.createObject(johnID);
 
 		// adding fields to the john-XObject which will the name and phonenumber
 		// of "John"
-		XId nameID = idProvider.fromString("name");
-		XField nameField = johnEntry.createField(nameID);
+		final XId nameID = idProvider.fromString("name");
+		final XField nameField = johnEntry.createField(nameID);
 
-		XId phonenrID = idProvider.fromString("phonenr");
-		XField phonenrField = johnEntry.createField(phonenrID);
+		final XId phonenrID = idProvider.fromString("phonenr");
+		final XField phonenrField = johnEntry.createField(phonenrID);
 
 		// getting an XValueFactory using X
-		XValueFactory valueFactory = X.getValueFactory();
+		final XValueFactory valueFactory = BaseRuntime.getValueFactory();
 
 		// names can be represented by Strings -> create an XStringValue
-		XStringValue nameValue = valueFactory.createStringValue("John");
+		final XStringValue nameValue = valueFactory.createStringValue("John");
 
 		// phone numbers can be represented by Integers -> create an
 		// XIntegerValue
-		XIntegerValue phonenrValue = valueFactory.createIntegerValue(1234567);
+		final XIntegerValue phonenrValue = valueFactory.createIntegerValue(1234567);
 
 		// lets add these values to our XFields
 		nameField.setValue(nameValue);

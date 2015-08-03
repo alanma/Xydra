@@ -25,7 +25,7 @@ public class JsonParser implements XydraParser {
 		public List<Object> list = null;
 		private String key = null;
 
-		private void onObject(Object o) {
+		private void onObject(final Object o) {
 			if (this.map != null) {
 				this.map.put(this.key, o);
 			} else if (this.list != null) {
@@ -35,7 +35,7 @@ public class JsonParser implements XydraParser {
 			}
 		}
 
-		private void onContainer(Object c) {
+		private void onContainer(final Object c) {
 			if (this.map != null) {
 				this.map.put(this.key, c);
 				this.stack.push(this.map);
@@ -49,14 +49,14 @@ public class JsonParser implements XydraParser {
 
 		@Override
 		public void arrayStart() {
-			List<Object> c = new ArrayList<Object>();
+			final List<Object> c = new ArrayList<Object>();
 			onContainer(c);
 			this.list = c;
 		}
 
 		@Override
 		public void objectStart() {
-			Map<String, Object> c = new HashMap<String, Object>();
+			final Map<String, Object> c = new HashMap<String, Object>();
 			onContainer(c);
 			this.map = c;
 		}
@@ -76,7 +76,7 @@ public class JsonParser implements XydraParser {
 			if (!this.stack.isEmpty()) {
 				this.map = null;
 				this.list = null;
-				Object last = this.stack.pop();
+				final Object last = this.stack.pop();
 				if (last instanceof Map<?, ?>) {
 					this.map = (Map<String, Object>) last;
 				} else {
@@ -86,27 +86,27 @@ public class JsonParser implements XydraParser {
 		}
 
 		@Override
-		public void onKey(String key) {
+		public void onKey(final String key) {
 			this.key = key;
 		}
 
 		@Override
-		public void onBoolean(boolean b) {
+		public void onBoolean(final boolean b) {
 			onObject(b);
 		}
 
 		@Override
-		public void onDouble(double d) {
+		public void onDouble(final double d) {
 			onObject(d);
 		}
 
 		@Override
-		public void onInteger(int i) {
+		public void onInteger(final int i) {
 			onObject(i);
 		}
 
 		@Override
-		public void onLong(long l) {
+		public void onLong(final long l) {
 			onObject(l);
 		}
 
@@ -116,21 +116,21 @@ public class JsonParser implements XydraParser {
 		}
 
 		@Override
-		public void onString(String s) {
+		public void onString(final String s) {
 			onObject(s);
 		}
 
 	}
 
 	@Override
-	public XydraElement parse(String data) throws IllegalArgumentException {
+	public XydraElement parse(final String data) throws IllegalArgumentException {
 
-		MiniSaj saj = new MiniSaj();
+		final MiniSaj saj = new MiniSaj();
 
-		JsonParserSAJ parser = new JsonParserSAJ(saj);
+		final JsonParserSAJ parser = new JsonParserSAJ(saj);
 		try {
 			parser.parse(data);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			throw new IllegalArgumentException(e);
 		}
 
@@ -146,13 +146,13 @@ public class JsonParser implements XydraParser {
 	}
 
 	@Override
-	public XydraElement parse(MiniReader miniReader) throws IllegalArgumentException {
-		MiniSaj saj = new MiniSaj();
+	public XydraElement parse(final MiniReader miniReader) throws IllegalArgumentException {
+		final MiniSaj saj = new MiniSaj();
 
-		JsonParserSAJ parser = new JsonParserSAJ(saj);
+		final JsonParserSAJ parser = new JsonParserSAJ(saj);
 		try {
 			parser.parse(miniReader);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			throw new IllegalArgumentException(e);
 		}
 

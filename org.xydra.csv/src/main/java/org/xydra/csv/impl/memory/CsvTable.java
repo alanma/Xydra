@@ -26,16 +26,16 @@ import org.xydra.log.api.LoggerFactory;
 
 /**
  * Maintains a sparse table, organised by rows and columns.
- * 
+ *
  * Insertion order is preserved.
- * 
+ *
  * @author xamde
  */
 public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactory {
 
 	private static Logger log = LoggerFactory.getLogger(CsvTable.class);
 
-	public CsvTable(boolean maintainColumnInsertionOrder) {
+	public CsvTable(final boolean maintainColumnInsertionOrder) {
 		super(maintainColumnInsertionOrder);
 	}
 
@@ -45,41 +45,41 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 
 	/**
 	 * Dump table to System.out
-	 * 
+	 *
 	 * @throws IOException
 	 *             from System.out
 	 */
 	@Override
 	public void dump() throws IOException {
-		Writer writer = new OutputStreamWriter(System.out);
+		final Writer writer = new OutputStreamWriter(System.out);
 		writeTo(writer);
 		writer.flush();
 	}
 
 	/**
 	 * Dump table to System.out in LaTeX syntax
-	 * 
+	 *
 	 * @throws IOException
 	 *             from System.out
 	 */
 	@Override
 	public void dumpToLaTeX() throws IOException {
-		OutputStreamWriter osw = new OutputStreamWriter(System.out);
+		final OutputStreamWriter osw = new OutputStreamWriter(System.out);
 		toLaTeX(osw);
 	}
 
-	
+
 	@Override
-	public void readFrom(File f) throws IOException {
+	public void readFrom(final File f) throws IOException {
 		readFrom(f, this.defaultEncoding);
 	}
 
 	@Override
-	public void readFrom(File f, String encoding) throws IOException {
-		log.info("Reading CSV table from " + f.getAbsolutePath() + " Before: " + this.rowCount()
-				+ " rows and " + this.colCount() + " columns");
-		FileInputStream fos = new FileInputStream(f);
-		Reader reader = new InputStreamReader(fos, Charset.forName(encoding));
+	public void readFrom(final File f, final String encoding) throws IOException {
+		log.info("Reading CSV table from " + f.getAbsolutePath() + " Before: " + rowCount()
+				+ " rows and " + colCount() + " columns");
+		final FileInputStream fos = new FileInputStream(f);
+		final Reader reader = new InputStreamReader(fos, Charset.forName(encoding));
 		readFrom(reader, true);
 		reader.close();
 		// remove "NULL" and "ROW"-columns
@@ -87,32 +87,32 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		this.columnNames.remove("ROW");
 	}
 
-	
+
 	@Override
-	public void readFrom(Reader r, boolean create) throws IOException {
-		CsvReader csvReader = new CsvReader(r, this.readMaxRows);
-		Collection<String> columnNames = csvReader.readHeaders();
+	public void readFrom(final Reader r, final boolean create) throws IOException {
+		final CsvReader csvReader = new CsvReader(r, this.readMaxRows);
+		final Collection<String> columnNames = csvReader.readHeaders();
 		assert this.columnNames != null;
 		this.columnNames.addAll(columnNames);
 		IReadableRow row = csvReader.readDataRow();
 		while (row != null) {
-			Row tableRow = this.getOrCreateRow(row.getKey(), true);
+			final Row tableRow = getOrCreateRow(row.getKey(), true);
 			tableRow.addAll(row);
 			row = csvReader.readDataRow();
 		}
 	}
 
-	
+
 	@Override
-	public void toLaTeX(Writer w) throws IOException {
+	public void toLaTeX(final Writer w) throws IOException {
 		// determine padding
-		Map<String, Integer> colName2maxLength = new HashMap<String, Integer>();
-		for (IRow row : this) {
-			for (String colName : this.columnNames) {
-				int oldmax = colName2maxLength.get(colName) == null ? 0 : colName2maxLength
+		final Map<String, Integer> colName2maxLength = new HashMap<String, Integer>();
+		for (final IRow row : this) {
+			for (final String colName : this.columnNames) {
+				final int oldmax = colName2maxLength.get(colName) == null ? 0 : colName2maxLength
 						.get(colName);
-				String value = row.getValue(colName);
-				int newmax = Math.max(oldmax, value.length());
+				final String value = row.getValue(colName);
+				final int newmax = Math.max(oldmax, value.length());
 				colName2maxLength.put(colName, newmax);
 			}
 		}
@@ -129,12 +129,12 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 
 		// calculate the last columns name
 		String lastColumnName = null;
-		Iterator<String> colNameIt = this.columnNames.iterator();
+		final Iterator<String> colNameIt = this.columnNames.iterator();
 		while (colNameIt.hasNext()) {
 			lastColumnName = colNameIt.next();
 		}
 
-		for (String colName : this.columnNames) {
+		for (final String colName : this.columnNames) {
 			w.write(latexEncode(colName, colName2maxLength.get(colName)));
 			if (colName.equals(lastColumnName)) {
 				w.write(" \\\\\n");
@@ -144,9 +144,9 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		}
 		w.write("\\hline\n");
 
-		for (String rowName : this.rowNamesIterable()) {
-			IRow row = this.getOrCreateRow(rowName, false);
-			for (String colName : this.columnNames) {
+		for (final String rowName : rowNamesIterable()) {
+			final IRow row = getOrCreateRow(rowName, false);
+			for (final String colName : this.columnNames) {
 				w.write(latexEncode(row.getValue(colName), colName2maxLength.get(colName)));
 				if (colName.equals(lastColumnName)) {
 					w.write(" \\\\\n");
@@ -160,9 +160,9 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		w.flush();
 	}
 
-	
+
 	@Override
-	public void writeTo(File f) throws FileNotFoundException {
+	public void writeTo(final File f) throws FileNotFoundException {
 		writeTo(f, false);
 	}
 
@@ -173,36 +173,36 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 	 *            format of the old ones. Otherwise just a big mess is produced.
 	 * @throws FileNotFoundException
 	 */
-	public void writeTo(File f, boolean append) throws FileNotFoundException {
+	public void writeTo(final File f, final boolean append) throws FileNotFoundException {
 		log.info("Writing CSV table to " + f.getAbsolutePath());
 		FileOutputStream fos;
 		try {
 			fos = new FileOutputStream(f, append);
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			// Java's way of saying, Windows locked the file
-			File f2 = new File(f.getAbsolutePath() + "-COULD-NOT-"
+			final File f2 = new File(f.getAbsolutePath() + "-COULD-NOT-"
 					+ (append ? "APPEND" : "OVERWRITE"));
 			fos = new FileOutputStream(f2);
 		}
 		Writer writer = new OutputStreamWriter(fos, Charset.forName(this.defaultEncoding));
 		try {
 			if (!append && this.splitWhenWritingLargeFiles) {
-				log.info("Will write as " + ((this.rowCount() / EXCEL_MAX_ROWS) + 1) + " file(s)");
+				log.info("Will write as " + (rowCount() / EXCEL_MAX_ROWS + 1) + " file(s)");
 				int startRow = 0;
-				int endRow = Math.min(EXCEL_MAX_ROWS, this.rowCount());
+				int endRow = Math.min(EXCEL_MAX_ROWS, rowCount());
 				writeTo(writer, startRow, endRow);
 				int writtenRows = endRow - startRow;
 				int fileNumber = 1;
-				while (writtenRows < this.rowCount()) {
+				while (writtenRows < rowCount()) {
 					// split in several files
 					writer.flush();
 					writer.close();
 
 					// shift start
 					startRow += EXCEL_MAX_ROWS;
-					endRow = Math.min(endRow + EXCEL_MAX_ROWS, this.rowCount());
+					endRow = Math.min(endRow + EXCEL_MAX_ROWS, rowCount());
 
-					File f1 = new File(f.getAbsolutePath() + "-part-" + fileNumber);
+					final File f1 = new File(f.getAbsolutePath() + "-part-" + fileNumber);
 					fos = new FileOutputStream(f1);
 					writer = new OutputStreamWriter(fos, Charset.forName(this.defaultEncoding));
 					fileNumber++;
@@ -213,38 +213,38 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 			} else {
 				writeTo(writer);
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			log.warn("", e);
 		} finally {
 			try {
 				writer.flush();
 				writer.close();
-			} catch (IOException e1) {
+			} catch (final IOException e1) {
 				log.warn("", e1);
 			}
 		}
 	}
 
-	
+
 	@Override
-	public void writeTo(Writer w) throws IOException {
-		log.info("Writing " + this.rowCount() + " rows with " + this.columnNames.size()
+	public void writeTo(final Writer w) throws IOException {
+		log.info("Writing " + rowCount() + " rows with " + this.columnNames.size()
 				+ " columns");
-		writeTo(w, 0, this.rowCount());
+		writeTo(w, 0, rowCount());
 	}
 
 	private boolean oversizeWarning = false;
 
-	
+
 	@Override
-	public void writeTo(Writer w, int startRow, int endRow) throws IOException, ExcelLimitException {
+	public void writeTo(final Writer w, final int startRow, final int endRow) throws IOException, ExcelLimitException {
 		if (!this.oversizeWarning && endRow - startRow > EXCEL_MAX_ROWS) {
 			log.warn("Exceeding Excels limit of " + EXCEL_MAX_ROWS
 					+ " rows - older versions of Excel cannot read it");
 			this.oversizeWarning = true;
 		}
-		log.debug("Writing rows " + startRow + " to " + endRow + " of " + this.rowCount()
-				+ " rows with " + this.colCount() + " columns");
+		log.debug("Writing rows " + startRow + " to " + endRow + " of " + rowCount()
+				+ " rows with " + colCount() + " columns");
 		int writtenRows = 0;
 
 		// UTF-8 BOM
@@ -255,10 +255,10 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		writtenRows++;
 
 		// data
-		Iterator<String> rowIt = super.subIterator(startRow, endRow);
+		final Iterator<String> rowIt = super.subIterator(startRow, endRow);
 		while (rowIt.hasNext() && (!this.restrictToExcelSize || writtenRows < EXCEL_MAX_ROWS)) {
-			String rowName = rowIt.next();
-			IReadableRow row = this.getOrCreateRow(rowName, false);
+			final String rowName = rowIt.next();
+			final IReadableRow row = getOrCreateRow(rowName, false);
 			if (row == null) {
 				log.warn("Encountered null-row named '" + rowName + "', skipping.");
 			} else {
@@ -271,7 +271,7 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 	/**
 	 * Write the given iterator to a CSV writer
 	 * <em>with synthetic row names</em> (ascending numbers).
-	 * 
+	 *
 	 * @param w
 	 *            writer
 	 * @param columNames
@@ -281,14 +281,14 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 	 * @throws IOException
 	 *             from the writer
 	 */
-	public static void writeTable(Writer w, List<String> columNames, Iterator<IReadableRow> rowIt)
+	public static void writeTable(final Writer w, final List<String> columNames, final Iterator<IReadableRow> rowIt)
 			throws IOException {
 		// fetch first row to know column names
 		if (!rowIt.hasNext()) {
 			log.warn("No rows in rowIt, writing empty table");
 			return;
 		}
-		IReadableRow firstRow = rowIt.next();
+		final IReadableRow firstRow = rowIt.next();
 
 		int writtenRows = 0;
 		// header
@@ -297,26 +297,26 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 
 		// first data row
 		while (writtenRows < EXCEL_MAX_ROWS) {
-			String rowName = "" + writtenRows;
+			final String rowName = "" + writtenRows;
 			writeRow(w, columNames, rowName, firstRow);
 			writtenRows++;
 		}
 
 		// more data
 		while (rowIt.hasNext() && writtenRows < EXCEL_MAX_ROWS) {
-			IReadableRow row = rowIt.next();
-			String rowName = "" + writtenRows;
+			final IReadableRow row = rowIt.next();
+			final String rowName = "" + writtenRows;
 			writeRow(w, columNames, rowName, row);
 			writtenRows++;
 		}
 	}
 
-	public static void writeHeaderRow(Writer w, Collection<String> columnNames) throws IOException {
+	public static void writeHeaderRow(final Writer w, final Collection<String> columnNames) throws IOException {
 		w.write(CsvCodec.excelEncode(COLUMNNAME_ROW));
-		Iterator<String> colIt = columnNames.iterator();
+		final Iterator<String> colIt = columnNames.iterator();
 		int writtenCols = 0;
 		while (colIt.hasNext() && writtenCols < EXCEL_MAX_COLS) {
-			String columnName = colIt.next();
+			final String columnName = colIt.next();
 			w.write(CsvCodec.CELL_DELIMITER + CsvCodec.excelEncode(columnName));
 			writtenCols++;
 			if (writtenCols == EXCEL_MAX_COLS) {
@@ -326,14 +326,14 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		w.write(CsvCodec.CELL_DELIMITER + "\n");
 	}
 
-	public static void writeRow(Writer w, Collection<String> columnNames, String rowName,
-			IReadableRow row) throws IOException {
+	public static void writeRow(final Writer w, final Collection<String> columnNames, final String rowName,
+			final IReadableRow row) throws IOException {
 		assert row != null;
 		w.write(CsvCodec.excelEncode(rowName));
-		Iterator<String> colIt = columnNames.iterator();
+		final Iterator<String> colIt = columnNames.iterator();
 		int writtenCols = 0;
 		while (colIt.hasNext() && writtenCols < EXCEL_MAX_COLS) {
-			String columnName = colIt.next();
+			final String columnName = colIt.next();
 			w.write(CsvCodec.CELL_DELIMITER + CsvCodec.excelEncode(row.getValue(columnName)));
 			writtenCols++;
 			if (writtenCols == EXCEL_MAX_COLS) {
@@ -349,7 +349,7 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 	}
 
 	@Override
-	public ICsvTable createTable(boolean maintainColumnInsertionOrder) {
+	public ICsvTable createTable(final boolean maintainColumnInsertionOrder) {
 		return new CsvTable(maintainColumnInsertionOrder);
 	}
 

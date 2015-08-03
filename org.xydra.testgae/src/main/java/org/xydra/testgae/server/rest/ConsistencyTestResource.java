@@ -7,6 +7,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommandUtils;
@@ -35,7 +36,7 @@ import org.xydra.xgae.gaeutils.GaeTestfixer;
 /**
  * Expose a textual list which appends each access. Great for testing
  * concurrency.
- * 
+ *
  * @author xamde
  */
 public class ConsistencyTestResource {
@@ -50,11 +51,11 @@ public class ConsistencyTestResource {
 	/**
 	 * Expose /consistency for read/write access and /consistency/events to help
 	 * debugging
-	 * 
+	 *
 	 * @param restless
 	 * @param prefix
 	 */
-	public static void restless(Restless restless, String prefix) {
+	public static void restless(final Restless restless, final String prefix) {
 		LoggerFactory.addLogListener(getLogListener());
 		restless.addMethod("/consistency/", "GET", ConsistencyTestResource.class, "get", false,
 				new RestlessParameter("create", ""));
@@ -69,28 +70,28 @@ public class ConsistencyTestResource {
 		return logListener;
 	}
 
-	public static void events(HttpServletRequest req, HttpServletResponse res) throws IOException {
+	public static void events(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		NanoClock c = new NanoClock().start();
+		final NanoClock c = new NanoClock().start();
 		XyAssert.enable();
 		c.stopAndStart("init");
 		ServletUtils.headers(res, "text/html");
-		Writer w = res.getWriter();
-		String instance = XydraRuntime.getInstanceId() + "=" + AboutAppEngine.getThreadInfo();
+		final Writer w = res.getWriter();
+		final String instance = XydraRuntime.getInstanceId() + "=" + AboutAppEngine.getThreadInfo();
 		log.info("instanceId=" + instance);
 		w.write("instance: " + instance);
 		c.stopAndStart("headers,getInstanceId");
 
-		XydraPersistence pers = XydraRuntime.getPersistence(repoId);
-		XAddress modelAddress = XX.toAddress(repoId, ctId, null, null);
+		final XydraPersistence pers = XydraRuntime.getPersistence(repoId);
+		final XAddress modelAddress = Base.toAddress(repoId, ctId, null, null);
 
-		long tentativeRev = pers.getModelRevision(new GetWithAddressRequest(modelAddress, true))
+		final long tentativeRev = pers.getModelRevision(new GetWithAddressRequest(modelAddress, true))
 				.tentativeRevision();
 		w.write("Current rev: " + tentativeRev + "<br/>\n");
 		w.flush();
 		c.stopAndStart("current");
 
-		List<XEvent> events = pers.getEvents(modelAddress, 0, tentativeRev);
+		final List<XEvent> events = pers.getEvents(modelAddress, 0, tentativeRev);
 
 		XydraHtmlUtils.writeEvents(events, w);
 
@@ -98,26 +99,26 @@ public class ConsistencyTestResource {
 		w.close();
 	}
 
-	public static void get(String createStr, HttpServletRequest req, HttpServletResponse res)
+	public static void get(final String createStr, final HttpServletRequest req, final HttpServletResponse res)
 			throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		NanoClock c = new NanoClock().start();
+		final NanoClock c = new NanoClock().start();
 		XyAssert.enable();
 		GaeConfigurationManager.assertValidGaeConfiguration();
 		c.stopAndStart("config");
 
-		String instance = XydraRuntime.getInstanceId() + "+=" + AboutAppEngine.getThreadInfo();
+		final String instance = XydraRuntime.getInstanceId() + "+=" + AboutAppEngine.getThreadInfo();
 		log.info("instanceId=" + instance);
 		c.stopAndStart("getInstanceId");
 
-		boolean create = ServletUtils.isSet(createStr);
-		XydraPersistence persistence = XydraRuntime.getPersistence(repoId);
-		ISessionPersistence sessionPersistence = new DelegatingSessionPersistence(persistence,
+		final boolean create = ServletUtils.isSet(createStr);
+		final XydraPersistence persistence = XydraRuntime.getPersistence(repoId);
+		final ISessionPersistence sessionPersistence = new DelegatingSessionPersistence(persistence,
 				actorId);
-		ChangeSession session = ChangeSession.createSession(sessionPersistence, create, actorId);
+		final ChangeSession session = ChangeSession.createSession(sessionPersistence, create, actorId);
 		c.stopAndStart("init");
 
-		SessionModel model = session.openModel(ctId, create).loadAllObjects();
+		final SessionModel model = session.openModel(ctId, create).loadAllObjects();
 		log.debug("Loaded model DATA?rev=" + model.getRevisionNumber() + "&i_addr="
 				+ model.getAddress() + "&instance=" + AboutAppEngine.getInstanceId()
 				+ "&changesMethod=ConsTestRes.get");
@@ -126,15 +127,15 @@ public class ConsistencyTestResource {
 		// create
 		if (create) {
 			try {
-				model.createObject(XX.toId(createStr));
-			} catch (Exception e) {
+				model.createObject(Base.toId(createStr));
+			} catch (final Exception e) {
 				throw new RuntimeException("Could not create", e);
 			}
 		}
 		c.stopAndStart("create-object");
 
 		ServletUtils.headers(res, "text/html");
-		Writer w = res.getWriter();
+		final Writer w = res.getWriter();
 		w.write("<div style='"
 
 		+ "font-family: \"Courier New\", Courier, monospace;"
@@ -149,7 +150,7 @@ public class ConsistencyTestResource {
 		c.stopAndStart("getRevNr");
 		w.flush();
 		int count = 0;
-		for (XId id : model) {
+		for (final XId id : model) {
 			w.write("id=" + id.toString() + "<br/>\n");
 			w.flush();
 			count++;
@@ -162,7 +163,7 @@ public class ConsistencyTestResource {
 		w.flush();
 		c.stopAndStart("logger-write");
 
-		long result = model.commitToSessionPersistence();
+		final long result = model.commitToSessionPersistence();
 		c.stopAndStart("commit");
 		if (XCommandUtils.failed(result)) {
 			throw new RuntimeException("commit failed " + result);

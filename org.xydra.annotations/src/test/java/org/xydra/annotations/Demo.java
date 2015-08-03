@@ -14,7 +14,7 @@ public class Demo {
 	String password;
 
 	@ModificationOperation
-	void setName(String name) {
+	void setName(final String name) {
 		this.name = name;
 	}
 

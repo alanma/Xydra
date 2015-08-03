@@ -46,21 +46,21 @@ public class RemoveModelDialog extends DialogBox {
 	@UiField(provided = true)
 	ButtonPanel buttonPanel;
 
-	private XAddress address;
-	private CheckBox checkBox;
-	private HorizontalPanel panel;
+	private final XAddress address;
+	private final CheckBox checkBox;
+	private final HorizontalPanel panel;
 
-	public RemoveModelDialog(final Presenter presenter, XAddress address) {
+	public RemoveModelDialog(final Presenter presenter, final XAddress address) {
 
 		super();
 
 		this.address = address;
 
-		ClickHandler okHandler = new ClickHandler() {
+		final ClickHandler okHandler = new ClickHandler() {
 
 			@Override
-			public void onClick(ClickEvent event) {
-				Boolean deleteFromRepo = RemoveModelDialog.this.checkBox.getValue();
+			public void onClick(final ClickEvent event) {
+				final Boolean deleteFromRepo = RemoveModelDialog.this.checkBox.getValue();
 				presenter.remove(RemoveModelDialog.this.address, deleteFromRepo);
 				if (deleteFromRepo) {
 					RemoveModelDialog.this.mainPanel.clear();
@@ -81,21 +81,21 @@ public class RemoveModelDialog extends DialogBox {
 		this.panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		this.mainPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		this.mainPanel.insert(this.panel, 1);
-		HTML text = new HTML("remove permanentely from repository ");
+		final HTML text = new HTML("remove permanentely from repository ");
 		this.panel.add(text);
 		this.checkBox = new CheckBox();
 		this.panel.add(this.checkBox);
 
 		this.setStyleName("dialogStyle");
-		this.setText("remove Entity");
-		this.getElement().setId("removeDialog");
+		setText("remove Entity");
+		getElement().setId("removeDialog");
 
-		this.center();
+		center();
 
 		EventHelper.addCommittingListener(address, new ICommitEventHandler() {
 
 			@Override
-			public void onCommit(CommittingEvent event) {
+			public void onCommit(final CommittingEvent event) {
 				processCommitResponse(event.getModelAddress(), event.getStatus(),
 						event.getNewRevision());
 
@@ -103,8 +103,8 @@ public class RemoveModelDialog extends DialogBox {
 		});
 	}
 
-	protected void processCommitResponse(XAddress modelAddress, CommitStatus status,
-			long newRevision) {
+	protected void processCommitResponse(final XAddress modelAddress, final CommitStatus status,
+			final long newRevision) {
 		String resultString = "successfully deleted model " + modelAddress.toString();
 		switch (status) {
 		case FAILED:
@@ -116,17 +116,17 @@ public class RemoveModelDialog extends DialogBox {
 			break;
 		}
 		this.mainPanel.add(new Label(resultString));
-		this.addCloseOKButton();
+		addCloseOKButton();
 		Controller.showDefaultCursor();
 
 	}
 
 	public void addCloseOKButton() {
-		Button okButton = new Button("ok");
+		final Button okButton = new Button("ok");
 		okButton.addClickHandler(new ClickHandler() {
 
 			@Override
-			public void onClick(ClickEvent event) {
+			public void onClick(final ClickEvent event) {
 				RemoveModelDialog.this.removeFromParent();
 			}
 		});

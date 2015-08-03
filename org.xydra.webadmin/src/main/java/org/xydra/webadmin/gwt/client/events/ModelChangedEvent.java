@@ -8,14 +8,14 @@ import com.google.web.bindery.event.shared.Event;
 
 /**
  * Model has been added or removed
- * 
+ *
  * @author xamde
  */
 public class ModelChangedEvent extends Event<IModelChangedEventHandler> {
 
-	private XAddress modelAddress;
+	private final XAddress modelAddress;
 
-	private EntityStatus status;
+	private final EntityStatus status;
 
 	private XId moreInfos;
 
@@ -25,7 +25,7 @@ public class ModelChangedEvent extends Event<IModelChangedEventHandler> {
 		void onModelChange(ModelChangedEvent event);
 	}
 
-	public ModelChangedEvent(XAddress modelAddress, EntityStatus status, XId moreInfos) {
+	public ModelChangedEvent(final XAddress modelAddress, final EntityStatus status, final XId moreInfos) {
 		this.modelAddress = modelAddress;
 		this.status = status;
 		this.moreInfos = moreInfos;
@@ -36,7 +36,7 @@ public class ModelChangedEvent extends Event<IModelChangedEventHandler> {
 	}
 
 	@Override
-	protected void dispatch(IModelChangedEventHandler handler) {
+	protected void dispatch(final IModelChangedEventHandler handler) {
 		handler.onModelChange(this);
 	}
 
@@ -49,7 +49,7 @@ public class ModelChangedEvent extends Event<IModelChangedEventHandler> {
 		return this.status;
 	}
 
-	public void setMoreInfos(XId moreInfos) {
+	public void setMoreInfos(final XId moreInfos) {
 		this.moreInfos = moreInfos;
 	}
 

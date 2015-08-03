@@ -28,220 +28,247 @@ import org.xydra.base.value.XValueFactory;
 
 /**
  * An implementation of {@link XValueFactory}
- * 
+ *
  * @author xamde
  * @author kaidel
  * @author dscharrer
- * 
+ *
  */
 public class MemoryValueFactory implements XValueFactory {
-    
+
     @Override
-    public XAddressListValue createAddressListValue(Collection<XAddress> addresses) {
-        if(addresses == null)
-            return null;
+    public XAddressListValue createAddressListValue(final Collection<XAddress> addresses) {
+        if(addresses == null) {
+			return null;
+		}
         return new MemoryAddressListValue(addresses);
     }
-    
+
     @Override
-    public XAddressListValue createAddressListValue(XAddress[] addresses) {
-        if(addresses == null)
-            return null;
+    public XAddressListValue createAddressListValue(final XAddress[] addresses) {
+        if(addresses == null) {
+			return null;
+		}
         return new MemoryAddressListValue(addresses);
     }
-    
+
     @Override
-    public XAddressSetValue createAddressSetValue(Collection<XAddress> addresses) {
-        if(addresses == null)
-            return null;
+    public XAddressSetValue createAddressSetValue(final Collection<XAddress> addresses) {
+        if(addresses == null) {
+			return null;
+		}
         return new MemoryAddressSetValue(addresses);
     }
-    
+
     @Override
-    public XAddressSetValue createAddressSetValue(XAddress[] addresses) {
-        if(addresses == null)
-            return null;
+    public XAddressSetValue createAddressSetValue(final XAddress[] addresses) {
+        if(addresses == null) {
+			return null;
+		}
         return new MemoryAddressSetValue(addresses);
     }
-    
+
     @Override
-    public XAddressSortedSetValue createAddressSortedSetValue(Collection<XAddress> addresses) {
-        if(addresses == null)
-            return null;
+    public XAddressSortedSetValue createAddressSortedSetValue(final Collection<XAddress> addresses) {
+        if(addresses == null) {
+			return null;
+		}
         return new MemoryAddressSortedSetValue(addresses);
     }
-    
+
     @Override
-    public XAddressSortedSetValue createAddressSortedSetValue(XAddress[] addresses) {
-        if(addresses == null)
-            return null;
+    public XAddressSortedSetValue createAddressSortedSetValue(final XAddress[] addresses) {
+        if(addresses == null) {
+			return null;
+		}
         return new MemoryAddressSortedSetValue(addresses);
     }
-    
+
     @Override
-    public XBooleanListValue createBooleanListValue(boolean[] booleans) {
-        if(booleans == null)
-            return null;
+    public XBooleanListValue createBooleanListValue(final boolean[] booleans) {
+        if(booleans == null) {
+			return null;
+		}
         return new MemoryBooleanListValue(booleans);
     }
-    
+
     @Override
-    public XBooleanListValue createBooleanListValue(Collection<Boolean> booleans) {
-        if(booleans == null)
-            return null;
+    public XBooleanListValue createBooleanListValue(final Collection<Boolean> booleans) {
+        if(booleans == null) {
+			return null;
+		}
         return new MemoryBooleanListValue(booleans);
     }
-    
+
     @Override
-    public XBooleanValue createBooleanValue(boolean b) {
+    public XBooleanValue createBooleanValue(final boolean b) {
         return new MemoryBooleanValue(b);
     }
-    
+
     @Override
-    public XBinaryValue createBinaryValue(byte[] bytes) {
-        if(bytes == null)
-            return null;
+    public XBinaryValue createBinaryValue(final byte[] bytes) {
+        if(bytes == null) {
+			return null;
+		}
         return new MemoryBinaryValue(bytes);
     }
-    
+
     @Override
-    public XBinaryValue createBinaryValue(Collection<Byte> bytes) {
-        if(bytes == null)
-            return null;
+    public XBinaryValue createBinaryValue(final Collection<Byte> bytes) {
+        if(bytes == null) {
+			return null;
+		}
         return new MemoryBinaryValue(bytes);
     }
-    
+
     @Override
-    public XDoubleListValue createDoubleListValue(Collection<Double> doubles) {
-        if(doubles == null)
-            return null;
+    public XDoubleListValue createDoubleListValue(final Collection<Double> doubles) {
+        if(doubles == null) {
+			return null;
+		}
         return new MemoryDoubleListValue(doubles);
     }
-    
+
     @Override
-    public XDoubleListValue createDoubleListValue(double[] doubles) {
-        if(doubles == null)
-            return null;
+    public XDoubleListValue createDoubleListValue(final double[] doubles) {
+        if(doubles == null) {
+			return null;
+		}
         return new MemoryDoubleListValue(doubles);
     }
-    
+
     @Override
-    public XDoubleValue createDoubleValue(double d) {
+    public XDoubleValue createDoubleValue(final double d) {
         return new MemoryDoubleValue(d);
     }
-    
+
     @Override
-    public XIdListValue createIdListValue(Collection<XId> xids) {
-        if(xids == null)
-            return null;
+    public XIdListValue createIdListValue(final Collection<XId> xids) {
+        if(xids == null) {
+			return null;
+		}
         return new MemoryIdListValue(xids);
     }
-    
+
     @Override
-    public XIdListValue createIdListValue(XId[] xids) {
-        if(xids == null)
-            return null;
+    public XIdListValue createIdListValue(final XId[] xids) {
+        if(xids == null) {
+			return null;
+		}
         return new MemoryIdListValue(xids);
     }
-    
+
     @Override
-    public XIdSetValue createIdSetValue(Collection<XId> xids) {
-        if(xids == null)
-            return null;
+    public XIdSetValue createIdSetValue(final Collection<XId> xids) {
+        if(xids == null) {
+			return null;
+		}
         return new MemoryIdSetValue(xids);
     }
-    
+
     @Override
-    public XIdSetValue createIdSetValue(XId[] xids) {
-        if(xids == null)
-            return null;
+    public XIdSetValue createIdSetValue(final XId[] xids) {
+        if(xids == null) {
+			return null;
+		}
         return new MemoryIdSetValue(xids);
     }
-    
+
     @Override
-    public XIdSortedSetValue createIdSortedSetValue(Collection<XId> xids) {
-        if(xids == null)
-            return null;
+    public XIdSortedSetValue createIdSortedSetValue(final Collection<XId> xids) {
+        if(xids == null) {
+			return null;
+		}
         return new MemoryIdSortedSetValue(xids);
     }
-    
+
     @Override
-    public XIdSortedSetValue createIdSortedSetValue(XId[] xids) {
-        if(xids == null)
-            return null;
+    public XIdSortedSetValue createIdSortedSetValue(final XId[] xids) {
+        if(xids == null) {
+			return null;
+		}
         return new MemoryIdSortedSetValue(xids);
     }
-    
+
     @Override
-    public XIntegerListValue createIntegerListValue(Collection<Integer> ints) {
-        if(ints == null)
-            return null;
+    public XIntegerListValue createIntegerListValue(final Collection<Integer> ints) {
+        if(ints == null) {
+			return null;
+		}
         return new MemoryIntegerListValue(ints);
     }
-    
+
     @Override
-    public XIntegerListValue createIntegerListValue(int[] ints) {
-        if(ints == null)
-            return null;
+    public XIntegerListValue createIntegerListValue(final int[] ints) {
+        if(ints == null) {
+			return null;
+		}
         return new MemoryIntegerListValue(ints);
     }
-    
+
     @Override
-    public XIntegerValue createIntegerValue(int i) {
+    public XIntegerValue createIntegerValue(final int i) {
         return new MemoryIntegerValue(i);
     }
-    
+
     @Override
-    public XLongListValue createLongListValue(Collection<Long> longs) {
-        if(longs == null)
-            return null;
+    public XLongListValue createLongListValue(final Collection<Long> longs) {
+        if(longs == null) {
+			return null;
+		}
         return new MemoryLongListValue(longs);
     }
-    
+
     @Override
-    public XLongListValue createLongListValue(long[] longs) {
-        if(longs == null)
-            return null;
+    public XLongListValue createLongListValue(final long[] longs) {
+        if(longs == null) {
+			return null;
+		}
         return new MemoryLongListValue(longs);
     }
-    
+
     @Override
-    public XLongValue createLongValue(long l) {
+    public XLongValue createLongValue(final long l) {
         return new MemoryLongValue(l);
     }
-    
+
     @Override
-    public XStringListValue createStringListValue(Collection<String> strings) {
-        if(strings == null)
-            return null;
+    public XStringListValue createStringListValue(final Collection<String> strings) {
+        if(strings == null) {
+			return null;
+		}
         return new MemoryStringListValue(strings);
     }
-    
+
     @Override
-    public XStringListValue createStringListValue(String[] strings) {
-        if(strings == null)
-            return null;
+    public XStringListValue createStringListValue(final String[] strings) {
+        if(strings == null) {
+			return null;
+		}
         return new MemoryStringListValue(strings);
     }
-    
+
     @Override
-    public XStringSetValue createStringSetValue(Collection<String> strings) {
-        if(strings == null)
-            return null;
+    public XStringSetValue createStringSetValue(final Collection<String> strings) {
+        if(strings == null) {
+			return null;
+		}
         return new MemoryStringSetValue(strings);
     }
-    
+
     @Override
-    public XStringSetValue createStringSetValue(String[] strings) {
-        if(strings == null)
-            return null;
+    public XStringSetValue createStringSetValue(final String[] strings) {
+        if(strings == null) {
+			return null;
+		}
         return new MemoryStringSetValue(strings);
     }
-    
+
     @Override
-    public XStringValue createStringValue(@CanBeNull String string) {
-        if(string == null)
-            return null;
+    public XStringValue createStringValue(@CanBeNull final String string) {
+        if(string == null) {
+			return null;
+		}
         return new MemoryStringValue(string);
     }
 }

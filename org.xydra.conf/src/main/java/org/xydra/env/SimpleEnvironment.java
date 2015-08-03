@@ -4,12 +4,12 @@ import org.xydra.conf.IConfig;
 
 public class SimpleEnvironment implements IEnvironment {
 
-	public SimpleEnvironment(IConfig config) {
+	public SimpleEnvironment(final IConfig config) {
 		super();
 		this.config = config;
 	}
 
-	private IConfig config;
+	private final IConfig config;
 
 	@Override
 	public IConfig conf() {

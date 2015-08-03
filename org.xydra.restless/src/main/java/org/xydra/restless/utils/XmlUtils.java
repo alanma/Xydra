@@ -9,7 +9,7 @@ public class XmlUtils {
 	 *            unencoded string @NeverNull
 	 * @return the input string with XML escaping
 	 */
-	public static final String xmlEncode(@NeverNull String raw) {
+	public static final String xmlEncode(@NeverNull final String raw) {
 		String safe = raw;
 		safe = safe.replace("&", "&amp;");
 		safe = safe.replace("<", "&lt;");

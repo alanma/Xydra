@@ -13,6 +13,7 @@ import java.util.HashMap;
 
 import org.xydra.csv.HtmlTool;
 import org.xydra.csv.IRow;
+import org.xydra.csv.TableCoreTools;
 import org.xydra.csv.TableTools;
 import org.xydra.csv.impl.memory.CsvTable;
 import org.xydra.testgae.shared.Operations;
@@ -24,7 +25,7 @@ import org.xydra.testgae.shared.Operations;
  * like a normal program, the output will be stored in
  * ./src/main/data/Performance/ with the file name "Evaluation" +
  * System.currentTimeMillis() + ".html".
- * 
+ *
  * @author kaidel
  */
 public class PerformanceDataAnalyzer {
@@ -54,17 +55,17 @@ public class PerformanceDataAnalyzer {
 
 	private static boolean version2Exists;
 
-	public static void main(String args[]) {
+	public static void main(final String args[]) {
 		final String[] oldVersions = new String[] { // "Version2",
 													// "gae20111105",
 													// "gae20111105-20"
 		};
 
-		String url = "http://testgae20120918.xydra-1.appspot.com/";
-		String newVersion = "20120930";
-		ArrayList<String> list = new ArrayList<String>();
+		final String url = "http://testgae20120918.xydra-1.appspot.com/";
+		final String newVersion = "20120930";
+		final ArrayList<String> list = new ArrayList<String>();
 
-		for (String old : oldVersions) {
+		for (final String old : oldVersions) {
 			list.add(old);
 		}
 		list.add(newVersion);
@@ -87,7 +88,7 @@ public class PerformanceDataAnalyzer {
 
 		/*
 		 * Last url: "http://testgae20111105.xydra-1.appspot.com/logged";
-		 * 
+		 *
 		 * Last label: "gae20111105-20";
 		 */
 
@@ -95,7 +96,7 @@ public class PerformanceDataAnalyzer {
 
 	/**
 	 * Runs and evaluates the benchmarks
-	 * 
+	 *
 	 * @param versionUrl
 	 *            url of the current appengine version
 	 * @param versionLabel
@@ -112,7 +113,7 @@ public class PerformanceDataAnalyzer {
 	 *            was already collected, then check if the given maxAmount was
 	 *            already met/exceeded. If not, the benchmarks will be executed
 	 *            at most "iteration" times, while maxAmount is still the limit.
-	 * 
+	 *
 	 *            For example, one benchmark already measured 4 sets of data,
 	 *            maxAmount is set to 10 and iterations is also set to ten. In
 	 *            this case, the given benchmark will only be executed 6 times
@@ -120,15 +121,15 @@ public class PerformanceDataAnalyzer {
 	 *            not exceeded.
 	 */
 
-	public static void runAndEvaluateSingleThreadBenchmark(String versionUrl, String versionLabel,
-			String[] oldVersions, int iterations, int maxAmount) {
+	public static void runAndEvaluateSingleThreadBenchmark(final String versionUrl, final String versionLabel,
+			final String[] oldVersions, final int iterations, final int maxAmount) {
 
-		RemoteBenchmarkOnAppEngine benchmark = new RemoteBenchmarkOnAppEngine(versionUrl, DIR_DATA
+		final RemoteBenchmarkOnAppEngine benchmark = new RemoteBenchmarkOnAppEngine(versionUrl, DIR_DATA
 				+ versionLabel + "/", iterations, maxAmount, range);
 
 		benchmark.executeAllSingleThreadBenchmarks();
 
-		String versions[] = new String[oldVersions.length + 1];
+		final String versions[] = new String[oldVersions.length + 1];
 
 		for (int i = 0; i < versions.length; i++) {
 			if (i < oldVersions.length) {
@@ -141,15 +142,15 @@ public class PerformanceDataAnalyzer {
 		evaluateSingleThreadBenchmark(versions);
 	}
 
-	public static void runMultiThreadedBenchmark(String versionUrl, String versionLabel,
-			String[] oldVersions, int iterations, int maxAmount) {
+	public static void runMultiThreadedBenchmark(final String versionUrl, final String versionLabel,
+			final String[] oldVersions, final int iterations, final int maxAmount) {
 
-		RemoteBenchmarkOnAppEngine benchmark = new RemoteBenchmarkOnAppEngine(versionUrl, DIR_DATA
+		final RemoteBenchmarkOnAppEngine benchmark = new RemoteBenchmarkOnAppEngine(versionUrl, DIR_DATA
 				+ versionLabel + "/", iterations, maxAmount, range);
 
 		benchmark.executeAllMultiThreadedBenchmarks(threads);
 
-		String versions[] = new String[oldVersions.length + 1];
+		final String versions[] = new String[oldVersions.length + 1];
 
 		for (int i = 0; i < versions.length; i++) {
 			if (i < oldVersions.length) {
@@ -162,11 +163,11 @@ public class PerformanceDataAnalyzer {
 
 	/**
 	 * Evaluates the measured data
-	 * 
+	 *
 	 * @param versions
 	 *            array of versions of which the data is to be measured
 	 */
-	public static void evaluateSingleThreadBenchmark(String[] versions) {
+	public static void evaluateSingleThreadBenchmark(final String[] versions) {
 		fileName = "Evaluation" + System.currentTimeMillis() + ".html";
 
 		// check if "Version2" is one of the versions
@@ -197,7 +198,7 @@ public class PerformanceDataAnalyzer {
 				range);
 	}
 
-	public static void evaluateMultiThreadedBenchmark(String[] versions) {
+	public static void evaluateMultiThreadedBenchmark(final String[] versions) {
 		fileName = "Evaluation" + System.currentTimeMillis() + "MultiThreaded" + threads
 				+ "Threads.html";
 
@@ -230,8 +231,8 @@ public class PerformanceDataAnalyzer {
 				Operations.EDIT, range);
 	}
 
-	public static void evaluateSingleOperationBenchmarkOneThread(String[] versions, Operations op) {
-		CsvTable results = new CsvTable(true);
+	public static void evaluateSingleOperationBenchmarkOneThread(final String[] versions, final Operations op) {
+		final CsvTable results = new CsvTable(true);
 
 		String path = null;
 
@@ -251,11 +252,11 @@ public class PerformanceDataAnalyzer {
 		assert path != null;
 
 		// add rows for average, standard deviation and exceptions
-		IRow avg = results.getOrCreateRow("avg", true);
-		IRow stdev = results.getOrCreateRow("stdev", true);
-		IRow excep = results.getOrCreateRow("Excep", true);
-		IRow critEr = results.getOrCreateRow("Critical Errors", true);
-		IRow amount = results.getOrCreateRow("Amount of data", true);
+		final IRow avg = results.getOrCreateRow("avg", true);
+		final IRow stdev = results.getOrCreateRow("stdev", true);
+		final IRow excep = results.getOrCreateRow("Excep", true);
+		final IRow critEr = results.getOrCreateRow("Critical Errors", true);
+		final IRow amount = results.getOrCreateRow("Amount of data", true);
 
 		avg.setValue("", "Average (ms)", true);
 		stdev.setValue("", "Standard Deviation (ms)", true);
@@ -266,8 +267,8 @@ public class PerformanceDataAnalyzer {
 		int version2Operations = 0;
 
 		for (int i = 0; i < versions.length; i++) {
-			CsvTable dataTable = new CsvTable(true);
-			CsvTable excepTable = new CsvTable(true);
+			final CsvTable dataTable = new CsvTable(true);
+			final CsvTable excepTable = new CsvTable(true);
 
 			int dataCount = 0;
 			try {
@@ -275,22 +276,22 @@ public class PerformanceDataAnalyzer {
 				 * Read data for the current version and write it in the CSV
 				 * table
 				 */
-				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i] + "/"
+				final BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i] + "/"
 						+ path + ".txt"));
 
 				String currentLine = in.readLine();
 				int excepCount = 0;
 
 				if (versions[i].equals("Version2")) {
-					String[] data = currentLine.split(",");
+					final String[] data = currentLine.split(",");
 					version2Operations = Integer.parseInt(data[3].replaceAll(" ", ""));
 				}
 
 				while (currentLine != null) {
-					String[] csvData = currentLine.split(",");
+					final String[] csvData = currentLine.split(",");
 
-					IRow dataRow = dataTable.getOrCreateRow("" + dataCount, true);
-					IRow excepRow = excepTable.getOrCreateRow("" + excepCount, true);
+					final IRow dataRow = dataTable.getOrCreateRow("" + dataCount, true);
+					final IRow excepRow = excepTable.getOrCreateRow("" + excepCount, true);
 
 					// csv column 9 holds the data for the average time
 					if (!csvData[9].contains("NaN")) {
@@ -308,8 +309,8 @@ public class PerformanceDataAnalyzer {
 					currentLine = in.readLine();
 				}
 
-				CsvTable dataTarget = new CsvTable();
-				TableTools.groupBy(dataTable, Arrays.asList("X"), Collections.<String> emptyList(),
+				final CsvTable dataTarget = new CsvTable();
+				TableCoreTools.groupBy(dataTable, Arrays.asList("X"), Collections.<String> emptyList(),
 						Arrays.asList("data"), Collections.<String> emptyList(), dataTarget);
 
 				avg.setValue(i + "-" + versions[i], dataTarget.getValue("" + 0, "data"
@@ -318,8 +319,8 @@ public class PerformanceDataAnalyzer {
 						+ "--stdev"), true);
 				amount.setValue(i + "-" + versions[i], dataCount, true);
 
-				CsvTable excepTarget = new CsvTable();
-				TableTools.groupBy(excepTable, Arrays.asList("X"),
+				final CsvTable excepTarget = new CsvTable();
+				TableCoreTools.groupBy(excepTable, Arrays.asList("X"),
 						Collections.<String> emptyList(), Arrays.asList("data"),
 						Collections.<String> emptyList(), excepTarget);
 
@@ -327,12 +328,12 @@ public class PerformanceDataAnalyzer {
 						+ "--average"), true);
 
 				in.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				e.printStackTrace();
 			}
 
 			try {
-				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i] + "/"
+				final BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i] + "/"
 						+ path + "CriticalErrors.txt"));
 
 				/*
@@ -352,11 +353,11 @@ public class PerformanceDataAnalyzer {
 					currentLine = in.readLine();
 				}
 
-				critEr.setValue(i + "-" + versions[i], (double) (count) / dataCount, true);
+				critEr.setValue(i + "-" + versions[i], (double) count / dataCount, true);
 
 				in.close();
 
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				if (versions[i].equals("Version2")) {
 					/*
 					 * critical errors weren't measured for version 2
@@ -375,7 +376,7 @@ public class PerformanceDataAnalyzer {
 		}
 
 		try {
-			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
+			final FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
 			// add some CSS to have table border lines
 			fw.write("<style>\n" + "  table.csv * { border: 1px solid; } \n" + "</style>\n");
 
@@ -402,15 +403,15 @@ public class PerformanceDataAnalyzer {
 			fw.write("\n  <hr />  \n");
 
 			fw.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 
 	}
 
-	public static void evaluateSingleOperationBenchmarkMultipleThreads(String[] versions,
-			Operations op) {
-		CsvTable results = new CsvTable(true);
+	public static void evaluateSingleOperationBenchmarkMultipleThreads(final String[] versions,
+			final Operations op) {
+		final CsvTable results = new CsvTable(true);
 
 		String path = null;
 
@@ -430,11 +431,11 @@ public class PerformanceDataAnalyzer {
 		assert path != null;
 
 		// add rows for average, standard deviation and exceptions
-		IRow avg = results.getOrCreateRow("avg", true);
-		IRow stdev = results.getOrCreateRow("stdev", true);
-		IRow excep = results.getOrCreateRow("Excep", true);
-		IRow critEr = results.getOrCreateRow("Critical Errors", true);
-		IRow amount = results.getOrCreateRow("Amount of data", true);
+		final IRow avg = results.getOrCreateRow("avg", true);
+		final IRow stdev = results.getOrCreateRow("stdev", true);
+		final IRow excep = results.getOrCreateRow("Excep", true);
+		final IRow critEr = results.getOrCreateRow("Critical Errors", true);
+		final IRow amount = results.getOrCreateRow("Amount of data", true);
 
 		avg.setValue("", "Average (ms)", true);
 		stdev.setValue("", "Standard Deviation (ms)", true);
@@ -445,8 +446,8 @@ public class PerformanceDataAnalyzer {
 		int version2Operations = 0;
 
 		for (int i = 0; i < versions.length; i++) {
-			CsvTable dataTable = new CsvTable(true);
-			CsvTable excepTable = new CsvTable(true);
+			final CsvTable dataTable = new CsvTable(true);
+			final CsvTable excepTable = new CsvTable(true);
 
 			int dataCount = 0;
 			try {
@@ -454,22 +455,22 @@ public class PerformanceDataAnalyzer {
 				 * Read data for the current version and write it in the CSV
 				 * table
 				 */
-				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i] + "/"
+				final BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i] + "/"
 						+ path + ".txt"));
 
 				String currentLine = in.readLine();
 				int excepCount = 0;
 
 				if (versions[i].equals("Version2")) {
-					String[] data = currentLine.split(",");
+					final String[] data = currentLine.split(",");
 					version2Operations = Integer.parseInt(data[3].replaceAll(" ", ""));
 				}
 
 				while (currentLine != null) {
-					String[] csvData = currentLine.split(",");
+					final String[] csvData = currentLine.split(",");
 
-					IRow dataRow = dataTable.getOrCreateRow("" + dataCount, true);
-					IRow excepRow = excepTable.getOrCreateRow("" + excepCount, true);
+					final IRow dataRow = dataTable.getOrCreateRow("" + dataCount, true);
+					final IRow excepRow = excepTable.getOrCreateRow("" + excepCount, true);
 
 					// csv column 9 holds the data for the average time
 					if (!csvData[9].contains("NaN")) {
@@ -487,8 +488,8 @@ public class PerformanceDataAnalyzer {
 					currentLine = in.readLine();
 				}
 
-				CsvTable dataTarget = new CsvTable();
-				TableTools.groupBy(dataTable, Arrays.asList("X"), Collections.<String> emptyList(),
+				final CsvTable dataTarget = new CsvTable();
+				TableCoreTools.groupBy(dataTable, Arrays.asList("X"), Collections.<String> emptyList(),
 						Arrays.asList("data"), Collections.<String> emptyList(), dataTarget);
 
 				avg.setValue(i + "-" + versions[i], dataTarget.getValue("" + 0, "data"
@@ -497,8 +498,8 @@ public class PerformanceDataAnalyzer {
 						+ "--stdev"), true);
 				amount.setValue(i + "-" + versions[i], dataCount, true);
 
-				CsvTable excepTarget = new CsvTable();
-				TableTools.groupBy(excepTable, Arrays.asList("X"),
+				final CsvTable excepTarget = new CsvTable();
+				TableCoreTools.groupBy(excepTable, Arrays.asList("X"),
 						Collections.<String> emptyList(), Arrays.asList("data"),
 						Collections.<String> emptyList(), excepTarget);
 
@@ -506,12 +507,12 @@ public class PerformanceDataAnalyzer {
 						+ "--average"), true);
 
 				in.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				e.printStackTrace();
 			}
 
 			try {
-				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i] + "/"
+				final BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i] + "/"
 						+ path + "CriticalErrors.txt"));
 
 				/*
@@ -531,11 +532,11 @@ public class PerformanceDataAnalyzer {
 					currentLine = in.readLine();
 				}
 
-				critEr.setValue(i + "-" + versions[i], (double) (count) / dataCount, true);
+				critEr.setValue(i + "-" + versions[i], (double) count / dataCount, true);
 
 				in.close();
 
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				if (versions[i].equals("Version2")) {
 					/*
 					 * critical errors weren't measured for version 2
@@ -554,7 +555,7 @@ public class PerformanceDataAnalyzer {
 		}
 
 		try {
-			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
+			final FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
 			// add some CSS to have table border lines
 			fw.write("<style>\n" + "  table.csv * { border: 1px solid; } \n" + "</style>\n");
 
@@ -581,34 +582,34 @@ public class PerformanceDataAnalyzer {
 			fw.write("\n  <hr />  \n");
 
 			fw.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 
 	}
 
-	public static void evaluateAddingMultipleWishesOneThread(String[] versions, Integer[] range) {
-		CsvTable avgResults = new CsvTable(true);
-		CsvTable stdevResults = new CsvTable(true);
-		CsvTable excepResults = new CsvTable(true);
-		CsvTable critErResults = new CsvTable(true);
+	public static void evaluateAddingMultipleWishesOneThread(final String[] versions, final Integer[] range) {
+		final CsvTable avgResults = new CsvTable(true);
+		final CsvTable stdevResults = new CsvTable(true);
+		final CsvTable excepResults = new CsvTable(true);
+		final CsvTable critErResults = new CsvTable(true);
 
-		String path = "/AddingMultipleWishesInTransactionOneThread";
+		final String path = "/AddingMultipleWishesInTransactionOneThread";
 
 		int version2Operations = 0;
 
 		if (version2Exists) {
 			try {
-				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + "Version2/" + path
+				final BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + "Version2/" + path
 						+ "10.txt"));
 
-				String currentLine = in.readLine();
+				final String currentLine = in.readLine();
 
-				String[] data = currentLine.split(",");
+				final String[] data = currentLine.split(",");
 				version2Operations = Integer.parseInt(data[3].replaceAll(" ", ""));
 
 				in.close();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 
@@ -618,7 +619,7 @@ public class PerformanceDataAnalyzer {
 				critErResults);
 
 		try {
-			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
+			final FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
 			// add some CSS to have table border lines
 			fw.write("<style>\n" + "  table.csv * { border: 1px solid; } \n" + "</style>\n");
 
@@ -643,35 +644,35 @@ public class PerformanceDataAnalyzer {
 			fw.write("\n  <hr />  \n");
 
 			fw.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 
 	}
 
-	public static void evaluateAddingMultipleWishesMultipleThreads(String[] versions,
-			Integer[] range) {
-		CsvTable avgResults = new CsvTable(true);
-		CsvTable stdevResults = new CsvTable(true);
-		CsvTable excepResults = new CsvTable(true);
-		CsvTable critErResults = new CsvTable(true);
+	public static void evaluateAddingMultipleWishesMultipleThreads(final String[] versions,
+			final Integer[] range) {
+		final CsvTable avgResults = new CsvTable(true);
+		final CsvTable stdevResults = new CsvTable(true);
+		final CsvTable excepResults = new CsvTable(true);
+		final CsvTable critErResults = new CsvTable(true);
 
-		String path = "/AddingMultipleWishesInTransaction" + threads + "Threads";
+		final String path = "/AddingMultipleWishesInTransaction" + threads + "Threads";
 
 		int version2Operations = 0;
 
 		if (version2Exists) {
 			try {
-				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + "Version2/" + path
+				final BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + "Version2/" + path
 						+ "10.txt"));
 
-				String currentLine = in.readLine();
+				final String currentLine = in.readLine();
 
-				String[] data = currentLine.split(",");
+				final String[] data = currentLine.split(",");
 				version2Operations = Integer.parseInt(data[3].replaceAll(" ", ""));
 
 				in.close();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 
@@ -681,7 +682,7 @@ public class PerformanceDataAnalyzer {
 				critErResults);
 
 		try {
-			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
+			final FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
 			// add some CSS to have table border lines
 			fw.write("<style>\n" + "  table.csv * { border: 1px solid; } \n" + "</style>\n");
 
@@ -706,18 +707,18 @@ public class PerformanceDataAnalyzer {
 			fw.write("\n  <hr />  \n");
 
 			fw.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 
 	}
 
 	public static void evaluateSingleOperationWithInitialWishesBenchmarksOneThread(
-			String[] versions, Operations op, Integer[] range) {
-		CsvTable avgResults = new CsvTable(true);
-		CsvTable stdevResults = new CsvTable(true);
-		CsvTable excepResults = new CsvTable(true);
-		CsvTable critErResults = new CsvTable(true);
+			final String[] versions, final Operations op, final Integer[] range) {
+		final CsvTable avgResults = new CsvTable(true);
+		final CsvTable stdevResults = new CsvTable(true);
+		final CsvTable excepResults = new CsvTable(true);
+		final CsvTable critErResults = new CsvTable(true);
 
 		String path = null;
 
@@ -740,16 +741,16 @@ public class PerformanceDataAnalyzer {
 
 		if (version2Exists) {
 			try {
-				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + "Version2/" + path
+				final BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + "Version2/" + path
 						+ "10.txt"));
 
-				String currentLine = in.readLine();
+				final String currentLine = in.readLine();
 
-				String[] data = currentLine.split(",");
+				final String[] data = currentLine.split(",");
 				version2Operations = Integer.parseInt(data[3].replaceAll(" ", ""));
 
 				in.close();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 
@@ -759,7 +760,7 @@ public class PerformanceDataAnalyzer {
 				critErResults);
 
 		try {
-			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
+			final FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
 			// add some CSS to have table border lines
 			fw.write("<style>\n" + "  table.csv * { border: 1px solid; } \n" + "</style>\n");
 
@@ -800,18 +801,18 @@ public class PerformanceDataAnalyzer {
 			fw.write("\n  <hr />  \n");
 
 			fw.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 
 	}
 
 	public static void evaluateSingleOperationWithInitialWishesBenchmarksMultipleThreads(
-			String[] versions, Operations op, Integer[] range) {
-		CsvTable avgResults = new CsvTable(true);
-		CsvTable stdevResults = new CsvTable(true);
-		CsvTable excepResults = new CsvTable(true);
-		CsvTable critErResults = new CsvTable(true);
+			final String[] versions, final Operations op, final Integer[] range) {
+		final CsvTable avgResults = new CsvTable(true);
+		final CsvTable stdevResults = new CsvTable(true);
+		final CsvTable excepResults = new CsvTable(true);
+		final CsvTable critErResults = new CsvTable(true);
 
 		String path = null;
 
@@ -834,16 +835,16 @@ public class PerformanceDataAnalyzer {
 
 		if (version2Exists) {
 			try {
-				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + "Version2/" + path
+				final BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + "Version2/" + path
 						+ "10.txt"));
 
-				String currentLine = in.readLine();
+				final String currentLine = in.readLine();
 
-				String[] data = currentLine.split(",");
+				final String[] data = currentLine.split(",");
 				version2Operations = Integer.parseInt(data[3].replaceAll(" ", ""));
 
 				in.close();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 
@@ -853,7 +854,7 @@ public class PerformanceDataAnalyzer {
 				critErResults);
 
 		try {
-			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
+			final FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
 			// add some CSS to have table border lines
 			fw.write("<style>\n" + "  table.csv * { border: 1px solid; } \n" + "</style>\n");
 
@@ -894,23 +895,23 @@ public class PerformanceDataAnalyzer {
 			fw.write("\n  <hr />  \n");
 
 			fw.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void collectDataAndEvaluate(String[] versions, String path, Integer[] range,
-			CsvTable avgResults, CsvTable stdevResults, CsvTable excepResults,
-			CsvTable critErResults) {
-		CsvTable dataTables[] = new CsvTable[versions.length];
-		CsvTable excepTables[] = new CsvTable[versions.length];
+	public static void collectDataAndEvaluate(final String[] versions, final String path, final Integer[] range,
+			final CsvTable avgResults, final CsvTable stdevResults, final CsvTable excepResults,
+			final CsvTable critErResults) {
+		final CsvTable dataTables[] = new CsvTable[versions.length];
+		final CsvTable excepTables[] = new CsvTable[versions.length];
 
-		CsvTable dataTargets[] = new CsvTable[versions.length];
-		CsvTable excepTargets[] = new CsvTable[versions.length];
+		final CsvTable dataTargets[] = new CsvTable[versions.length];
+		final CsvTable excepTargets[] = new CsvTable[versions.length];
 
-		HashMap<Integer, Integer> dataCounts[] = new HashMap[versions.length];
+		final HashMap<Integer, Integer> dataCounts[] = new HashMap[versions.length];
 
 		/*
 		 * write data in csv table for each version to calculate averages etc -
@@ -923,7 +924,7 @@ public class PerformanceDataAnalyzer {
 			dataCounts[i] = new HashMap<Integer, Integer>();
 			boolean testNotExecuted = false;
 
-			for (int X : range) {
+			for (final int X : range) {
 
 				int dataCount = 0;
 				try {
@@ -931,7 +932,7 @@ public class PerformanceDataAnalyzer {
 					 * Read data for the current version and write it in the CSV
 					 * table
 					 */
-					BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i]
+					final BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i]
 							+ "/" + path + X + ".txt"));
 
 					String currentLine = in.readLine();
@@ -939,10 +940,10 @@ public class PerformanceDataAnalyzer {
 					int excepCount = 0;
 
 					while (currentLine != null) {
-						String[] csvData = currentLine.split(",");
+						final String[] csvData = currentLine.split(",");
 
-						IRow dataRow = dataTables[i].getOrCreateRow(X + " " + dataCount, true);
-						IRow excepRow = excepTables[i].getOrCreateRow(X + " " + excepCount, true);
+						final IRow dataRow = dataTables[i].getOrCreateRow(X + " " + dataCount, true);
+						final IRow excepRow = excepTables[i].getOrCreateRow(X + " " + excepCount, true);
 
 						// csv column 9 holds the data for the average time
 						if (!csvData[9].contains("NaN")) {
@@ -961,7 +962,7 @@ public class PerformanceDataAnalyzer {
 					}
 
 					in.close();
-				} catch (FileNotFoundException e) {
+				} catch (final FileNotFoundException e) {
 					/*
 					 * Some values of X may not have been measured in older
 					 * versions, therefore write -1 in the tables. The code
@@ -971,25 +972,25 @@ public class PerformanceDataAnalyzer {
 
 					testNotExecuted = true;
 
-					IRow dataRow = dataTables[i].getOrCreateRow(X + " " + 0, true);
+					final IRow dataRow = dataTables[i].getOrCreateRow(X + " " + 0, true);
 					dataRow.setValue("X", X, true);
 					dataRow.setValue("data", -1, true);
 
-					IRow excepRow = excepTables[i].getOrCreateRow(X + " " + 0, true);
+					final IRow excepRow = excepTables[i].getOrCreateRow(X + " " + 0, true);
 					excepRow.setValue("X", X, true);
 					excepRow.setValue("data", -1, true);
 
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					e.printStackTrace();
 				}
 
 				dataCounts[i].put(X, dataCount);
 
-				IRow critEr = critErResults.getOrCreateRow(X + " " + 0, true);
+				final IRow critEr = critErResults.getOrCreateRow(X + " " + 0, true);
 				critEr.setValue("0-X", X, false);
 
 				try {
-					BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i]
+					final BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i]
 							+ "/" + path + X + "CriticalErrors.txt"));
 
 					/*
@@ -1015,20 +1016,20 @@ public class PerformanceDataAnalyzer {
 						 * measured, hence every execution resulted in a
 						 * critical error
 						 */
-						critEr.setValue((i + 1) + "-" + versions[i], "1.0", true);
+						critEr.setValue(i + 1 + "-" + versions[i], "1.0", true);
 					} else {
-						critEr.setValue((i + 1) + "-" + versions[i], round((double) (count)
+						critEr.setValue(i + 1 + "-" + versions[i], round((double) count
 								/ dataCount), true);
 					}
 
 					in.close();
 
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					if (versions[i].equals("Version2")) {
 						/*
 						 * critical errors weren't measured for version 2
 						 */
-						critEr.setValue((i + 1) + "-" + versions[i], "N/A", true);
+						critEr.setValue(i + 1 + "-" + versions[i], "N/A", true);
 					} else {
 						if (testNotExecuted) {
 							/*
@@ -1042,7 +1043,7 @@ public class PerformanceDataAnalyzer {
 							 * will never be written, since it can't be
 							 * measured)
 							 */
-							critEr.setValue((i + 1) + "-" + versions[i], "N/A", true);
+							critEr.setValue(i + 1 + "-" + versions[i], "N/A", true);
 						} else {
 							/*
 							 * Test was executed and the file for critical
@@ -1051,40 +1052,40 @@ public class PerformanceDataAnalyzer {
 							 * such file exists, no critical error happened
 							 */
 
-							critEr.setValue((i + 1) + "-" + versions[i], "0", true);
+							critEr.setValue(i + 1 + "-" + versions[i], "0", true);
 						}
 					}
 				}
 			}
 
 			dataTargets[i] = new CsvTable();
-			TableTools.groupBy(dataTables[i], Arrays.asList("X"), Collections.EMPTY_LIST,
+			TableCoreTools.groupBy(dataTables[i], Arrays.asList("X"), Collections.EMPTY_LIST,
 					Arrays.asList("data"), Collections.EMPTY_LIST, dataTargets[i]);
 
 			excepTargets[i] = new CsvTable();
-			TableTools.groupBy(excepTables[i], Arrays.asList("X"), Collections.EMPTY_LIST,
+			TableCoreTools.groupBy(excepTables[i], Arrays.asList("X"), Collections.EMPTY_LIST,
 					Arrays.asList("data"), Collections.EMPTY_LIST, excepTargets[i]);
 		}
 
 		// write table in final result tables
-		for (int rowX : range) {
-			IRow avgResultRow = avgResults.getOrCreateRow("" + rowX, true);
-			IRow stdevResultRow = stdevResults.getOrCreateRow("" + rowX, true);
-			IRow excepResultRow = excepResults.getOrCreateRow("" + rowX, true);
+		for (final int rowX : range) {
+			final IRow avgResultRow = avgResults.getOrCreateRow("" + rowX, true);
+			final IRow stdevResultRow = stdevResults.getOrCreateRow("" + rowX, true);
+			final IRow excepResultRow = excepResults.getOrCreateRow("" + rowX, true);
 
 			avgResultRow.setValue("0-X", rowX, true);
 			stdevResultRow.setValue("0-X", rowX, true);
 			excepResultRow.setValue("0-X", rowX, true);
 
 			int column = 1;
-			Double[] avgTimes = new Double[versions.length];
-			Double[] stdevs = new Double[versions.length];
+			final Double[] avgTimes = new Double[versions.length];
+			final Double[] stdevs = new Double[versions.length];
 
 			for (int i = 0; i < versions.length; i++, column++) {
 				try {
 					avgTimes[i] = Double.parseDouble(dataTargets[i].getValue("" + rowX, "data"
 							+ "--average"));
-				} catch (NullPointerException e) {
+				} catch (final NullPointerException e) {
 					/*
 					 * Happens when each and every line in the read file has
 					 * "NaN" as the average time. This usual only happens when
@@ -1098,7 +1099,7 @@ public class PerformanceDataAnalyzer {
 				try {
 					stdevs[i] = Double.parseDouble(dataTargets[i].getValue("" + rowX, "data"
 							+ "--stdev"));
-				} catch (NullPointerException e) {
+				} catch (final NullPointerException e) {
 					/*
 					 * Happens when each and every line in the read file has
 					 * "NaN" as the average time. This usual only happens when
@@ -1121,7 +1122,7 @@ public class PerformanceDataAnalyzer {
 					avgResultRow.setValue(column + "-" + versions[i] + " (ms)", avgTimes[i], true);
 				}
 
-				Integer dataCount = dataCounts[i].get(rowX);
+				final Integer dataCount = dataCounts[i].get(rowX);
 				// System.out.println(dataCount);
 				if (dataCount == 0) {
 					avgResultRow.setValue(column + "-" + versions[i] + "- Amount", "N/A", true);
@@ -1137,7 +1138,7 @@ public class PerformanceDataAnalyzer {
 							true);
 				}
 
-				double excep = Double.parseDouble(excepTargets[i].getValue("" + rowX, "data"
+				final double excep = Double.parseDouble(excepTargets[i].getValue("" + rowX, "data"
 						+ "--average"));
 				// Check whether excep was correctly calculated
 				if (excep < 0) {
@@ -1154,7 +1155,7 @@ public class PerformanceDataAnalyzer {
 					normAvg = -1.0;
 				}
 
-				Double normStdev = (stdevs[versions.length - 1] / stdevs[i]) * 100;
+				Double normStdev = stdevs[versions.length - 1] / stdevs[i] * 100;
 
 				if (normAvg < 0 || Double.isInfinite(normAvg)) {
 					avgResultRow.setValue(column + "-" + versions[versions.length - 1] + "/"
@@ -1179,8 +1180,8 @@ public class PerformanceDataAnalyzer {
 	}
 
 	// rounds to #.### format
-	private static String round(Double d) {
-		long rounded = (long) (d * 1000);
+	private static String round(final Double d) {
+		final long rounded = (long) (d * 1000);
 
 		return "" + rounded / 1000 + "." + rounded % 1000;
 	}

@@ -10,7 +10,7 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * See {@link AbstractXydraOut#Type} = Array, Child, Element, Entry, Map, Root,
  * Text
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(true)
@@ -20,7 +20,7 @@ public class XmlOut extends AbstractXydraOut {
 
 	public static final String CONTENT_TYPE_XML = "application/xml";
 
-	public XmlOut(MiniWriter writer) {
+	public XmlOut(final MiniWriter writer) {
 		this(writer, true);
 	}
 
@@ -28,17 +28,17 @@ public class XmlOut extends AbstractXydraOut {
 		this(true);
 	}
 
-	public XmlOut(MiniWriter writer, boolean writeHeader) {
+	public XmlOut(final MiniWriter writer, final boolean writeHeader) {
 		super(writer);
 		init(writeHeader);
 	}
 
-	public XmlOut(boolean writeHeader) {
+	public XmlOut(final boolean writeHeader) {
 		super();
 		init(writeHeader);
 	}
 
-	private void init(boolean writeHeader) {
+	private void init(final boolean writeHeader) {
 		if (!writeHeader) {
 			return;
 		}
@@ -48,7 +48,7 @@ public class XmlOut extends AbstractXydraOut {
 	}
 
 	@Override
-	protected <T> void outputAttribute(Frame element, String name, T value) {
+	protected <T> void outputAttribute(final Frame element, final String name, final T value) {
 		write(" ");
 		write(name);
 		write("=\"");
@@ -57,11 +57,11 @@ public class XmlOut extends AbstractXydraOut {
 	}
 
 	@Override
-	protected void outputChild(Frame child) {
+	protected void outputChild(final Frame child) {
 		child.depth = child.parent.depth;
 	}
 
-	Frame getElement(Frame frame) {
+	Frame getElement(final Frame frame) {
 
 		Frame element = frame;
 
@@ -90,9 +90,9 @@ public class XmlOut extends AbstractXydraOut {
 		return null;
 	}
 
-	private void begin(Frame frame) {
+	private void begin(final Frame frame) {
 
-		Frame element = getElement(frame);
+		final Frame element = getElement(frame);
 
 		if (element.type != Type.Root) {
 			if (!element.hasContent) {
@@ -105,7 +105,7 @@ public class XmlOut extends AbstractXydraOut {
 	}
 
 	@Override
-	protected void outputCloseElement(Frame element) {
+	protected void outputCloseElement(final Frame element) {
 
 		if (element.hasContent) {
 			if (!element.hasSpecialContent) {
@@ -122,7 +122,7 @@ public class XmlOut extends AbstractXydraOut {
 	}
 
 	@Override
-	protected <T> void outputValue(Frame container, T value) {
+	protected <T> void outputValue(final Frame container, final T value) {
 
 		if (isInlined(container)) {
 
@@ -132,7 +132,7 @@ public class XmlOut extends AbstractXydraOut {
 				outputAttribute(container, XmlEncoder.NULL_CONTENT_ATTRIBUTE,
 						XmlEncoder.NULL_CONTENT_VALUE);
 			} else {
-				String valueStr = value.toString();
+				final String valueStr = value.toString();
 				if (!valueStr.isEmpty()) {
 					write('>');
 					write(XmlEncoder.encode(valueStr));
@@ -146,12 +146,12 @@ public class XmlOut extends AbstractXydraOut {
 
 			begin(container);
 
-			String type = container.getChildType(XmlEncoder.XVALUE_ELEMENT);
+			final String type = container.getChildType(XmlEncoder.XVALUE_ELEMENT);
 
 			write('<');
 			write(type);
 			outputId(container);
-			String valueStr = value.toString();
+			final String valueStr = value.toString();
 			if (valueStr.isEmpty()) {
 				write("/>");
 			} else {
@@ -166,12 +166,12 @@ public class XmlOut extends AbstractXydraOut {
 
 	}
 
-	private static boolean isInlined(Frame container) {
+	private static boolean isInlined(final Frame container) {
 		return container.type == Type.Child && !container.hasChildType();
 	}
 
 	@Override
-	protected void outputNullElement(Frame container) {
+	protected void outputNullElement(final Frame container) {
 
 		begin(container);
 
@@ -189,7 +189,7 @@ public class XmlOut extends AbstractXydraOut {
 	}
 
 	@Override
-	protected void outputOpenElement(Frame element) {
+	protected void outputOpenElement(final Frame element) {
 
 		begin(element.parent);
 
@@ -201,12 +201,12 @@ public class XmlOut extends AbstractXydraOut {
 	}
 
 	@Override
-	protected void outputBeginArray(Frame array) {
+	protected void outputBeginArray(final Frame array) {
 		beginContainer(array, XmlEncoder.XARRAY_ELEMENT);
 	}
 
 	@Override
-	protected void outputEndArray(Frame array) {
+	protected void outputEndArray(final Frame array) {
 		endContainer(array, XmlEncoder.XARRAY_ELEMENT);
 	}
 
@@ -221,11 +221,11 @@ public class XmlOut extends AbstractXydraOut {
 	}
 
 	@Override
-	protected void outputBeginMap(Frame map) {
+	protected void outputBeginMap(final Frame map) {
 		beginContainer(map, XmlEncoder.XMAP_ELEMENT);
 	}
 
-	private void beginContainer(Frame container, String type) {
+	private void beginContainer(final Frame container, final String type) {
 		if (isInlined(container.parent)) {
 
 			XyAssert.xyAssert(!container.parent.parent.hasContent);
@@ -244,11 +244,11 @@ public class XmlOut extends AbstractXydraOut {
 	}
 
 	@Override
-	protected void outputEndMap(Frame map) {
+	protected void outputEndMap(final Frame map) {
 		endContainer(map, XmlEncoder.XMAP_ELEMENT);
 	}
 
-	private void endContainer(Frame container, String type) {
+	private void endContainer(final Frame container, final String type) {
 
 		if (isInlined(container.parent)) {
 			// do nothing
@@ -268,11 +268,11 @@ public class XmlOut extends AbstractXydraOut {
 	}
 
 	@Override
-	protected void outputEntry(Frame entry) {
+	protected void outputEntry(final Frame entry) {
 		entry.depth = entry.parent.depth;
 	}
 
-	private void outputId(Frame container) {
+	private void outputId(final Frame container) {
 		if (container.type == Type.Entry) {
 			outputAttribute(null, container.parent.name, container.name);
 		}

@@ -4,11 +4,11 @@ public class CapabilityDisabledException extends RuntimeException {
 
 	private static final long serialVersionUID = 5181603692209183255L;
 
-	public CapabilityDisabledException(String msg, Throwable cause) {
+	public CapabilityDisabledException(final String msg, final Throwable cause) {
 		super(msg, cause);
 	}
 
-	public CapabilityDisabledException(String msg) {
+	public CapabilityDisabledException(final String msg) {
 		super(msg);
 	}
 

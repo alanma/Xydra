@@ -22,14 +22,14 @@ import org.xydra.log.api.LoggerFactory;
 public class XmlStreamParser implements XydraStreamParser {
 
 	@Override
-	public boolean parse(MiniReader miniReader, XmlOut xmlOut) throws IllegalArgumentException {
-		MiniReaderToReader reader = new MiniReaderToReader(miniReader);
-		InputSource is = new InputSource(reader);
+	public boolean parse(final MiniReader miniReader, final XmlOut xmlOut) throws IllegalArgumentException {
+		final MiniReaderToReader reader = new MiniReaderToReader(miniReader);
+		final InputSource is = new InputSource(reader);
 
-		XmlOutHandler handler = new XmlOutHandler(xmlOut);
+		final XmlOutHandler handler = new XmlOutHandler(xmlOut);
 		try {
 			getParser().parse(is, handler);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new IllegalArgumentException(e);
 		}
 		return true;
@@ -39,41 +39,41 @@ public class XmlStreamParser implements XydraStreamParser {
 
 	static class XmlOutHandler extends DefaultHandler implements EntityResolver, DTDHandler,
 			ContentHandler, ErrorHandler {
-		public XmlOutHandler(XmlOut xout) {
+		public XmlOutHandler(final XmlOut xout) {
 			this.xout = xout;
 		}
 
-		private XmlOut xout;
+		private final XmlOut xout;
 
 		@Override
-		public void warning(SAXParseException exception) throws SAXException {
+		public void warning(final SAXParseException exception) throws SAXException {
 			log.warn("xml", exception);
 		}
 
 		@Override
-		public void error(SAXParseException exception) throws SAXException {
+		public void error(final SAXParseException exception) throws SAXException {
 			log.warn("xml", exception);
 		}
 
 		@Override
-		public void fatalError(SAXParseException exception) throws SAXException {
+		public void fatalError(final SAXParseException exception) throws SAXException {
 			log.error("xml", exception);
 		}
 
 		@Override
-		public void startElement(String uri, String localName, String qName, Attributes atts)
+		public void startElement(final String uri, final String localName, final String qName, final Attributes atts)
 				throws SAXException {
 			maybeEmitCharacters();
 			this.xout.open(qName);
 			for (int i = 0; i < atts.getLength(); i++) {
-				String name = atts.getQName(i);
-				String value = atts.getValue(i);
+				final String name = atts.getQName(i);
+				final String value = atts.getValue(i);
 				this.xout.attribute(name, value);
 			}
 		}
 
 		@Override
-		public void endElement(String uri, String localName, String qName) throws SAXException {
+		public void endElement(final String uri, final String localName, final String qName) throws SAXException {
 			maybeEmitCharacters();
 			this.xout.close(qName);
 		}
@@ -87,7 +87,7 @@ public class XmlStreamParser implements XydraStreamParser {
 		}
 
 		@Override
-		public void characters(char[] ch, int start, int length) throws SAXException {
+		public void characters(final char[] ch, final int start, final int length) throws SAXException {
 			if (this.charBuffer == null) {
 				this.charBuffer = new StringBuilder();
 			}

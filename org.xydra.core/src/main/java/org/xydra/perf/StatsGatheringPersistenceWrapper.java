@@ -24,117 +24,117 @@ import org.xydra.persistence.XydraPersistence;
 /**
  * A wrapper around a {@link XydraPersistence} that monitors statistics on call
  * number and time spent.
- * 
+ *
  * IMPROVE Profile also tentative methods
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(true)
 public class StatsGatheringPersistenceWrapper implements XydraPersistence {
-	
+
 	private static final Logger log = LoggerFactory
 	        .getLogger(StatsGatheringPersistenceWrapper.class);
-	
-	private XydraPersistence basePersistence;
-	
+
+	private final XydraPersistence basePersistence;
+
 	public static StatsGatheringPersistenceWrapper INSTANCE = null;
-	
+
 	public static boolean isEnabled() {
 		return INSTANCE != null;
 	}
-	
-	private Stats stats = new Stats();
-	
+
+	private final Stats stats = new Stats();
+
 	@Override
 	public void clear() {
-		Clock c = this.stats.startClock("clear");
+		final Clock c = this.stats.startClock("clear");
 		this.basePersistence.clear();
 		c.stop();
 	}
-	
+
 	@Override
-	public long executeCommand(XId actorId, XCommand command) {
-		Clock c = this.stats.startClock("executeCommand");
-		long result = this.basePersistence.executeCommand(actorId, command);
+	public long executeCommand(final XId actorId, final XCommand command) {
+		final Clock c = this.stats.startClock("executeCommand");
+		final long result = this.basePersistence.executeCommand(actorId, command);
 		c.stop();
 		return result;
 	}
-	
+
 	@Override
-	public List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision) {
-		Clock c = this.stats.startClock("getEvents");
-		List<XEvent> result = this.basePersistence.getEvents(address, beginRevision, endRevision);
+	public List<XEvent> getEvents(final XAddress address, final long beginRevision, final long endRevision) {
+		final Clock c = this.stats.startClock("getEvents");
+		final List<XEvent> result = this.basePersistence.getEvents(address, beginRevision, endRevision);
 		c.stop();
 		return result;
 	}
-	
+
 	@Override
 	public Set<XId> getManagedModelIds() {
-		Clock c = this.stats.startClock("getModelIds");
-		Set<XId> result = this.basePersistence.getManagedModelIds();
+		final Clock c = this.stats.startClock("getModelIds");
+		final Set<XId> result = this.basePersistence.getManagedModelIds();
 		c.stop();
 		return result;
 	}
-	
+
 	@Override
-	public ModelRevision getModelRevision(GetWithAddressRequest addressRequest) {
-		Clock c = this.stats.startClock("getModelRevision");
-		ModelRevision result = this.basePersistence.getModelRevision(addressRequest);
+	public ModelRevision getModelRevision(final GetWithAddressRequest addressRequest) {
+		final Clock c = this.stats.startClock("getModelRevision");
+		final ModelRevision result = this.basePersistence.getModelRevision(addressRequest);
 		c.stop();
 		return result;
 	}
-	
+
 	@Override
-	public XWritableModel getModelSnapshot(GetWithAddressRequest addressRequest) {
-		Clock c = this.stats.startClock("getModelSnapshot");
-		XWritableModel result = this.basePersistence.getModelSnapshot(addressRequest);
+	public XWritableModel getModelSnapshot(final GetWithAddressRequest addressRequest) {
+		final Clock c = this.stats.startClock("getModelSnapshot");
+		final XWritableModel result = this.basePersistence.getModelSnapshot(addressRequest);
 		c.stop();
 		return result;
 	}
-	
+
 	@Override
-	public XWritableObject getObjectSnapshot(GetWithAddressRequest addressRequest) {
-		Clock c = this.stats.startClock("getObjectSnapshot");
-		XWritableObject result = this.basePersistence.getObjectSnapshot(addressRequest);
+	public XWritableObject getObjectSnapshot(final GetWithAddressRequest addressRequest) {
+		final Clock c = this.stats.startClock("getObjectSnapshot");
+		final XWritableObject result = this.basePersistence.getObjectSnapshot(addressRequest);
 		c.stop();
 		return result;
 	}
-	
+
 	@Override
 	public XId getRepositoryId() {
-		Clock c = this.stats.startClock("getRepositoryId");
-		XId result = this.basePersistence.getRepositoryId();
+		final Clock c = this.stats.startClock("getRepositoryId");
+		final XId result = this.basePersistence.getRepositoryId();
 		c.stop();
 		return result;
 	}
-	
+
 	@Override
-	public boolean hasManagedModel(XId modelId) {
-		Clock c = this.stats.startClock("hasModel");
-		boolean result = this.basePersistence.hasManagedModel(modelId);
+	public boolean hasManagedModel(final XId modelId) {
+		final Clock c = this.stats.startClock("hasModel");
+		final boolean result = this.basePersistence.hasManagedModel(modelId);
 		c.stop();
 		return result;
 	}
-	
+
 	public void dumpStats() {
-		MiniStringWriter sw = new MiniStringWriter();
+		final MiniStringWriter sw = new MiniStringWriter();
 		try {
 			writeStats(sw);
-		} catch(MiniIOException e) {
+		} catch(final MiniIOException e) {
 			throw new RuntimeException(e);
 		}
 		log.info(sw.toString());
 	}
-	
-	public void writeStats(MiniWriter w) throws MiniIOException {
+
+	public void writeStats(final MiniWriter w) throws MiniIOException {
 		w.write("XydraPersistence stats ----------\n");
 		this.stats.writeStats(w);
 	}
-	
+
 	/**
 	 * @param persistence a {@link XydraPersistence}
 	 */
-	public StatsGatheringPersistenceWrapper(XydraPersistence persistence) {
+	public StatsGatheringPersistenceWrapper(final XydraPersistence persistence) {
 		super();
 		this.basePersistence = persistence;
 		// hack to have first instance also available statically for easy
@@ -145,7 +145,7 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 			log.warn("Create new stats-instance that is not availalbe statically");
 		}
 	}
-	
+
 	public static void staticDumpStats() {
 		if(INSTANCE == null) {
 			log.warn("No StatsPersistence has been created");
@@ -153,9 +153,9 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 			INSTANCE.dumpStats();
 		}
 	}
-	
+
 	public XydraPersistence getBasePersistence() {
 		return this.basePersistence;
 	}
-	
+
 }

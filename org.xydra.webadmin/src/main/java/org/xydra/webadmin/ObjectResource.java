@@ -5,6 +5,7 @@ import java.io.Writer;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.XX;
@@ -23,7 +24,7 @@ public class ObjectResource {
 
 	public static final String PAGE_NAME = "Object";
 
-	public static void restless(Restless restless, String prefix) {
+	public static void restless(final Restless restless, final String prefix) {
 
 		restless.addMethod(prefix + "/{repoId}/{modelId}/{objectId}/", "GET", ObjectResource.class,
 				"index", true,
@@ -35,20 +36,20 @@ public class ObjectResource {
 
 	}
 
-	public static void index(String repoIdStr, String modelIdStr, String objectIdStr, String style,
-			HttpServletResponse res) throws IOException {
+	public static void index(final String repoIdStr, final String modelIdStr, final String objectIdStr, final String style,
+			final HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		XAddress objectAddress = XX.toAddress(XX.toId(repoIdStr), XX.toId(modelIdStr),
-				XX.toId(objectIdStr), null);
+		final XAddress objectAddress = Base.toAddress(Base.toId(repoIdStr), Base.toId(modelIdStr),
+				Base.toId(objectIdStr), null);
 
-		Writer w = Utils.startPage(res, PAGE_NAME, objectAddress.toString());
+		final Writer w = Utils.startPage(res, PAGE_NAME, objectAddress.toString());
 		render(w, objectAddress, style);
 		Utils.endPage(w);
 	}
 
-	public static void render(Writer w, XAddress objectAddress, String style) throws IOException {
-		XydraPersistence p = Utils.createPersistence(objectAddress.getRepository());
-		XWritableObject obj = p.getObjectSnapshot(new GetWithAddressRequest(objectAddress,
+	public static void render(final Writer w, final XAddress objectAddress, final String style) throws IOException {
+		final XydraPersistence p = Utils.createPersistence(objectAddress.getRepository());
+		final XWritableObject obj = p.getObjectSnapshot(new GetWithAddressRequest(objectAddress,
 				ModelResource.INCLUDE_TENTATIVE));
 		if (obj != null) {
 			w.write("rev=" + obj.getRevisionNumber() + "<br/>\n");

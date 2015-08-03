@@ -21,18 +21,18 @@ import org.xydra.oo.generator.java.JavaCodeGenerator;
 
 /**
  * Writes ...Spec data objects into Java source code via {@link CodeWriter}.
- * 
+ *
  * @author xamde
  */
 public class SpecWriter {
 
 	private static final Logger log = LoggerFactory.getLogger(JavaCodeGenerator.class);
 
-	static void writeClass(Writer w, ClassSpec classSpec) throws IOException {
+	static void writeClass(final Writer w, final ClassSpec classSpec) throws IOException {
 		writeClass(w, classSpec.getPackageName(), classSpec);
 	}
 
-	public static void writeClass(Writer w, String packageName, ClassSpec classSpec)
+	public static void writeClass(final Writer w, final String packageName, final ClassSpec classSpec)
 			throws IOException {
 		// package org.xydra.oo.test.tasks;
 		//
@@ -41,10 +41,10 @@ public class SpecWriter {
 
 		// import java.util.*;
 		// import org.xydra.oo.*;
-		List<String> imports = new ArrayList<String>();
+		final List<String> imports = new ArrayList<String>();
 		imports.addAll(classSpec.getRequiredImports());
 		Collections.sort(imports);
-		for (String imp : imports) {
+		for (final String imp : imports) {
 			w.write("import " + imp + ";\n");
 		}
 		w.write("\n");
@@ -67,7 +67,7 @@ public class SpecWriter {
 		if (!classSpec.implementedInterfaces.isEmpty()) {
 			w.write(" implements ");
 			for (int i = 0; i < classSpec.implementedInterfaces.size(); i++) {
-				String s = classSpec.implementedInterfaces.get(i);
+				final String s = classSpec.implementedInterfaces.get(i);
 				w.write(s);
 				if (i + 1 < classSpec.implementedInterfaces.size()) {
 					w.write(", ");
@@ -84,27 +84,27 @@ public class SpecWriter {
 		w.write("}\n");
 	}
 
-	public static void writeClassMethod(Writer w, String indent, MethodSpec method)
+	public static void writeClassMethod(final Writer w, final String indent, final MethodSpec method)
 			throws IOException {
 		writeMethodHead(w, indent, method);
 		writeMethodBody(w, indent, method);
 	}
 
-	public static void writeInterfaceMethod(Writer w, String indent, MethodSpec method)
+	public static void writeInterfaceMethod(final Writer w, final String indent, final MethodSpec method)
 			throws IOException {
 		writeMethodHead(w, indent, method);
 		w.write(";\n");
 	}
 
-	public static void writeMethodComment(Writer w, String indent,
-			AbstractConstructorOrMethodSpec methodOrConstructor) throws IOException {
-		StringBuilder comment = new StringBuilder();
+	public static void writeMethodComment(final Writer w, final String indent,
+			final AbstractConstructorOrMethodSpec methodOrConstructor) throws IOException {
+		final StringBuilder comment = new StringBuilder();
 		if (methodOrConstructor.getComment() != null) {
 			comment.append(methodOrConstructor.getComment());
 			comment.append("\n");
 			comment.append("\n");
 		}
-		for (FieldSpec p : methodOrConstructor.params) {
+		for (final FieldSpec p : methodOrConstructor.params) {
 			comment.append("@param ");
 			comment.append(p.getName());
 			comment.append(" ");
@@ -112,7 +112,7 @@ public class SpecWriter {
 			comment.append("\n");
 		}
 		if (methodOrConstructor instanceof MethodSpec) {
-			MethodSpec method = (MethodSpec) methodOrConstructor;
+			final MethodSpec method = (MethodSpec) methodOrConstructor;
 			if (!method.isVoid()) {
 				comment.append("@return ");
 				comment.append(method.returnType.getComment() == null ? "..." : method.returnType
@@ -123,27 +123,29 @@ public class SpecWriter {
 		CodeWriter.writeJavaDocComment(w, indent, comment.toString());
 	}
 
-	static void writeMethodHead(Writer w, String indent, MethodSpec method) throws IOException {
-		for (AnnotationSpec<?> ann : method.annotations) {
+	static void writeMethodHead(final Writer w, final String indent, final MethodSpec method) throws IOException {
+		for (final AnnotationSpec<?> ann : method.annotations) {
 			CodeWriter.writeAnnotation(w, indent, ann.annot.getSimpleName(), ann.getValues());
 		}
 		w.write(indent);
 		w.write(method.getModifiers());
-		if (method.getModifiers().length() > 0)
+		if (method.getModifiers().length() > 0) {
 			w.write(" ");
+		}
 		w.write(method.getReturnTypeString());
 		w.write(" ");
 		w.write(method.getName());
 		writeMethodParams(w, method);
 	}
 
-	private static void writeMethodParams(Writer w, AbstractConstructorOrMethodSpec com)
+	private static void writeMethodParams(final Writer w, final AbstractConstructorOrMethodSpec com)
 			throws IOException {
 		w.write("(");
 		boolean first = true;
-		for (FieldSpec p : com.params) {
-			if (!first)
+		for (final FieldSpec p : com.params) {
+			if (!first) {
 				w.write(", ");
+			}
 			w.write(p.getTypeString());
 			w.write(" ");
 			w.write(p.getName());
@@ -153,7 +155,7 @@ public class SpecWriter {
 
 	}
 
-	public static void writeConstructor(Writer w, String indent, ConstructorSpec method)
+	public static void writeConstructor(final Writer w, final String indent, final ConstructorSpec method)
 			throws IOException {
 		w.write(indent);
 		w.write("public ");
@@ -162,37 +164,38 @@ public class SpecWriter {
 		writeMethodBody(w, indent, method);
 	}
 
-	private static void writeMethodBody(Writer w, String indent, AbstractConstructorOrMethodSpec com)
+	private static void writeMethodBody(final Writer w, final String indent, final AbstractConstructorOrMethodSpec com)
 			throws IOException {
 		if (com instanceof MethodSpec && ((MethodSpec) com).isAbstract()) {
 			w.write(";\n");
 		} else {
 			w.write(" {\n");
-			for (String line : com.sourceLines) {
+			for (final String line : com.sourceLines) {
 				w.write(indent + "    " + line + "\n");
 			}
 			w.write(indent + "}\n");
 		}
 	}
 
-	public static void writeClass(ClassSpec classSpec, File outDir) throws IOException {
-		if (classSpec.isBuiltIn())
+	public static void writeClass(final ClassSpec classSpec, final File outDir) throws IOException {
+		if (classSpec.isBuiltIn()) {
 			return;
+		}
 
-		File javaFile = CodeWriter.toJavaSourceFile(outDir, classSpec.getPackageName(),
+		final File javaFile = CodeWriter.toJavaSourceFile(outDir, classSpec.getPackageName(),
 				classSpec.getName());
-		Writer w = CodeWriter.openWriter(javaFile);
+		final Writer w = CodeWriter.openWriter(javaFile);
 		writeClass(w, classSpec);
 		w.close();
 	}
 
-	public static void writePackage(PackageSpec packageSpec, File outDir) throws IOException {
+	public static void writePackage(final PackageSpec packageSpec, final File outDir) throws IOException {
 		log.info("Writing package " + packageSpec.getFQPackageName() + " to "
 				+ outDir.getAbsolutePath());
 
 		if (!packageSpec.isBuiltIn()) {
 			int i = 0;
-			for (ClassSpec classSpec : packageSpec.classes) {
+			for (final ClassSpec classSpec : packageSpec.classes) {
 				ClassSpec currentClass = classSpec;
 
 				while (currentClass != null) {
@@ -204,7 +207,7 @@ public class SpecWriter {
 			}
 			log.info("Wrote " + i + " files");
 		}
-		for (PackageSpec subPackage : packageSpec.subPackages) {
+		for (final PackageSpec subPackage : packageSpec.subPackages) {
 			writePackage(subPackage, outDir);
 		}
 	}
@@ -214,20 +217,20 @@ public class SpecWriter {
 	 * @param classSpec
 	 * @throws IOException
 	 */
-	public static void writeMethodsAndFields(Writer w, ClassSpec classSpec) throws IOException {
-		String indent = "    ";
-		for (IMember t : classSpec.members) {
+	public static void writeMethodsAndFields(final Writer w, final ClassSpec classSpec) throws IOException {
+		final String indent = "    ";
+		for (final IMember t : classSpec.members) {
 			if (t instanceof FieldSpec) {
-				FieldSpec fieldSpec = (FieldSpec) t;
+				final FieldSpec fieldSpec = (FieldSpec) t;
 				writeFieldComment(w, indent, fieldSpec);
 				writeField(w, indent, fieldSpec);
 			} else if (t instanceof ConstructorSpec) {
-				ConstructorSpec constructorSpec = (ConstructorSpec) t;
+				final ConstructorSpec constructorSpec = (ConstructorSpec) t;
 				writeMethodComment(w, indent, constructorSpec);
 				writeConstructor(w, indent, constructorSpec);
 			} else {
 				assert t instanceof MethodSpec;
-				MethodSpec methodSpec = (MethodSpec) t;
+				final MethodSpec methodSpec = (MethodSpec) t;
 				writeMethodComment(w, indent, methodSpec);
 				if (classSpec.kind.equals("interface")) {
 					writeInterfaceMethod(w, indent, methodSpec);
@@ -240,14 +243,15 @@ public class SpecWriter {
 
 	}
 
-	private static void writeField(Writer w, String indent, FieldSpec fieldSpec) throws IOException {
+	private static void writeField(final Writer w, final String indent, final FieldSpec fieldSpec) throws IOException {
 		CodeWriter.writeField(w, indent, fieldSpec.getTypeString(), fieldSpec.getName());
 	}
 
-	private static void writeFieldComment(Writer w, String indent, FieldSpec fieldSpec)
+	private static void writeFieldComment(final Writer w, final String indent, final FieldSpec fieldSpec)
 			throws IOException {
-		if (fieldSpec.getComment() == null)
+		if (fieldSpec.getComment() == null) {
 			return;
+		}
 		CodeWriter.writeJavaDocComment(w, indent, fieldSpec.getComment());
 	}
 

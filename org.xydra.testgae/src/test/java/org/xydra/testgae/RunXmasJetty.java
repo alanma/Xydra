@@ -15,14 +15,14 @@ import org.xydra.xgae.gaeutils.GaeTestfixer;
  * This class is starts a Jetty server configured to allow testing of the
  * webapp, loading static files directly from src/main/webapp. This class is not
  * required to run the webapp.
- * 
+ *
  * @author xamde
  */
 public class RunXmasJetty {
 
 	private static final Logger log = LoggerFactory.getLogger(RunXmasJetty.class);
 
-	public static void main(String[] args) throws Exception {
+	public static void main(final String[] args) throws Exception {
 		/*
 		 * Enable tests with GAE (especially mail)
 		 */
@@ -35,14 +35,14 @@ public class RunXmasJetty {
 		CopyGwt.copyGwt();
 
 		// start jetty
-		Jetty jetty = new Jetty();
+		final Jetty jetty = new Jetty();
 
-		IConfig conf = Env.get().conf();
+		final IConfig conf = Env.get().conf();
 		new ConfParamsJetty().configureDefaults(conf);
 
 		conf.setLong(ConfParamsJetty.PORT, 8787);
 		conf.set(ConfParamsJetty.DOC_ROOT, "src/main/webapp");
-		URI uri = jetty.startServer();
+		final URI uri = jetty.startServer();
 
 		log.info("Started embedded Jetty server. User interface is at " + uri.toString());
 	}

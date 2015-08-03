@@ -2,6 +2,7 @@ package org.xydra.store.rmof.impl.delegate;
 
 import java.util.Iterator;
 
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -17,43 +18,43 @@ import org.xydra.sharedutils.XyAssert;
 
 public class WritableObjectOnPersistence extends AbstractWritableOnPersistence implements
         XWritableObject {
-    
-    private XId modelId;
-    
-    private XId objectId;
-    
-    public WritableObjectOnPersistence(XydraPersistence persistence, XId executingActorId,
-            XId modelId, XId objectId) {
+
+    private final XId modelId;
+
+    private final XId objectId;
+
+    public WritableObjectOnPersistence(final XydraPersistence persistence, final XId executingActorId,
+            final XId modelId, final XId objectId) {
         super(persistence, executingActorId);
         this.modelId = modelId;
         this.objectId = objectId;
     }
-    
+
     @Override
-    public XWritableField createField(XId fieldId) {
+    public XWritableField createField(final XId fieldId) {
         // assume model and object exist
-        XWritableField field = this.getField(fieldId);
+        final XWritableField field = getField(fieldId);
         if(field != null) {
             return field;
         }
         // else: create in persistence
-        XCommand command = X.getCommandFactory().createAddFieldCommand(getAddress(), fieldId, true);
+        final XCommand command = BaseRuntime.getCommandFactory().createAddFieldCommand(getAddress(), fieldId, true);
         this.persistence.executeCommand(this.executingActorId, command);
         return getField(fieldId);
     }
-    
+
     @Override
     public XAddress getAddress() {
         /* cache object after construction */
         if(this.address == null) {
-            this.address = X.getIDProvider().fromComponents(this.persistence.getRepositoryId(),
+            this.address = BaseRuntime.getIDProvider().fromComponents(this.persistence.getRepositoryId(),
                     this.modelId, this.objectId, null);
         }
         return this.address;
     }
-    
+
     @Override
-    public XWritableField getField(XId fieldId) {
+    public XWritableField getField(final XId fieldId) {
         if(hasField(fieldId)) {
             // make sure changes to object are reflected in persistence
             return new WritableFieldOnPersistence(this.persistence, this.executingActorId,
@@ -62,70 +63,70 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
             return null;
         }
     }
-    
+
     @Override
     public XId getId() {
         return this.objectId;
     }
-    
+
     /**
      * @return always a fresh snapshot from the {@link XydraPersistence}
      */
     private XWritableObject getObjectSnapshot() {
         return this.persistence.getObjectSnapshot(new GetWithAddressRequest(getAddress(),
                 WritableRepositoryOnPersistence.USE_TENTATIVE_STATE));
-        
+
     }
-    
+
     @Override
     public long getRevisionNumber() {
         return getObjectSnapshot().getRevisionNumber();
     }
-    
+
     @Override
-    public boolean hasField(XId fieldId) {
-        XWritableObject snapshot = getObjectSnapshot();
+    public boolean hasField(final XId fieldId) {
+        final XWritableObject snapshot = getObjectSnapshot();
         return snapshot != null && snapshot.hasField(fieldId);
     }
-    
+
     @Override
     public boolean isEmpty() {
-        XWritableObject snapshot = getObjectSnapshot();
+        final XWritableObject snapshot = getObjectSnapshot();
         return snapshot == null || snapshot.isEmpty();
     }
-    
+
     @Override
     public Iterator<XId> iterator() {
-        XWritableObject snapshot = getObjectSnapshot();
+        final XWritableObject snapshot = getObjectSnapshot();
         if(snapshot==null) {
         	return Iterators.none();
         } else {
         	return snapshot.iterator();
         }
     }
-    
+
     @Override
-    public boolean removeField(XId fieldId) {
-        boolean result = hasField(fieldId);
-        XCommand command = X.getCommandFactory().createRemoveFieldCommand(
+    public boolean removeField(final XId fieldId) {
+        final boolean result = hasField(fieldId);
+        final XCommand command = BaseRuntime.getCommandFactory().createRemoveFieldCommand(
                 this.persistence.getRepositoryId(), this.modelId, this.objectId, fieldId,
                 XCommand.FORCED, true);
-        long commandResult = this.persistence.executeCommand(this.executingActorId, command);
+        final long commandResult = this.persistence.executeCommand(this.executingActorId, command);
         XyAssert.xyAssert(commandResult >= 0);
         return result;
     }
-    
+
     public XId getModelId() {
         return this.modelId;
     }
-    
+
     public XId getObjectId() {
         return this.objectId;
     }
-    
+
     @Override
     public XType getType() {
         return XType.XOBJECT;
     }
-    
+
 }

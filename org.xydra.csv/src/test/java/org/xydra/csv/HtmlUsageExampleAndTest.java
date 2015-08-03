@@ -12,7 +12,7 @@ public class HtmlUsageExampleAndTest {
 
 	public void testOutputAsHtml() throws IOException {
 		/* Create a new in-memory table */
-		CsvTable table = new CsvTable(true);
+		final CsvTable table = new CsvTable(true);
 		/* Create a row with a unique key, using some index number X */
 		int x = 10;
 		int count = 0;
@@ -65,12 +65,12 @@ public class HtmlUsageExampleAndTest {
 		row.setValue("aaa", "898", true);
 
 		// now we process it to average all X=... something rows together
-		CsvTable target = new CsvTable();
-		TableTools.groupBy(table, Arrays.asList("X"), Collections.EMPTY_LIST,
+		final CsvTable target = new CsvTable();
+		TableCoreTools.groupBy(table, Arrays.asList("X"), Collections.EMPTY_LIST,
 				Arrays.asList("bbb", "aaa"), Collections.EMPTY_LIST, target);
 
 		// write to HTML
-		FileWriter fw = new FileWriter(new File("./target/sample.html"));
+		final FileWriter fw = new FileWriter(new File("./target/sample.html"));
 		// add some CSS to have table border lines
 		fw.write("<style>\n" + "  table.csv * { border: 1px solid; } \n" + "</style>\n");
 		HtmlTool.writeToHtml(table, null, fw);
@@ -79,8 +79,8 @@ public class HtmlUsageExampleAndTest {
 		fw.close();
 	}
 
-	public static void main(String[] args) throws IOException {
-		HtmlUsageExampleAndTest h = new HtmlUsageExampleAndTest();
+	public static void main(final String[] args) throws IOException {
+		final HtmlUsageExampleAndTest h = new HtmlUsageExampleAndTest();
 		h.testOutputAsHtml();
 	}
 

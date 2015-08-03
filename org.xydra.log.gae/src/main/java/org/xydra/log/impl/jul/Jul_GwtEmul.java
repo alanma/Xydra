@@ -8,13 +8,13 @@ import org.xydra.annotations.RunsInGWT;
 // via emulation
 public class Jul_GwtEmul {
 
-	public static String getSourceClassName(LogRecord log) {
-		String clazz = log.getSourceClassName();
+	public static String getSourceClassName(final LogRecord log) {
+		final String clazz = log.getSourceClassName();
 		return clazz;
 	}
 
-	public static String getSourceMethodName(LogRecord log) {
-		String method = log.getSourceMethodName();
+	public static String getSourceMethodName(final LogRecord log) {
+		final String method = log.getSourceMethodName();
 		return method;
 	}
 

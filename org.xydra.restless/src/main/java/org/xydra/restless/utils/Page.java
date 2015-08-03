@@ -14,9 +14,9 @@ import org.xydra.restless.Restless;
 
 /**
  * A fluent API for {@link HtmlUtils}.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 
 @NotThreadSafe
@@ -26,13 +26,13 @@ public class Page {
 
 	public static class Attribute {
 		/**
-		 * 
+		 *
 		 * @param name
 		 * @CanBeNull
 		 * @param value
 		 * @CanBeNull
 		 */
-		public Attribute(@CanBeNull String name, @CanBeNull String value) {
+		public Attribute(@CanBeNull final String name, @CanBeNull final String value) {
 			this.name = name;
 			this.value = value;
 		}
@@ -48,7 +48,7 @@ public class Page {
 	public static abstract class BlockElement extends ElementWithChildren implements ToHtml {
 
 		/**
-		 * 
+		 *
 		 * @param tag
 		 * @NeverNull
 		 * @param parent
@@ -58,8 +58,8 @@ public class Page {
 		 * @param attributes
 		 * @CanBeNull
 		 */
-		public BlockElement(@NeverNull String tag, @CanBeNull ToHtml parent, boolean first,
-				@CanBeNull Attribute... attributes) {
+		public BlockElement(@NeverNull final String tag, @CanBeNull final ToHtml parent, final boolean first,
+				@CanBeNull final Attribute... attributes) {
 			super(tag, parent, first, attributes);
 		}
 
@@ -71,7 +71,7 @@ public class Page {
 			}
 			assert this.parent != null;
 			if (this.parent instanceof Body) {
-				Body body = (Body) this.parent;
+				final Body body = (Body) this.parent;
 				return (Html) body.parent;
 			} else {
 				return ((BlockElement) this.parent).endBodyEndHtml();
@@ -83,35 +83,35 @@ public class Page {
 		 * @NeverNull
 		 * @return a P-element wrapper
 		 */
-		public Paragraph paragraph(@NeverNull String content) {
-			Paragraph p = new Paragraph(this, content);
+		public Paragraph paragraph(@NeverNull final String content) {
+			final Paragraph p = new Paragraph(this, content);
 			this.children.add(p);
 			return p;
 		}
 
 		/**
-		 * 
+		 *
 		 * @param method
 		 * @NeverNull
 		 * @param action
 		 * @CanBeNull
 		 * @return a FORM-element wrapper
 		 */
-		public Form form(@NeverNull METHOD method, @CanBeNull String action) {
-			Form form = new Form(this, method, action);
+		public Form form(@NeverNull final METHOD method, @CanBeNull final String action) {
+			final Form form = new Form(this, method, action);
 			form.parent = this;
 			this.children.add(form);
 			return form;
 		}
 
 		/**
-		 * 
+		 *
 		 * @param label
 		 * @CanBeNull
 		 * @return a DIV-element wrapper
 		 */
-		public BlockElement inputSubmit(@CanBeNull String label) {
-			SubmitInput input = new SubmitInput(this, label);
+		public BlockElement inputSubmit(@CanBeNull final String label) {
+			final SubmitInput input = new SubmitInput(this, label);
 			input.parent = this;
 			this.children.add(input);
 			return this;
@@ -125,8 +125,8 @@ public class Page {
 		 *            current value, can be null
 		 * @return this element for fluid API chaining
 		 */
-		public BlockElement inputText(String label, String name, String value) {
-			TextInput input = new TextInput(this, name, value);
+		public BlockElement inputText(final String label, final String name, final String value) {
+			final TextInput input = new TextInput(this, name, value);
 			input.parent = this;
 			this.children.add(new TextNode(label));
 			this.children.add(input);
@@ -135,21 +135,21 @@ public class Page {
 		}
 
 		public DefinitionList definitionList() {
-			DefinitionList dl = new DefinitionList(this);
+			final DefinitionList dl = new DefinitionList(this);
 			dl.parent = this;
 			this.children.add(dl);
 			return dl;
 		}
 
 		public UnsortedList unsortedList() {
-			UnsortedList ul = new UnsortedList(this);
+			final UnsortedList ul = new UnsortedList(this);
 			ul.parent = this;
 			this.children.add(ul);
 			return ul;
 		}
 
 		@Override
-		public String toHtml(@CanBeNull String indent) {
+		public String toHtml(@CanBeNull final String indent) {
 			return Page.renderToHtml(indent, this.first, RenderMode.Block, this.tag,
 					Page.toHtml("  " + indent, this.children),
 					this.attributes.toArray(new Attribute[0]));
@@ -159,7 +159,7 @@ public class Page {
 
 	public static class Body extends BlockElement {
 
-		protected Body(Html html) {
+		protected Body(final Html html) {
 			super("body", html, false);
 		}
 
@@ -172,7 +172,7 @@ public class Page {
 	public static class Form extends BlockElement {
 
 		/**
-		 * 
+		 *
 		 * @param parent
 		 * @CanBeNull
 		 * @param method
@@ -180,7 +180,7 @@ public class Page {
 		 * @param action
 		 * @CanBeNull
 		 */
-		public Form(@CanBeNull ToHtml parent, @NeverNull METHOD method, String action) {
+		public Form(@CanBeNull final ToHtml parent, @NeverNull final METHOD method, final String action) {
 			super("form", parent, false, new Attribute("action", action), new Attribute("method",
 					method.name()));
 		}
@@ -197,21 +197,21 @@ public class Page {
 		 * @param attributes
 		 * @CanBeNull
 		 */
-		public Input(@NeverNull String tag, @CanBeNull ToHtml parent,
-				@CanBeNull Attribute... attributes) {
+		public Input(@NeverNull final String tag, @CanBeNull final ToHtml parent,
+				@CanBeNull final Attribute... attributes) {
 			super(tag, parent, RenderMode.InlineBlock, attributes);
 		}
 	}
 
 	public static class SubmitInput extends Input {
 		/**
-		 * 
+		 *
 		 * @param parent
 		 * @CanBeNull
 		 * @param label
 		 * @CanBeNull
 		 */
-		public SubmitInput(@CanBeNull ToHtml parent, @CanBeNull String label) {
+		public SubmitInput(@CanBeNull final ToHtml parent, @CanBeNull final String label) {
 			super("input", parent, new Attribute("type", "submit"), new Attribute("value", label));
 		}
 	}
@@ -221,7 +221,7 @@ public class Page {
 	 */
 	public static class TextInput extends Input {
 		/**
-		 * 
+		 *
 		 * @param parent
 		 * @CanBeNull
 		 * @param name
@@ -229,7 +229,7 @@ public class Page {
 		 * @param value
 		 * @NeverNull
 		 */
-		public TextInput(@CanBeNull ToHtml parent, @NeverNull String name, @NeverNull String value) {
+		public TextInput(@CanBeNull final ToHtml parent, @NeverNull final String name, @NeverNull final String value) {
 			super("input", parent, new Attribute("type", "text"), new Attribute("name",
 					urlencode(name)), new Attribute("value", urlencode(value)));
 		}
@@ -238,16 +238,16 @@ public class Page {
 
 	/**
 	 * For GWT there is a univerals function in Xydra.core
-	 * 
+	 *
 	 * @param s
 	 * @NeverNull
 	 * @return encoded string
 	 */
 	@RunsInGWT(false)
-	public static String urlencode(@NeverNull String s) {
+	public static String urlencode(@NeverNull final String s) {
 		try {
 			return URLEncoder.encode(s, Restless.JAVA_ENCODING_UTF8);
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			throw new AssertionError(e);
 		}
 	}
@@ -255,25 +255,25 @@ public class Page {
 	public static class DefinitionList extends BlockElement {
 
 		/**
-		 * 
+		 *
 		 * @param parent
 		 * @CanBeNull
 		 * @param attributes
 		 * @CanBeNull
 		 */
-		public DefinitionList(@CanBeNull ToHtml parent, @CanBeNull Attribute... attributes) {
+		public DefinitionList(@CanBeNull final ToHtml parent, @CanBeNull final Attribute... attributes) {
 			super("dl", parent, false, attributes);
 		}
 
 		/**
-		 * 
+		 *
 		 * @param term
 		 * @NeverNull
 		 * @param definition
 		 * @NeverNull
 		 * @return a DL-element wrapper
 		 */
-		public DefinitionList define(@NeverNull String term, @NeverNull String definition) {
+		public DefinitionList define(@NeverNull final String term, @NeverNull final String definition) {
 			this.children.add(new DefinitionListTermDefinition(term, definition));
 			return this;
 		}
@@ -288,18 +288,18 @@ public class Page {
 		 * @param attributes
 		 * @CanBeNull
 		 */
-		public UnsortedList(@CanBeNull ToHtml parent, @CanBeNull Attribute... attributes) {
+		public UnsortedList(@CanBeNull final ToHtml parent, @CanBeNull final Attribute... attributes) {
 			super("ul", parent, false, attributes);
 		}
 
-		public UnsortedList li(String content) {
-			Listitem li = new Listitem(this, content);
+		public UnsortedList li(final String content) {
+			final Listitem li = new Listitem(this, content);
 			this.children.add(li);
 			return this;
 		}
 
 		public Listitem li() {
-			Listitem li = new Listitem(this);
+			final Listitem li = new Listitem(this);
 			this.children.add(li);
 			return li;
 
@@ -309,24 +309,24 @@ public class Page {
 
 	public static class Listitem extends BlockElement {
 		/**
-		 * 
+		 *
 		 * @param parent
 		 * @CanBeNull
 		 * @param attributes
 		 * @CanBeNull
 		 */
-		public Listitem(@CanBeNull ToHtml parent, @CanBeNull Attribute... attributes) {
+		public Listitem(@CanBeNull final ToHtml parent, @CanBeNull final Attribute... attributes) {
 			super("li", parent, false, attributes);
 		}
 
 		/**
-		 * 
+		 *
 		 * @param parent
 		 * @CanBeNull
 		 * @param content
 		 * @NeverNull
 		 */
-		public Listitem(@CanBeNull UnsortedList parent, @NeverNull String content) {
+		public Listitem(@CanBeNull final UnsortedList parent, @NeverNull final String content) {
 			this(parent);
 			this.children.add(new TextNode(content));
 		}
@@ -337,13 +337,13 @@ public class Page {
 		protected TextNode dt, dd;
 
 		/**
-		 * 
+		 *
 		 * @param dt
 		 * @NeverNull
 		 * @param dd
 		 * @NeverNull
 		 */
-		public DefinitionListTermDefinition(@NeverNull String dt, @NeverNull String dd) {
+		public DefinitionListTermDefinition(@NeverNull final String dt, @NeverNull final String dd) {
 			this.dt = new TextNode(dt);
 			this.dd = new TextNode(dd);
 		}
@@ -353,7 +353,7 @@ public class Page {
 		 * @CanBeNull
 		 */
 		@Override
-		public String toHtml(@CanBeNull String indent) {
+		public String toHtml(@CanBeNull final String indent) {
 			return indent + "<dt>" + this.dt.toHtml("") + "</dt><dd>" + this.dd.toHtml("")
 					+ "</dd>\n";
 		}
@@ -377,8 +377,8 @@ public class Page {
 		 * @param attributes
 		 *            optional @CanBeNull
 		 */
-		public ElementWithChildren(@NeverNull String tag, @CanBeNull ToHtml parent, boolean first,
-				@CanBeNull Attribute... attributes) {
+		public ElementWithChildren(@NeverNull final String tag, @CanBeNull final ToHtml parent, final boolean first,
+				@CanBeNull final Attribute... attributes) {
 			this.tag = tag;
 			this.parent = parent;
 			this.first = first;
@@ -392,19 +392,19 @@ public class Page {
 				 * weren't null.
 				 */
 
-				Attribute[] emptyArray = new Attribute[0];
+				final Attribute[] emptyArray = new Attribute[0];
 				this.attributes = Arrays.asList(emptyArray);
 			}
 		}
 
 		/**
-		 * 
+		 *
 		 * @param name
 		 * @CanBeNull
 		 * @param value
 		 * @CanBeNull
 		 */
-		public void addAttribute(@CanBeNull String name, @CanBeNull String value) {
+		public void addAttribute(@CanBeNull final String name, @CanBeNull final String value) {
 			this.attributes.add(new Attribute(name, value));
 		}
 
@@ -413,27 +413,27 @@ public class Page {
 	public static class Head extends BlockElement {
 
 		/**
-		 * 
+		 *
 		 * @param html
 		 * @CanBeNull
 		 */
-		protected Head(@CanBeNull Html html) {
+		protected Head(@CanBeNull final Html html) {
 			super("head", html, false);
 		}
 
 		public Body endHeadStartBody() {
-			Html html = (Html) this.parent;
-			Body body = new Body(html);
+			final Html html = (Html) this.parent;
+			final Body body = new Body(html);
 			html.children.add(body);
 			return body;
 		}
 
 		/**
-		 * 
+		 *
 		 * @param title
 		 * @NeverNull
 		 */
-		public void title(@NeverNull String title) {
+		public void title(@NeverNull final String title) {
 			this.children.add(new Tag("title", title));
 		}
 
@@ -446,7 +446,7 @@ public class Page {
 		}
 
 		public Head head() {
-			Head head = new Head(this);
+			final Head head = new Head(this);
 			this.children.add(head);
 			return head;
 		}
@@ -459,10 +459,10 @@ public class Page {
 	}
 
 	public abstract static class InlineElement extends ElementWithChildren implements ToHtml {
-		private RenderMode renderMode;
+		private final RenderMode renderMode;
 
 		/**
-		 * 
+		 *
 		 * @param tag
 		 * @NeverNull
 		 * @param parent
@@ -472,8 +472,8 @@ public class Page {
 		 * @param attributes
 		 * @CanBeNull
 		 */
-		public InlineElement(@NeverNull String tag, @CanBeNull ToHtml parent,
-				@NeverNull RenderMode renderMode, @CanBeNull Attribute... attributes) {
+		public InlineElement(@NeverNull final String tag, @CanBeNull final ToHtml parent,
+				@NeverNull final RenderMode renderMode, @CanBeNull final Attribute... attributes) {
 			super(tag, parent, false, attributes);
 			this.renderMode = renderMode;
 		}
@@ -483,7 +483,7 @@ public class Page {
 		 * @CanBeNull
 		 */
 		@Override
-		public String toHtml(@CanBeNull String indent) {
+		public String toHtml(@CanBeNull final String indent) {
 			return Page.renderToHtml(indent, false, this.renderMode, this.tag,
 					Page.toHtml("", this.children), this.attributes.toArray(new Attribute[0]));
 		}
@@ -491,13 +491,13 @@ public class Page {
 
 	public static class Paragraph extends BlockElement {
 		/**
-		 * 
+		 *
 		 * @param parent
 		 * @CanBeNull
 		 * @param content
 		 * @NeverNull
 		 */
-		public Paragraph(@CanBeNull BlockElement parent, @NeverNull String content) {
+		public Paragraph(@CanBeNull final BlockElement parent, @NeverNull final String content) {
 			super("p", parent, false);
 			this.children.add(new TextNode(content));
 		}
@@ -505,28 +505,28 @@ public class Page {
 
 	public static class Tag implements ToHtml {
 
-		private ToHtml content;
-		private String tag;
+		private final ToHtml content;
+		private final String tag;
 
 		/**
-		 * 
+		 *
 		 * @param tag
 		 * @NeverNull
 		 * @param content
 		 * @NeverNull
 		 */
-		public Tag(@NeverNull String tag, @NeverNull String content) {
+		public Tag(@NeverNull final String tag, @NeverNull final String content) {
 			this(tag, new TextNode(content));
 		}
 
 		/**
-		 * 
+		 *
 		 * @param tag
 		 * @NeverNull
 		 * @param content
 		 * @NeverNull
 		 */
-		public Tag(String tag, ToHtml content) {
+		public Tag(final String tag, final ToHtml content) {
 			this.tag = tag;
 			this.content = content;
 		}
@@ -536,7 +536,7 @@ public class Page {
 		 * @CanBeNull
 		 */
 		@Override
-		public String toHtml(@CanBeNull String indent) {
+		public String toHtml(@CanBeNull final String indent) {
 			return Page.renderToHtml(indent, false, RenderMode.InlineBlock, this.tag,
 					this.content.toHtml(""));
 		}
@@ -545,7 +545,7 @@ public class Page {
 
 	public static class HtmlNode implements ToHtml {
 
-		private String content;
+		private final String content;
 
 		/**
 		 * @param content
@@ -560,7 +560,7 @@ public class Page {
 		 * @CanBeNull
 		 */
 		@Override
-		public String toHtml(@CanBeNull String indent) {
+		public String toHtml(@CanBeNull final String indent) {
 			return this.content;
 		}
 
@@ -568,13 +568,13 @@ public class Page {
 
 	public static class TextNode implements ToHtml {
 
-		private String content;
+		private final String content;
 
 		/**
 		 * @param content
 		 *            will be HTML-escaped @NeverNull
 		 */
-		public TextNode(@NeverNull String content) {
+		public TextNode(@NeverNull final String content) {
 			this.content = content;
 		}
 
@@ -583,7 +583,7 @@ public class Page {
 		 * @CanBeNull
 		 */
 		@Override
-		public String toHtml(@CanBeNull String indent) {
+		public String toHtml(@CanBeNull final String indent) {
 			return xmlEncode(this.content);
 		}
 
@@ -591,7 +591,7 @@ public class Page {
 
 	public static interface ToHtml {
 		/**
-		 * 
+		 *
 		 * @param indent
 		 * @CanBeNull
 		 * @return @CanBeNull
@@ -600,21 +600,21 @@ public class Page {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param title
 	 * @NeverNull
 	 * @return a HEAD-element
-	 * 
+	 *
 	 */
-	public static Head htmlHeadTitle(@NeverNull String title) {
-		Html html = new Html();
-		Head head = html.head();
+	public static Head htmlHeadTitle(@NeverNull final String title) {
+		final Html html = new Html();
+		final Head head = html.head();
 		head.title(title);
 		return head;
 	}
 
 	/**
-	 * 
+	 *
 	 * @param indent
 	 * @CanBeNull
 	 * @param children
@@ -622,12 +622,13 @@ public class Page {
 	 * @return the given children as matching html, e.g. in a list the children
 	 *         become LI-elements.
 	 */
-	public static String toHtml(@CanBeNull String indent, @CanBeNull List<ToHtml> children) {
-		StringBuffer buf = new StringBuffer();
-		if (children != null)
-			for (ToHtml child : children) {
+	public static String toHtml(@CanBeNull final String indent, @CanBeNull final List<ToHtml> children) {
+		final StringBuffer buf = new StringBuffer();
+		if (children != null) {
+			for (final ToHtml child : children) {
 				buf.append(child.toHtml(indent));
 			}
+		}
 		return buf.toString();
 	}
 
@@ -658,10 +659,10 @@ public class Page {
 	 * @CanBeNull
 	 * @return
 	 */
-	private static String renderToHtml(@CanBeNull String indent, boolean first,
-			@NeverNull RenderMode renderMode, @NeverNull String tag, @CanBeNull String content,
-			@CanBeNull Attribute... attributes) {
-		StringBuffer buf = new StringBuffer();
+	private static String renderToHtml(@CanBeNull final String indent, final boolean first,
+			@NeverNull final RenderMode renderMode, @NeverNull final String tag, @CanBeNull final String content,
+			@CanBeNull final Attribute... attributes) {
+		final StringBuffer buf = new StringBuffer();
 
 		if (!first && renderMode != RenderMode.Inline) {
 			buf.append("\n");
@@ -687,28 +688,30 @@ public class Page {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param attributes
 	 * @CanBeNull
 	 */
-	private static String toHtmlAttributes(@CanBeNull Attribute... attributes) {
-		StringBuffer buf = new StringBuffer();
-		if (attributes != null)
-			for (Attribute attribute : attributes) {
-				if (attribute.value != null)
+	private static String toHtmlAttributes(@CanBeNull final Attribute... attributes) {
+		final StringBuffer buf = new StringBuffer();
+		if (attributes != null) {
+			for (final Attribute attribute : attributes) {
+				if (attribute.value != null) {
 					buf.append(attribute.toHtml());
+				}
 			}
+		}
 		return buf.toString();
 	}
 
 	/**
-	 * 
+	 *
 	 * @param raw
 	 * @NeverNull
 	 * @return XML-encoded string
-	 * 
+	 *
 	 */
-	public static final String xmlEncode(@NeverNull String raw) {
+	public static final String xmlEncode(@NeverNull final String raw) {
 		String safe = raw.replace("&", "&amp;");
 		safe = safe.replace("<", "&lt;");
 		safe = safe.replace(">", "&gt;");
@@ -717,14 +720,14 @@ public class Page {
 		return safe;
 	}
 
-	public static void main(String[] args) {
-		String s2 = Page.htmlHeadTitle("Hello World").endHeadStartBody().paragraph("Foo")
+	public static void main(final String[] args) {
+		final String s2 = Page.htmlHeadTitle("Hello World").endHeadStartBody().paragraph("Foo")
 				.form(METHOD.GET, "/my/url").inputText("Name: ", "name", "John Doe")
 				.inputSubmit("Abschicken").endBodyEndHtml().toString();
 		System.out.println(s2);
 
-		Form form = new Form(null, METHOD.GET, "/my/url");
-		String s3 = form.inputText("Name: ", "name", "John Doe").inputSubmit("Abschicken")
+		final Form form = new Form(null, METHOD.GET, "/my/url");
+		final String s3 = form.inputText("Name: ", "name", "John Doe").inputSubmit("Abschicken")
 				.toHtml("");
 		System.out.println(s3);
 	}

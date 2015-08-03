@@ -9,18 +9,18 @@ import org.xydra.core.model.XObject;
 
 
 public interface IMemoryObject extends XObject, IMemoryEntity, IMemoryMOFEntity {
-    
+
     void fireObjectEvent(XObjectEvent event);
-    
+
     void fireFieldEvent(XFieldEvent event);
-    
+
     void fireTransactionEvent(XTransactionEvent event);
-    
+
     IMemoryModel getFather();
-    
+
     @Override
 	IMemoryField getField(XId fieldId);
-    
+
     XRevWritableObject getState();
-    
+
 }

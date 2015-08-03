@@ -6,6 +6,8 @@ import java.util.Set;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.Base;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -22,70 +24,70 @@ import org.xydra.store.XydraStore;
 /**
  * An {@link XReadableRepository} which pulls state <em>once</em> lazily via a
  * snapshot from a local {@link XydraStore}.
- * 
+ *
  * TODO GWT doesn't have a Thread class
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(false)
 public class ReadableRepositoryOnStore implements XReadableRepository, Serializable {
-	
+
 	private static final long serialVersionUID = -5943088597508682530L;
 	protected XAddress address;
 	protected XReadableRepository baseRepository;
 	protected Credentials credentials;
 	protected Set<XId> modelIds = null;
 	private XId repositoryId;
-	
+
 	protected XydraStore store;
-	
+
 	/**
 	 * @param credentials active credentials which are used to authenticate and
 	 *            authorise to the XydraStore.
 	 * @param store must be in the same VM and may not be accessed over a
 	 *            network.
 	 */
-	public ReadableRepositoryOnStore(Credentials credentials, XydraStore store) {
+	public ReadableRepositoryOnStore(final Credentials credentials, final XydraStore store) {
 		this.credentials = credentials;
 		this.store = store;
-		this.address = X.getIDProvider().fromComponents(getRepositoryId(store), null, null, null);
+		this.address = BaseRuntime.getIDProvider().fromComponents(getRepositoryId(store), null, null, null);
 		XyAssert.xyAssert(this.address.getAddressedType() == XType.XREPOSITORY);
 	}
-	
+
 	@Override
 	public XAddress getAddress() {
 		return this.address;
 	}
-	
+
 	@Override
 	public XId getId() {
 		return this.address.getRepository();
 	}
-	
+
 	@Override
-	public XReadableModel getModel(XId id) {
-		ReadableModelOnStore model = new ReadableModelOnStore(this.credentials, this.store,
-		        XX.resolveModel(getAddress(), id));
+	public XReadableModel getModel(final XId id) {
+		final ReadableModelOnStore model = new ReadableModelOnStore(this.credentials, this.store,
+		        Base.resolveModel(getAddress(), id));
 		if(model.baseModel == null) {
 			return null;
 		}
 		return model;
 	}
-	
-	private synchronized XId getRepositoryId(@NeverNull XydraStore store) {
+
+	private synchronized XId getRepositoryId(@NeverNull final XydraStore store) {
 		XyAssert.xyAssert(store != null); assert store != null;
 		assert store != null;
 		this.repositoryId = null;
 		store.getRepositoryId(this.credentials.getActorId(), this.credentials.getPasswordHash(),
 		        new Callback<XId>() {
-			        
+
 			        @Override
-			        public void onFailure(Throwable exception) {
+			        public void onFailure(final Throwable exception) {
 				        throw new RuntimeException(exception);
 			        }
-			        
+
 			        @Override
-			        public void onSuccess(XId object) {
+			        public void onSuccess(final XId object) {
 				        ReadableRepositoryOnStore.this.repositoryId = object;
 			        }
 		        });
@@ -94,54 +96,54 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 			try {
 				// TODO implement smarter with wait()?
 				Thread.sleep(c);
-			} catch(InterruptedException e) {
+			} catch(final InterruptedException e) {
 			}
 			c *= 2;
 		}
 		return this.repositoryId;
 	}
-	
+
 	@Override
-	public boolean hasModel(XId id) {
+	public boolean hasModel(final XId id) {
 		initModelIds();
 		return this.modelIds.contains(id);
 	}
-	
+
 	private void initModelIds() {
 		if(this.modelIds != null) {
 			return;
 		}
 		this.store.getModelIds(this.credentials.getActorId(), this.credentials.getPasswordHash(),
 		        new Callback<Set<XId>>() {
-			        
+
 			        @Override
-			        public void onFailure(Throwable exception) {
+			        public void onFailure(final Throwable exception) {
 				        throw new StoreException("re-throw", exception);
 			        }
-			        
+
 			        @Override
-			        public void onSuccess(Set<XId> modelIds) {
+			        public void onSuccess(final Set<XId> modelIds) {
 				        ReadableRepositoryOnStore.this.modelIds = modelIds;
 			        }
 		        });
 		// FIXME callback may not have been called yet
 	}
-	
+
 	@Override
 	public boolean isEmpty() {
 		initModelIds();
 		return this.modelIds.isEmpty();
 	}
-	
+
 	@Override
 	public Iterator<XId> iterator() {
 		initModelIds();
 		return this.modelIds.iterator();
 	}
-	
+
 	@Override
 	public XType getType() {
 		return XType.XREPOSITORY;
 	}
-	
+
 }

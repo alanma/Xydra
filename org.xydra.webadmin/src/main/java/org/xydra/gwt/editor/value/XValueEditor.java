@@ -35,9 +35,10 @@ public abstract class XValueEditor extends Composite {
 
 	public abstract XValue getValue();
 
-	public static XValueEditor get(XValue value, EditListener listener) {
-		if (value == null)
+	public static XValueEditor get(final XValue value, final EditListener listener) {
+		if (value == null) {
 			throw new IllegalArgumentException("Value may not be null");
+		}
 
 		if (value instanceof XCollectionValue<?>) {
 			if (value instanceof XListValue<?>) {
@@ -76,9 +77,9 @@ public abstract class XValueEditor extends Composite {
 		} else if (value instanceof XStringValue) {
 			return new XStringEditor(((XStringValue) value).contents(), listener);
 		} else if (value instanceof XId) {
-			return new XIdEditor(((XId) value), listener);
+			return new XIdEditor((XId) value, listener);
 		} else if (value instanceof XAddress) {
-			return new XAddressEditor(((XAddress) value), listener);
+			return new XAddressEditor((XAddress) value, listener);
 		} else if (value instanceof XBinaryValue) {
 			return new XBinaryValueEditor(((XBinaryValue) value).getValue(), listener);
 		} else if (value instanceof XBooleanValue) {

@@ -20,9 +20,9 @@ import org.xydra.index.query.Pair;
 /**
  * {@link XydraElement} implementation that wraps an {@link org.w3c.dom.Element}
  * .
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 @RunsInGWT(false)
 @RequiresAppEngine(false)
@@ -31,7 +31,7 @@ public class XmlElement extends AbstractXmlElement {
 	private static final ITransformer<Node, String> NODE2NODENAME = new ITransformer<Node, String>() {
 
 		@Override
-		public String transform(Node in) {
+		public String transform(final Node in) {
 			return in.getNodeName();
 		}
 
@@ -39,12 +39,12 @@ public class XmlElement extends AbstractXmlElement {
 
 	private final Element element;
 
-	protected XmlElement(Element element) {
+	protected XmlElement(final Element element) {
 		this.element = element;
 	}
 
 	@Override
-	public String getAttribute(String attributeName) {
+	public String getAttribute(final String attributeName) {
 		if (this.element.hasAttribute(attributeName)) {
 			return this.element.getAttribute(attributeName);
 		} else {
@@ -52,10 +52,10 @@ public class XmlElement extends AbstractXmlElement {
 		}
 	}
 
-	private static Iterator<XydraElement> nodeListToIterator(NodeList nodes) {
-		List<XydraElement> list = new ArrayList<XydraElement>();
+	private static Iterator<XydraElement> nodeListToIterator(final NodeList nodes) {
+		final List<XydraElement> list = new ArrayList<XydraElement>();
 		for (int i = 0; i < nodes.getLength(); ++i) {
-			Node node = nodes.item(i);
+			final Node node = nodes.item(i);
 			if (node instanceof Element) {
 				list.add(wrap((Element) node));
 			}
@@ -64,13 +64,13 @@ public class XmlElement extends AbstractXmlElement {
 	}
 
 	@Override
-	public Iterator<XydraElement> getChildren(String defaultType) {
+	public Iterator<XydraElement> getChildren(final String defaultType) {
 		final NodeList nodes = this.element.getChildNodes();
 		return nodeListToIterator(nodes);
 	}
 
 	@Override
-	public Iterator<XydraElement> getChildrenByType(String name, String type) {
+	public Iterator<XydraElement> getChildrenByType(final String name, final String type) {
 		final NodeList nodes = this.element.getElementsByTagName(type);
 		return nodeListToIterator(nodes);
 	}
@@ -83,9 +83,9 @@ public class XmlElement extends AbstractXmlElement {
 		}
 
 		// return the first text() nodes content
-		NodeList nodeList = this.element.getChildNodes();
+		final NodeList nodeList = this.element.getChildNodes();
 		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node child = nodeList.item(i);
+			final Node child = nodeList.item(i);
 			if (child.getNodeType() == Node.TEXT_NODE) {
 				return child.getNodeValue();
 			}
@@ -96,11 +96,11 @@ public class XmlElement extends AbstractXmlElement {
 	}
 
 	@Override
-	public XydraElement getElement(String name, int index) {
+	public XydraElement getElement(final String name, final int index) {
 		int idx = 0;
 		final NodeList nodes = this.element.getChildNodes();
 		for (int i = 0; i < nodes.getLength(); ++i) {
-			Node node = nodes.item(i);
+			final Node node = nodes.item(i);
 			if (node instanceof Element) {
 				if (idx == index) {
 					return new XmlElement((Element) node);
@@ -113,10 +113,10 @@ public class XmlElement extends AbstractXmlElement {
 	}
 
 	@Override
-	public XydraElement getChild(String name, String type) {
+	public XydraElement getChild(final String name, final String type) {
 		final NodeList nodes = this.element.getElementsByTagName(type);
 		for (int i = 0; i < nodes.getLength(); ++i) {
-			Node node = nodes.item(i);
+			final Node node = nodes.item(i);
 			if (node instanceof Element) {
 				return new XmlElement((Element) node);
 			}
@@ -125,11 +125,11 @@ public class XmlElement extends AbstractXmlElement {
 	}
 
 	@Override
-	public Object getValue(String name, int index) {
+	public Object getValue(final String name, final int index) {
 		int idx = 0;
 		final NodeList nodes = this.element.getChildNodes();
 		for (int i = 0; i < nodes.getLength(); ++i) {
-			Node node = nodes.item(i);
+			final Node node = nodes.item(i);
 			if (node instanceof Element) {
 				if (idx == index) {
 					return getValue((Element) node);
@@ -142,10 +142,10 @@ public class XmlElement extends AbstractXmlElement {
 	}
 
 	@Override
-	public Object getValue(String name, String type) {
+	public Object getValue(final String name, final String type) {
 		final NodeList nodes = this.element.getElementsByTagName(type);
 		for (int i = 0; i < nodes.getLength(); ++i) {
-			Node node = nodes.item(i);
+			final Node node = nodes.item(i);
 			if (node instanceof Element) {
 				return getValue((Element) node);
 			}
@@ -159,7 +159,7 @@ public class XmlElement extends AbstractXmlElement {
 	}
 
 	@Override
-	public Iterator<Object> getValues(String name, String type) {
+	public Iterator<Object> getValues(final String name, final String type) {
 		final NodeList nodes = this.element.getElementsByTagName(type);
 		return nodeListToValues(nodes);
 	}
@@ -172,9 +172,9 @@ public class XmlElement extends AbstractXmlElement {
 
 	private static Iterator<Object> nodeListToValues(final NodeList nodes) {
 
-		List<Object> objects = new ArrayList<Object>();
+		final List<Object> objects = new ArrayList<Object>();
 		for (int i = 0; i < nodes.getLength(); ++i) {
-			Node node = nodes.item(i);
+			final Node node = nodes.item(i);
 			if (node instanceof Element) {
 				objects.add(getValue((Element) node));
 			}
@@ -183,32 +183,32 @@ public class XmlElement extends AbstractXmlElement {
 		return objects.iterator();
 	}
 
-	static XmlElement wrap(Element element) {
+	static XmlElement wrap(final Element element) {
 		return isNull(element) ? null : new XmlElement(element);
 	}
 
-	static String getValue(Element element) {
+	static String getValue(final Element element) {
 		return isNull(element) ? null : element.getTextContent();
 	}
 
-	private static boolean isNull(Element element) {
-		return (XmlEncoder.XNULL_ELEMENT.equals(element.getNodeName()) || (element
+	private static boolean isNull(final Element element) {
+		return XmlEncoder.XNULL_ELEMENT.equals(element.getNodeName()) || element
 				.hasAttribute(XmlEncoder.NULL_ATTRIBUTE) && Boolean.valueOf(element
-				.getAttribute(XmlEncoder.NULL_ATTRIBUTE))));
+				.getAttribute(XmlEncoder.NULL_ATTRIBUTE));
 	}
 
 	@Override
 	public String toString() {
 		String returnString = "";
 
-		Element element = this.element;
+		final Element element = this.element;
 		returnString = examineNode(returnString, element);
 
 		return returnString;
 
 	}
 
-	public static String examineNode(String returnString, Node element) {
+	public static String examineNode(final String returnString, final Node element) {
 		String returnString2 = returnString;
 		returnString2 += "tagName: " + element.getNodeName();
 		returnString2 += "\nattributes: ";
@@ -216,10 +216,10 @@ public class XmlElement extends AbstractXmlElement {
 		for (int i = 0; i < attributes.getLength(); i++) {
 			returnString2 += ", " + attributes.item(i);
 		}
-		NodeList childNodes = element.getChildNodes();
+		final NodeList childNodes = element.getChildNodes();
 		returnString2 += "\n\nnodes: " + childNodes.getLength();
 		for (int i = 0; i < childNodes.getLength(); i++) {
-			Node childNode = childNodes.item(i);
+			final Node childNode = childNodes.item(i);
 			returnString2 += "\n nodeName: " + childNode.getNodeName() + ", value: "
 					+ childNode.getNodeValue();
 			// somehow doesn't work...
@@ -240,24 +240,24 @@ public class XmlElement extends AbstractXmlElement {
 	}
 
 	@Override
-	public Iterator<Pair<String, XydraElement>> getEntries(String attribute, String defaultType) {
+	public Iterator<Pair<String, XydraElement>> getEntries(final String attribute, final String defaultType) {
 		final NodeList nodes = this.element.getChildNodes();
 		return nodeListToMapIterator(nodes, attribute);
 	}
 
 	@Override
-	public Iterator<Pair<String, XydraElement>> getEntriesByType(String attribute, String type) {
+	public Iterator<Pair<String, XydraElement>> getEntriesByType(final String attribute, final String type) {
 		final NodeList nodes = this.element.getElementsByTagName(type);
 		return nodeListToMapIterator(nodes, attribute);
 	}
 
-	private static Iterator<Pair<String, XydraElement>> nodeListToMapIterator(NodeList nodes,
-			String attribute) {
-		List<Pair<String, XydraElement>> list = new ArrayList<Pair<String, XydraElement>>();
+	private static Iterator<Pair<String, XydraElement>> nodeListToMapIterator(final NodeList nodes,
+			final String attribute) {
+		final List<Pair<String, XydraElement>> list = new ArrayList<Pair<String, XydraElement>>();
 		for (int i = 0; i < nodes.getLength(); ++i) {
-			Node node = nodes.item(i);
+			final Node node = nodes.item(i);
 			if (node instanceof Element && ((Element) node).hasAttribute(attribute)) {
-				Element element = (Element) node;
+				final Element element = (Element) node;
 
 				list.add(new Pair<String, XydraElement>(element.getAttribute(attribute),
 						wrap(element)));
@@ -268,15 +268,15 @@ public class XmlElement extends AbstractXmlElement {
 
 	@Override
 	public Iterator<String> getAttributes() {
-		Iterator<Node> nodeIt = new NamedNodeMap2NodeIterator(this.element.getAttributes());
+		final Iterator<Node> nodeIt = new NamedNodeMap2NodeIterator(this.element.getAttributes());
 		return Iterators.transform(nodeIt, NODE2NODENAME);
 	}
 
 	static class NamedNodeMap2NodeIterator implements Iterator<Node> {
 
-		private NamedNodeMap namedNodeMap;
+		private final NamedNodeMap namedNodeMap;
 
-		public NamedNodeMap2NodeIterator(NamedNodeMap namedNodeMap) {
+		public NamedNodeMap2NodeIterator(final NamedNodeMap namedNodeMap) {
 			this.namedNodeMap = namedNodeMap;
 		}
 
@@ -293,7 +293,7 @@ public class XmlElement extends AbstractXmlElement {
 				throw new NoSuchElementException();
 			}
 
-			Node node = this.namedNodeMap.item(this.nextPos);
+			final Node node = this.namedNodeMap.item(this.nextPos);
 			this.nextPos++;
 			return node;
 		}

@@ -10,17 +10,17 @@ import org.xydra.store.impl.memory.AllowAllAccessControlManager;
 /**
  * An implementation of {@link XydraStore} with no authorisation and access
  * control. Persistence is delegated.
- * 
+ *
  * @author xamde
  */
 
 public class DelegatingAllowAllStore extends DelegatingStore implements XydraStore {
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(DelegatingAllowAllStore.class);
-	
-	public DelegatingAllowAllStore(XydraPersistence persistence) {
+
+	public DelegatingAllowAllStore(final XydraPersistence persistence) {
 		super(persistence, new AllowAllAccessControlManager());
 	}
-	
+
 }

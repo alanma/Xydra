@@ -24,7 +24,7 @@ public class ChangeExecutor {
 
 	private static final Logger log = LoggerFactory.getLogger(ChangeExecutor.class);
 
-	public static boolean executeAnyCommand(XCommand command, ChangedModel changedModel) {
+	public static boolean executeAnyCommand(final XCommand command, final ChangedModel changedModel) {
 		if (command instanceof XTransaction) {
 			return executeTransaction((XTransaction) command, changedModel);
 		} else if (command instanceof XRepositoryCommand) {
@@ -47,7 +47,7 @@ public class ChangeExecutor {
 	 * @param changedObject
 	 * @return
 	 */
-	public static boolean executeAnyCommand(XCommand command, ChangedObject changedObject) {
+	public static boolean executeAnyCommand(final XCommand command, final ChangedObject changedObject) {
 		if (command instanceof XTransaction) {
 			return executeTransaction((XTransaction) command, changedObject);
 		} else if (command instanceof XRepositoryCommand) {
@@ -66,7 +66,7 @@ public class ChangeExecutor {
 		}
 	}
 
-	public static boolean executeFieldCommand(XFieldCommand fieldCommand, ChangedModel changedModel) {
+	public static boolean executeFieldCommand(final XFieldCommand fieldCommand, final ChangedModel changedModel) {
 		assert changedModel.exists();
 		if (!fieldCommand.getTarget().getParent().getParent().equals(changedModel.getAddress())) {
 			log.warn("XFieldCommand " + fieldCommand + " does not target this model: "
@@ -74,7 +74,7 @@ public class ChangeExecutor {
 			return false;
 		}
 
-		XWritableObject object = changedModel.getObject(fieldCommand.getObjectId());
+		final XWritableObject object = changedModel.getObject(fieldCommand.getObjectId());
 		if (object == null) {
 			log.warn("{" + fieldCommand + "} is invalid - object is null");
 			return false;
@@ -82,9 +82,9 @@ public class ChangeExecutor {
 		return executeFieldCommand(fieldCommand, object);
 	}
 
-	public static boolean executeFieldCommand(XFieldCommand fieldCommand, XWritableField field) {
+	public static boolean executeFieldCommand(final XFieldCommand fieldCommand, final XWritableField field) {
 
-		XValue currentValue = field.getValue();
+		final XValue currentValue = field.getValue();
 		switch (fieldCommand.getChangeType()) {
 		case ADD: {
 			if (currentValue != null) {
@@ -169,8 +169,8 @@ public class ChangeExecutor {
 		}
 	}
 
-	public static boolean executeFieldCommand(XFieldCommand fieldCommand, XWritableObject object) {
-		XWritableField field = object.getField(fieldCommand.getFieldId());
+	public static boolean executeFieldCommand(final XFieldCommand fieldCommand, final XWritableObject object) {
+		final XWritableField field = object.getField(fieldCommand.getFieldId());
 		if (field == null) {
 			log.warn("Command { " + fieldCommand + "} is invalid. Field '"
 					+ fieldCommand.getFieldId() + "' not found in object '"
@@ -185,14 +185,14 @@ public class ChangeExecutor {
 	 * @param changedModel
 	 * @return true if command succeeds
 	 */
-	public static boolean executeModelCommand(XModelCommand modelCommand, ChangedModel changedModel) {
+	public static boolean executeModelCommand(final XModelCommand modelCommand, final ChangedModel changedModel) {
 		if (!modelCommand.getTarget().equals(changedModel.getAddress())) {
 			log.warn("XModelCommand " + modelCommand + " does not target this model: "
 					+ changedModel.getAddress());
 			return false;
 		}
 
-		XId objectId = modelCommand.getObjectId();
+		final XId objectId = modelCommand.getObjectId();
 
 		switch (modelCommand.getChangeType()) {
 
@@ -212,7 +212,7 @@ public class ChangeExecutor {
 					}
 				}
 				// command is OK and adds a new object
-				XWritableObject object = changedModel.createObject(objectId);
+				final XWritableObject object = changedModel.createObject(objectId);
 				if (object instanceof XRevWritableObject) {
 					((XRevWritableObject) object).setRevisionNumber(changedModel
 							.getRevisionNumber());
@@ -221,7 +221,7 @@ public class ChangeExecutor {
 			}
 		}
 		case REMOVE: {
-			XReadableObject object = changedModel.getObject(objectId);
+			final XReadableObject object = changedModel.getObject(objectId);
 
 			if (object == null) {
 				if (modelCommand.getIntent() != Intent.Forced) {
@@ -252,20 +252,20 @@ public class ChangeExecutor {
 
 	/**
 	 * ADD SafeRevBound must be checked outside.
-	 * 
+	 *
 	 * @param modelCommand
 	 * @param changedObject
 	 * @return true if command succeeds
 	 */
-	public static boolean executeModelCommand(XModelCommand modelCommand,
-			ChangedObject changedObject) {
+	public static boolean executeModelCommand(final XModelCommand modelCommand,
+			final ChangedObject changedObject) {
 		if (!modelCommand.getChangedEntity().equals(changedObject.getAddress())) {
 			log.warn("XModelCommand " + modelCommand + " does not target this object: "
 					+ changedObject.getAddress());
 			return false;
 		}
 
-		XId objectId = modelCommand.getObjectId();
+		final XId objectId = modelCommand.getObjectId();
 
 		switch (modelCommand.getChangeType()) {
 
@@ -305,15 +305,15 @@ public class ChangeExecutor {
 		}
 	}
 
-	public static boolean executeObjectCommand(XObjectCommand objectCommand,
-			ChangedModel changedModel) {
+	public static boolean executeObjectCommand(final XObjectCommand objectCommand,
+			final ChangedModel changedModel) {
 		if (!objectCommand.getTarget().getParent().equals(changedModel.getAddress())) {
 			log.warn("XObjectCommand " + objectCommand.getTarget()
 					+ " does not target this model: " + changedModel.getAddress());
 			return false;
 		}
 
-		XWritableObject object = changedModel.getObject(objectCommand.getObjectId());
+		final XWritableObject object = changedModel.getObject(objectCommand.getObjectId());
 		if (object == null) {
 			log.warn("XObjectCommand is invalid (found no object with id '"
 					+ objectCommand.getObjectId() + "'): " + objectCommand);
@@ -335,13 +335,13 @@ public class ChangeExecutor {
 	/**
 	 * ADD-SafeRevBound commands must have checked before if modelRev matches or
 	 * not.
-	 * 
+	 *
 	 * @param objectCommand
 	 * @param object
 	 * @return true if command succeeds
 	 */
-	public static boolean executeObjectCommand(XObjectCommand objectCommand, XWritableObject object) {
-		XId fieldId = objectCommand.getFieldId();
+	public static boolean executeObjectCommand(final XObjectCommand objectCommand, final XWritableObject object) {
+		final XId fieldId = objectCommand.getFieldId();
 
 		switch (objectCommand.getChangeType()) {
 
@@ -354,14 +354,14 @@ public class ChangeExecutor {
 				return objectCommand.isForced();
 			}
 			// command is OK and adds a new field
-			XWritableField field = object.createField(fieldId);
+			final XWritableField field = object.createField(fieldId);
 			if (field instanceof XRevWritableField) {
 				((XRevWritableField) field).setRevisionNumber(object.getRevisionNumber());
 			}
 			return true;
 		}
 		case REMOVE: {
-			XReadableField field = object.getField(fieldId);
+			final XReadableField field = object.getField(fieldId);
 
 			if (field == null) {
 				// command is invalid or doesn't change anything
@@ -387,14 +387,14 @@ public class ChangeExecutor {
 		}
 	}
 
-	public static boolean executeRepositoryCommand(XRepositoryCommand command,
-			ChangedModel changedModel) {
+	public static boolean executeRepositoryCommand(final XRepositoryCommand command,
+			final ChangedModel changedModel) {
 		if (!command.getRepositoryId().equals(changedModel.getAddress().getRepository())) {
 			log.warn("XRepositoryCommand " + command + " does not target this models repository: "
 					+ changedModel.getAddress());
 			return false;
 		}
-		XId modelId = command.getModelId();
+		final XId modelId = command.getModelId();
 		if (!modelId.equals(changedModel.getId())) {
 			log.warn("XRepositoryCommand " + command + " does not target this model: "
 					+ changedModel.getAddress());
@@ -455,9 +455,9 @@ public class ChangeExecutor {
 		}
 	}
 
-	public static boolean executeTransaction(XTransaction transaction, ChangedModel changedModel) {
+	public static boolean executeTransaction(final XTransaction transaction, final ChangedModel changedModel) {
 		for (int i = 0; i < transaction.size(); i++) {
-			XAtomicCommand command = transaction.getCommand(i);
+			final XAtomicCommand command = transaction.getCommand(i);
 
 			if (command instanceof XRepositoryCommand) {
 				if (!executeRepositoryCommand((XRepositoryCommand) command, changedModel)) {
@@ -484,9 +484,9 @@ public class ChangeExecutor {
 		return true;
 	}
 
-	public static boolean executeTransaction(XTransaction transaction, ChangedObject changedObject) {
+	public static boolean executeTransaction(final XTransaction transaction, final ChangedObject changedObject) {
 		for (int i = 0; i < transaction.size(); i++) {
-			XAtomicCommand command = transaction.getCommand(i);
+			final XAtomicCommand command = transaction.getCommand(i);
 
 			if (command instanceof XRepositoryCommand) {
 				if (!executeAnyCommand(command, changedObject)) {

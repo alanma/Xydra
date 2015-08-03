@@ -1,5 +1,6 @@
 package org.xydra.webadmin.gwt.client.widgets.selectiontree.modelbranches;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.core.XX;
@@ -22,7 +23,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
  * Performs all the logic for {@link ModelBranchWidget}s. So it:
- * 
+ *
  * <ul>
  * <li>triggers the presentation of models in the {@link EditorPanel}
  * <li>triggers requests to add objects
@@ -30,7 +31,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * from the persistence)
  * <li>has listeners for {@link ModelChangedEvent}s
  * </ul>
- * 
+ *
  * The listeners react, when
  * <ul>
  * <li>a model with the appropriate address is indexed (fetched from the server
@@ -39,32 +40,32 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * <li>when the model is extended by an object (asserts the model is presented
  * then)
  * </ul>
- * 
+ *
  * @author kahmann
- * 
+ *
  */
 public class ModelBranchPresenter extends SelectionTreePresenter {
 
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
 
-	private XAddress modelAddress;
+	private final XAddress modelAddress;
 	private IModelBranchWidget widget;
 	boolean expanded = false;
 
-	private RepoBranchPresenter presenter;
+	private final RepoBranchPresenter presenter;
 
 	private HandlerRegistration registration;
 
 	private HandlerRegistration repoChangeRegistration;
 
-	public ModelBranchPresenter(RepoBranchPresenter repoPresenter, XAddress address) {
+	public ModelBranchPresenter(final RepoBranchPresenter repoPresenter, final XAddress address) {
 		this.presenter = repoPresenter;
 		this.modelAddress = address;
 
 	}
 
-	protected void processChanges(XAddress modelAddress, final EntityStatus status, XId info) {
+	protected void processChanges(final XAddress modelAddress, final EntityStatus status, final XId info) {
 		switch (status) {
 		case CHANGED:
 			// doesn't happen...
@@ -75,14 +76,14 @@ public class ModelBranchPresenter extends SelectionTreePresenter {
 			this.registration.removeHandler();
 			break;
 		case INDEXED:
-			if (info.equals(XX.toId("removed"))) {
+			if (info.equals(Base.toId("removed"))) {
 				this.widget.setStatusDeleted();
 				this.repoChangeRegistration = EventHelper.addRepoChangeListener(
-						XX.toAddress(modelAddress.getRepository(), null, null, null),
+						Base.toAddress(modelAddress.getRepository(), null, null, null),
 						new IRepoChangedEventHandler() {
 
 							@Override
-							public void onRepoChange(RepoChangedEvent event) {
+							public void onRepoChange(final RepoChangedEvent event) {
 								if (event.getStatus().equals(EntityStatus.EXTENDED)) {
 									if (!XyAdmin
 											.getInstance()
@@ -102,7 +103,7 @@ public class ModelBranchPresenter extends SelectionTreePresenter {
 						});
 				this.presenter.addRegistration(this.repoChangeRegistration);
 			} else {
-				long revisionNumber = XyAdmin.getInstance().getModel()
+				final long revisionNumber = XyAdmin.getInstance().getModel()
 						.getRepo(modelAddress.getRepository()).getModel(modelAddress.getModel())
 						.getRevisionNumber();
 				this.widget.setRevisionNumber(revisionNumber);
@@ -111,7 +112,7 @@ public class ModelBranchPresenter extends SelectionTreePresenter {
 		case EXTENDED:
 			if (!this.modelAddress.equals(XyAdmin.getInstance().getController()
 					.getCurrentlyOpenedModelAddress())) {
-				this.presentModel();
+				presentModel();
 			}
 			break;
 		default:
@@ -129,7 +130,7 @@ public class ModelBranchPresenter extends SelectionTreePresenter {
 
 	}
 
-	public void openAddElementDialog(String string) {
+	public void openAddElementDialog(final String string) {
 		super.openAddElementDialog(this.modelAddress, string);
 
 	}
@@ -157,22 +158,22 @@ public class ModelBranchPresenter extends SelectionTreePresenter {
 	public IModelBranchWidget presentWidget() {
 		this.widget = new ModelBranchWidget(this);
 
-		ClickHandler anchorClickHandler = new ClickHandler() {
+		final ClickHandler anchorClickHandler = new ClickHandler() {
 
 			@Override
-			public void onClick(ClickEvent event) {
+			public void onClick(final ClickEvent event) {
 				ModelBranchPresenter.this.presentModel();
 			}
 		};
 
 		this.widget.init(this, this.modelAddress, anchorClickHandler);
-		this.checkStatus();
+		checkStatus();
 
 		this.registration = EventHelper.addModelChangedListener(this.modelAddress,
 				new IModelChangedEventHandler() {
 
 					@Override
-					public void onModelChange(ModelChangedEvent event) {
+					public void onModelChange(final ModelChangedEvent event) {
 						ModelBranchPresenter.this.processChanges(event.getModelAddress(),
 								event.getStatus(), event.getMoreInfos());
 					}

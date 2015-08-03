@@ -127,13 +127,14 @@ public class TypeConstants {
 	// List.class,
 	// Boolean.class;
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 
-		for (ValueType v : ValueType.values()) {
-			for (String coll : new String[] { "Set", "List", "SortedSet" })
+		for (final ValueType v : ValueType.values()) {
+			for (final String coll : new String[] { "Set", "List", "SortedSet" }) {
 				System.out.println("    public static final TypeSpec " + v + "_" + coll
 						+ " = new TypeSpec(\"java.util\",\"" + coll + "\", VALUES, \"X" + v
 						+ "Value\", \"TypeConstants\");");
+			}
 		}
 	}
 }

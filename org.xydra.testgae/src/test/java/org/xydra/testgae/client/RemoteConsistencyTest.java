@@ -17,10 +17,10 @@ public class RemoteConsistencyTest {
 
 	public static final int ROUNDS = 100;
 
-	public static void main(String[] args) {
-		NanoClock c = new NanoClock().start();
+	public static void main(final String[] args) {
+		final NanoClock c = new NanoClock().start();
 		for (int i = 0; i < THREADS; i++) {
-			ConsistencyTestClient client = new ConsistencyTestClient(SERVER_ROOT, "thread-" + i
+			final ConsistencyTestClient client = new ConsistencyTestClient(SERVER_ROOT, "thread-" + i
 					+ "-", ROUNDS);
 			client.start();
 		}
@@ -29,11 +29,11 @@ public class RemoteConsistencyTest {
 			Thread.yield();
 		}
 
-		long d = c.stopAndGetDuration("Threads: " + THREADS + " x Rounds: " + ROUNDS);
-		long runs = THREADS * ROUNDS;
+		final long d = c.stopAndGetDuration("Threads: " + THREADS + " x Rounds: " + ROUNDS);
+		final long runs = THREADS * ROUNDS;
 		System.out.println("==== " + c.getStats());
 		System.out.println("Ran " + THREADS + " for up to " + ROUNDS + " rounds");
-		System.out.println("Average: " + (d / runs) + " ms per run");
+		System.out.println("Average: " + d / runs + " ms per run");
 		System.out.println("Read  errors: " + ConsistencyTestClient.failedReads);
 		System.out.println("Write errors: " + ConsistencyTestClient.failedWrites);
 	}

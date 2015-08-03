@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xydra.base.Base;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
@@ -27,18 +28,18 @@ public class MemcachePerformanceTest {
 		XydraRuntime.getConfigMap().put(XydraRuntime.PROP_USEMEMCACHE, "true");
 		XydraRuntime.getConfigMap().put(XydraRuntime.PROP_MEMCACHESTATS, "true");
 		XydraRuntime.forceReInitialisation();
-		XydraPersistence pers = XydraRuntime.getPersistence(XX.toId("test-repo"));
+		final XydraPersistence pers = XydraRuntime.getPersistence(Base.toId("test-repo"));
 		assertNotNull(pers);
 		assertTrue("pers is " + pers.getClass().getCanonicalName(), pers instanceof GaePersistence);
 
-		XWritableRepository gaeTestRepo = new WritableRepositoryOnPersistence(pers,
-				XX.toId("testactor"));
+		final XWritableRepository gaeTestRepo = new WritableRepositoryOnPersistence(pers,
+				Base.toId("testactor"));
 
-		NanoClock c = new NanoClock().start();
+		final NanoClock c = new NanoClock().start();
 
-		XWritableModel model1 = gaeTestRepo.createModel(XX.toId("model1"));
-		XWritableObject object1 = model1.createObject(XX.toId("object1"));
-		XWritableField field1 = object1.createField(XX.toId("field1"));
+		final XWritableModel model1 = gaeTestRepo.createModel(Base.toId("model1"));
+		final XWritableObject object1 = model1.createObject(Base.toId("object1"));
+		final XWritableField field1 = object1.createField(Base.toId("field1"));
 		field1.setValue(XV.toValue("Value1"));
 
 		c.stop("miniusage");
@@ -52,9 +53,9 @@ public class MemcachePerformanceTest {
 		// System.out.println(((StatsGatheringMemCacheWrapper)memcache).stats());
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		setup();
-		MemcachePerformanceTest test = new MemcachePerformanceTest();
+		final MemcachePerformanceTest test = new MemcachePerformanceTest();
 		test.testWithCaching();
 	}
 

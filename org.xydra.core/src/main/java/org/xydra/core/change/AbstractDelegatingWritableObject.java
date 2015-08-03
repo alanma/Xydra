@@ -2,11 +2,13 @@ package org.xydra.core.change;
 
 import java.util.Iterator;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.util.DumpUtilsBase;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
 import org.xydra.core.util.DumpUtils;
@@ -17,8 +19,8 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * A abstract helper class for the commonalities between {@link XWritableObject}
  * implementations that have a delegation strategy to an internal state.
- * 
- * 
+ *
+ *
  * @author xamde
  */
 public abstract class AbstractDelegatingWritableObject implements XWritableObject {
@@ -39,8 +41,8 @@ public abstract class AbstractDelegatingWritableObject implements XWritableObjec
 
 		@Override
 		public XAddress getAddress() {
-			XAddress xa = AbstractDelegatingWritableObject.this.getAddress();
-			return XX.toAddress(xa.getRepository(), xa.getModel(), xa.getObject(), this.fieldId);
+			final XAddress xa = AbstractDelegatingWritableObject.this.getAddress();
+			return Base.toAddress(xa.getRepository(), xa.getModel(), xa.getObject(), this.fieldId);
 		}
 
 		@Override
@@ -50,7 +52,7 @@ public abstract class AbstractDelegatingWritableObject implements XWritableObjec
 
 		@Override
 		public long getRevisionNumber() {
-			return AbstractDelegatingWritableObject.this.field_getRevisionNumber(this.fieldId);
+			return field_getRevisionNumber(this.fieldId);
 		}
 
 		@Override
@@ -60,17 +62,17 @@ public abstract class AbstractDelegatingWritableObject implements XWritableObjec
 
 		@Override
 		public XValue getValue() {
-			return AbstractDelegatingWritableObject.this.field_getValue(this.fieldId);
+			return field_getValue(this.fieldId);
 		}
 
 		@Override
 		public boolean isEmpty() {
-			return AbstractDelegatingWritableObject.this.field_isEmpty(this.fieldId);
+			return field_isEmpty(this.fieldId);
 		}
 
 		@Override
 		public boolean setValue(final XValue value) {
-			return AbstractDelegatingWritableObject.this.field_setValue(this.fieldId, value);
+			return field_setValue(this.fieldId, value);
 		}
 
 	}
@@ -116,7 +118,7 @@ public abstract class AbstractDelegatingWritableObject implements XWritableObjec
 		}
 	}
 
-	protected XWritableField getField_internal(XId fieldId) {
+	protected XWritableField getField_internal(final XId fieldId) {
 		return new WrappedField(fieldId);
 	}
 
@@ -129,21 +131,21 @@ public abstract class AbstractDelegatingWritableObject implements XWritableObjec
 	protected XAddress resolveField(final XId fieldId) {
 		XyAssert.xyAssert(fieldId != null);
 		assert fieldId != null;
-		return XX.toAddress(this.getAddress().getRepository(), this.getAddress().getModel(),
-				this.getId(), fieldId);
+		return Base.toAddress(getAddress().getRepository(), getAddress().getModel(),
+				getId(), fieldId);
 	}
 
 	protected XAddress resolveObject(final XId objectId) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
-		return XX.toAddress(this.getAddress().getRepository(), this.getAddress().getModel(),
-				this.getId(), null);
+		return Base.toAddress(getAddress().getRepository(), getAddress().getModel(),
+				getId(), null);
 	}
 
 	@Override
 	public String toString() {
-		return this.getId() + " (" + this.getClass().getName() + ") " + this.hashCode() + " "
-				+ DumpUtils.toStringBuffer(this);
+		return getId() + " (" + this.getClass().getName() + ") " + hashCode() + " "
+				+ DumpUtilsBase.toStringBuffer(this);
 	}
 
 }

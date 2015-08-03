@@ -11,15 +11,15 @@ import org.xydra.annotations.RunsInGWT;
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
 public class MiniIOException extends RuntimeException {
-	
-	public MiniIOException(IOException e) {
+
+	public MiniIOException(final IOException e) {
 		super(e);
 	}
-	
-	public MiniIOException(String msg) {
+
+	public MiniIOException(final String msg) {
 		super(msg);
 	}
-	
+
 	private static final long serialVersionUID = -4688233089137736280L;
-	
+
 }

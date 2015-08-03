@@ -13,9 +13,9 @@ import com.google.apphosting.api.ApiProxy.Environment;
 /**
  * The part of {@link GaeMyAdmin_GaeTestfixer} that requires stub classes only
  * available for local testing.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class GaeMyAdmin_GaeTestFixer_LocalPart {
 
@@ -27,9 +27,9 @@ public class GaeMyAdmin_GaeTestFixer_LocalPart {
 	public static void initialiseHelperAndAttachToCurrentThread() {
 		if (helper_ == null) {
 			// create new environment
-			LocalDatastoreServiceTestConfig localDatastoreServiceTestConfig = new LocalDatastoreServiceTestConfig()
+			final LocalDatastoreServiceTestConfig localDatastoreServiceTestConfig = new LocalDatastoreServiceTestConfig()
 					.setNoStorage(true).setBackingStoreLocation(null);
-			LocalMemcacheServiceTestConfig localMemcacheServiceTestConfig = new LocalMemcacheServiceTestConfig()
+			final LocalMemcacheServiceTestConfig localMemcacheServiceTestConfig = new LocalMemcacheServiceTestConfig()
 					.setMaxSize(10, SizeUnit.MB);
 			helper_ = new LocalServiceTestHelper(localDatastoreServiceTestConfig,
 					localMemcacheServiceTestConfig);
@@ -41,7 +41,7 @@ public class GaeMyAdmin_GaeTestFixer_LocalPart {
 			delegate = ApiProxy.getDelegate();
 
 			// hopeless attempt to get a clean datastore in JUnit tests
-			ApiProxyLocal proxy = (ApiProxyLocal) delegate;
+			final ApiProxyLocal proxy = (ApiProxyLocal) delegate;
 			proxy.setProperty(LocalDatastoreService.NO_STORAGE_PROPERTY, Boolean.TRUE.toString());
 
 		} else if (ApiProxy.getCurrentEnvironment() == null) {

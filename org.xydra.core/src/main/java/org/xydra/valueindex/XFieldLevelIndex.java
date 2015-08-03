@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -21,7 +22,7 @@ import org.xydra.index.query.Pair;
  * An index for {@link XReadableModel XReadableModels}. Indexes the contents of
  * the {@link XValue XValues} and stores them together with the {@link XAddress}
  * of the {@link XReadableField} containing the value.
- * 
+ *
  * The index entries are "String -> XAddress & XValue". An {@link XValueIndexer}
  * is needed to get the String representations used for indexing. This index
  * works on the Field-level, which means that {@link XValue XValues} are
@@ -29,9 +30,9 @@ import org.xydra.index.query.Pair;
  * holds the value. Since different {@link XReadableField XReadableFields} might
  * contain the same {@link XValue}, it is possible that there are multiple
  * entries for the same value in the index.
- * 
+ *
  * @author kaidel
- * 
+ *
  */
 
 /*
@@ -45,29 +46,29 @@ import org.xydra.index.query.Pair;
  */
 
 public class XFieldLevelIndex {
-	private XValueIndexer indexer;
-	private ValueIndex index;
-	private XAddress modelAddress;
-	
+	private final XValueIndexer indexer;
+	private final ValueIndex index;
+	private final XAddress modelAddress;
+
 	/*
 	 * TODO It might be necessary to store defaultIncludeAll, includeFieldIds
 	 * and excludeFieldIds somehow, since using the data constructed by a given
 	 * index with wrong parameters might result in wrong behavior.
 	 */
-	private boolean defaultIncludeAll;
-	private Set<XId> includedFieldIds;
-	private Set<XId> excludedFieldIds;
-	
+	private final boolean defaultIncludeAll;
+	private final Set<XId> includedFieldIds;
+	private final Set<XId> excludedFieldIds;
+
 	/**
 	 * Creates a new index for the given {@link XReadableModel} using the given
 	 * {@link XValueIndexer}. The given {@link XReadableModel} will be
 	 * completely indexed during the creation.
-	 * 
+	 *
 	 * It is possible to specify which {@link XReadableField XReadableFields}
 	 * will be indexed by adding their {@link XId XIds} to a white-/blacklist.
 	 * See explanation of the parameters for instructions.
-	 * 
-	 * 
+	 *
+	 *
 	 * @param model The {@link XReadableModel} which will be indexed.
 	 * @param indexer The {@link XValueIndexer} which is to be used to get the
 	 *            Strings used for indexing.
@@ -83,29 +84,29 @@ public class XFieldLevelIndex {
 	 *            {@link XReadableField XReadableFields} will never be indexed,
 	 *            independent of how defaultIncludeAll is set.
 	 */
-	public XFieldLevelIndex(XReadableModel model, XValueIndexer indexer, boolean defaultIncludeAll,
-	        Set<XId> includedFieldIds, Set<XId> excludedFieldIds) {
+	public XFieldLevelIndex(final XReadableModel model, final XValueIndexer indexer, final boolean defaultIncludeAll,
+	        final Set<XId> includedFieldIds, final Set<XId> excludedFieldIds) {
 		this.indexer = indexer;
 		this.index = indexer.getIndex();
-		
+
 		this.defaultIncludeAll = defaultIncludeAll;
 		this.includedFieldIds = includedFieldIds;
 		this.excludedFieldIds = excludedFieldIds;
-		
+
 		this.index(model);
 		this.modelAddress = model.getAddress();
 	}
-	
+
 	/**
 	 * Checks for the given {@link XId} if fields with this {@link XId} are to
 	 * be indexed or not.
-	 * 
+	 *
 	 * @param fieldId The {@link XId} which is to be checked.
 	 * @return true, if fields with the given {@link XId} are to be indexed,
 	 *         false otherwise.
 	 */
-	private boolean isToBeIndexed(XId fieldId) {
-		
+	private boolean isToBeIndexed(final XId fieldId) {
+
 		if(this.defaultIncludeAll) {
 			if(this.excludedFieldIds == null) {
 				return true;
@@ -120,10 +121,10 @@ public class XFieldLevelIndex {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Completely indexes the given {@link XReadableModel}. Since this method
 	 * does not check for changes, updates etc. this should only be called once
@@ -131,20 +132,20 @@ public class XFieldLevelIndex {
 	 * public would actually be dangerous, since no checks are done and values
 	 * might be indexed multiple times, leading to an inconsistent state). It is
 	 * only used during the indexing procedure of the constructor.
-	 * 
+	 *
 	 * @param model The {@link XReadableModel} which is to be indexed (i.e. the
 	 *            {@link XReadableModel} given to the constructor
 	 *            {@link XFieldLevelIndex#XFieldLevelIndex(XReadableModel, XValueIndexer)}
 	 *            ).
 	 */
-	private void index(XReadableModel model) {
-		for(XId objectId : model) {
-			XReadableObject object = model.getObject(objectId);
-			
+	private void index(final XReadableModel model) {
+		for(final XId objectId : model) {
+			final XReadableObject object = model.getObject(objectId);
+
 			index(object);
 		}
 	}
-	
+
 	/**
 	 * Completely indexes the given {@link XReadableObject}. Since this method
 	 * does not check for changes, updates etc. and calling this method on a
@@ -155,19 +156,19 @@ public class XFieldLevelIndex {
 	 * done and values might be indexed multiple times, leading to an
 	 * inconsistent state). It is only used during the indexing procedure of the
 	 * constructor.
-	 * 
+	 *
 	 * @param object The {@link XReadableObject} which is to be indexed
 	 */
-	private void index(XReadableObject object) {
-		for(XId fieldId : object) {
-			
-			if(this.isToBeIndexed(fieldId)) {
-				XReadableField field = object.getField(fieldId);
+	private void index(final XReadableObject object) {
+		for(final XId fieldId : object) {
+
+			if(isToBeIndexed(fieldId)) {
+				final XReadableField field = object.getField(fieldId);
 				index(field);
 			}
 		}
 	}
-	
+
 	/**
 	 * Completely indexes the given {@link XReadableField}. Since this method
 	 * does not check for changes, updates etc., this method should only be
@@ -176,24 +177,24 @@ public class XFieldLevelIndex {
 	 * multiple times, leading to an inconsistent state) and should only be
 	 * called on {@link XReadableField XReadableFields} which were not yet
 	 * indexed.
-	 * 
-	 * 
+	 *
+	 *
 	 * @param field The {@link XReadableField} which is to be indexed
 	 */
-	private void index(XReadableField field) {
-		XId fieldId = field.getId();
-		
-		if(this.isToBeIndexed(fieldId)) {
+	private void index(final XReadableField field) {
+		final XId fieldId = field.getId();
+
+		if(isToBeIndexed(fieldId)) {
 			this.indexer.indexValue(field.getAddress(), field.getValue());
 		}
 	}
-	
+
 	/**
 	 * Computes the difference between the given old and new states of an
 	 * {@link XReadableObject} and changes updates the index according to these
 	 * changes, i.e. newly added values will be indexed, entries of changed
 	 * values will be updated and entries of removed values will be deindexed.
-	 * 
+	 *
 	 * This method assumes the given oldObject is an {@link XReadableObject}
 	 * which was already indexed and is in exactly the same state as during the
 	 * last time it was indexed. No guarantees to the behavior of this method
@@ -202,10 +203,10 @@ public class XFieldLevelIndex {
 	 * indexed, these values will also not be indexed during the update
 	 * procedure, even if the newObject still contains them, since they do not
 	 * appear in the difference we compute.
-	 * 
+	 *
 	 * @param oldObject the old state of the {@link XReadableObject}.
 	 * @param newObject the new state of the {@link XReadableObject}.
-	 * 
+	 *
 	 * @throws RuntimeException if the given oldObject was no object of the
 	 *             {@link XReadableModel} indexed by this index, if the given
 	 *             {@link XReadableObject XReadableObjects} are not
@@ -215,52 +216,52 @@ public class XFieldLevelIndex {
 	 *             number (and therefore oldObject is actually a newer
 	 *             representation).
 	 */
-	public void updateIndex(XReadableObject oldObject, XReadableObject newObject) {
-		XAddress address = oldObject.getAddress();
-		
-		XAddress modelAddress = XX.resolveModel(address.getRepository(), address.getModel());
+	public void updateIndex(final XReadableObject oldObject, final XReadableObject newObject) {
+		final XAddress address = oldObject.getAddress();
+
+		final XAddress modelAddress = Base.resolveModel(address.getRepository(), address.getModel());
 		if(!this.modelAddress.equals(modelAddress)) {
 			throw new RuntimeException(
 			        "the given oldObject was no object of the XReadableModel indexed by this index.");
 		}
-		
+
 		if(!address.equals(newObject.getAddress())) {
 			throw new RuntimeException("oldObject and newObject do not have the same address.");
 		}
-		
+
 		if(newObject.getRevisionNumber() < oldObject.getRevisionNumber()) {
 			throw new RuntimeException("newObject is an older revision than oldObject.");
 			// TODO how about just swapping the objects?
 		}
-		
+
 		/*
 		 * if the revision numbers are equal, nothing has changed and therefore
 		 * there's nothing to update.
 		 */
-		
+
 		if(newObject.getRevisionNumber() > oldObject.getRevisionNumber()) {
 			// objects changed
-			
+
 			/*
 			 * used to remember which fields exist in both models and do not
 			 * need to be checked again later.
 			 */
-			HashSet<XId> intersection = new HashSet<XId>();
-			
-			for(XId fieldId : oldObject) {
-				XReadableField oldField = oldObject.getField(fieldId);
-				boolean isToBeIndexed = this.isToBeIndexed(fieldId);
-				
+			final HashSet<XId> intersection = new HashSet<XId>();
+
+			for(final XId fieldId : oldObject) {
+				final XReadableField oldField = oldObject.getField(fieldId);
+				final boolean isToBeIndexed = isToBeIndexed(fieldId);
+
 				if(newObject.hasField(fieldId)) {
 					/*
 					 * add the field to the intersection, since both objects
 					 * contain it
 					 */
 					intersection.add(fieldId);
-					
+
 					if(isToBeIndexed) {
-						XReadableField newField = newObject.getField(fieldId);
-						
+						final XReadableField newField = newObject.getField(fieldId);
+
 						updateFieldEntry(oldField, newField);
 					}
 				} else {
@@ -270,8 +271,8 @@ public class XFieldLevelIndex {
 					}
 				}
 			}
-			
-			for(XId fieldId : newObject) {
+
+			for(final XId fieldId : newObject) {
 				/*
 				 * TODO is there a faster way to calculate to calculate the
 				 * difference between the newObject and the intersection than
@@ -279,43 +280,43 @@ public class XFieldLevelIndex {
 				 * algorithm, maybe already implemented in the Java API? Is
 				 * removeAll faster?
 				 */
-				if(!intersection.contains(fieldId) && this.isToBeIndexed(fieldId)) {
+				if(!intersection.contains(fieldId) && isToBeIndexed(fieldId)) {
 					// field is new
 					index(newObject.getField(fieldId));
 				}
 			}
 		}
 	}
-	
+
 	/*
 	 * deIndex methods for event types apart from XFieldEvents are not possible,
 	 * because:
-	 * 
+	 *
 	 * XModelEvents: Only the REMOVE-Case is interesting here. We would need to
 	 * remove a complete object only by it's address, which is not possible,
 	 * because we do not have the possibility to iterate over all keys (to look
 	 * up the entries which contain the object address) nor do we have the
 	 * possibility to look up the values which were stored in the XObject.
-	 * 
+	 *
 	 * XObjectEvents: Only the REMOVE-Case is interesting here. We would need to
 	 * remove a complete field only by it's address. The argumentation why this
 	 * is not possible is analogous to the argumentation for XModelEvents.
-	 * 
+	 *
 	 * XTransactionEvents: Typically contain both XModel- and XObjectEvents,
 	 * which cannot be handled. Transaction consisting only of XFieldEvents also
 	 * cannot be handled, since the Transaction contains no information over the
 	 * removed values etc., which is needed for deindexing.
 	 */
-	
+
 	/**
 	 * Updates the index according to the given {@link XFieldEvent}.
-	 * 
+	 *
 	 * This method assumes that the given event refers to a revision of the
 	 * changed field which is newer than the revision which state is currently
 	 * represented in the index and that the changed field was already indexed.
 	 * If not, this method will leave the index in a state inconsistent to the
 	 * state of the {@link XReadableModel} which is indexed by this Index.
-	 * 
+	 *
 	 * @param event The {@link XFieldEvent} which specifies what was changed in
 	 *            the {@link XReadableModel} and what needs to be updated in the
 	 *            index.
@@ -325,20 +326,20 @@ public class XFieldLevelIndex {
 	 *             {@link XReadableField} which is not a field of an object of
 	 *             the {@link XReadableModel} indexed by this index.
 	 */
-	public void updateIndex(XFieldEvent event, XValue oldValue) {
-		XAddress fieldAddress = event.getChangedEntity();
-		XId fieldId = fieldAddress.getField();
-		
-		XAddress modelAddress = XX.resolveModel(event.getRepositoryId(), event.getModelId());
+	public void updateIndex(final XFieldEvent event, final XValue oldValue) {
+		final XAddress fieldAddress = event.getChangedEntity();
+		final XId fieldId = fieldAddress.getField();
+
+		final XAddress modelAddress = Base.resolveModel(event.getRepositoryId(), event.getModelId());
 		if(!this.modelAddress.equals(modelAddress)) {
 			throw new RuntimeException(
 			        "the changed field was no field of an object of the XReadableModel indexed by this index.");
 		}
-		
-		if(!this.isToBeIndexed(fieldId)) {
+
+		if(!isToBeIndexed(fieldId)) {
 			return;
 		}
-		
+
 		switch(event.getChangeType()) {
 		case ADD:
 			XValue addedValue = event.getNewValue();
@@ -356,22 +357,22 @@ public class XFieldLevelIndex {
 			break;
 		}
 	}
-	
+
 	/**
 	 * Computes the difference between the given old and new states of an
 	 * {@link XReadableField} and changes updates the index according to these
 	 * changes, i.e. newly added values will be indexed, entries of changed
 	 * values will be updated and entries of removed values will be deindexed.
-	 * 
+	 *
 	 * This method assumes the given oldField is an {@link XReadableField} which
 	 * was already indexed and is in exactly the same state as during the last
 	 * time it was indexed. If this is not the case, the index will be left in a
 	 * state inconsistent to the state of the {@link XReadableModel} which is
 	 * indexed by this index.
-	 * 
+	 *
 	 * @param oldField the old state of the {@link XReadableField}.
 	 * @param newField the new state of the {@link XReadableField}.
-	 * 
+	 *
 	 * @throws RuntimeException if the given oldField was no field of an object
 	 *             of the {@link XReadableModel} indexed by this index, if the
 	 *             given {@link XReadableField XReadableFields} are not
@@ -381,42 +382,42 @@ public class XFieldLevelIndex {
 	 *             number (and therefore oldObject is actually a newer
 	 *             representation).
 	 */
-	public void updateIndex(XReadableField oldField, XReadableField newField) {
-		XAddress oldAddress = oldField.getAddress();
-		XAddress newAddress = newField.getAddress();
-		
-		XAddress modelAddress = XX.resolveModel(oldAddress.getRepository(), oldAddress.getModel());
+	public void updateIndex(final XReadableField oldField, final XReadableField newField) {
+		final XAddress oldAddress = oldField.getAddress();
+		final XAddress newAddress = newField.getAddress();
+
+		final XAddress modelAddress = Base.resolveModel(oldAddress.getRepository(), oldAddress.getModel());
 		if(!this.modelAddress.equals(modelAddress)) {
 			throw new RuntimeException(
 			        "the given oldField was no field of an object of the XReadableModel indexed by this index.");
 		}
-		
+
 		if(newField.getRevisionNumber() < oldField.getRevisionNumber()) {
 			throw new RuntimeException("newField is an older revision than oldField.");
 			// TODO how about just swapping the objects?
 		}
-		
+
 		if(!oldAddress.equals(newAddress)) {
 			throw new RuntimeException(
 			        "oldField and newField do not have the same address and therefore aren't different versions of the same field.");
 		}
-		
-		if(!this.isToBeIndexed(oldField.getId())) {
+
+		if(!isToBeIndexed(oldField.getId())) {
 			return;
 		}
-		
+
 		updateFieldEntry(oldField, newField);
 	}
-	
+
 	/**
 	 * Deindexes the given oldValue and indexes the newValue for the specified
 	 * object.
-	 * 
+	 *
 	 * This method assumes that the given newValue is actually newer then the
 	 * given oldValue. If this is not the case, the index will be left in a
 	 * state inconsistent to the state of the {@link XReadableModel} indexed by
 	 * this index.
-	 * 
+	 *
 	 * @param fieldAddress The {@link XAddress} of the {@link XReadableField}
 	 *            which stores the newValue and in which the oldValue was
 	 *            stored.
@@ -425,23 +426,23 @@ public class XFieldLevelIndex {
 	 * @throws RuntimeException if the given fieldAddress is no address of an
 	 *             {@link XReadableField}.
 	 */
-	public void updateIndex(XAddress fieldAddress, XValue oldValue, XValue newValue) {
+	public void updateIndex(final XAddress fieldAddress, final XValue oldValue, final XValue newValue) {
 		if(fieldAddress.getAddressedType() != XType.XFIELD) {
 			throw new RuntimeException("fieldAddress is no valid Field-XAddress, but an "
 			        + fieldAddress.getAddressedType() + "-Address.");
 		}
-		
-		XAddress modelAddress = XX.resolveModel(fieldAddress.getRepository(),
+
+		final XAddress modelAddress = Base.resolveModel(fieldAddress.getRepository(),
 		        fieldAddress.getModel());
 		if(!this.modelAddress.equals(modelAddress)) {
 			throw new RuntimeException(
 			        "the given field address was not an address of a field of the model indexed by this index.");
 		}
-		
-		if(!this.isToBeIndexed(fieldAddress.getField())) {
+
+		if(!isToBeIndexed(fieldAddress.getField())) {
 			return;
 		}
-		
+
 		/*
 		 * nothing needs to be done if oldValue and newValue are equal
 		 */
@@ -450,16 +451,16 @@ public class XFieldLevelIndex {
 			this.indexer.indexValue(fieldAddress, newValue);
 		}
 	}
-	
+
 	/**
 	 * A convenience method for updating the entries of two fields. Checks
 	 * whether the given newField revision is higher than the revision number of
 	 * the oldField and does nothing if this is not the case.
-	 * 
+	 *
 	 * @param oldField
 	 * @param newField
 	 */
-	private void updateFieldEntry(XReadableField oldField, XReadableField newField) {
+	private void updateFieldEntry(final XReadableField oldField, final XReadableField newField) {
 		// nothing needs to be updated if the revision numbers are equal or
 		// newField is not "newer" than oldField
 		if(newField.getRevisionNumber() > oldField.getRevisionNumber()) {
@@ -468,61 +469,61 @@ public class XFieldLevelIndex {
 			index(newField);
 		}
 	}
-	
+
 	/**
 	 * Deindexes the content of the given {@link XReadableObject}. Should only
 	 * be called on {@link XReadableObject XReadableObjects} which were
 	 * completely removed from the {@link XReadableModel} indexed by this index.
-	 * 
+	 *
 	 * @param object The {@link XReadableObject} which is to be deindexed.
 	 * @throws RuntimeException if the given {@link XReadableObject} was no
 	 *             object of the {@link XReadableModel} indexed by this Index.
 	 */
-	public void deIndex(XReadableObject object) {
-		XAddress objectAddress = object.getAddress();
-		
-		XAddress modelAddress = XX.resolveModel(objectAddress.getRepository(),
+	public void deIndex(final XReadableObject object) {
+		final XAddress objectAddress = object.getAddress();
+
+		final XAddress modelAddress = Base.resolveModel(objectAddress.getRepository(),
 		        objectAddress.getModel());
 		if(!this.modelAddress.equals(modelAddress)) {
 			throw new RuntimeException(
 			        "the given XReadableObject was no object of the XReadableModel indexed by this index.");
 		}
-		
-		for(XId fieldId : object) {
-			if(this.isToBeIndexed(fieldId)) {
-				XReadableField field = object.getField(fieldId);
+
+		for(final XId fieldId : object) {
+			if(isToBeIndexed(fieldId)) {
+				final XReadableField field = object.getField(fieldId);
 				this.indexer.deIndexValue(field.getAddress(), field.getValue());
 			}
 		}
 	}
-	
+
 	/**
 	 * Deindexes the content of the given {@link XReadableField}. Should only be
 	 * called on {@link XReadableField XReadableFields} which were completely
 	 * removed from the {@link XReadableModel} indexed by this index.
-	 * 
+	 *
 	 * @param field The {@link XReadableField} which is to be deindexed.
 	 * @throws RuntimeException if the given {@link XReadableField} was no field
 	 *             of an object of the {@link XReadableModel} indexed by this
 	 *             Index.
 	 */
-	public void deIndex(XReadableField field) {
-		XAddress fieldAddress = field.getAddress();
-		XAddress objectAddress = XX.resolveObject(fieldAddress.getRepository(),
+	public void deIndex(final XReadableField field) {
+		final XAddress fieldAddress = field.getAddress();
+		final XAddress objectAddress = Base.resolveObject(fieldAddress.getRepository(),
 		        fieldAddress.getModel(), fieldAddress.getObject());
-		
-		XAddress modelAddress = XX.resolveModel(objectAddress.getRepository(),
+
+		final XAddress modelAddress = Base.resolveModel(objectAddress.getRepository(),
 		        objectAddress.getModel());
 		if(!this.modelAddress.equals(modelAddress)) {
 			throw new RuntimeException(
 			        "the given XReadableField was no field of an object of the XReadableModel indexed by this index.");
 		}
-		
-		if(this.isToBeIndexed(fieldAddress.getField())) {
+
+		if(isToBeIndexed(fieldAddress.getField())) {
 			this.indexer.deIndexValue(fieldAddress, field.getValue());
 		}
 	}
-	
+
 	/**
 	 * Returns a set of {@link ValueIndexEntry ValueIndexEntries}. The
 	 * {@link XAddress XAddresses} are addresses of fields which hold
@@ -530,23 +531,23 @@ public class XFieldLevelIndex {
 	 * in the entry is exactly this corresponding {@link XValue}. Exception if
 	 * the contained value is an {@link XValue} it might not be the actual
 	 * value.
-	 * 
+	 *
 	 * TODO Since were now on the field level, why not use "null" instead of the
 	 * Field Address?
-	 * 
+	 *
 	 * Warning: If an {@link XValue} in an entry is an instance of
 	 * {@link XAddress}, it either is the corresponding {@link XValue} or the
 	 * {@link XAddress} of the field holding the corresponding {@link XValue}.
 	 * The second case can only occur if the index stores the {@link XAddress}
 	 * of the field if an {@link XValue} is too large. If your index is not
 	 * configured in this manner, this will never occur.
-	 * 
+	 *
 	 * Which {@link XValue XValues} corresponds to a given key is determined by
 	 * the used {@link XValueIndexer} which was set in the constructor
 	 * (XValueIndexer in
 	 * {@link XFieldLevelIndex#XFieldLevelIndex(XReadableModel, XValueIndexer, boolean, Set, Set)
 	 * )} )
-	 * 
+	 *
 	 * @param key The key for which corresponding will be searched
 	 * @return a set of {@link Pair Pairs} of {@link XAddress XAddresses} and
 	 *         {@link XValue XValues}. The {@link XAddress XAddresses} of
@@ -555,24 +556,24 @@ public class XFieldLevelIndex {
 	 *         for a warning concerning the {@link XValue XValues} in the
 	 *         {@link Pair Pairs}.
 	 */
-	public Set<ValueIndexEntry> search(String key) {
+	public Set<ValueIndexEntry> search(final String key) {
 		// IMPROVE rather simple search algorithm at the moment...
-		
+
 		/*
 		 * the index uses lower case strings only, so we need to transform the
 		 * given key appropriately
 		 */
-		String indexKey = key.toLowerCase();
-		HashSet<ValueIndexEntry> set = new HashSet<ValueIndexEntry>();
-		
-		EqualsConstraint<String> constraint = new EqualsConstraint<String>(indexKey);
-		Iterator<ValueIndexEntry> iterator = this.index.constraintIterator(constraint);
-		
+		final String indexKey = key.toLowerCase();
+		final HashSet<ValueIndexEntry> set = new HashSet<ValueIndexEntry>();
+
+		final EqualsConstraint<String> constraint = new EqualsConstraint<String>(indexKey);
+		final Iterator<ValueIndexEntry> iterator = this.index.constraintIterator(constraint);
+
 		while(iterator.hasNext()) {
-			ValueIndexEntry entry = iterator.next();
+			final ValueIndexEntry entry = iterator.next();
 			set.add(entry);
 		}
-		
+
 		return set;
 	}
 }

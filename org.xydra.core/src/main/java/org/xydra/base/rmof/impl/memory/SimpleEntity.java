@@ -15,7 +15,7 @@ public abstract class SimpleEntity implements Serializable, XEntity {
 
 	@Override
 	public int hashCode() {
-		return (int) (this.getAddress().hashCode() + this.getRevisionNumber());
+		return (int) (getAddress().hashCode() + getRevisionNumber());
 	}
 
 	public abstract long getRevisionNumber();
@@ -32,10 +32,10 @@ public abstract class SimpleEntity implements Serializable, XEntity {
 
 	/**
 	 * Set if this entity exists or not. This flag is not persisted.
-	 * 
+	 *
 	 * @param b
 	 */
-	public void setExists(boolean b) {
+	public void setExists(final boolean b) {
 		this.entityExists = b;
 	}
 

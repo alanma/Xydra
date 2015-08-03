@@ -10,13 +10,13 @@ import org.xydra.log.api.Logger;
 
 /**
  * Log to logger and delegate to {@link ILogListener}.
- * 
+ *
  * @author xamde
  */
 @org.xydra.annotations.NotThreadSafe
 public class LoggerWithListeners implements Logger {
 
-	private Logger log;
+	private final Logger log;
 
 	@NeverNull
 	protected final Collection<ILogListener> logListeners;
@@ -27,7 +27,7 @@ public class LoggerWithListeners implements Logger {
 	 * @param logListeners
 	 * @CanBeNull
 	 */
-	public LoggerWithListeners(Logger logger, @CanBeNull Collection<ILogListener> logListeners) {
+	public LoggerWithListeners(final Logger logger, @CanBeNull final Collection<ILogListener> logListeners) {
 		assert logger != null;
 		this.log = logger;
 		/*
@@ -44,55 +44,55 @@ public class LoggerWithListeners implements Logger {
 	}
 
 	@Override
-	public void debug(String msg) {
+	public void debug(final String msg) {
 		this.log.debug(msg);
 
-		for (ILogListener logListener : this.logListeners) {
+		for (final ILogListener logListener : this.logListeners) {
 			logListener.debug(this.log, msg);
 		}
 	}
 
 	@Override
-	public void debug(String msg, Throwable t) {
+	public void debug(final String msg, final Throwable t) {
 		this.log.debug(msg, t);
 
-		for (ILogListener logListener : this.logListeners) {
+		for (final ILogListener logListener : this.logListeners) {
 			logListener.debug(this.log, msg, t);
 		}
 	}
 
 	@Override
-	public void error(String msg) {
+	public void error(final String msg) {
 		this.log.error(msg);
 
-		for (ILogListener logListener : this.logListeners) {
+		for (final ILogListener logListener : this.logListeners) {
 			logListener.error(this.log, msg);
 		}
 	}
 
 	@Override
-	public void error(String msg, Throwable t) {
+	public void error(final String msg, final Throwable t) {
 		this.log.error(msg, t);
 
-		for (ILogListener logListener : this.logListeners) {
+		for (final ILogListener logListener : this.logListeners) {
 			logListener.error(this.log, msg, t);
 		}
 	}
 
 	@Override
-	public void info(String msg) {
+	public void info(final String msg) {
 		this.log.info(msg);
 
-		for (ILogListener logListener : this.logListeners) {
+		for (final ILogListener logListener : this.logListeners) {
 			logListener.info(this.log, msg);
 		}
 	}
 
 	@Override
-	public void info(String msg, Throwable t) {
+	public void info(final String msg, final Throwable t) {
 		this.log.info(msg, t);
 
-		for (ILogListener logListener : this.logListeners) {
+		for (final ILogListener logListener : this.logListeners) {
 			logListener.info(this.log, msg, t);
 		}
 	}
@@ -123,43 +123,43 @@ public class LoggerWithListeners implements Logger {
 	}
 
 	@Override
-	public void trace(String msg) {
+	public void trace(final String msg) {
 		this.log.trace(msg);
 
-		for (ILogListener logListener : this.logListeners) {
+		for (final ILogListener logListener : this.logListeners) {
 			logListener.trace(this.log, msg);
 		}
 	}
 
 	@Override
-	public void trace(String msg, Throwable t) {
+	public void trace(final String msg, final Throwable t) {
 		this.log.trace(msg, t);
 
-		for (ILogListener logListener : this.logListeners) {
+		for (final ILogListener logListener : this.logListeners) {
 			logListener.trace(this.log, msg, t);
 		}
 	}
 
 	@Override
-	public void warn(String msg) {
+	public void warn(final String msg) {
 		this.log.warn(msg);
 
-		for (ILogListener logListener : this.logListeners) {
+		for (final ILogListener logListener : this.logListeners) {
 			logListener.warn(this.log, msg);
 		}
 	}
 
 	@Override
-	public void warn(String msg, Throwable t) {
+	public void warn(final String msg, final Throwable t) {
 		this.log.warn(msg, t);
 
-		for (ILogListener logListener : this.logListeners) {
+		for (final ILogListener logListener : this.logListeners) {
 			logListener.warn(this.log, msg, t);
 		}
 	}
 
 	@Override
-	public void setLevel(Level level) {
+	public void setLevel(final Level level) {
 		this.log.setLevel(level);
 	}
 

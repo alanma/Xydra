@@ -70,37 +70,37 @@ public class EntityWidget extends Composite {
 	@UiField
 	Button showAddressButton;
 
-	private XAddress address;
+	private final XAddress address;
 
 	private String addText;
 	private String addTitle;
 	private String removeTitle;
 
-	private String addFieldText = "enter Field ID";
-	private String addObjectText = "enter Object ID";
-	private String addFieldButtonTitle = "add new field";
-	private String addObjectButtonTitle = "add new object";
-	private String removeObjectButtonTitle = "remove this object";
-	private String removeModelButtonTitle = "remove this model";
+	private final String addFieldText = "enter Field ID";
+	private final String addObjectText = "enter Object ID";
+	private final String addFieldButtonTitle = "add new field";
+	private final String addObjectButtonTitle = "add new object";
+	private final String removeObjectButtonTitle = "remove this object";
+	private final String removeModelButtonTitle = "remove this model";
 
-	private HandlerRegistration removeClickHandlerRegistration;
+	private final HandlerRegistration removeClickHandlerRegistration;
 
-	private Presenter presenter;
+	private final Presenter presenter;
 
-	public EntityWidget(Presenter presenter, XAddress address, ClickHandler anchorClickHandler) {
+	public EntityWidget(final Presenter presenter, final XAddress address, final ClickHandler anchorClickHandler) {
 		super();
 
 		this.presenter = presenter;
 		this.address = address;
 		initWidget(uiBinder.createAndBindUi(this));
 
-		Image deleteImg = new Image(BundledRes.INSTANCE.images().delete());
+		final Image deleteImg = new Image(BundledRes.INSTANCE.images().delete());
 		this.removeButton.getElement().appendChild(deleteImg.getElement());
 		this.removeButton.setStyleName("imageButtonStyle");
-		Image addImg = new Image(BundledRes.INSTANCE.images().add());
+		final Image addImg = new Image(BundledRes.INSTANCE.images().add());
 		this.addButton.getElement().appendChild(addImg.getElement());
 		this.addButton.setStyleName("imageButtonStyle");
-		Image textImage = new Image(BundledRes.INSTANCE.images().list());
+		final Image textImage = new Image(BundledRes.INSTANCE.images().list());
 		this.showAddressButton.getElement().appendChild(textImage.getElement());
 		this.showAddressButton.setStyleName("imageButtonStyle");
 		this.removeButton.getElement().setAttribute("style", "float: right");
@@ -114,7 +114,7 @@ public class EntityWidget extends Composite {
 
 		XId entityId = address.getModel();
 		long revisionNumber = -1000l;
-		SessionCachedModel model = XyAdmin.getInstance().getModel()
+		final SessionCachedModel model = XyAdmin.getInstance().getModel()
 				.getRepo(address.getRepository()).getModel(entityId);
 
 		switch (address.getAddressedType()) {
@@ -134,7 +134,7 @@ public class EntityWidget extends Composite {
 			this.addTitle = this.addFieldButtonTitle;
 			this.removeTitle = this.removeObjectButtonTitle;
 			entityId = address.getObject();
-			XWritableObject object = model.getObject(entityId);
+			final XWritableObject object = model.getObject(entityId);
 			revisionNumber = object.getRevisionNumber();
 
 			this.idPanel.addStyleName("objectIDLabel");
@@ -153,7 +153,7 @@ public class EntityWidget extends Composite {
 		this.addDomHandler(new MouseOverHandler() {
 
 			@Override
-			public void onMouseOver(MouseOverEvent event) {
+			public void onMouseOver(final MouseOverEvent event) {
 				EntityWidget.this.addButton.setVisible(true);
 				EntityWidget.this.removeButton.setVisible(true);
 				EntityWidget.this.showAddressButton.setVisible(true);
@@ -163,7 +163,7 @@ public class EntityWidget extends Composite {
 		this.addDomHandler(new MouseOutHandler() {
 
 			@Override
-			public void onMouseOut(MouseOutEvent event) {
+			public void onMouseOut(final MouseOutEvent event) {
 				EntityWidget.this.addButton.setVisible(false);
 				EntityWidget.this.removeButton.setVisible(false);
 				EntityWidget.this.showAddressButton.setVisible(false);
@@ -178,8 +178,8 @@ public class EntityWidget extends Composite {
 		this.removeClickHandlerRegistration = this.removeButton.addClickHandler(new ClickHandler() {
 
 			@Override
-			public void onClick(ClickEvent event) {
-				RemoveElementDialog removeDialog = new RemoveElementDialog(
+			public void onClick(final ClickEvent event) {
+				final RemoveElementDialog removeDialog = new RemoveElementDialog(
 						EntityWidget.this.presenter, EntityWidget.this.address);
 				removeDialog.show();
 
@@ -189,8 +189,8 @@ public class EntityWidget extends Composite {
 	}
 
 	@UiHandler("addButton")
-	void onClickAdd(ClickEvent event) {
-		AddElementDialog addDialog = new AddElementDialog(this.presenter,
+	void onClickAdd(final ClickEvent event) {
+		final AddElementDialog addDialog = new AddElementDialog(this.presenter,
 				EntityWidget.this.address, this.addText);
 		addDialog.show();
 		addDialog.selectEverything();
@@ -198,9 +198,9 @@ public class EntityWidget extends Composite {
 	}
 
 	@UiHandler("showAddressButton")
-	void onClickShow(ClickEvent event) {
+	void onClickShow(final ClickEvent event) {
 		String entityIdString = "";
-		XType entitysType = this.address.getAddressedType();
+		final XType entitysType = this.address.getAddressedType();
 		switch (entitysType) {
 		case XFIELD:
 			entityIdString = " field " + this.address.getField().toString();
@@ -214,7 +214,7 @@ public class EntityWidget extends Composite {
 		default:
 			break;
 		}
-		AddressDialog addressDialog = new AddressDialog(entityIdString, this.address.toString());
+		final AddressDialog addressDialog = new AddressDialog(entityIdString, this.address.toString());
 		addressDialog.show();
 		addressDialog.selectEverything();
 
@@ -226,7 +226,7 @@ public class EntityWidget extends Composite {
 
 			@SuppressWarnings("unused")
 			@Override
-			public void onClick(ClickEvent event) {
+			public void onClick(final ClickEvent event) {
 
 				new RemoveModelDialog(EntityWidget.this.presenter, EntityWidget.this.address);
 
@@ -243,7 +243,7 @@ public class EntityWidget extends Composite {
 		this.revisionLabel.setText("???");
 	}
 
-	public void setRevisionNumber(long modelsRevisionNumber) {
+	public void setRevisionNumber(final long modelsRevisionNumber) {
 		this.revisionLabel.setText("Rev. " + modelsRevisionNumber);
 
 	}

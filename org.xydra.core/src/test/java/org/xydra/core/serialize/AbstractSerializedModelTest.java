@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.xydra.base.Base;
 import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableField;
@@ -33,69 +34,69 @@ import org.xydra.log.api.LoggerFactory;
 /**
  * Test serializing {@link XReadableRepository}, {@link XReadableModel},
  * {@link XReadableObject} and {@link XReadableField} types to/from XML.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 abstract public class AbstractSerializedModelTest extends AbstractSerializingTest {
-    
+
     private static final Logger log = getLogger();
-    
+
     private static Logger getLogger() {
         LoggerTestHelper.init();
         return LoggerFactory.getLogger(AbstractSerializedModelTest.class);
     }
-    
-    private XId actorId = XX.toId("a-test-user");
-    
-    void checkNoRevisions(XReadableField field) {
+
+    private final XId actorId = XX.toId("a-test-user");
+
+    void checkNoRevisions(final XReadableField field) {
         assertEquals(SerializedModel.NO_REVISION, field.getRevisionNumber());
     }
-    
-    void checkNoRevisions(XReadableModel model) {
+
+    void checkNoRevisions(final XReadableModel model) {
         assertEquals(SerializedModel.NO_REVISION, model.getRevisionNumber());
-        for(XId objectId : model) {
+        for(final XId objectId : model) {
             checkNoRevisions(model.getObject(objectId));
         }
     }
-    
-    void checkNoRevisions(XReadableObject object) {
+
+    void checkNoRevisions(final XReadableObject object) {
         assertEquals(SerializedModel.NO_REVISION, object.getRevisionNumber());
-        for(XId fieldId : object) {
+        for(final XId fieldId : object) {
             checkNoRevisions(object.getField(fieldId));
         }
     }
-    
-    void checkNoRevisions(XReadableRepository repo) {
-        for(XId modelId : repo) {
+
+    void checkNoRevisions(final XReadableRepository repo) {
+        for(final XId modelId : repo) {
             checkNoRevisions(repo.getModel(modelId));
         }
     }
-    
+
     @Test
     public void testEmptyField() {
         testField(new MemoryField(this.actorId, DemoModelUtil.ALIASES_ID));
     }
-    
+
     @Test
     public void testEmptyModel() {
-        MemoryModel empty = new MemoryModel(this.actorId, null, DemoModelUtil.PHONEBOOK_ID);
+        final MemoryModel empty = new MemoryModel(this.actorId, null, DemoModelUtil.PHONEBOOK_ID);
         assert empty.exists();
         testModel(empty);
     }
-    
+
     @Test
     public void testEmptyObject() {
         testObject(new MemoryObject(this.actorId, null, DemoModelUtil.JOHN_ID));
     }
-    
+
     @Test
     public void testEmptyRepository() {
-        testRepository(new MemoryRepository(this.actorId, null, XX.toId("repo")));
+        testRepository(new MemoryRepository(this.actorId, null, Base.toId("repo")));
     }
-    
-    private void testField(XReadableField field) {
-        
+
+    private void testField(final XReadableField field) {
+
         // test serializing with revisions
         XydraOut out = create();
         SerializedModel.serialize(field, out);
@@ -105,7 +106,7 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
         XydraElement e = parse(data);
         XField fieldAgain = SerializedModel.toField(this.actorId, e);
         assertTrue(XCompareUtils.equalState(field, fieldAgain));
-        
+
         // test serializing without revisions
         out = create();
         SerializedModel.serialize(field, out, false);
@@ -116,81 +117,81 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
         fieldAgain = SerializedModel.toField(this.actorId, e);
         assertTrue(XCompareUtils.equalTree(field, fieldAgain));
         checkNoRevisions(fieldAgain);
-        
+
     }
-    
+
     @Test
     public void testFullField() {
-        XField field = new MemoryField(this.actorId, DemoModelUtil.ALIASES_ID);
+        final XField field = new MemoryField(this.actorId, DemoModelUtil.ALIASES_ID);
         field.setValue(XV.toStringSetValue(new String[] { "Cookie Monster" }));
         testField(field);
     }
-    
+
     @Test
     public void testFullModel() {
-        XModel model = new MemoryModel(this.actorId, null, DemoModelUtil.PHONEBOOK_ID);
+        final XModel model = new MemoryModel(this.actorId, null, DemoModelUtil.PHONEBOOK_ID);
         DemoModelUtil.setupPhonebook(model);
         testModel(model);
     }
-    
+
     @Test
     public void testFullObject() {
-        XObject object = new MemoryObject(this.actorId, null, DemoModelUtil.JOHN_ID);
+        final XObject object = new MemoryObject(this.actorId, null, DemoModelUtil.JOHN_ID);
         DemoModelUtil.setupJohn(object);
         testObject(object);
     }
-    
+
     @Test
     public void testFullRepository() {
-        XRepository repo = new MemoryRepository(this.actorId, null, XX.toId("repo"));
+        final XRepository repo = new MemoryRepository(this.actorId, null, Base.toId("repo"));
         DemoModelUtil.addPhonebookModel(repo);
         testRepository(repo);
     }
-    
+
     @Test
     public void testFullModelWithNoSyncLog() {
-        XModel model = new MemoryModel(this.actorId, null, DemoModelUtil.PHONEBOOK_ID);
+        final XModel model = new MemoryModel(this.actorId, null, DemoModelUtil.PHONEBOOK_ID);
         DemoModelUtil.setupPhonebook(model);
-        
+
         // test serializing with revisions
-        XydraOut out = create();
+        final XydraOut out = create();
         out.enableWhitespace(true, true);
         SerializedModel.serialize(model, out, true, false, false);
         assertTrue(out.isClosed());
-        String data = out.getData();
+        final String data = out.getData();
         log.info(data);
-        XydraElement e = parse(data);
-        XModel modelAgain = SerializedModel.toModel(this.actorId, null, e);
+        final XydraElement e = parse(data);
+        final XModel modelAgain = SerializedModel.toModel(this.actorId, null, e);
         assertTrue(XCompareUtils.equalState(model, modelAgain));
         assertFalse(XCompareSyncUtils.equalHistory(model, modelAgain));
-        
+
         // check that there is a change log
-        XChangeLog changeLog = modelAgain.getChangeLog();
+        final XChangeLog changeLog = modelAgain.getChangeLog();
         assertNotNull(changeLog);
     }
-    
+
     @Test
     public void testEmptyModelWithNoSyncLog() {
-        MemoryModel model = new MemoryModel(this.actorId, null, DemoModelUtil.PHONEBOOK_ID);
-        
+        final MemoryModel model = new MemoryModel(this.actorId, null, DemoModelUtil.PHONEBOOK_ID);
+
         // test serializing with revisions
-        XydraOut out = create();
+        final XydraOut out = create();
         out.enableWhitespace(true, true);
         SerializedModel.serialize(model, out, true, false, false);
         assertTrue(out.isClosed());
-        String data = out.getData();
+        final String data = out.getData();
         log.info(data);
-        XydraElement e = parse(data);
-        XModel modelAgain = SerializedModel.toModel(this.actorId, null, e);
+        final XydraElement e = parse(data);
+        final XModel modelAgain = SerializedModel.toModel(this.actorId, null, e);
         assertTrue(XCompareUtils.equalState(model, modelAgain));
-        
+
         // check that there is a change log
-        XChangeLog changeLog = modelAgain.getChangeLog();
+        final XChangeLog changeLog = modelAgain.getChangeLog();
         assertNotNull(changeLog);
     }
-    
-    private void testModel(XReadableModel model) {
-        
+
+    private void testModel(final XReadableModel model) {
+
         // test serializing with revisions
         XydraOut out = create();
         out.enableWhitespace(true, true);
@@ -202,11 +203,11 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
         XModel modelAgain = SerializedModel.toModel(this.actorId, null, e);
         assertTrue(XCompareUtils.equalState(model, modelAgain));
         assertTrue(XCompareSyncUtils.equalHistory(model, modelAgain));
-        
+
         // check that there is a change log
-        XChangeLog changeLog = modelAgain.getChangeLog();
+        final XChangeLog changeLog = modelAgain.getChangeLog();
         assertNotNull(changeLog);
-        
+
         // test serializing without revisions
         out = create();
         SerializedModel.serialize(model, out, false, true, false);
@@ -217,11 +218,11 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
         modelAgain = SerializedModel.toModel(this.actorId, null, e);
         assertTrue(XCompareUtils.equalTree(model, modelAgain));
         checkNoRevisions(modelAgain);
-        
+
     }
-    
-    private void testObject(XReadableObject object) {
-        
+
+    private void testObject(final XReadableObject object) {
+
         // test serializing with revisions
         XydraOut out = create();
         SerializedModel.serialize(object, out);
@@ -232,11 +233,11 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
         XObject objectAgain = SerializedModel.toObject(this.actorId, null, e);
         assertTrue(XCompareUtils.equalState(object, objectAgain));
         assertTrue(XCompareSyncUtils.equalHistory(object, objectAgain));
-        
+
         // check that there is a change log
-        XChangeLog changeLog = objectAgain.getChangeLog();
+        final XChangeLog changeLog = objectAgain.getChangeLog();
         assertNotNull(changeLog);
-        
+
         // test serializing without revisions
         out = create();
         SerializedModel.serialize(object, out, false, true, false);
@@ -247,16 +248,16 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
         objectAgain = SerializedModel.toObject(this.actorId, null, e);
         assertTrue(XCompareUtils.equalTree(object, objectAgain));
         checkNoRevisions(objectAgain);
-        
+
     }
-    
+
     /**
      * DESERIALIZED REPOSITORIES DO NOT CONTAIN SYNCLOG
-     * 
+     *
      * @param repo
      */
-    private void testRepository(XReadableRepository repo) {
-        
+    private void testRepository(final XReadableRepository repo) {
+
         // test serializing with revisions
         XydraOut out = create();
         SerializedModel.serialize(repo, out);
@@ -267,7 +268,7 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
         XRepository repoAgain = SerializedModel.toRepository(this.actorId, null, e);
         assertTrue(XCompareUtils.equalState(repo, repoAgain));
         // assertTrue(XCompareUtils.equalHistory(repo, repoAgain));
-        
+
         // test serializing without revisions
         out = create();
         SerializedModel.serialize(repo, out, false, true, false);
@@ -278,7 +279,7 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
         repoAgain = SerializedModel.toRepository(this.actorId, null, e);
         assertTrue(XCompareUtils.equalTree(repo, repoAgain));
         checkNoRevisions(repoAgain);
-        
+
     }
-    
+
 }

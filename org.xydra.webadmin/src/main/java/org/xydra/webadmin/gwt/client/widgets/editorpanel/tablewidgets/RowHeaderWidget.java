@@ -30,14 +30,14 @@ public class RowHeaderWidget extends Composite {
 	@UiField(provided = true)
 	EntityWidget entityWidget;
 
-	private RowPresenter presenter;
+	private final RowPresenter presenter;
 
-	public RowHeaderWidget(RowPresenter presenter, String expandButtonText) {
+	public RowHeaderWidget(final RowPresenter presenter, final String expandButtonText) {
 		this.presenter = presenter;
 		this.entityWidget = new EntityWidget(presenter, presenter.getAddress(), new ClickHandler() {
 
 			@Override
-			public void onClick(ClickEvent event) {
+			public void onClick(final ClickEvent event) {
 				RowHeaderWidget.this.expandButton.click();
 			}
 		});
@@ -49,7 +49,7 @@ public class RowHeaderWidget extends Composite {
 	}
 
 	@UiHandler("expandButton")
-	void onClickExpand(ClickEvent e) {
+	void onClickExpand(final ClickEvent e) {
 
 		this.presenter.handleExpandOrCollapse();
 	}

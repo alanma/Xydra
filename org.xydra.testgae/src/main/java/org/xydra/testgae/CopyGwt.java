@@ -24,27 +24,27 @@ public class CopyGwt {
 	 * @param moduleName
 	 *            e.g. 'frontpage'
 	 */
-	private static void copyCompiledGwtModule(String warPath, String moduleName) {
-		File targetGwt = new File(warPath + "/" + moduleName);
+	private static void copyCompiledGwtModule(final String warPath, final String moduleName) {
+		final File targetGwt = new File(warPath + "/" + moduleName);
 		if (!targetGwt.exists()) {
 			log.warn("GWT data not found in " + targetGwt.getAbsolutePath()
 					+ ".Some AJAX will not work. \n Please run 'mvn gwt:compile' first");
 		} else {
 			assert targetGwt.isDirectory();
-			File sourceWebAppGwt = new File("./src/main/webapp/" + moduleName);
+			final File sourceWebAppGwt = new File("./src/main/webapp/" + moduleName);
 			assert sourceWebAppGwt.getParentFile().exists();
 			log.info("Copying GWT files temporarily to " + sourceWebAppGwt.getAbsolutePath());
 			FileUtils.deleteQuietly(sourceWebAppGwt);
 			sourceWebAppGwt.mkdirs();
 			try {
 				FileUtils.copyDirectory(targetGwt, sourceWebAppGwt);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		CopyGwt.copyGwt();
 	}
 

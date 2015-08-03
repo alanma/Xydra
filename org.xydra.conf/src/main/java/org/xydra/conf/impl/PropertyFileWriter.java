@@ -7,20 +7,20 @@ import org.xydra.conf.escape.Escaping;
 
 /**
  * Writes java property files with comments.
- * 
+ *
  * @author xamde
  */
 public class PropertyFileWriter {
 
-	private Writer w;
-	private String lineEnd;
+	private final Writer w;
+	private final String lineEnd;
 
 	/**
 	 * Uses the platform line ending
-	 * 
+	 *
 	 * @param w
 	 */
-	public PropertyFileWriter(Writer w) {
+	public PropertyFileWriter(final Writer w) {
 		this(w, System.getProperty("line.separator") == null ? "\n" : System
 				.getProperty("line.separator"));
 	}
@@ -29,7 +29,7 @@ public class PropertyFileWriter {
 	 * @param w
 	 * @param lineEnd
 	 */
-	public PropertyFileWriter(Writer w, String lineEnd) {
+	public PropertyFileWriter(final Writer w, final String lineEnd) {
 		this.w = w;
 		this.lineEnd = lineEnd;
 	}
@@ -40,7 +40,7 @@ public class PropertyFileWriter {
 	 *            @CanBeNull
 	 * @throws IOException
 	 */
-	public void keyValue(String key, String value) throws IOException {
+	public void keyValue(final String key, final String value) throws IOException {
 		assert key != null;
 		this.w.write(Escaping.escape(key, true, false));
 		this.w.write("=");
@@ -53,7 +53,7 @@ public class PropertyFileWriter {
 	 *            @NeverNull
 	 * @throws IOException
 	 */
-	public void comment(String comment) throws IOException {
+	public void comment(final String comment) throws IOException {
 		assert comment != null;
 		this.w.write("# " + comment + this.lineEnd);
 	}

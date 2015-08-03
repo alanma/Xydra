@@ -25,22 +25,22 @@ import org.xydra.restless.utils.Delay;
  * This class starts a Jetty server configured to allow testing of the webapp,
  * loading static files directly from src/main/webapp. This class is not
  * required to run the webapp.
- * 
+ *
  * This class requires to build and assemble the web app: call
  * <code>mvn clean compile gwt:compile gwt:mergewebxml war:war -Dmaven.test.skip=true -o
  * </code>
- * 
+ *
  * <p>
  * If only the client source code changed, use <code>mvn gwt:compile</code>
- * 
+ *
  * <p>
  * If the web.xml changed use
  * <code>mvn gwt:mergwebxml war:war to update the web.xml in target/{appname}-SNAPSHOT/WEB-INF
- * 
+ *
  * <p>If only static files have been modified, no call is necessary as this Jetty is configured to load the directly from src/main/webapp.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class Jetty extends EmbeddedJetty {
 
@@ -59,14 +59,14 @@ public class Jetty extends EmbeddedJetty {
 
 	/**
 	 * Jetty with your port of choice
-	 * 
+	 *
 	 * TODO deprecate this constructor
-	 * 
+	 *
 	 * @param port
-	 * 
+	 *
 	 *            use {@link #configureFromConf(IConfig)} instead
 	 */
-	public Jetty(int port) {
+	public Jetty(final int port) {
 		Env.get().conf().set(ConfParamsJetty.PORT, port);
 	}
 
@@ -83,24 +83,24 @@ public class Jetty extends EmbeddedJetty {
 	 * set some nice default servlet filters
 	 */
 	@Override
-	protected void configureWebapp(WebAppContext webappContext) {
+	protected void configureWebapp(final WebAppContext webappContext) {
 		// make sure 'com.google.appengine.tools.appstats.AppstatsFilter' is on
 		// the classpath
 
 		// Add the servlets.
-		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+		final ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 
 		webappContext.setClassLoader(classloader);
 		// user given filter goes first
 		if (this.userFirstFilter != null) {
-			FilterHolder filterHolder = new FilterHolder();
+			final FilterHolder filterHolder = new FilterHolder();
 			filterHolder.setFilter(this.userFirstFilter);
 			webappContext.addFilter(filterHolder, "*", EnumSet.allOf(DispatcherType.class));
 		}
 
 		// caching filter
 		{
-			FilterHolder filterHolder = new FilterHolder();
+			final FilterHolder filterHolder = new FilterHolder();
 			filterHolder.setFilter(this.imageCachingFilter);
 			webappContext.addFilter(filterHolder, "*.png", EnumSet.allOf(DispatcherType.class));
 			webappContext.addFilter(filterHolder, "*.gif", EnumSet.allOf(DispatcherType.class));
@@ -109,19 +109,19 @@ public class Jetty extends EmbeddedJetty {
 		}
 
 		// GWT caching
-		FilterHolder gwtFilterHolder = new FilterHolder();
+		final FilterHolder gwtFilterHolder = new FilterHolder();
 		gwtFilterHolder.setFilter(this.noGwtCachingFilter);
 		webappContext.addFilter(gwtFilterHolder, "*.nocache.js",
 				EnumSet.allOf(DispatcherType.class));
 
 		// count requests
-		FilterHolder filterHolderForCounting = new FilterHolder();
+		final FilterHolder filterHolderForCounting = new FilterHolder();
 		filterHolderForCounting.setFilter(this.requestCountingFilter);
 		webappContext.addFilter(filterHolderForCounting, "*", EnumSet.allOf(DispatcherType.class));
 
 		// slow down to simulate bad network
 		if (Delay.hasServePageDelay()) {
-			FilterHolder filterHolderForDelay = new FilterHolder();
+			final FilterHolder filterHolderForDelay = new FilterHolder();
 			filterHolderForDelay.setFilter(this.simulateNetworkDelaysFilter);
 			webappContext.addFilter(filterHolderForDelay, "*", EnumSet.allOf(DispatcherType.class));
 		}
@@ -135,7 +135,7 @@ public class Jetty extends EmbeddedJetty {
 		// webappContext.getSecurityHandler().setUserRealm(JettyUtils.createInsecureTestUserRealm());
 
 		// route requests to static content
-		FilterHolder filterHolderForStaticContent = new FilterHolder();
+		final FilterHolder filterHolderForStaticContent = new FilterHolder();
 		filterHolderForStaticContent.setFilter(new Filter() {
 
 			@Override
@@ -144,10 +144,10 @@ public class Jetty extends EmbeddedJetty {
 			}
 
 			@Override
-			public void doFilter(ServletRequest req, ServletResponse response,
-					FilterChain filterChain) throws IOException, ServletException {
+			public void doFilter(final ServletRequest req, final ServletResponse response,
+					final FilterChain filterChain) throws IOException, ServletException {
 				if (req instanceof HttpServletRequest) {
-					HttpServletRequest hreq = (HttpServletRequest) req;
+					final HttpServletRequest hreq = (HttpServletRequest) req;
 					String path = hreq.getPathInfo();
 					if (path == null) {
 						path = "";
@@ -166,7 +166,7 @@ public class Jetty extends EmbeddedJetty {
 			}
 
 			@Override
-			public void init(FilterConfig filterConfig) {
+			public void init(final FilterConfig filterConfig) {
 				// do nothing
 			}
 		});
@@ -174,7 +174,7 @@ public class Jetty extends EmbeddedJetty {
 				EnumSet.allOf(DispatcherType.class));
 	}
 
-	public void setFirstFilter(Filter filter) {
+	public void setFirstFilter(final Filter filter) {
 		this.userFirstFilter = filter;
 	}
 

@@ -15,9 +15,9 @@ import org.xydra.annotations.ThreadSafe;
 
 /**
  * Loops back the complete incoming request
- * 
+ *
  * @author xamde
- * 
+ *
  */
 
 @ThreadSafe
@@ -31,44 +31,44 @@ public class EchoServlet extends HttpServlet {
 	 */
 
 	/**
-	 * 
+	 *
 	 * @param req
 	 * @NeverNull
 	 * @param resp
 	 * @NeverNull
 	 */
 	@Override
-	public void doGet(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse resp)
+	public void doGet(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse resp)
 			throws IOException {
 		echo(req, resp);
 	}
 
 	/**
-	 * 
+	 *
 	 * @param req
 	 * @NeverNull
 	 * @param resp
 	 * @NeverNull
 	 */
 	@Override
-	public void doPost(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse resp)
+	public void doPost(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse resp)
 			throws IOException {
 		echo(req, resp);
 	}
 
 	/**
-	 * 
+	 *
 	 * @param req
 	 * @NeverNull
 	 * @param resp
 	 * @NeverNull
 	 */
-	private static void echo(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse resp)
+	private static void echo(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse resp)
 			throws IOException {
 		resp.setStatus(200);
 		resp.setContentType("text/plain");
 
-		PrintWriter w = resp.getWriter();
+		final PrintWriter w = resp.getWriter();
 		w.println("Got request.");
 		w.println("== Request ==");
 		w.println(" * schema: " + req.getScheme()); // HTTP
@@ -81,7 +81,7 @@ public class EchoServlet extends HttpServlet {
 
 		if (req.getCookies() != null) {
 			w.println("=== Cookies ===");
-			for (Cookie cookie : req.getCookies()) {
+			for (final Cookie cookie : req.getCookies()) {
 				w.println(cookie.getName());
 				w.println(" * version: " + cookie.getVersion());
 				w.println(" * domain: " + cookie.getDomain());
@@ -93,13 +93,13 @@ public class EchoServlet extends HttpServlet {
 		}
 
 		w.println("=== Headers ===");
-		Enumeration<String> headers = req.getHeaderNames();
+		final Enumeration<String> headers = req.getHeaderNames();
 		while (headers.hasMoreElements()) {
-			String headerName = headers.nextElement();
+			final String headerName = headers.nextElement();
 			w.println(headerName);
-			Enumeration<String> headerValues = req.getHeaders(headerName);
+			final Enumeration<String> headerValues = req.getHeaders(headerName);
 			while (headerValues.hasMoreElements()) {
-				String headerValue = headerValues.nextElement();
+				final String headerValue = headerValues.nextElement();
 				w.println(" * " + headerValue);
 			}
 		}
@@ -107,10 +107,10 @@ public class EchoServlet extends HttpServlet {
 		w.println("");
 		w.println("== Payload ==");
 		w.println("=== Request Parameters ===");
-		Enumeration<String> parameters = req.getParameterNames();
+		final Enumeration<String> parameters = req.getParameterNames();
 		while (parameters.hasMoreElements()) {
-			String paramName = parameters.nextElement();
-			for (String paramValue : req.getParameterValues(paramName)) {
+			final String paramName = parameters.nextElement();
+			for (final String paramValue : req.getParameterValues(paramName)) {
 				w.println(" * " + paramName + " = " + paramValue);
 			}
 		}
@@ -137,10 +137,10 @@ public class EchoServlet extends HttpServlet {
 		w.println(" * localPort: " + req.getLocalPort());
 
 		w.println("=== Attributes ===");
-		Enumeration<String> attributes = req.getAttributeNames();
+		final Enumeration<String> attributes = req.getAttributeNames();
 		while (attributes.hasMoreElements()) {
-			String attName = attributes.nextElement();
-			Object attValue = req.getAttribute(attName);
+			final String attName = attributes.nextElement();
+			final Object attValue = req.getAttribute(attName);
 			w.println(" * " + attName + " = " + attValue.getClass() + " " + attValue.toString());
 		}
 
@@ -155,7 +155,7 @@ public class EchoServlet extends HttpServlet {
 		w.flush();
 
 		w.println("=== Request Content ===");
-		BufferedReader r = req.getReader();
+		final BufferedReader r = req.getReader();
 		String line = r.readLine();
 		while (line != null) {
 			w.println("> " + line);

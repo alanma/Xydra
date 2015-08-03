@@ -4,7 +4,7 @@ import org.xydra.base.change.XEvent;
 
 
 public interface IGenericEventListener {
-    
+
     void onEvent(XEvent event);
-    
+
 }

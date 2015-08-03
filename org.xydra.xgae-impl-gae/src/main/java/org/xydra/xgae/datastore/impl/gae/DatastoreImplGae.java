@@ -38,23 +38,23 @@ public class DatastoreImplGae implements IDatastore {
 	}
 
 	@Override
-	public SEntity createEntity(SKey key) {
-		Entity e = new Entity((Key) key.raw());
+	public SEntity createEntity(final SKey key) {
+		final Entity e = new Entity((Key) key.raw());
 		return GEntity.wrap(e);
 	}
 
 	@Override
-	public SEntity createEntity(String kind, String name) {
+	public SEntity createEntity(final String kind, final String name) {
 		return createEntity(createKey(kind, name));
 	}
 
 	@Override
-	public SText createText(String value) {
+	public SText createText(final String value) {
 		return GText.wrap(new Text(value));
 	}
 
 	@Override
-	public SKey createKey(String kind, String name) {
+	public SKey createKey(final String kind, final String name) {
 		return GKey.wrap(KeyFactory.createKey(kind, name));
 	}
 

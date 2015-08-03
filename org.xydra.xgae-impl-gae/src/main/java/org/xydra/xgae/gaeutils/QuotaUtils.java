@@ -14,7 +14,7 @@ public class QuotaUtils {
 	 */
 	@SuppressWarnings("deprecation")
 	public static Pair<Long, Long> getCurrentQuotas() {
-		QuotaService qs = QuotaServiceFactory.getQuotaService();
+		final QuotaService qs = QuotaServiceFactory.getQuotaService();
 		long apiTime = -1;
 		if (qs.supports(DataType.API_TIME_IN_MEGACYCLES)) {
 			apiTime = qs.getApiTimeInMegaCycles();

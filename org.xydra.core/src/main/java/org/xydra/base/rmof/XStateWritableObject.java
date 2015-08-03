@@ -7,25 +7,25 @@ import org.xydra.base.XId;
 
 /**
  * An XObject allowing simple changes, but not to the revision number.
- * 
+ *
  * @author xamde
  */
 public interface XStateWritableObject extends XStateReadableObject {
-	
+
 	@ModificationOperation
 	XStateWritableField createField(XId fieldId);
-	
+
 	/* More specific return type */
 	@Override
 	@ReadOperation
 	XStateWritableField getField(XId fieldId);
-	
+
 	/**
 	 * Removes the {@link XWritableField} with the given {@link XId} from this
 	 * XObject
-	 * 
+	 *
 	 * @param fieldId The field which is to be removed
-	 * 
+	 *
 	 * @return true, if the specified {@link XWritableField} did exist and could
 	 *         be removed
 	 * @throws IllegalStateException if this object has already been removed
@@ -33,5 +33,5 @@ public interface XStateWritableObject extends XStateReadableObject {
 	 */
 	@ModificationOperation
 	boolean removeField(XId fieldId);
-	
+
 }

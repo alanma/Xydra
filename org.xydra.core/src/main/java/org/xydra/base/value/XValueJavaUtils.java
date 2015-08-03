@@ -23,12 +23,12 @@ import org.xydra.base.rmof.XWritableObject;
 /**
  * Helper class to use a {@link XWritableObject} more like a Java class with
  * typed fields.
- * 
+ *
  * For each ValueType there are methods toT and fromT with T = ValueType.name().
  * They convert to the respective Java object types (e.g. Boolean to
  * XBooleanValue). For the primitive types, use the corresponding Java primitive
  * name, e.g. 'toint' to convert from XIntgerValue to int.
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(true)
@@ -40,15 +40,18 @@ public class XValueJavaUtils {
 	 * @return
 	 * @throws IllegalArgumentException if fieldId or writableObject are null
 	 */
-	private static XWritableField _getOrCreateField(XWritableObject writableObject, XId fieldId)
+	private static XWritableField _getOrCreateField(final XWritableObject writableObject, final XId fieldId)
 			throws IllegalArgumentException {
-		if (writableObject == null)
+		if (writableObject == null) {
 			throw new IllegalArgumentException("writableObject is null");
-		if (fieldId == null)
+		}
+		if (fieldId == null) {
 			throw new IllegalArgumentException("fieldId is null");
+		}
 		XWritableField f = writableObject.getField(fieldId);
-		if (f == null)
+		if (f == null) {
 			f = writableObject.createField(fieldId);
+		}
 		return f;
 	}
 
@@ -58,102 +61,105 @@ public class XValueJavaUtils {
 	 * @return null if field or value does not exist; a {@link XValue} if set
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
-	private static XValue _getValue(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) {
-		if (readableObject == null)
+	private static XValue _getValue(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) {
+		if (readableObject == null) {
 			throw new IllegalArgumentException("readableObject is null");
-		if (fieldId == null)
+		}
+		if (fieldId == null) {
 			throw new IllegalArgumentException("fieldId is null");
-		XReadableField f = readableObject.getField(fieldId);
-		if (f == null)
+		}
+		final XReadableField f = readableObject.getField(fieldId);
+		if (f == null) {
 			return null;
-		XValue v = f.getValue();
+		}
+		final XValue v = f.getValue();
 		return v;
 	}
 
-	public static List<Boolean> asList(boolean[] contents) {
-		ArrayList<Boolean> list = new ArrayList<Boolean>(contents.length);
+	public static List<Boolean> asList(final boolean[] contents) {
+		final ArrayList<Boolean> list = new ArrayList<Boolean>(contents.length);
 		for (int i = 0; i < contents.length; i++) {
 			list.add(contents[i]);
 		}
 		return list;
 	}
 
-	public static List<Byte> asList(byte[] contents) {
-		ArrayList<Byte> list = new ArrayList<Byte>(contents.length);
+	public static List<Byte> asList(final byte[] contents) {
+		final ArrayList<Byte> list = new ArrayList<Byte>(contents.length);
 		for (int i = 0; i < contents.length; i++) {
 			list.add(contents[i]);
 		}
 		return list;
 	}
 
-	public static List<Character> asList(char[] contents) {
-		ArrayList<Character> list = new ArrayList<Character>(contents.length);
+	public static List<Character> asList(final char[] contents) {
+		final ArrayList<Character> list = new ArrayList<Character>(contents.length);
 		for (int i = 0; i < contents.length; i++) {
 			list.add(contents[i]);
 		}
 		return list;
 	}
 
-	public static List<Double> asList(double[] contents) {
-		ArrayList<Double> list = new ArrayList<Double>(contents.length);
+	public static List<Double> asList(final double[] contents) {
+		final ArrayList<Double> list = new ArrayList<Double>(contents.length);
 		for (int i = 0; i < contents.length; i++) {
 			list.add(contents[i]);
 		}
 		return list;
 	}
 
-	public static List<Float> asList(float[] contents) {
-		ArrayList<Float> list = new ArrayList<Float>(contents.length);
+	public static List<Float> asList(final float[] contents) {
+		final ArrayList<Float> list = new ArrayList<Float>(contents.length);
 		for (int i = 0; i < contents.length; i++) {
 			list.add(contents[i]);
 		}
 		return list;
 	}
 
-	public static List<Integer> asList(int[] contents) {
-		ArrayList<Integer> list = new ArrayList<Integer>(contents.length);
+	public static List<Integer> asList(final int[] contents) {
+		final ArrayList<Integer> list = new ArrayList<Integer>(contents.length);
 		for (int i = 0; i < contents.length; i++) {
 			list.add(contents[i]);
 		}
 		return list;
 	}
 
-	public static List<Long> asList(long[] contents) {
-		ArrayList<Long> list = new ArrayList<Long>(contents.length);
+	public static List<Long> asList(final long[] contents) {
+		final ArrayList<Long> list = new ArrayList<Long>(contents.length);
 		for (int i = 0; i < contents.length; i++) {
 			list.add(contents[i]);
 		}
 		return list;
 	}
 
-	public static List<Short> asList(short[] contents) {
-		ArrayList<Short> list = new ArrayList<Short>(contents.length);
+	public static List<Short> asList(final short[] contents) {
+		final ArrayList<Short> list = new ArrayList<Short>(contents.length);
 		for (int i = 0; i < contents.length; i++) {
 			list.add(contents[i]);
 		}
 		return list;
 	}
 
-	public static <T> List<T> asList(T[] contents) {
+	public static <T> List<T> asList(final T[] contents) {
 		return Arrays.asList(contents);
 	}
 
-	public static <T> Set<T> asSet(T[] contents) {
+	public static <T> Set<T> asSet(final T[] contents) {
 		return new HashSet<T>(asList(contents));
 	}
 
-	public static <T> SortedSet<T> asSortedSet(T[] contents) {
+	public static <T> SortedSet<T> asSortedSet(final T[] contents) {
 		return new TreeSet<T>(asList(contents));
 	}
 
 	// Address
-	public static XAddress fromAddress(XAddress xydraValue) {
+	public static XAddress fromAddress(final XAddress xydraValue) {
 		return xydraValue;
 	}
 
 	// AddressList
-	public static List<XAddress> fromAddressList(XAddressListValue xydraValue) {
+	public static List<XAddress> fromAddressList(final XAddressListValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -161,7 +167,7 @@ public class XValueJavaUtils {
 	}
 
 	// AddressSet
-	public static Set<XAddress> fromAddressSet(XAddressSetValue xydraValue) {
+	public static Set<XAddress> fromAddressSet(final XAddressSetValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -169,7 +175,7 @@ public class XValueJavaUtils {
 	}
 
 	// AddressSortedSet
-	public static SortedSet<XAddress> fromAddressSortedSet(XAddressSortedSetValue xydraValue) {
+	public static SortedSet<XAddress> fromAddressSortedSet(final XAddressSortedSetValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -177,7 +183,7 @@ public class XValueJavaUtils {
 	}
 
 	// Binary
-	public static byte[] fromBinary(XBinaryValue xydraValue) {
+	public static byte[] fromBinary(final XBinaryValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -185,7 +191,7 @@ public class XValueJavaUtils {
 	}
 
 	// boolean
-	public static boolean fromboolean(XBooleanValue xydraValue) {
+	public static boolean fromboolean(final XBooleanValue xydraValue) {
 		if (xydraValue == null) {
 			return false;
 		}
@@ -193,7 +199,7 @@ public class XValueJavaUtils {
 	}
 
 	// Boolean
-	public static Boolean fromBoolean(XBooleanValue xydraValue) {
+	public static Boolean fromBoolean(final XBooleanValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -201,7 +207,7 @@ public class XValueJavaUtils {
 	}
 
 	// BooleanList
-	public static List<Boolean> fromBooleanList(XBooleanListValue xydraValue) {
+	public static List<Boolean> fromBooleanList(final XBooleanListValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -209,7 +215,7 @@ public class XValueJavaUtils {
 	}
 
 	// double
-	public static double fromdouble(XDoubleValue xydraValue) {
+	public static double fromdouble(final XDoubleValue xydraValue) {
 		if (xydraValue == null) {
 			return 0d;
 		}
@@ -217,7 +223,7 @@ public class XValueJavaUtils {
 	}
 
 	// Double
-	public static Double fromDouble(XDoubleValue xydraValue) {
+	public static Double fromDouble(final XDoubleValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -225,7 +231,7 @@ public class XValueJavaUtils {
 	}
 
 	// DoubleList
-	public static List<Double> fromDoubleList(XDoubleListValue xydraValue) {
+	public static List<Double> fromDoubleList(final XDoubleListValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -233,12 +239,12 @@ public class XValueJavaUtils {
 	}
 
 	// Id
-	public static XId fromId(XId xydraValue) {
+	public static XId fromId(final XId xydraValue) {
 		return xydraValue;
 	}
 
 	// IdList
-	public static List<XId> fromIdList(XIdListValue xydraValue) {
+	public static List<XId> fromIdList(final XIdListValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -246,7 +252,7 @@ public class XValueJavaUtils {
 	}
 
 	// IdSet
-	public static Set<XId> fromIdSet(XIdSetValue xydraValue) {
+	public static Set<XId> fromIdSet(final XIdSetValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -254,7 +260,7 @@ public class XValueJavaUtils {
 	}
 
 	// IdSortedSet
-	public static SortedSet<XId> fromIdSortedSet(XIdSortedSetValue xydraValue) {
+	public static SortedSet<XId> fromIdSortedSet(final XIdSortedSetValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -262,7 +268,7 @@ public class XValueJavaUtils {
 	}
 
 	// int
-	public static int fromint(XIntegerValue xydraValue) {
+	public static int fromint(final XIntegerValue xydraValue) {
 		if (xydraValue == null) {
 			return 0;
 		}
@@ -270,7 +276,7 @@ public class XValueJavaUtils {
 	}
 
 	// Integer
-	public static Integer fromInteger(XIntegerValue xydraValue) {
+	public static Integer fromInteger(final XIntegerValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -278,7 +284,7 @@ public class XValueJavaUtils {
 	}
 
 	// IntegerList
-	public static List<Integer> fromIntegerList(XIntegerListValue xydraValue) {
+	public static List<Integer> fromIntegerList(final XIntegerListValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -286,7 +292,7 @@ public class XValueJavaUtils {
 	}
 
 	// long
-	public static long fromlong(XLongValue xydraValue) {
+	public static long fromlong(final XLongValue xydraValue) {
 		if (xydraValue == null) {
 			return 0l;
 		}
@@ -294,7 +300,7 @@ public class XValueJavaUtils {
 	}
 
 	// Long
-	public static Long fromLong(XLongValue xydraValue) {
+	public static Long fromLong(final XLongValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -302,7 +308,7 @@ public class XValueJavaUtils {
 	}
 
 	// LongList
-	public static List<Long> fromLongList(XLongListValue xydraValue) {
+	public static List<Long> fromLongList(final XLongListValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -310,7 +316,7 @@ public class XValueJavaUtils {
 	}
 
 	// String
-	public static String fromString(XStringValue xydraValue) {
+	public static String fromString(final XStringValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -318,7 +324,7 @@ public class XValueJavaUtils {
 	}
 
 	// StringList
-	public static List<String> fromStringList(XStringListValue xydraValue) {
+	public static List<String> fromStringList(final XStringListValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -326,7 +332,7 @@ public class XValueJavaUtils {
 	}
 
 	// StringSet
-	public static Set<String> fromStringSet(XStringSetValue xydraValue) {
+	public static Set<String> fromStringSet(final XStringSetValue xydraValue) {
 		if (xydraValue == null) {
 			return null;
 		}
@@ -343,23 +349,25 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static XAddress getAddress(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+	public static XAddress getAddress(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) throws ClassCastException, IllegalArgumentException {
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XAddress) {
-			XAddress specificV = (XAddress) v;
+			final XAddress specificV = (XAddress) v;
 			return specificV;
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass() + " require an XAddress");
 		}
 	}
 
-	public static XAddress[] getAddressArray(XWritableObject readableObject, XId fieldId) {
-		List<XAddress> list = getAddressList(readableObject, fieldId);
-		if (list == null)
+	public static XAddress[] getAddressArray(final XWritableObject readableObject, final XId fieldId) {
+		final List<XAddress> list = getAddressList(readableObject, fieldId);
+		if (list == null) {
 			return null;
+		}
 		return list.toArray(new XAddress[list.size()]);
 	}
 
@@ -374,14 +382,15 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static List<XAddress> getAddressList(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+	public static List<XAddress> getAddressList(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) throws ClassCastException, IllegalArgumentException {
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XAddressListValue) {
-			XAddressListValue specificV = (XAddressListValue) v;
-			XAddress[] array = specificV.contents();
+			final XAddressListValue specificV = (XAddressListValue) v;
+			final XAddress[] array = specificV.contents();
 			return Arrays.asList(array);
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass()
@@ -400,14 +409,15 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static Set<XAddress> getAddressSet(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+	public static Set<XAddress> getAddressSet(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) throws ClassCastException, IllegalArgumentException {
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XAddressSetValue) {
-			XAddressSetValue specificV = (XAddressSetValue) v;
-			Set<XAddress> set = specificV.toSet();
+			final XAddressSetValue specificV = (XAddressSetValue) v;
+			final Set<XAddress> set = specificV.toSet();
 			return set;
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass()
@@ -427,14 +437,15 @@ public class XValueJavaUtils {
 	 */
 	@CanBeNull
 	public static SortedSet<XAddress> getAddressSortedSet(
-			@NeverNull XReadableObject readableObject, @NeverNull XId fieldId)
+			@NeverNull final XReadableObject readableObject, @NeverNull final XId fieldId)
 			throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XAddressSortedSetValue) {
-			XAddressSortedSetValue specificV = (XAddressSortedSetValue) v;
-			SortedSet<XAddress> set = specificV.toSortedSet();
+			final XAddressSortedSetValue specificV = (XAddressSortedSetValue) v;
+			final SortedSet<XAddress> set = specificV.toSortedSet();
 			return set;
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass()
@@ -453,13 +464,14 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static byte[] getBinary(@NeverNull XReadableObject readableObject, @NeverNull XId fieldId)
+	public static byte[] getBinary(@NeverNull final XReadableObject readableObject, @NeverNull final XId fieldId)
 			throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XBinaryValue) {
-			XBinaryValue specificV = (XBinaryValue) v;
+			final XBinaryValue specificV = (XBinaryValue) v;
 			return specificV.getValue();
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass() + " require an XBinaryValue");
@@ -477,13 +489,14 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static Boolean getBoolean(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+	public static Boolean getBoolean(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) throws ClassCastException, IllegalArgumentException {
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XBooleanValue) {
-			XBooleanValue specificV = (XBooleanValue) v;
+			final XBooleanValue specificV = (XBooleanValue) v;
 			return specificV.contents();
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass()
@@ -502,14 +515,15 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static boolean[] getBooleanArray(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+	public static boolean[] getBooleanArray(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) throws ClassCastException, IllegalArgumentException {
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XBooleanListValue) {
-			XBooleanListValue specificV = (XBooleanListValue) v;
-			boolean[] array = specificV.contents();
+			final XBooleanListValue specificV = (XBooleanListValue) v;
+			final boolean[] array = specificV.contents();
 			return array;
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass()
@@ -528,13 +542,14 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static Double getDouble(@NeverNull XReadableObject readableObject, @NeverNull XId fieldId)
+	public static Double getDouble(@NeverNull final XReadableObject readableObject, @NeverNull final XId fieldId)
 			throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XDoubleValue) {
-			XDoubleValue specificV = (XDoubleValue) v;
+			final XDoubleValue specificV = (XDoubleValue) v;
 			return specificV.contents();
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass() + " require an XDoubleValue");
@@ -552,14 +567,15 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static double[] getDoubleArray(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+	public static double[] getDoubleArray(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) throws ClassCastException, IllegalArgumentException {
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XDoubleListValue) {
-			XDoubleListValue specificV = (XDoubleListValue) v;
-			double[] array = specificV.contents();
+			final XDoubleListValue specificV = (XDoubleListValue) v;
+			final double[] array = specificV.contents();
 			return array;
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass()
@@ -577,23 +593,25 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static XId getId(@NeverNull XReadableObject readableObject, @NeverNull XId fieldId)
+	public static XId getId(@NeverNull final XReadableObject readableObject, @NeverNull final XId fieldId)
 			throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XId) {
-			XId specificV = (XId) v;
+			final XId specificV = (XId) v;
 			return specificV;
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass() + " require an XId");
 		}
 	}
 
-	public static XId[] getIdArray(XWritableObject readableObject, XId fieldId) {
-		List<XId> list = getIdList(readableObject, fieldId);
-		if (list == null)
+	public static XId[] getIdArray(final XWritableObject readableObject, final XId fieldId) {
+		final List<XId> list = getIdList(readableObject, fieldId);
+		if (list == null) {
 			return null;
+		}
 		return list.toArray(new XId[list.size()]);
 	}
 
@@ -608,14 +626,15 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static List<XId> getIdList(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+	public static List<XId> getIdList(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) throws ClassCastException, IllegalArgumentException {
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XIdListValue) {
-			XIdListValue specificV = (XIdListValue) v;
-			XId[] array = specificV.contents();
+			final XIdListValue specificV = (XIdListValue) v;
+			final XId[] array = specificV.contents();
 			return Arrays.asList(array);
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass() + " require an XIdListValue");
@@ -633,14 +652,15 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static Set<XId> getIdSet(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+	public static Set<XId> getIdSet(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) throws ClassCastException, IllegalArgumentException {
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XIdSetValue) {
-			XIdSetValue specificV = (XIdSetValue) v;
-			Set<XId> set = specificV.toSet();
+			final XIdSetValue specificV = (XIdSetValue) v;
+			final Set<XId> set = specificV.toSet();
 			return set;
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass() + " require an XIdSetValue");
@@ -658,14 +678,15 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static SortedSet<XId> getIdSortedSet(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+	public static SortedSet<XId> getIdSortedSet(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) throws ClassCastException, IllegalArgumentException {
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XIdSortedSetValue) {
-			XIdSortedSetValue specificV = (XIdSortedSetValue) v;
-			SortedSet<XId> set = specificV.toSortedSet();
+			final XIdSortedSetValue specificV = (XIdSortedSetValue) v;
+			final SortedSet<XId> set = specificV.toSortedSet();
 			return set;
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass()
@@ -684,13 +705,14 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static Integer getInteger(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+	public static Integer getInteger(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) throws ClassCastException, IllegalArgumentException {
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XIntegerValue) {
-			XIntegerValue specificV = (XIntegerValue) v;
+			final XIntegerValue specificV = (XIntegerValue) v;
 			return specificV.contents();
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass()
@@ -709,14 +731,15 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static int[] getIntegerArray(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+	public static int[] getIntegerArray(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) throws ClassCastException, IllegalArgumentException {
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XIntegerListValue) {
-			XIntegerListValue specificV = (XIntegerListValue) v;
-			int[] array = specificV.contents();
+			final XIntegerListValue specificV = (XIntegerListValue) v;
+			final int[] array = specificV.contents();
 			return array;
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass()
@@ -735,13 +758,14 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static Long getLong(@NeverNull XReadableObject readableObject, @NeverNull XId fieldId)
+	public static Long getLong(@NeverNull final XReadableObject readableObject, @NeverNull final XId fieldId)
 			throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XLongValue) {
-			XLongValue specificV = (XLongValue) v;
+			final XLongValue specificV = (XLongValue) v;
 			return specificV.contents();
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass() + " require an XLongValue");
@@ -759,14 +783,15 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static long[] getLongArray(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+	public static long[] getLongArray(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) throws ClassCastException, IllegalArgumentException {
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XLongListValue) {
-			XLongListValue specificV = (XLongListValue) v;
-			long[] array = specificV.contents();
+			final XLongListValue specificV = (XLongListValue) v;
+			final long[] array = specificV.contents();
 			return array;
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass()
@@ -785,23 +810,25 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static String getString(@NeverNull XReadableObject readableObject, @NeverNull XId fieldId)
+	public static String getString(@NeverNull final XReadableObject readableObject, @NeverNull final XId fieldId)
 			throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XStringValue) {
-			XStringValue specificV = (XStringValue) v;
+			final XStringValue specificV = (XStringValue) v;
 			return specificV.contents();
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass() + " require an XStringValue");
 		}
 	}
 
-	public static String[] getStringArray(XWritableObject readableObject, XId fieldId) {
-		List<String> list = getStringList(readableObject, fieldId);
-		if (list == null)
+	public static String[] getStringArray(final XWritableObject readableObject, final XId fieldId) {
+		final List<String> list = getStringList(readableObject, fieldId);
+		if (list == null) {
 			return null;
+		}
 		return list.toArray(new String[list.size()]);
 	}
 
@@ -816,14 +843,15 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static List<String> getStringList(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+	public static List<String> getStringList(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) throws ClassCastException, IllegalArgumentException {
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XStringListValue) {
-			XStringListValue specificV = (XStringListValue) v;
-			String[] array = specificV.contents();
+			final XStringListValue specificV = (XStringListValue) v;
+			final String[] array = specificV.contents();
 			return Arrays.asList(array);
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass()
@@ -842,14 +870,15 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if given readableObject is null
 	 */
 	@CanBeNull
-	public static Set<String> getStringSet(@NeverNull XReadableObject readableObject,
-			@NeverNull XId fieldId) throws ClassCastException, IllegalArgumentException {
-		XValue v = _getValue(readableObject, fieldId);
-		if (v == null)
+	public static Set<String> getStringSet(@NeverNull final XReadableObject readableObject,
+			@NeverNull final XId fieldId) throws ClassCastException, IllegalArgumentException {
+		final XValue v = _getValue(readableObject, fieldId);
+		if (v == null) {
 			return null;
+		}
 		if (v instanceof XStringSetValue) {
-			XStringSetValue specificV = (XStringSetValue) v;
-			Set<String> set = specificV.toSet();
+			final XStringSetValue specificV = (XStringSetValue) v;
+			final Set<String> set = specificV.toSet();
 			return set;
 		} else {
 			throw new ClassCastException("XValue is a " + v.getClass()
@@ -862,25 +891,34 @@ public class XValueJavaUtils {
 	 * @return the default value used in the Java type system if a value is not
 	 *         initialised. It's null for all non-primitive types.
 	 */
-	public static Object getUninitializedValue(Class<?> type) {
-		if (type.equals(boolean.class))
+	public static Object getUninitializedValue(final Class<?> type) {
+		if (type.equals(boolean.class)) {
 			return false;
-		if (type.equals(int.class))
+		}
+		if (type.equals(int.class)) {
 			return 0;
-		if (type.equals(double.class))
+		}
+		if (type.equals(double.class)) {
 			return 0d;
-		if (type.equals(byte.class))
+		}
+		if (type.equals(byte.class)) {
 			return 0;
-		if (type.equals(float.class))
+		}
+		if (type.equals(float.class)) {
 			return 0f;
-		if (type.equals(byte.class))
+		}
+		if (type.equals(byte.class)) {
 			return 0;
-		if (type.equals(char.class))
+		}
+		if (type.equals(char.class)) {
 			return 0;
-		if (type.equals(short.class))
+		}
+		if (type.equals(short.class)) {
 			return 0;
-		if (type.equals(long.class))
+		}
+		if (type.equals(long.class)) {
 			return 0l;
+		}
 		return null;
 	}
 
@@ -889,7 +927,7 @@ public class XValueJavaUtils {
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -898,26 +936,26 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setAddress(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull XAddress value) throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+	public static void setAddress(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final XAddress value) throws IllegalArgumentException {
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		f.setValue(value);
 	}
 
-	public static void setAddressArray(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull XAddress[] values) {
+	public static void setAddressArray(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final XAddress[] values) {
 		XAddressListValue v = null;
 		if (values != null) {
 			v = BaseRuntime.getValueFactory().createAddressListValue(values);
 		}
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		f.setValue(v);
 	}
 
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -926,11 +964,12 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setAddressList(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull List<XAddress> value)
+	public static void setAddressList(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final List<XAddress> value)
 			throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XAddressListValue v = XV.toAddressListValue(value);
 		f.setValue(v);
 	}
@@ -938,7 +977,7 @@ public class XValueJavaUtils {
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -947,10 +986,11 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setAddressSet(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull Set<XAddress> value) throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+	public static void setAddressSet(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final Set<XAddress> value) throws IllegalArgumentException {
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XAddressSetValue v = XV.toAddressSetValue(value);
 		f.setValue(v);
 	}
@@ -958,7 +998,7 @@ public class XValueJavaUtils {
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -967,11 +1007,12 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setAddressSortedSet(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull SortedSet<XAddress> value)
+	public static void setAddressSortedSet(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final SortedSet<XAddress> value)
 			throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XAddressSortedSetValue v = XV.toAddressSortedSetValue(value);
 		f.setValue(v);
 	}
@@ -979,7 +1020,7 @@ public class XValueJavaUtils {
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -988,10 +1029,11 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setBinary(@NeverNull XWritableObject writableObject, @NeverNull XId fieldId,
-			@CanBeNull byte[] value) throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+	public static void setBinary(@NeverNull final XWritableObject writableObject, @NeverNull final XId fieldId,
+			@CanBeNull final byte[] value) throws IllegalArgumentException {
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XBinaryValue v = XV.toValue(value);
 		f.setValue(v);
 	}
@@ -999,7 +1041,7 @@ public class XValueJavaUtils {
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1008,21 +1050,22 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setBoolean(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull boolean value) throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+	public static void setBoolean(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final boolean value) throws IllegalArgumentException {
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XBooleanValue v = XV.toValue(value);
 		f.setValue(v);
 	}
 
-	public static void setBooleanArray(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull boolean[] values) {
+	public static void setBooleanArray(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final boolean[] values) {
 		XBooleanListValue v = null;
 		if (values != null) {
 			v = BaseRuntime.getValueFactory().createBooleanListValue(values);
 		}
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		f.setValue(v);
 	}
 
@@ -1031,7 +1074,7 @@ public class XValueJavaUtils {
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1040,11 +1083,12 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setBooleanCollection(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull Collection<Boolean> value)
+	public static void setBooleanCollection(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final Collection<Boolean> value)
 			throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XBooleanListValue v = XV.toBooleanListValue(value);
 		f.setValue(v);
 	}
@@ -1052,7 +1096,7 @@ public class XValueJavaUtils {
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1061,28 +1105,29 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setDouble(@NeverNull XWritableObject writableObject, @NeverNull XId fieldId,
-			@CanBeNull double value) throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+	public static void setDouble(@NeverNull final XWritableObject writableObject, @NeverNull final XId fieldId,
+			@CanBeNull final double value) throws IllegalArgumentException {
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XDoubleValue v = XV.toValue(value);
 		f.setValue(v);
 	}
 
-	public static void setDoubleArray(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull double[] values) {
+	public static void setDoubleArray(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final double[] values) {
 		XDoubleListValue v = null;
 		if (values != null) {
 			v = BaseRuntime.getValueFactory().createDoubleListValue(values);
 		}
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		f.setValue(v);
 	}
 
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1091,11 +1136,12 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setDoubleCollection(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull Collection<Double> value)
+	public static void setDoubleCollection(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final Collection<Double> value)
 			throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XDoubleListValue v = XV.toDoubleListValue(value);
 		f.setValue(v);
 	}
@@ -1103,7 +1149,7 @@ public class XValueJavaUtils {
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1112,26 +1158,26 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setId(@NeverNull XWritableObject writableObject, @NeverNull XId fieldId,
-			@CanBeNull XId value) throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+	public static void setId(@NeverNull final XWritableObject writableObject, @NeverNull final XId fieldId,
+			@CanBeNull final XId value) throws IllegalArgumentException {
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		f.setValue(value);
 	}
 
-	public static void setIdArray(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull XId[] values) {
+	public static void setIdArray(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final XId[] values) {
 		XIdListValue v = null;
 		if (values != null) {
 			v = BaseRuntime.getValueFactory().createIdListValue(values);
 		}
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		f.setValue(v);
 	}
 
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1140,10 +1186,11 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setIdList(@NeverNull XWritableObject writableObject, @NeverNull XId fieldId,
-			@CanBeNull List<XId> value) throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+	public static void setIdList(@NeverNull final XWritableObject writableObject, @NeverNull final XId fieldId,
+			@CanBeNull final List<XId> value) throws IllegalArgumentException {
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XIdListValue v = XV.toIdListValue(value);
 		f.setValue(v);
 	}
@@ -1151,7 +1198,7 @@ public class XValueJavaUtils {
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1160,10 +1207,11 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setIdSet(@NeverNull XWritableObject writableObject, @NeverNull XId fieldId,
-			@CanBeNull Set<XId> value) throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+	public static void setIdSet(@NeverNull final XWritableObject writableObject, @NeverNull final XId fieldId,
+			@CanBeNull final Set<XId> value) throws IllegalArgumentException {
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XIdSetValue v = XV.toIdSetValue(value);
 		f.setValue(v);
 	}
@@ -1171,7 +1219,7 @@ public class XValueJavaUtils {
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1180,11 +1228,12 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setIdSortedSet(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull SortedSet<XId> value)
+	public static void setIdSortedSet(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final SortedSet<XId> value)
 			throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XIdSortedSetValue v = XV.toIdSortedSetValue(value);
 		f.setValue(v);
 	}
@@ -1192,7 +1241,7 @@ public class XValueJavaUtils {
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1201,28 +1250,29 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setInteger(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull int value) throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+	public static void setInteger(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final int value) throws IllegalArgumentException {
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XIntegerValue v = XV.toValue(value);
 		f.setValue(v);
 	}
 
-	public static void setIntegerArray(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull int[] values) {
+	public static void setIntegerArray(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final int[] values) {
 		XIntegerListValue v = null;
 		if (values != null) {
 			v = BaseRuntime.getValueFactory().createIntegerListValue(values);
 		}
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		f.setValue(v);
 	}
 
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1231,11 +1281,12 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setIntegerCollection(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull Collection<Integer> value)
+	public static void setIntegerCollection(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final Collection<Integer> value)
 			throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XIntegerListValue v = XV.toIntegerListValue(value);
 		f.setValue(v);
 	}
@@ -1243,7 +1294,7 @@ public class XValueJavaUtils {
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1252,28 +1303,29 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setLong(@NeverNull XWritableObject writableObject, @NeverNull XId fieldId,
-			@CanBeNull Long value) throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+	public static void setLong(@NeverNull final XWritableObject writableObject, @NeverNull final XId fieldId,
+			@CanBeNull final Long value) throws IllegalArgumentException {
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XLongValue v = XV.toValue(value);
 		f.setValue(v);
 	}
 
-	public static void setLongArray(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull long[] values) {
+	public static void setLongArray(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final long[] values) {
 		XLongListValue v = null;
 		if (values != null) {
 			v = BaseRuntime.getValueFactory().createLongListValue(values);
 		}
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		f.setValue(v);
 	}
 
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1282,11 +1334,12 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setLongCollection(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull Collection<Long> value)
+	public static void setLongCollection(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final Collection<Long> value)
 			throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XLongListValue v = XV.toLongListValue(value);
 		f.setValue(v);
 	}
@@ -1294,7 +1347,7 @@ public class XValueJavaUtils {
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1303,28 +1356,29 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setString(@NeverNull XWritableObject writableObject, @NeverNull XId fieldId,
-			@CanBeNull String value) throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+	public static void setString(@NeverNull final XWritableObject writableObject, @NeverNull final XId fieldId,
+			@CanBeNull final String value) throws IllegalArgumentException {
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XStringValue v = XV.toValue(value);
 		f.setValue(v);
 	}
 
-	public static void setStringArray(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull String[] values) {
+	public static void setStringArray(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final String[] values) {
 		XStringListValue v = null;
 		if (values != null) {
 			v = BaseRuntime.getValueFactory().createStringListValue(values);
 		}
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		f.setValue(v);
 	}
 
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1333,10 +1387,11 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setStringList(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull List<String> value) throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+	public static void setStringList(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final List<String> value) throws IllegalArgumentException {
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XStringListValue v = XV.toStringListValue(value);
 		f.setValue(v);
 	}
@@ -1344,7 +1399,7 @@ public class XValueJavaUtils {
 	/**
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
-	 * 
+	 *
 	 * @param writableObject
 	 * @NeverNull
 	 * @param fieldId
@@ -1353,147 +1408,166 @@ public class XValueJavaUtils {
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
 	 */
-	public static void setStringSet(@NeverNull XWritableObject writableObject,
-			@NeverNull XId fieldId, @CanBeNull Set<String> value) throws IllegalArgumentException {
-		XWritableField f = _getOrCreateField(writableObject, fieldId);
+	public static void setStringSet(@NeverNull final XWritableObject writableObject,
+			@NeverNull final XId fieldId, @CanBeNull final Set<String> value) throws IllegalArgumentException {
+		final XWritableField f = _getOrCreateField(writableObject, fieldId);
 		@CanBeNull
+		final
 		XStringSetValue v = XV.toStringSetValue(value);
 		f.setValue(v);
 	}
 
-	public static XAddress toAddress(XAddress javaValue) {
+	public static XAddress toAddress(final XAddress javaValue) {
 		return javaValue;
 	}
 
-	public static XAddressListValue toAddressList(List<XAddress> javaValue) {
-		if (javaValue == null)
+	public static XAddressListValue toAddressList(final List<XAddress> javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toAddressListValue(javaValue);
 	}
 
-	public static XAddressSetValue toAddressSet(Set<XAddress> javaValue) {
-		if (javaValue == null)
+	public static XAddressSetValue toAddressSet(final Set<XAddress> javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toAddressSetValue(javaValue);
 	}
 
-	public static XAddressSortedSetValue toAddressSortedSet(SortedSet<XAddress> javaValue) {
-		if (javaValue == null)
+	public static XAddressSortedSetValue toAddressSortedSet(final SortedSet<XAddress> javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toAddressSortedSetValue(javaValue);
 	}
 
-	public static XBinaryValue toBinary(byte[] javaValue) {
-		if (javaValue == null)
+	public static XBinaryValue toBinary(final byte[] javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toValue(javaValue);
 	}
 
-	public static XBooleanValue toboolean(boolean javaValue) {
+	public static XBooleanValue toboolean(final boolean javaValue) {
 		return XV.toValue(javaValue);
 	}
 
-	public static XBooleanValue toBoolean(Boolean javaValue) {
-		if (javaValue == null)
+	public static XBooleanValue toBoolean(final Boolean javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toValue(javaValue);
 	}
 
-	public static XBooleanListValue toBooleanList(List<Boolean> javaValue) {
-		if (javaValue == null)
+	public static XBooleanListValue toBooleanList(final List<Boolean> javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toBooleanListValue(javaValue);
 	}
 
-	public static XDoubleValue todouble(double javaValue) {
+	public static XDoubleValue todouble(final double javaValue) {
 		return XV.toValue(javaValue);
 	}
 
-	public static XDoubleValue toDouble(Double javaValue) {
-		if (javaValue == null)
+	public static XDoubleValue toDouble(final Double javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toValue(javaValue);
 	}
 
-	public static XDoubleListValue toDoubleList(List<Double> javaValue) {
-		if (javaValue == null)
+	public static XDoubleListValue toDoubleList(final List<Double> javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toDoubleListValue(javaValue);
 	}
 
-	public static XId toId(XId javaValue) {
+	public static XId toId(final XId javaValue) {
 		return javaValue;
 	}
 
-	public static XIdListValue toIdList(List<XId> javaValue) {
-		if (javaValue == null)
+	public static XIdListValue toIdList(final List<XId> javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toIdListValue(javaValue);
 	}
 
-	public static XIdSetValue toIdSet(Set<XId> javaValue) {
-		if (javaValue == null)
+	public static XIdSetValue toIdSet(final Set<XId> javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toIdSetValue(javaValue);
 	}
 
-	public static XIdSortedSetValue toIdSortedSet(SortedSet<XId> javaValue) {
-		if (javaValue == null)
+	public static XIdSortedSetValue toIdSortedSet(final SortedSet<XId> javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toIdSortedSetValue(javaValue);
 	}
 
-	public static XIntegerValue toint(int javaValue) {
+	public static XIntegerValue toint(final int javaValue) {
 		return XV.toValue(javaValue);
 	}
 
-	public static XIntegerValue toInteger(Integer javaValue) {
-		if (javaValue == null)
+	public static XIntegerValue toInteger(final Integer javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toValue(javaValue);
 	}
 
-	public static XIntegerListValue toIntegerList(List<Integer> javaValue) {
-		if (javaValue == null)
+	public static XIntegerListValue toIntegerList(final List<Integer> javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toIntegerListValue(javaValue);
 	}
 
-	public static XLongValue tolong(long javaValue) {
+	public static XLongValue tolong(final long javaValue) {
 		return XV.toValue(javaValue);
 	}
 
-	public static XLongValue toLong(Long javaValue) {
-		if (javaValue == null)
+	public static XLongValue toLong(final Long javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toValue(javaValue);
 	}
 
-	public static XLongListValue toLongList(List<Long> javaValue) {
-		if (javaValue == null)
+	public static XLongListValue toLongList(final List<Long> javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toLongListValue(javaValue);
 	}
 
-	public static XStringValue toString(String javaValue) {
-		if (javaValue == null)
+	public static XStringValue toString(final String javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toValue(javaValue);
 	}
 
-	public static XStringListValue toStringList(List<String> javaValue) {
-		if (javaValue == null)
+	public static XStringListValue toStringList(final List<String> javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toStringListValue(javaValue);
 	}
 
-	public static XStringSetValue toStringSet(Set<String> javaValue) {
-		if (javaValue == null)
+	public static XStringSetValue toStringSet(final Set<String> javaValue) {
+		if (javaValue == null) {
 			return null;
+		}
 		return XV.toStringSetValue(javaValue);
 	}
 
-	public static XValue toValue(String content, ValueType valueType) {
+	public static XValue toValue(final String content, final ValueType valueType) {
 		switch (valueType) {
 		case Long:
 			return XV.toValue(Long.parseLong(content));
@@ -1512,18 +1586,19 @@ public class XValueJavaUtils {
 	 * @throws IllegalArgumentException if Java type does not map to a Xydra
 	 *             type
 	 */
-	public static XValue toValue(Object object) throws IllegalArgumentException {
+	public static XValue toValue(final Object object) throws IllegalArgumentException {
 		if (object == null) {
 			return null;
 		} else if (object instanceof XValue) {
 			return (XValue) object;
 		} else if (object instanceof List<?>) {
-			List<?> list = (List<?>) object;
+			final List<?> list = (List<?>) object;
 			if (list.isEmpty()) {
 				// no type information for empty list
 				throw new IllegalArgumentException("Cannot handle empty collections");
 			}
 			@SuppressWarnings("unused")
+			final
 			Object first = list.get(0);
 			// TODO map to xydra type, convert all elements
 			throw new IllegalStateException("too lazy too implement this");

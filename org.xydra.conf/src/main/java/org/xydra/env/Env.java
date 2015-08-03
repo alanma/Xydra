@@ -9,7 +9,7 @@ import org.xydra.conf.impl.MemoryConfig;
 
 /**
  * JVM-wide singleton to manage creation of {@link IEnvironment} instances.
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(true)
@@ -27,11 +27,11 @@ public class Env {
 	/**
 	 * Use this method in tests in order to start multiple, different
 	 * environments to test interactions between them
-	 * 
+	 *
 	 * @param name
 	 * @return a named environment
 	 */
-	public static synchronized IEnvironment getNamedEnvironment(String name) {
+	public static synchronized IEnvironment getNamedEnvironment(final String name) {
 		IEnvironment env = map.get(name);
 		if (env == null) {
 			env = createNamedEnvironment(name);
@@ -42,14 +42,14 @@ public class Env {
 
 	/**
 	 * Use this method in production code
-	 * 
+	 *
 	 * @return the default environment
 	 */
 	public static synchronized IEnvironment get() {
 		return getNamedEnvironment(DEFAULT_NAME);
 	}
 
-	protected static IEnvironment createNamedEnvironment(String name) {
+	protected static IEnvironment createNamedEnvironment(final String name) {
 		return new SimpleEnvironment(new MemoryConfig());
 	}
 

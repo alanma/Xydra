@@ -40,55 +40,61 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * Various helper methods for working with {@link XEvent XEvents} and
  * {@link XCommand XCommands}.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 public class XChanges {
 
 	/**
 	 * Create a forced {@link XAtomicCommand} that undoes the given
 	 * {@link XAtomicEvent}.
-	 * 
+	 *
 	 * Note: Be aware that the given command may still fail to apply if the
 	 * target it operates upon no longer exists.
-	 * 
+	 *
 	 * @param event The {@link XAtomicEvent} which inverse
 	 *            {@link XAtomicCommand} is to be calculated
 	 * @return the inverse of the given {@link XAtomicEvent}, executing it will
 	 *         basically result in an undo operation
 	 */
-	static public XAtomicCommand createForcedUndoCommand(XAtomicEvent event) {
+	static public XAtomicCommand createForcedUndoCommand(final XAtomicEvent event) {
 
-		if (event instanceof XFieldEvent)
+		if (event instanceof XFieldEvent) {
 			return createForcedUndoCommand((XReversibleFieldEvent) event);
-		if (event instanceof XObjectEvent)
+		}
+		if (event instanceof XObjectEvent) {
 			return createForcedUndoCommand((XObjectEvent) event);
-		if (event instanceof XModelEvent)
+		}
+		if (event instanceof XModelEvent) {
 			return createForcedUndoCommand((XModelEvent) event);
-		if (event instanceof XRepositoryEvent)
+		}
+		if (event instanceof XRepositoryEvent) {
 			return createForcedUndoCommand((XRepositoryEvent) event);
+		}
 
 		throw new IllegalArgumentException("unknown command class: " + event);
 	}
 
 	/**
 	 * Create a forced {@link XCommand} that undoes the given {@link XEvent}.
-	 * 
+	 *
 	 * Note: Be aware that the given command may still fail to apply if the
 	 * target it operates upon no longer exists.
-	 * 
+	 *
 	 * @param event The {@link XEvent} which inverse {@link XCommand} is to be
 	 *            calculated
 	 * @return the inverse of the given {@link XEvent}, executing it will
 	 *         basically result in an undo operation
 	 */
-	static public XCommand createForcedUndoCommand(XEvent event) {
+	static public XCommand createForcedUndoCommand(final XEvent event) {
 
-		if (event instanceof XAtomicEvent)
+		if (event instanceof XAtomicEvent) {
 			return createForcedUndoCommand((XAtomicEvent) event);
-		if (event instanceof XTransactionEvent)
+		}
+		if (event instanceof XTransactionEvent) {
 			return createForcedUndoCommand((XTransactionEvent) event);
+		}
 
 		throw new IllegalArgumentException("unknown command class: " + event);
 	}
@@ -96,16 +102,16 @@ public class XChanges {
 	/**
 	 * Create a forced {@link XFieldCommand} that undoes the given
 	 * {@link XFieldEvent}.
-	 * 
+	 *
 	 * Note: Be aware that the given command may still fail to apply if the
 	 * field it operates upon no longer exists.
-	 * 
+	 *
 	 * @param event The {@link XFieldEvent} which inverse {@link XFieldCommand}
 	 *            is to be calculated.
 	 * @return the inverse of the given {@link XFieldCommand}, executing it will
 	 *         basically result in an undo operation
 	 */
-	static public XFieldCommand createForcedUndoCommand(XReversibleFieldEvent event) {
+	static public XFieldCommand createForcedUndoCommand(final XReversibleFieldEvent event) {
 
 		switch (event.getChangeType()) {
 
@@ -130,16 +136,16 @@ public class XChanges {
 	/**
 	 * Create a forced {@link XModelCommand} that undoes the given
 	 * {@link XModelEvent}.
-	 * 
+	 *
 	 * Note: Be aware that the given command may still fail to apply if the
 	 * model it operates upon no longer exists.
-	 * 
+	 *
 	 * @param event The {@link XModelEvent} which inverse {@link XModelCommand}
 	 *            is to be calculated.
 	 * @return The inverse of the given {@link XModelEvent}, executing it will
 	 *         basically result in an undo operation
 	 */
-	static public XModelCommand createForcedUndoCommand(XModelEvent event) {
+	static public XModelCommand createForcedUndoCommand(final XModelEvent event) {
 
 		if (event.getChangeType() == ChangeType.REMOVE) {
 
@@ -161,16 +167,16 @@ public class XChanges {
 	/**
 	 * Create a forced {@link XObjectCommand} that undoes the given
 	 * {@link XObjectEvent}.
-	 * 
+	 *
 	 * Note: Be aware that the given command may still fail to apply if the
 	 * object it operates upon no longer exists.
-	 * 
+	 *
 	 * @param event The {@link XObjectEvent} which inverse
 	 *            {@link XObjectCommand} is to be calculated
 	 * @return The inverse of the given {@link XObjectEvent}, executing it will
 	 *         basically result in an undo operation
 	 */
-	static public XObjectCommand createForcedUndoCommand(XObjectEvent event) {
+	static public XObjectCommand createForcedUndoCommand(final XObjectEvent event) {
 
 		if (event.getChangeType() == ChangeType.REMOVE) {
 
@@ -192,13 +198,13 @@ public class XChanges {
 	/**
 	 * Create a forced {@link XRepositoryCommand} that undoes the given
 	 * {@link XRepositoryEvent}.
-	 * 
+	 *
 	 * @param event The {@link XRepositoryEvent} which inverse
 	 *            {@link XRepositoryCommand} is to be calculated.
 	 * @return The inverse of the given {@link XRepositoryEvent}, executing it
 	 *         will basically result in an undo operation
 	 */
-	static public XRepositoryCommand createForcedUndoCommand(XRepositoryEvent event) {
+	static public XRepositoryCommand createForcedUndoCommand(final XRepositoryEvent event) {
 
 		if (event.getChangeType() == ChangeType.REMOVE) {
 
@@ -220,19 +226,19 @@ public class XChanges {
 	/**
 	 * Create a forced {@link XTransaction} that undoes the given
 	 * {@link XTransactionEvent}.
-	 * 
+	 *
 	 * Note: Be aware that the given command may still fail to apply if the
 	 * targets it or only of the contained commands operate upon no longer
 	 * exist.
-	 * 
+	 *
 	 * @param transaction The {@link XTransactionEvent} which inverse
 	 *            {@link XTransaction} is to be calculated
 	 * @return the inverse of the given {@link XTransaction}, executing it will
 	 *         basically result in an undo operation
 	 */
-	static public XTransaction createForcedUndoCommand(XTransactionEvent transaction) {
+	static public XTransaction createForcedUndoCommand(final XTransactionEvent transaction) {
 
-		XAtomicCommand[] result = new XAtomicCommand[transaction.size()];
+		final XAtomicCommand[] result = new XAtomicCommand[transaction.size()];
 
 		for (int i = 0, j = transaction.size() - 1; j >= 0; i++, j--) {
 			result[i] = createForcedUndoCommand(transaction.getEvent(j));
@@ -246,25 +252,29 @@ public class XChanges {
 	 * {@link XAtomicEvent} but will fail if there have been any conflicting
 	 * changes since then, even if they have also been undone as the revision
 	 * number remains changed.
-	 * 
+	 *
 	 * This should only be used for undoing the last event unless you know that
 	 * there have been no conflicting events.
-	 * 
+	 *
 	 * @param event The {@link XAtomicEvent} which inverse
 	 *            {@link XAtomicCommand} is to be calculated
 	 * @return The inverse of the given {@link XAtomicEvent}, successfully
 	 *         executing it will basically result in an undo operation
 	 */
-	static public XAtomicCommand createImmediateUndoCommand(XAtomicEvent event) {
+	static public XAtomicCommand createImmediateUndoCommand(final XAtomicEvent event) {
 
-		if (event instanceof XFieldEvent)
+		if (event instanceof XFieldEvent) {
 			return createImmediateUndoCommand((XReversibleFieldEvent) event);
-		if (event instanceof XObjectEvent)
+		}
+		if (event instanceof XObjectEvent) {
 			return createImmediateUndoCommand((XObjectEvent) event);
-		if (event instanceof XModelEvent)
+		}
+		if (event instanceof XModelEvent) {
 			return createImmediateUndoCommand((XModelEvent) event);
-		if (event instanceof XRepositoryEvent)
+		}
+		if (event instanceof XRepositoryEvent) {
 			return createImmediateUndoCommand((XRepositoryEvent) event);
+		}
 
 		throw new IllegalArgumentException("unknown command class: " + event);
 	}
@@ -273,18 +283,18 @@ public class XChanges {
 	 * Create a {@link XFieldCommand} that undoes the given {@link XFieldEvent}
 	 * but will fail if there have been any conflicting changes since then, even
 	 * if they have also been undone as the revision number remains changed.
-	 * 
+	 *
 	 * This should only be used for undoing the last event unless you know that
 	 * there have been no conflicting events.
-	 * 
+	 *
 	 * @param event The {@link XFieldEvent} which inverse {@link XFieldCommand}
 	 *            is to be calculated
 	 * @return the inverse of the given {@link XFieldEvent}, successfully
 	 *         executing it will basically result in an undo operation
 	 */
-	static public XFieldCommand createImmediateUndoCommand(XReversibleFieldEvent event) {
+	static public XFieldCommand createImmediateUndoCommand(final XReversibleFieldEvent event) {
 
-		long newRev = event.getOldModelRevision() + 1;
+		final long newRev = event.getOldModelRevision() + 1;
 
 		switch (event.getChangeType()) {
 
@@ -310,16 +320,16 @@ public class XChanges {
 	 * Create a {@link XModelCommand} that undoes the given {@link XModelEvent}
 	 * but will fail if there have been any conflicting changes since then, even
 	 * if they have also been undone as the revision number remains changed.
-	 * 
+	 *
 	 * This should only be used for undoing the last event unless you know that
 	 * there have been no conflicting events.
-	 * 
+	 *
 	 * @param event The {@link XModelEvent} which inverse {@link XModelCommand}
 	 *            is to be calculated
 	 * @return The inverse of the given {@link XModelEvent}, successfully
 	 *         executing it will basically result in an undo operation
 	 */
-	static public XModelCommand createImmediateUndoCommand(XModelEvent event) {
+	static public XModelCommand createImmediateUndoCommand(final XModelEvent event) {
 
 		if (event.getChangeType() == ChangeType.REMOVE) {
 
@@ -331,7 +341,7 @@ public class XChanges {
 			assert event.getChangeType() == ChangeType.ADD : "unexpected change type for model events: "
 					+ event.getChangeType();
 
-			long newRev = event.getOldModelRevision() + 1;
+			final long newRev = event.getOldModelRevision() + 1;
 
 			return MemoryModelCommand.createRemoveCommand(event.getTarget(), newRev,
 					event.getObjectId());
@@ -345,16 +355,16 @@ public class XChanges {
 	 * {@link XObjectEvent} but will fail if there have been any conflicting
 	 * changes since then, even if they have also been undone as the revision
 	 * number remains changed.
-	 * 
+	 *
 	 * This should only be used for undoing the last event unless you know that
 	 * there have been no conflicting events.
-	 * 
+	 *
 	 * @param event The {@link XObjectEvent} which inverse
 	 *            {@link XObjectCommand} is to be calculated
 	 * @return The inverse of the given {@link XObjectEvent}, successfully
 	 *         executing it will basically result in an undo operation.
 	 */
-	static public XObjectCommand createImmediateUndoCommand(XObjectEvent event) {
+	static public XObjectCommand createImmediateUndoCommand(final XObjectEvent event) {
 
 		if (event.getChangeType() == ChangeType.REMOVE) {
 
@@ -366,7 +376,7 @@ public class XChanges {
 			assert event.getChangeType() == ChangeType.ADD : "unexpected change type for object events: "
 					+ event.getChangeType();
 
-			long newRev = event.getOldModelRevision() + 1;
+			final long newRev = event.getOldModelRevision() + 1;
 
 			return MemoryObjectCommand.createRemoveCommand(event.getTarget(), newRev,
 					event.getFieldId());
@@ -380,16 +390,16 @@ public class XChanges {
 	 * {@link XRepositoryEvent} but will fail if there have been any conflicting
 	 * changes since then, even if they have also been undone as the revision
 	 * number remains changed.
-	 * 
+	 *
 	 * This should only be used for undoing the last event unless you know that
 	 * there have been no conflicting events.
-	 * 
+	 *
 	 * @param event The {@link XRepositoryEvent} which inverse
 	 *            {@link XRepositoryCommand} is to be calculated
 	 * @return The inverse of the given {@link XRepositoryEvent}, successfully
 	 *         executing it will basically result in an undo operation
 	 */
-	static public XRepositoryCommand createImmediateUndoCommand(XRepositoryEvent event) {
+	static public XRepositoryCommand createImmediateUndoCommand(final XRepositoryEvent event) {
 
 		if (event.getChangeType() == ChangeType.REMOVE) {
 
@@ -411,7 +421,7 @@ public class XChanges {
 	/**
 	 * Create a {@link XAtomicCommand} that would have caused the given
 	 * {@link XAtomicEvent}
-	 * 
+	 *
 	 * @param event The {@link XAtomicEvent} for which a corresponding
 	 *            {@link XAtomicCommand} is to be created
 	 * @param safe if safe, creates ADD: {@link XCommand#SAFE_STATE_BOUND}
@@ -420,23 +430,27 @@ public class XChanges {
 	 * @return an {@link XAtomicCommand} which execution would've created the
 	 *         given {@link XAtomicEvent}
 	 */
-	static public XAtomicCommand createReplayCommand(XAtomicEvent event, boolean safe) {
+	static public XAtomicCommand createReplayCommand(final XAtomicEvent event, final boolean safe) {
 
-		if (event instanceof XFieldEvent)
+		if (event instanceof XFieldEvent) {
 			return createReplayCommand((XFieldEvent) event, safe);
-		if (event instanceof XObjectEvent)
+		}
+		if (event instanceof XObjectEvent) {
 			return createReplayCommand((XObjectEvent) event, safe);
-		if (event instanceof XModelEvent)
+		}
+		if (event instanceof XModelEvent) {
 			return createReplayCommand((XModelEvent) event, safe);
-		if (event instanceof XRepositoryEvent)
+		}
+		if (event instanceof XRepositoryEvent) {
 			return createReplayCommand((XRepositoryEvent) event, safe);
+		}
 
 		throw new IllegalArgumentException("unknown command class: " + event);
 	}
 
 	/**
 	 * Create a {@link XCommand} that would have caused the given {@link XEvent}
-	 * 
+	 *
 	 * @param event The {@link XEvent} for which a corresponding
 	 *            {@link XCommand} is to be created
 	 * @param safe if safe, creates ADD: {@link XCommand#SAFE_STATE_BOUND}
@@ -445,12 +459,14 @@ public class XChanges {
 	 * @return an {@link XCommand} which execution would've created the given
 	 *         {@link XEvent}
 	 */
-	static public XCommand createReplayCommand(XEvent event, boolean safe) {
+	static public XCommand createReplayCommand(final XEvent event, final boolean safe) {
 
-		if (event instanceof XAtomicEvent)
+		if (event instanceof XAtomicEvent) {
 			return createReplayCommand((XAtomicEvent) event, safe);
-		if (event instanceof XTransactionEvent)
+		}
+		if (event instanceof XTransactionEvent) {
 			return createReplayCommand((XTransactionEvent) event, safe);
+		}
 
 		throw new IllegalArgumentException("unknown command class: " + event);
 	}
@@ -458,7 +474,7 @@ public class XChanges {
 	/**
 	 * Create a {@link XFieldCommand} that would have caused the given
 	 * {@link XFieldEvent}
-	 * 
+	 *
 	 * @param event The {@link XFieldEvent} for which a corresponding
 	 *            {@link XFieldCommand} is to be created
 	 * @param safe if safe, creates ADD: {@link XCommand#SAFE_STATE_BOUND}
@@ -467,7 +483,7 @@ public class XChanges {
 	 * @return an {@link XFieldCommand} which execution would've created the
 	 *         given {@link XFieldEvent}
 	 */
-	static public XFieldCommand createReplayCommand(XFieldEvent event, boolean safe) {
+	static public XFieldCommand createReplayCommand(final XFieldEvent event, final boolean safe) {
 
 		switch (event.getChangeType()) {
 
@@ -493,7 +509,7 @@ public class XChanges {
 	/**
 	 * Create a {@link XModelCommand} that would have caused the given
 	 * {@link XModelEvent}
-	 * 
+	 *
 	 * @param event The {@link XModelEvent} for which a corresponding
 	 *            {@link XModelCommand} is to be created
 	 * @param safe if safe, creates ADD: {@link XCommand#SAFE_STATE_BOUND}
@@ -502,7 +518,7 @@ public class XChanges {
 	 * @return an {@link XModelCommand} which execution would've created the
 	 *         given {@link XModelEvent}
 	 */
-	static public XModelCommand createReplayCommand(XModelEvent event, boolean safe) {
+	static public XModelCommand createReplayCommand(final XModelEvent event, final boolean safe) {
 
 		if (event.getChangeType() == ChangeType.ADD) {
 
@@ -524,7 +540,7 @@ public class XChanges {
 	/**
 	 * Create a {@link XObjectCommand} that would have caused the given
 	 * {@link XObjectEvent}
-	 * 
+	 *
 	 * @param event The {@link XObjectEvent} for which a corresponding
 	 *            {@link XObjectCommand} is to be created
 	 * @param safe if safe, creates ADD: {@link XCommand#SAFE_STATE_BOUND}
@@ -533,7 +549,7 @@ public class XChanges {
 	 * @return an {@link XObjectCommand} which execution would've created the
 	 *         given {@link XObjectEvent}
 	 */
-	static public XObjectCommand createReplayCommand(XObjectEvent event, boolean safe) {
+	static public XObjectCommand createReplayCommand(final XObjectEvent event, final boolean safe) {
 
 		if (event.getChangeType() == ChangeType.ADD) {
 			return MemoryObjectCommand.createAddCommand(event.getTarget(),
@@ -553,7 +569,7 @@ public class XChanges {
 	/**
 	 * Create a {@link XRepositoryCommand} that would have caused the given
 	 * {@link XRepositoryEvent}
-	 * 
+	 *
 	 * @param event The {@link XRepositoryEvent} for which a corresponding
 	 *            {@link XRepositoryCommand} is to be created
 	 * @param safe if safe, creates ADD: {@link XCommand#SAFE_STATE_BOUND}
@@ -562,7 +578,7 @@ public class XChanges {
 	 * @return an {@link XRepositoryCommand} which execution would've created
 	 *         the given {@link XRepositoryEvent}
 	 */
-	static public XRepositoryCommand createReplayCommand(XRepositoryEvent event, boolean safe) {
+	static public XRepositoryCommand createReplayCommand(final XRepositoryEvent event, final boolean safe) {
 
 		if (event.getChangeType() == ChangeType.ADD) {
 
@@ -584,7 +600,7 @@ public class XChanges {
 	/**
 	 * Create a {@link XTransaction} that would have caused the given
 	 * {@link XTransactionEvent}
-	 * 
+	 *
 	 * @param trans The {@link XTransactionEvent} for which a corresponding
 	 *            {@link XTransaction} is to be created
 	 * @param safe if safe, creates ADD: {@link XCommand#SAFE_STATE_BOUND}
@@ -593,11 +609,11 @@ public class XChanges {
 	 * @return an {@link XTransaction} or {@link XCommand} (if sufficient) which
 	 *         execution would've created the given {@link XTransactionEvent}
 	 */
-	static public XCommand createReplayCommand(XTransactionEvent trans, boolean safe) {
+	static public XCommand createReplayCommand(final XTransactionEvent trans, final boolean safe) {
 
-		List<XAtomicCommand> result = new ArrayList<XAtomicCommand>();
+		final List<XAtomicCommand> result = new ArrayList<XAtomicCommand>();
 
-		for (XAtomicEvent event : trans) {
+		for (final XAtomicEvent event : trans) {
 			if (!event.isImplied()) {
 				result.add(createReplayCommand(event, safe));
 			}
@@ -616,37 +632,37 @@ public class XChanges {
 	 * Create a {@link XCommand} that undoes the given {@link XEvent}s in the
 	 * order provided by the iterator but will fail if there have been any
 	 * conflicting changes since then that have not been undone already.
-	 * 
+	 *
 	 * The created command may be a transaction. However, if only one command is
 	 * needed to undo the events, no transaction is created and the command is
 	 * returned directly.
-	 * 
+	 *
 	 * The relevant parts of the given {@link XModel} must be in the same state
 	 * as they where directly after the event, only the revision numbers may
 	 * differ.
-	 * 
+	 *
 	 * @param base The {@link XReadableModel} on which the given {@link XEvent}s
 	 *            happened.
 	 * @param events an iterator over the {@link XEvent}s which inverse
 	 *            {@link XCommand}s are to be calculated
 	 * @return an {@link XTransaction} (as an {@link XCommand}), which will undo
 	 *         the specified events if it can be successfully executed.
-	 * 
+	 *
 	 * @throws IllegalStateException if the given {@link XModel} is in a
 	 *             different state
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of any of the events or if any of the
 	 *             events is a {@link XRepositoryEvent}
 	 */
-	public static XCommand createUndoCommand(XReadableModel base, Iterator<XEvent> events) {
+	public static XCommand createUndoCommand(final XReadableModel base, final Iterator<XEvent> events) {
 
-		ChangedModel model = new ChangedModel(base);
+		final ChangedModel model = new ChangedModel(base);
 
 		while (events.hasNext()) {
 			undoChanges(model, events.next());
 		}
 
-		XTransactionBuilder builder = new XTransactionBuilder(base.getAddress());
+		final XTransactionBuilder builder = new XTransactionBuilder(base.getAddress());
 
 		builder.applyChanges(model);
 
@@ -662,25 +678,25 @@ public class XChanges {
 	 * Create a {@link XCommand} that undoes the given {@link XEvent} but will
 	 * fail if there have been any conflicting changes since then that have not
 	 * been undone already.
-	 * 
+	 *
 	 * The relevant parts of the given {@link XReadableModel} must be in the
 	 * same state as they where directly after the event, only the revision
 	 * numbers may differ.
-	 * 
+	 *
 	 * @param base The {@link XReadableModel} on which the given {@link XEvent}
 	 *            happened
 	 * @param event The {@link XEvent} which inverse {@link XCommand} is to be
 	 *            calculated
 	 * @return the inverse of the given {@link XEvent}, successfully executing
 	 *         it will basically result in an undo operation
-	 * 
+	 *
 	 * @throws IllegalStateException if the given {@link XReadableModel} is in a
 	 *             different state
 	 * @throws IllegalArgumentException if the given {@link XReadableModel}
 	 *             doesn't contain the target of the given event or the event is
 	 *             an {@link XRepositoryEvent}
 	 */
-	public static XCommand createUndoCommand(XReadableModel base, XEvent event) {
+	public static XCommand createUndoCommand(final XReadableModel base, final XEvent event) {
 		return createUndoCommand(base, new SingleValueIterator<XEvent>(event));
 	}
 
@@ -688,34 +704,35 @@ public class XChanges {
 	 * Create a {@link XRepositoryCommand} that undoes the given
 	 * {@link XRepositoryEvent} but will fail if there have been any conflicting
 	 * changes since then that have not been undone already.
-	 * 
+	 *
 	 * The relevant parts of the given {@link XRepository} must be in the same
 	 * state as they where directly after the event, only the revision numbers
 	 * may differ.
-	 * 
+	 *
 	 * @param repo The {@link XRepository} on which the given
 	 *            {@link XRepositoryEvent} happened
 	 * @param event The {@link XRepository} which inverse
 	 *            {@link XRepositoryEvent} is to be calculated
 	 * @return The inverse of the given {@link XRepositoryEvent}, successfully
 	 *         executing it will basically result in an undo operation
-	 * 
+	 *
 	 * @throws IllegalStateException if the given {@link XRepository} is in a
 	 *             different state
 	 * @throws IllegalArgumentException if the given {@link XRepository} doesn't
 	 *             contain the target of the event
 	 */
-	static public XRepositoryCommand createUndoCommand(XRepository repo, XRepositoryEvent event) {
+	static public XRepositoryCommand createUndoCommand(final XRepository repo, final XRepositoryEvent event) {
 
-		if (!repo.getAddress().equals(event.getTarget()))
+		if (!repo.getAddress().equals(event.getTarget())) {
 			throw new IllegalArgumentException("repository and event don't match");
+		}
 
-		XId modelId = event.getTarget().getModel();
+		final XId modelId = event.getTarget().getModel();
 
 		XyAssert.xyAssert(modelId != null);
 		assert modelId != null;
 
-		XModel model = repo.getModel(modelId);
+		final XModel model = repo.getModel(modelId);
 
 		if (event.getChangeType() == ChangeType.REMOVE) {
 
@@ -749,18 +766,18 @@ public class XChanges {
 	/**
 	 * Undo the changes represented by the given {@link XAtomicEvent} on the
 	 * given {@link XWritableModel}.
-	 * 
+	 *
 	 * @param model The {@link XWritableModel} on which the given
 	 *            {@link XAtomicEvent} happened
 	 * @param event The {@link XAtomicEvent} which is to be undone
-	 * 
+	 *
 	 * @throws IllegalStateException if the are conflicting changes between the
 	 *             state the model was in after the event and now.
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of the event or if the events is a
 	 *             {@link XRepositoryEvent}
 	 */
-	public static void undoChanges(XWritableModel model, XAtomicEvent event) {
+	public static void undoChanges(final XWritableModel model, final XAtomicEvent event) {
 		if (event instanceof XModelEvent) {
 			undoChanges(model, (XModelEvent) event);
 			return;
@@ -781,17 +798,17 @@ public class XChanges {
 	/**
 	 * Undo the changes represented by the given {@link XTransactionEvent} on
 	 * the given {@link XWritableModel}.
-	 * 
+	 *
 	 * @param model The {@link XWritableModel} on which the events of the given
 	 *            {@link XTransactionEvent} happened
 	 * @param event The {@link XTransactionEvent} which changes are to be undone
-	 * 
+	 *
 	 * @throws IllegalStateException if the are conflicting changes between the
 	 *             state the model was in after the event and now.
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of any of the events
 	 */
-	public static void undoChanges(XWritableModel model, XEvent event) {
+	public static void undoChanges(final XWritableModel model, final XEvent event) {
 		if (event instanceof XTransactionEvent) {
 			undoChanges(model, (XTransactionEvent) event);
 		} else if (event instanceof XAtomicEvent) {
@@ -804,30 +821,30 @@ public class XChanges {
 	/**
 	 * Undo the changes represented by the given {@link XFieldEvent} on the
 	 * given {@link XWritableModel}.
-	 * 
+	 *
 	 * @param model The {@link XWritableModel} on which the given
 	 *            {@link XObjectEvent} happened
 	 * @param event The {@link XObjectEvent} which is to be undone
-	 * 
+	 *
 	 * @throws IllegalStateException if the are conflicting changes between the
 	 *             state the model was in after the event and now.
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of the event
 	 */
-	public static void undoChanges(XWritableModel model, XReversibleFieldEvent event) {
+	public static void undoChanges(final XWritableModel model, final XReversibleFieldEvent event) {
 
 		if (!model.getAddress().contains(event.getTarget())) {
 			throw new IllegalArgumentException();
 		}
 
-		XId objectId = event.getObjectId();
-		XWritableObject object = model.getObject(objectId);
+		final XId objectId = event.getObjectId();
+		final XWritableObject object = model.getObject(objectId);
 		if (object == null) {
 			throw new IllegalStateException();
 		}
 
-		XId fieldId = event.getFieldId();
-		XWritableField field = object.getField(fieldId);
+		final XId fieldId = event.getFieldId();
+		final XWritableField field = object.getField(fieldId);
 		if (field == null) {
 			throw new IllegalStateException();
 		}
@@ -842,23 +859,23 @@ public class XChanges {
 	/**
 	 * Undo the changes represented by the given {@link XModelEvent} on the
 	 * given {@link XWritableModel}.
-	 * 
+	 *
 	 * @param model The {@link XWritableModel} on which the given
 	 *            {@link XModelEvent} happened
 	 * @param event The {@link XModelEvent} which is to be undone
-	 * 
+	 *
 	 * @throws IllegalStateException if the are conflicting changes between the
 	 *             state the model was in after the event and now.
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of the event
 	 */
-	public static void undoChanges(XWritableModel model, XModelEvent event) {
+	public static void undoChanges(final XWritableModel model, final XModelEvent event) {
 
 		if (!XI.equals(model.getAddress(), event.getTarget())) {
 			throw new IllegalArgumentException();
 		}
 
-		XId objectId = event.getObjectId();
+		final XId objectId = event.getObjectId();
 
 		switch (event.getChangeType()) {
 
@@ -885,29 +902,29 @@ public class XChanges {
 	/**
 	 * Undo the changes represented by the given {@link XObjectEvent} on the
 	 * given {@link XWritableModel}.
-	 * 
+	 *
 	 * @param model The {@link XWritableModel} on which the given
 	 *            {@link XObjectEvent} happened
 	 * @param event The {@link XObjectEvent} which is to be undone
-	 * 
+	 *
 	 * @throws IllegalStateException if the are conflicting changes between the
 	 *             state the model was in after the event and now.
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of the event
 	 */
-	public static void undoChanges(XWritableModel model, XObjectEvent event) {
+	public static void undoChanges(final XWritableModel model, final XObjectEvent event) {
 
 		if (!model.getAddress().contains(event.getTarget())) {
 			throw new IllegalArgumentException();
 		}
 
-		XId objectId = event.getObjectId();
-		XWritableObject object = model.getObject(objectId);
+		final XId objectId = event.getObjectId();
+		final XWritableObject object = model.getObject(objectId);
 		if (object == null) {
 			throw new IllegalStateException();
 		}
 
-		XId fieldId = event.getFieldId();
+		final XId fieldId = event.getFieldId();
 
 		switch (event.getChangeType()) {
 
@@ -934,17 +951,17 @@ public class XChanges {
 	/**
 	 * Undo the changes represented by the given {@link XTransactionEvent} on
 	 * the given {@link XWritableModel}.
-	 * 
+	 *
 	 * @param model The {@link XWritableModel} on which the events of the given
 	 *            {@link XTransactionEvent} happened
 	 * @param event The {@link XTransactionEvent} which changes are to be undone
-	 * 
+	 *
 	 * @throws IllegalStateException if the are conflicting changes between the
 	 *             state the model was in after the event and now.
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of any of the events
 	 */
-	public static void undoChanges(XWritableModel model, XTransactionEvent event) {
+	public static void undoChanges(final XWritableModel model, final XTransactionEvent event) {
 		for (int i = event.size(); i >= 0; i--) {
 			undoChanges(model, event.getEvent(i));
 		}

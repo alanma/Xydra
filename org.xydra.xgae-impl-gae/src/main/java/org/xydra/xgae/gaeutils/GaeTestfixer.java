@@ -9,15 +9,15 @@ import com.google.appengine.api.utils.SystemProperty;
 /**
  * A helper class to turn the simulated local AppEngine environment into a
  * singleton.
- * 
+ *
  * If we run in a JUnit test behind Jersey, which uses reflection, we are in a
  * different thread and need to take additional measure to tell this thread
  * about the GAE-test-setup
- * 
+ *
  * IMPROVE @Max: Remove class if AppEngine issue is ever fixed by Google
- * 
+ *
  * http://code.google.com/p/googleappengine/issues/detail?id=2201
- * 
+ *
  * @author xamde
  */
 public class GaeTestfixer {
@@ -53,7 +53,7 @@ public class GaeTestfixer {
 	/**
 	 * Fix testing in development mode which spawns multiple threads, which
 	 * cannot not happen on AppEngine in production mode.
-	 * 
+	 *
 	 * This method just returns, doing nothing if {@link GaeTestfixer#enable()}
 	 * is not called from main code.
 	 */
@@ -76,12 +76,12 @@ public class GaeTestfixer {
 
 			/* second check: can we load this class: 'LocalServiceTestHelper' ? */
 			try {
-				ClassLoader cl = Thread.currentThread().getContextClassLoader();
+				final ClassLoader cl = Thread.currentThread().getContextClassLoader();
 				Class.forName(
 						"com.google.appengine.tools.development.testing.LocalServiceTestHelper",
 						false, cl);
 				log.info("We can load the test classes.");
-			} catch (ClassNotFoundException e) {
+			} catch (final ClassNotFoundException e) {
 				// we're on AppEngine in production OR locally not running tests
 				/* ah, we are in production */
 				log.info(
@@ -92,7 +92,7 @@ public class GaeTestfixer {
 				ClassPathTool.dumpCurrentClasspath();
 				enabled = false;
 				return;
-			} catch (NoClassDefFoundError e) {
+			} catch (final NoClassDefFoundError e) {
 				// we're on AppEngine in production OR locally not running tests
 				/* ah, we are in production */
 				log.warn(

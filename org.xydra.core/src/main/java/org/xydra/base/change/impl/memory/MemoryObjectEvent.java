@@ -12,20 +12,20 @@ import org.xydra.base.change.XTransaction;
 
 /**
  * An implementation of {@link XObjectEvent}
- * 
+ *
  * @author kaidel
- * 
+ *
  */
 @RunsInGWT(true)
 public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent {
-    
+
     private static final long serialVersionUID = 6129548600082005223L;
-    
+
     /**
      * Creates a new {@link XObjectEvent} of the add-type (an field was added to
      * the object this event refers to) that exists to negate an already
      * performed event
-     * 
+     *
      * @param actorId The {@link XId} of the actor
      * @param target The {@link XAddress} of the object to which the field was
      *            added - object {@link XId} must not be null
@@ -43,16 +43,17 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
      *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}.
      * @deprecated
      */
-    public static XObjectEvent createInternalAddEvent(XId actorId, XAddress target, XId fieldId,
-            long objectRevision, long fieldRevision, boolean inTransaction) {
+    @Deprecated
+	public static XObjectEvent createInternalAddEvent(final XId actorId, final XAddress target, final XId fieldId,
+            final long objectRevision, final long fieldRevision, final boolean inTransaction) {
         return createAddEvent(actorId, target, fieldId, fieldRevision, objectRevision,
                 inTransaction);
     }
-    
+
     /**
      * Creates a new {@link XObjectEvent} of the add-type (an field was added to
      * the object this event refers to)
-     * 
+     *
      * @param actorId The {@link XId} of the actor
      * @param target The {@link XAddress} of the object to which the field was
      *            added - object {@link XId} must not be null
@@ -67,24 +68,24 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
      *             given objectRevision equals
      *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}.
      */
-    public static XObjectEvent createAddEvent(XId actorId, XAddress target, XId fieldId,
-            long objectRevision, boolean inTransaction) {
+    public static XObjectEvent createAddEvent(final XId actorId, final XAddress target, final XId fieldId,
+            final long objectRevision, final boolean inTransaction) {
         return createAddEvent(actorId, target, fieldId, REVISION_OF_ENTITY_NOT_SET, objectRevision,
                 inTransaction);
     }
-    
-    public static XObjectEvent createFrom(XObjectEvent oe) {
-        MemoryObjectEvent event = new MemoryObjectEvent(oe.getActor(), oe.getTarget(),
+
+    public static XObjectEvent createFrom(final XObjectEvent oe) {
+        final MemoryObjectEvent event = new MemoryObjectEvent(oe.getActor(), oe.getTarget(),
                 oe.getFieldId(), oe.getChangeType(), oe.getOldModelRevision(),
                 oe.getOldObjectRevision(), oe.getOldFieldRevision(), oe.inTransaction(),
                 oe.isImplied());
         return event;
     }
-    
+
     /**
      * Creates a new {@link XObjectEvent} of the add-type (an field was added to
      * the object this event refers to)
-     * 
+     *
      * @param actorId The {@link XId} of the actor
      * @param target The {@link XAddress} of the object to which the field was
      *            added - object {@link XId} must not be null
@@ -101,17 +102,17 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
      *             given objectRevision equals
      *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}.
      */
-    public static XObjectEvent createAddEvent(XId actorId, XAddress target, XId fieldId,
-            long modelRevision, long objectRevision, boolean inTransaction) {
-        
+    public static XObjectEvent createAddEvent(final XId actorId, final XAddress target, final XId fieldId,
+            final long modelRevision, final long objectRevision, final boolean inTransaction) {
+
         return new MemoryObjectEvent(actorId, target, fieldId, ChangeType.ADD, modelRevision,
                 objectRevision, REVISION_OF_ENTITY_NOT_SET, inTransaction, false);
     }
-    
+
     /**
      * Creates a new {@link XObjectEvent} of the add-type (an field was added to
      * the object this event refers to)
-     * 
+     *
      * @param actorId The {@link XId} of the actor
      * @param target The {@link XAddress} of the object to which the field was
      *            added - object {@link XId} must not be null
@@ -130,24 +131,24 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
      *             given objectRevision equals
      *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}.
      */
-    public static XObjectEvent createAddEvent(XId actorId, XAddress target, XId fieldId,
-            long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction) {
-        
+    public static XObjectEvent createAddEvent(final XId actorId, final XAddress target, final XId fieldId,
+            final long modelRevision, final long objectRevision, final long fieldRevision, final boolean inTransaction) {
+
         return new MemoryObjectEvent(actorId, target, fieldId, ChangeType.ADD, modelRevision,
                 objectRevision, fieldRevision, inTransaction, false);
     }
-    
+
     /**
      * GWT only
      */
     protected MemoryObjectEvent() {
-        
+
     }
-    
+
     /**
      * Creates a new {@link XObjectEvent} of the remove-type (an field was
      * removed from the object this event refers to)
-     * 
+     *
      * @param actorId The {@link XId} of the actor
      * @param target The {@link XAddress} of the object from which the field was
      *            removed - object {@link XId} must not be null
@@ -165,17 +166,17 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
      *             given objectRevision equals
      *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}.
      */
-    public static XObjectEvent createRemoveEvent(XId actorId, XAddress target, XId fieldId,
-            long objectRevision, long fieldRevision, boolean inTransaction, boolean implied) {
+    public static XObjectEvent createRemoveEvent(final XId actorId, final XAddress target, final XId fieldId,
+            final long objectRevision, final long fieldRevision, final boolean inTransaction, final boolean implied) {
         return createRemoveEvent(actorId, target, fieldId, REVISION_OF_ENTITY_NOT_SET,
                 objectRevision, fieldRevision, inTransaction, implied);
-        
+
     }
-    
+
     /**
      * Returns an {@link XObjectEvent} of the remove-type (an field was removed
      * from the object this event refers to)
-     * 
+     *
      * @param actorId The {@link XId} of the actor
      * @param target The {@link XAddress} of the object from which the field was
      *            removed - object {@link XId} must not be null
@@ -195,171 +196,171 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
      *             given objectRevision or fieldRevision equals
      *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}.
      */
-    public static XObjectEvent createRemoveEvent(XId actorId, XAddress target, XId fieldId,
-            long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction,
-            boolean implied) {
+    public static XObjectEvent createRemoveEvent(final XId actorId, final XAddress target, final XId fieldId,
+            final long modelRevision, final long objectRevision, final long fieldRevision, final boolean inTransaction,
+            final boolean implied) {
         if(fieldRevision < 0 && fieldRevision != REVISION_NOT_AVAILABLE) {
             throw new IllegalArgumentException(
                     "field revision must be set for object REMOVE events");
         }
-        
+
         return new MemoryObjectEvent(actorId, target, fieldId, ChangeType.REMOVE, modelRevision,
                 objectRevision, fieldRevision, inTransaction, implied);
     }
-    
+
     // The XId of field that was created/deleted
     private XId fieldId;
-    
+
     // the revision numbers before the event happened
     private long fieldRevision, objectRevision, modelRevision;
-    
+
     // private constructor, use the createEvent methods for instantiating a
     // MemObjectEvent
-    private MemoryObjectEvent(XId actor, XAddress target, XId fieldId, ChangeType changeType,
-            long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction,
-            boolean implied) {
+    private MemoryObjectEvent(final XId actor, final XAddress target, final XId fieldId, final ChangeType changeType,
+            final long modelRevision, final long objectRevision, final long fieldRevision, final boolean inTransaction,
+            final boolean implied) {
         super(target, changeType, actor, inTransaction, implied);
-        
+
         if(target.getObject() == null || target.getField() != null) {
             throw new IllegalArgumentException("target must refer to an object, was: " + target);
         }
-        
+
         if(fieldId == null) {
             throw new IllegalArgumentException("field Id must be set for object events");
         }
-        
+
         if(objectRevision < -1 && objectRevision != REVISION_NOT_AVAILABLE
                 && objectRevision != XEvent.REVISION_OF_ENTITY_NOT_SET) {
             throw new IllegalArgumentException(
                     "object revision must be set for object events, was:" + objectRevision);
         }
-        
+
         if(fieldRevision < -1 && fieldRevision != REVISION_OF_ENTITY_NOT_SET
                 && fieldRevision != REVISION_NOT_AVAILABLE) {
             throw new IllegalArgumentException("invalid fieldRevision: " + fieldRevision);
         }
-        
+
         if(modelRevision < -1 && modelRevision != REVISION_OF_ENTITY_NOT_SET) {
             throw new IllegalArgumentException("invalid modelRevision: " + modelRevision);
         }
-        
+
         this.fieldId = fieldId;
         this.modelRevision = modelRevision;
         this.objectRevision = objectRevision;
         this.fieldRevision = fieldRevision;
     }
-    
+
     @Override
-    public boolean equals(Object object) {
-        
+    public boolean equals(final Object object) {
+
         if(!super.equals(object)) {
             return false;
         }
-        
+
         if(!(object instanceof XObjectEvent)) {
             return false;
         }
-        XObjectEvent event = (XObjectEvent)object;
-        
+        final XObjectEvent event = (XObjectEvent)object;
+
         if(!this.fieldId.equals(event.getFieldId())) {
             return false;
         }
-        
+
         if(this.modelRevision != event.getOldModelRevision()) {
             return false;
         }
-        
-        long otherObjectRev = event.getOldObjectRevision();
+
+        final long otherObjectRev = event.getOldObjectRevision();
         if(this.objectRevision != otherObjectRev) {
-            if((this.objectRevision != XEvent.REVISION_NOT_AVAILABLE && otherObjectRev != XEvent.REVISION_NOT_AVAILABLE)) {
+            if(this.objectRevision != XEvent.REVISION_NOT_AVAILABLE && otherObjectRev != XEvent.REVISION_NOT_AVAILABLE) {
                 return false;
             }
         }
-        
+
         if(this.fieldRevision != event.getOldFieldRevision()) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     @Override
     public XAddress getChangedEntity() {
         return Base.resolveField(getTarget(), getFieldId());
     }
-    
+
     @Override
     public XId getFieldId() {
         return this.fieldId;
     }
-    
+
     @Override
     public long getOldFieldRevision() {
         return this.fieldRevision;
     }
-    
+
     @Override
     public long getOldModelRevision() {
         return this.modelRevision;
     }
-    
+
     @Override
     public long getOldObjectRevision() {
         return this.objectRevision;
     }
-    
+
     @Override
     public int hashCode() {
-        
+
         int result = super.hashCode();
-        
+
         // newValue
         result ^= this.fieldId.hashCode();
-        
+
         // old revisions
         result += this.modelRevision;
         if(this.objectRevision != XEvent.REVISION_OF_ENTITY_NOT_SET) {
             result += 0x3472089;
         }
         result += this.fieldRevision;
-        
+
         return result;
     }
-    
+
     /**
      * Format: {MOF}Event
-     * 
+     *
      * r{mRev}/{oRev}/{fRev}
-     * 
+     *
      * {'ADD'|'REMOVE'}
-     * 
+     *
      * '[' {'+'|'-'} 'inTxn]' '[' {'+'|'-'} 'implied]'
-     * 
+     *
      * @{target *{id/value}, where xRef = '-' for
      *          {@link RevisionConstants#REVISION_OF_ENTITY_NOT_SET} and '?' for
      *          {@link RevisionConstants#REVISION_NOT_AVAILABLE}.
-     * 
+     *
      *          by actor: '{actorId}'
      */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append("    ObjectEvent");
-        
+
         sb.append(" rev:");
-        sb.append(rev2str(this.getRevisionNumber()));
+        sb.append(rev2str(getRevisionNumber()));
         sb.append(" old:");
-        sb.append(rev2str(this.getOldModelRevision()));
+        sb.append(rev2str(getOldModelRevision()));
         sb.append("/");
-        sb.append(rev2str(this.getOldObjectRevision()));
+        sb.append(rev2str(getOldObjectRevision()));
         sb.append("/");
-        sb.append(rev2str(this.getOldFieldRevision()));
-        
+        sb.append(rev2str(getOldFieldRevision()));
+
         addChangeTypeAndFlags(sb);
         sb.append(" @" + getTarget());
         sb.append(" *" + this.fieldId + "*");
         sb.append("                 (actor:'" + getActor() + "')");
         return sb.toString();
     }
-    
+
 }

@@ -5,5 +5,5 @@ import org.xydra.base.rmof.XRevWritableObject;
 
 public interface XExistsRevWritableObject extends XRevWritableObject, XExistsWritableObject,
         XExists {
-    
+
 }

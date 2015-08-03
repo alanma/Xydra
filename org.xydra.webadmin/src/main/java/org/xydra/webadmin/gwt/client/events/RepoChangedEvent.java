@@ -8,16 +8,16 @@ import com.google.web.bindery.event.shared.Event;
 
 /**
  * repo has changes; only used after having registered / added models
- * 
+ *
  * @author xamde
  */
 public class RepoChangedEvent extends Event<IRepoChangedEventHandler> {
 
-	private XAddress repoAddress;
+	private final XAddress repoAddress;
 
-	private EntityStatus status;
+	private final EntityStatus status;
 
-	private RepoDataModel moreInfos;
+	private final RepoDataModel moreInfos;
 
 	public static final Type<IRepoChangedEventHandler> TYPE = new Type<IRepoChangedEventHandler>();
 
@@ -25,7 +25,7 @@ public class RepoChangedEvent extends Event<IRepoChangedEventHandler> {
 		void onRepoChange(RepoChangedEvent event);
 	}
 
-	public RepoChangedEvent(XAddress repoAddress, EntityStatus status, RepoDataModel repoDataModel) {
+	public RepoChangedEvent(final XAddress repoAddress, final EntityStatus status, final RepoDataModel repoDataModel) {
 		this.repoAddress = repoAddress;
 		this.status = status;
 		this.moreInfos = repoDataModel;
@@ -36,7 +36,7 @@ public class RepoChangedEvent extends Event<IRepoChangedEventHandler> {
 	}
 
 	@Override
-	protected void dispatch(IRepoChangedEventHandler handler) {
+	protected void dispatch(final IRepoChangedEventHandler handler) {
 		handler.onRepoChange(this);
 	}
 

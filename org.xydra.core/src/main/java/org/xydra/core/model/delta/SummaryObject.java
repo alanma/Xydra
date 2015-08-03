@@ -15,18 +15,18 @@ import org.xydra.base.value.XValue;
 
 /**
  * State: {@link Change}; Map: fieldId -> {@link SummaryField}
- * 
+ *
  * @author xamde
  */
 public class SummaryObject extends SummaryEntity {
 
-	private Map<XId, SummaryField> id2summaryField = new HashMap<XId, SummaryField>();
+	private final Map<XId, SummaryField> id2summaryField = new HashMap<XId, SummaryField>();
 
-	public SummaryObject(XId id) {
+	public SummaryObject(final XId id) {
 		super(id);
 	}
 
-	public SummaryField createOrGet(XId fieldId) {
+	public SummaryField createOrGet(final XId fieldId) {
 		SummaryField sf = this.id2summaryField.get(fieldId);
 		if (sf == null) {
 			sf = new SummaryField(fieldId);
@@ -48,18 +48,20 @@ public class SummaryObject extends SummaryEntity {
 	 * @param remove
 	 * @return
 	 */
-	public XValue getFieldValue(XReadableObject xo, XId fieldId, boolean remove) {
-		SummaryField f = this.id2summaryField.get(fieldId);
+	public XValue getFieldValue(final XReadableObject xo, final XId fieldId, final boolean remove) {
+		final SummaryField f = this.id2summaryField.get(fieldId);
 		if (f != null) {
 			return remove ? f.getOldValue() : f.getNewValue();
 		}
 
-		if (xo == null)
+		if (xo == null) {
 			return null;
+		}
 
-		XReadableField xf = xo.getField(fieldId);
-		if (xf == null)
+		final XReadableField xf = xo.getField(fieldId);
+		if (xf == null) {
 			return null;
+		}
 
 		return xf.getValue();
 	}
@@ -68,7 +70,7 @@ public class SummaryObject extends SummaryEntity {
 	 * @param fieldId
 	 * @return @CanBeNull
 	 */
-	public SummaryField getSummaryField(XId fieldId) {
+	public SummaryField getSummaryField(final XId fieldId) {
 		return this.id2summaryField.get(fieldId);
 	}
 
@@ -84,11 +86,11 @@ public class SummaryObject extends SummaryEntity {
 		return toString("").toString();
 	}
 
-	public StringBuilder toString(String indent) {
-		StringBuilder b = new StringBuilder();
+	public StringBuilder toString(final String indent) {
+		final StringBuilder b = new StringBuilder();
 		b.append(indent + "Object." + this.change + " '" + getId() + "'\n");
 		// IMPROVE sort, if possible
-		for (Entry<XId, SummaryField> e : this.id2summaryField.entrySet()) {
+		for (final Entry<XId, SummaryField> e : this.id2summaryField.entrySet()) {
 			b.append(e.getValue().toString(indent + "  ").toString());
 		}
 		b.append(indent + "Events: " + super.appliedEvents + "\n");
@@ -96,21 +98,22 @@ public class SummaryObject extends SummaryEntity {
 	}
 
 	public boolean isNoOp() {
-		for (SummaryField sf : this.id2summaryField.values()) {
-			if (!sf.isNoOp())
+		for (final SummaryField sf : this.id2summaryField.values()) {
+			if (!sf.isNoOp()) {
 				return false;
+			}
 		}
 		return true;
 	}
 
 	public void removeNoOps() {
-		List<XId> toBeRemoved = new ArrayList<XId>();
-		for (SummaryField sf : this.id2summaryField.values()) {
+		final List<XId> toBeRemoved = new ArrayList<XId>();
+		for (final SummaryField sf : this.id2summaryField.values()) {
 			if (sf.isNoOp()) {
 				toBeRemoved.add(sf.getId());
 			}
 		}
-		for (XId id : toBeRemoved) {
+		for (final XId id : toBeRemoved) {
 			this.id2summaryField.remove(id);
 		}
 	}

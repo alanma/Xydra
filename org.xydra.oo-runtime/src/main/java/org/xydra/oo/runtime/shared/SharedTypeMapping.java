@@ -27,16 +27,16 @@ import org.xydra.log.api.LoggerFactory;
  * A mapping defines a relationship between Java and Xydra types. This is the
  * basis for Java dynamic proxies and generated GWT code to map Java POJOs to
  * Xydra objects.
- * 
+ *
  * The Java type is defined via a {@link TypeSpec} = a base type and an optional
  * component type.
- * 
+ *
  * The Xydra type is defined via its {@link ValueType}.
- * 
+ *
  * Optionally the mapping might have an {@link IMapper} which converts between
  * Xydra and Java types. Or it can optionally have an
  * {@link IXydraCollectionFactory} which can create empty collections.
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(true)
@@ -50,13 +50,13 @@ public class SharedTypeMapping {
 	private static IMapper<Boolean, XBooleanValue> _javaBooleanMapper = new IMapper<Boolean, XBooleanValue>() {
 
 		@Override
-		public java.lang.Boolean toJava(XBooleanValue x) {
-			return (Boolean) x.contents();
+		public java.lang.Boolean toJava(final XBooleanValue x) {
+			return x.contents();
 		}
 
 		@Override
-		public XBooleanValue toXydra(java.lang.Boolean j) {
-			return (XBooleanValue) XV.toValue((java.lang.Boolean) j);
+		public XBooleanValue toXydra(final java.lang.Boolean j) {
+			return XV.toValue(j);
 		}
 
 		@Override
@@ -74,13 +74,13 @@ public class SharedTypeMapping {
 	private static IMapper<byte[], XBinaryValue> _javaByteArrayMapper = new IMapper<byte[], XBinaryValue>() {
 
 		@Override
-		public byte[] toJava(XBinaryValue x) {
-			return (byte[]) ((XBinaryValue) x).getValue();
+		public byte[] toJava(final XBinaryValue x) {
+			return x.getValue();
 		}
 
 		@Override
-		public XBinaryValue toXydra(byte[] j) {
-			return (XBinaryValue) XV.toValue((byte[]) j);
+		public XBinaryValue toXydra(final byte[] j) {
+			return XV.toValue(j);
 		}
 
 		@Override
@@ -97,13 +97,13 @@ public class SharedTypeMapping {
 	private static IMapper<Double, XDoubleValue> _javaDoubleMapper = new IMapper<Double, XDoubleValue>() {
 
 		@Override
-		public java.lang.Double toJava(XDoubleValue x) {
-			return (Double) ((XDoubleValue) x).contents();
+		public java.lang.Double toJava(final XDoubleValue x) {
+			return x.contents();
 		}
 
 		@Override
-		public XDoubleValue toXydra(java.lang.Double j) {
-			return (XDoubleValue) XV.toValue((java.lang.Double) j);
+		public XDoubleValue toXydra(final java.lang.Double j) {
+			return XV.toValue(j);
 		}
 
 		@Override
@@ -120,13 +120,13 @@ public class SharedTypeMapping {
 	private static IMapper<Integer, XIntegerValue> _javaIntegerMapper = new IMapper<Integer, XIntegerValue>() {
 
 		@Override
-		public java.lang.Integer toJava(XIntegerValue x) {
-			return (Integer) ((XIntegerValue) x).contents();
+		public java.lang.Integer toJava(final XIntegerValue x) {
+			return x.contents();
 		}
 
 		@Override
-		public XIntegerValue toXydra(java.lang.Integer j) {
-			return (XIntegerValue) XV.toValue((Integer) j);
+		public XIntegerValue toXydra(final java.lang.Integer j) {
+			return XV.toValue(j);
 		}
 
 		@Override
@@ -144,13 +144,13 @@ public class SharedTypeMapping {
 	private static IMapper<Long, XLongValue> _javaLongMapper = new IMapper<Long, XLongValue>() {
 
 		@Override
-		public java.lang.Long toJava(XLongValue x) {
-			return (Long) ((XLongValue) x).contents();
+		public java.lang.Long toJava(final XLongValue x) {
+			return x.contents();
 		}
 
 		@Override
-		public XLongValue toXydra(java.lang.Long j) {
-			return (XLongValue) XV.toValue((Long) j);
+		public XLongValue toXydra(final java.lang.Long j) {
+			return XV.toValue(j);
 		}
 
 		@Override
@@ -175,12 +175,12 @@ public class SharedTypeMapping {
 			new IMapper<List<XAddress>, XAddressListValue>() {
 
 				@Override
-				public List<XAddress> toJava(XAddressListValue x) {
+				public List<XAddress> toJava(final XAddressListValue x) {
 					return Arrays.asList(x.contents());
 				}
 
 				@Override
-				public XAddressListValue toXydra(List<XAddress> j) {
+				public XAddressListValue toXydra(final List<XAddress> j) {
 					return XV.toAddressListValue(j);
 				}
 
@@ -623,13 +623,13 @@ public class SharedTypeMapping {
 			TypeConstants.JavaString, ValueType.String, new IMapper<String, XStringValue>() {
 
 				@Override
-				public java.lang.String toJava(XStringValue x) {
+				public java.lang.String toJava(final XStringValue x) {
 					return XV.toString(x);
 				}
 
 				@Override
-				public XStringValue toXydra(java.lang.String j) {
-					return (XStringValue) XV.toValue((java.lang.String) j);
+				public XStringValue toXydra(final java.lang.String j) {
+					return XV.toValue(j);
 				}
 
 				@Override
@@ -651,7 +651,7 @@ public class SharedTypeMapping {
 	 *            @NeverNull
 	 * @return a mapping for the given type
 	 */
-	public static SharedTypeMapping getMapping(@NeverNull IType type) {
+	public static SharedTypeMapping getMapping(@NeverNull final IType type) {
 		assert type != null;
 		return _mappings.get(type);
 	}
@@ -663,7 +663,7 @@ public class SharedTypeMapping {
 	 * @return looks up a mapping for the given type and returns the ValueType
 	 *         or null if no mapping was found
 	 */
-	public static ValueType getValueType(@NeverNull IBaseType baseType, IBaseType componentType) {
+	public static ValueType getValueType(@NeverNull final IBaseType baseType, final IBaseType componentType) {
 		assert baseType != null;
 		return getXydraBaseValueType(new TypeSpec(baseType, componentType, "runtime"));
 	}
@@ -674,9 +674,9 @@ public class SharedTypeMapping {
 	 * @return looks up a mapping for the given type and returns the ValueType
 	 *         or null if no mapping was found
 	 */
-	public static ValueType getXydraBaseValueType(@NeverNull TypeSpec type) {
+	public static ValueType getXydraBaseValueType(@NeverNull final TypeSpec type) {
 		assert type != null;
-		SharedTypeMapping mapping = getMapping(type);
+		final SharedTypeMapping mapping = getMapping(type);
 		if (mapping != null) {
 			return mapping.getXydraBaseValueType();
 		}
@@ -705,10 +705,10 @@ public class SharedTypeMapping {
 	 * @param factory
 	 * @return ...
 	 */
-	public SharedTypeMapping createAndAdd(String javaBaseTypePackage, String javaBaseTypeName,
-			String javaComponentTypePackage, String javaComponentTypeName,
-			ValueType xydraBaseValueType, @CanBeNull IMapper<?, ? extends XValue> mapper,
-			IXydraCollectionFactory factory) {
+	public SharedTypeMapping createAndAdd(final String javaBaseTypePackage, final String javaBaseTypeName,
+			final String javaComponentTypePackage, final String javaComponentTypeName,
+			final ValueType xydraBaseValueType, @CanBeNull final IMapper<?, ? extends XValue> mapper,
+			final IXydraCollectionFactory factory) {
 		return createAndAdd(
 				new TypeSpec(BaseTypeSpec.create(javaBaseTypePackage, javaBaseTypeName),
 						BaseTypeSpec.create(javaComponentTypePackage, javaComponentTypeName),
@@ -725,9 +725,9 @@ public class SharedTypeMapping {
 	 * @param factory
 	 * @return ...
 	 */
-	public static SharedTypeMapping createAndAdd(TypeSpec typeSpec, ValueType xydraBaseValueType,
-			@CanBeNull IMapper<?, ? extends XValue> mapper, IXydraCollectionFactory factory) {
-		SharedTypeMapping stm = new SharedTypeMapping();
+	public static SharedTypeMapping createAndAdd(final TypeSpec typeSpec, final ValueType xydraBaseValueType,
+			@CanBeNull final IMapper<?, ? extends XValue> mapper, final IXydraCollectionFactory factory) {
+		final SharedTypeMapping stm = new SharedTypeMapping();
 		stm.typeSpec = typeSpec;
 		stm.xydraBaseValueType = xydraBaseValueType;
 		stm.mapper = mapper;
@@ -761,14 +761,16 @@ public class SharedTypeMapping {
 		return this.xydraBaseValueType;
 	}
 
-	public <Y extends XValue> Object toJava(Y x) {
-		if (this.mapper == null)
+	public <Y extends XValue> Object toJava(final Y x) {
+		if (this.mapper == null) {
 			return x;
+		}
 
 		@SuppressWarnings("unchecked")
+		final
 		IMapper<Object, Y> castMapper = (IMapper<Object, Y>) this.mapper;
 
-		return castMapper.toJava((Y) x);
+		return castMapper.toJava(x);
 	}
 
 	@Override
@@ -777,10 +779,11 @@ public class SharedTypeMapping {
 				+ (this.mapper != null) + " factory?" + (this.factory != null);
 	}
 
-	public <Y extends XValue> XValue toXydra(Object j) {
+	public <Y extends XValue> XValue toXydra(final Object j) {
 		// do trivial conversion here
 		if (j instanceof XValue) {
 			@SuppressWarnings("unchecked")
+			final
 			Y y = (Y) j;
 			return y;
 		}
@@ -788,9 +791,10 @@ public class SharedTypeMapping {
 		if (this.mapper == null) {
 			try {
 				@SuppressWarnings("unchecked")
+				final
 				Y y = (Y) j;
 				return y;
-			} catch (ClassCastException e) {
+			} catch (final ClassCastException e) {
 				throw new RuntimeException("Maybe you need to add a mapper from "
 						+ j.getClass().getName() + " to a Xydra type. No mapper found. Mapping: "
 						+ this, e);
@@ -800,11 +804,12 @@ public class SharedTypeMapping {
 		// let mapper only deal with real conversions
 		try {
 			@SuppressWarnings("unchecked")
+			final
 			IMapper<Object, Y> castMapper = (IMapper<Object, Y>) this.mapper;
-			Y y = castMapper.toXydra(j);
+			final Y y = castMapper.toXydra(j);
 			return y;
-		} catch (ClassCastException e) {
-			log.warn("Defect mapper in " + this.toString());
+		} catch (final ClassCastException e) {
+			log.warn("Defect mapper in " + toString());
 			throw e;
 		}
 	}

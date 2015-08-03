@@ -32,13 +32,13 @@ public class DumpUtilsBase {
 	 * assert condition : DumpUtils.dump("mylabel", myentity);
 	 * </code>
 	 */
-	public static String dump(String label, XReadableRepository repo) {
+	public static String dump(final String label, final XReadableRepository repo) {
 		XyAssert.xyAssert(repo != null);
 		assert repo != null;
 		XyAssert.xyAssert(repo.getAddress().getAddressedType() == XType.XREPOSITORY);
 		log.info(label + " * Repo " + repo.getId() + " ...");
-		for (XId modelId : repo) {
-			XReadableModel model = repo.getModel(modelId);
+		for (final XId modelId : repo) {
+			final XReadableModel model = repo.getModel(modelId);
 			dump(label, model);
 		}
 		return "";
@@ -51,7 +51,7 @@ public class DumpUtilsBase {
 	 * assert condition : DumpUtils.dump("mylabel", myentity);
 	 * </code>
 	 */
-	public static String dump(String label, XReadableModel model) {
+	public static String dump(final String label, final XReadableModel model) {
 		log.info(label + "\n" + toStringBuffer(model));
 		return "";
 	}
@@ -60,16 +60,16 @@ public class DumpUtilsBase {
 	 * @param model to be dumped to a String
 	 * @return the model as a human-readable String
 	 */
-	public static StringBuffer toStringBuffer(XStateReadableModel model) {
+	public static StringBuffer toStringBuffer(final XStateReadableModel model) {
 		XyAssert.xyAssert(model != null);
 		assert model != null;
 		XyAssert.xyAssert(model.getAddress().getAddressedType() == XType.XMODEL);
 
-		StringBuffer buf = new StringBuffer();
+		final StringBuffer buf = new StringBuffer();
 		buf.append("** Model   " + model.getAddress() + "\n");
-		List<XId> ids = toSortedList(model);
-		for (XId objectId : ids) {
-			XStateReadableObject object = model.getObject(objectId);
+		final List<XId> ids = toSortedList(model);
+		for (final XId objectId : ids) {
+			final XStateReadableObject object = model.getObject(objectId);
 			buf.append(toStringBuffer(object));
 		}
 		return buf;
@@ -79,24 +79,24 @@ public class DumpUtilsBase {
 	 * @param model to be dumped to a String
 	 * @return the model as a human-readable String
 	 */
-	public static StringBuffer toStringBuffer(XReadableModel model) {
+	public static StringBuffer toStringBuffer(final XReadableModel model) {
 		XyAssert.xyAssert(model != null);
 		assert model != null;
 		XyAssert.xyAssert(model.getAddress().getAddressedType() == XType.XMODEL);
 
-		StringBuffer buf = new StringBuffer();
+		final StringBuffer buf = new StringBuffer();
 		buf.append("** Model   " + model.getAddress() + " [" + model.getRevisionNumber() + "]\n");
-		List<XId> ids = toSortedList(model);
-		for (XId objectId : ids) {
-			XReadableObject object = model.getObject(objectId);
+		final List<XId> ids = toSortedList(model);
+		for (final XId objectId : ids) {
+			final XReadableObject object = model.getObject(objectId);
 			buf.append(toStringBuffer(object));
 		}
 		return buf;
 	}
 
-	private static List<XId> toSortedList(Iterable<XId> iterable) {
-		List<XId> list = new ArrayList<XId>();
-		for (XId id : iterable) {
+	private static List<XId> toSortedList(final Iterable<XId> iterable) {
+		final List<XId> list = new ArrayList<XId>();
+		for (final XId id : iterable) {
 			list.add(id);
 		}
 		Collections.sort(list);
@@ -110,7 +110,7 @@ public class DumpUtilsBase {
 	 * assert condition : DumpUtils.dump("mylabel", myentity);
 	 * </code>
 	 */
-	public static String dump(String label, XReadableObject object) {
+	public static String dump(final String label, final XReadableObject object) {
 		log.info(label + "\n" + toStringBuffer(object));
 		return "";
 	}
@@ -119,15 +119,15 @@ public class DumpUtilsBase {
 	 * @param object to be dumped
 	 * @return given object as human-readable string
 	 */
-	public static StringBuffer toStringBuffer(XReadableObject object) {
+	public static StringBuffer toStringBuffer(final XReadableObject object) {
 		XyAssert.xyAssert(object != null);
 		assert object != null;
 		XyAssert.xyAssert(object.getAddress().getAddressedType() == XType.XOBJECT);
-		StringBuffer buf = new StringBuffer();
+		final StringBuffer buf = new StringBuffer();
 		buf.append("*** Object " + object.getAddress() + " [" + object.getRevisionNumber() + "]\n");
-		List<XId> ids = toSortedList(object);
-		for (XId fieldId : ids) {
-			XReadableField field = object.getField(fieldId);
+		final List<XId> ids = toSortedList(object);
+		for (final XId fieldId : ids) {
+			final XReadableField field = object.getField(fieldId);
 			buf.append(toStringBuffer(field));
 		}
 		return buf;
@@ -137,15 +137,15 @@ public class DumpUtilsBase {
 	 * @param object to be dumped
 	 * @return given object as human-readable string
 	 */
-	public static StringBuffer toStringBuffer(XStateReadableObject object) {
+	public static StringBuffer toStringBuffer(final XStateReadableObject object) {
 		XyAssert.xyAssert(object != null);
 		assert object != null;
 		XyAssert.xyAssert(object.getAddress().getAddressedType() == XType.XOBJECT);
-		StringBuffer buf = new StringBuffer();
+		final StringBuffer buf = new StringBuffer();
 		buf.append("*** Object " + object.getAddress() + "\n");
-		List<XId> ids = toSortedList(object);
-		for (XId fieldId : ids) {
-			XStateReadableField field = object.getField(fieldId);
+		final List<XId> ids = toSortedList(object);
+		for (final XId fieldId : ids) {
+			final XStateReadableField field = object.getField(fieldId);
 			buf.append(toStringBuffer(field));
 		}
 		return buf;
@@ -158,7 +158,7 @@ public class DumpUtilsBase {
 	 * assert condition : DumpUtils.dump("mylabel", myentity);
 	 * </code>
 	 */
-	public static String dump(String label, XReadableField field) {
+	public static String dump(final String label, final XReadableField field) {
 		log.info(label + "\n" + toStringBuffer(field));
 		return "";
 	}
@@ -167,11 +167,11 @@ public class DumpUtilsBase {
 	 * @param field to be dumped
 	 * @return the field as a human-readable String
 	 */
-	public static StringBuffer toStringBuffer(XReadableField field) {
+	public static StringBuffer toStringBuffer(final XReadableField field) {
 		XyAssert.xyAssert(field != null);
 		assert field != null;
 		XyAssert.xyAssert(field.getAddress().getAddressedType() == XType.XFIELD);
-		StringBuffer buf = new StringBuffer();
+		final StringBuffer buf = new StringBuffer();
 		buf.append("**** Field " + field.getAddress() + " = '" + field.getValue() + "' X-type=" +
 
 		(field.getValue() == null ? "NoValue" : field.getValue().getType())
@@ -184,11 +184,11 @@ public class DumpUtilsBase {
 	 * @param field to be dumped
 	 * @return the field as a human-readable String
 	 */
-	public static StringBuffer toStringBuffer(XStateReadableField field) {
+	public static StringBuffer toStringBuffer(final XStateReadableField field) {
 		XyAssert.xyAssert(field != null);
 		assert field != null;
 		XyAssert.xyAssert(field.getAddress().getAddressedType() == XType.XFIELD);
-		StringBuffer buf = new StringBuffer();
+		final StringBuffer buf = new StringBuffer();
 		buf.append("**** Field " + field.getAddress() + " = '" + field.getValue() + "' " + "\n");
 		return buf;
 	}
@@ -196,7 +196,7 @@ public class DumpUtilsBase {
 	public static class XidComparator implements Comparator<IHasXId> {
 
 		@Override
-		public int compare(IHasXId a, IHasXId b) {
+		public int compare(final IHasXId a, final IHasXId b) {
 			return a.getId().compareTo(b.getId());
 		}
 
@@ -204,17 +204,17 @@ public class DumpUtilsBase {
 
 	}
 
-	public static void dump(Map<?, ?> map) {
+	public static void dump(final Map<?, ?> map) {
 		// IMPROVE sort, if possible
-		for (Entry<?, ?> e : map.entrySet()) {
+		for (final Entry<?, ?> e : map.entrySet()) {
 			log.info("Key '" + e.getKey() + "' = Value '" + e.getValue() + "'");
 		}
 	}
 
-	public static StringBuilder toStringBuilder(Map<?, ?> map) {
-		StringBuilder b = new StringBuilder();
+	public static StringBuilder toStringBuilder(final Map<?, ?> map) {
+		final StringBuilder b = new StringBuilder();
 		// IMPROVE sort, if possible
-		for (Entry<?, ?> e : map.entrySet()) {
+		for (final Entry<?, ?> e : map.entrySet()) {
 			b.append("Key '");
 			b.append(e.getKey());
 			b.append("' = Value '");

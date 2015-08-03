@@ -10,7 +10,7 @@ import org.xydra.persistence.XydraPersistence;
 
 
 public interface ISessionPersistence {
-	
+
 	/**
 	 * @param modelId
 	 * @return {@link XCommand#NOCHANGE} if nothing changes,
@@ -20,7 +20,7 @@ public interface ISessionPersistence {
 	 *         is used here.
 	 */
 	long createModel(XId modelId);
-	
+
 	/**
 	 * @param modelId
 	 * @return {@link XCommand#NOCHANGE} if nothing changes,
@@ -30,12 +30,12 @@ public interface ISessionPersistence {
 	 *         is used here.
 	 */
 	long removeModel(XId modelId);
-	
+
 	/**
 	 * Commits the changes encoded in the {@link SessionCachedModel} to the
 	 * back-end. Empty models are not created. Non-empty models are created if
 	 * they do not exist yet.
-	 * 
+	 *
 	 * @param changedModel
 	 * @param actorId
 	 * @return {@link XCommand#NOCHANGE} if nothing changes,
@@ -47,13 +47,13 @@ public interface ISessionPersistence {
 	 *             be created
 	 */
 	long applyChangesAsTxn(SessionCachedModel changedModel, XId actorId) throws SessionException;
-	
+
 	XId getRepositoryId();
-	
+
 	XReadableModel getModelSnapshot(GetWithAddressRequest modelRequest);
-	
+
 	XReadableObject getObjectSnapshot(GetWithAddressRequest objectAddressRequest);
-	
+
 	/**
 	 * Great for tests.
 	 */

@@ -22,15 +22,15 @@ public class ConfEnvTest {
 
 	@Test
 	public void testResolver() {
-		IConfig conf = Env.get().conf();
+		final IConfig conf = Env.get().conf();
 
 		try {
 			conf.getResolver("foo");
 			fail();
-		} catch (ConfigException e) {
+		} catch (final ConfigException e) {
 		}
 
-		IResolver<Integer> resolver1 = new IResolver<Integer>() {
+		final IResolver<Integer> resolver1 = new IResolver<Integer>() {
 
 			@Override
 			public Integer resolve() {
@@ -45,9 +45,9 @@ public class ConfEnvTest {
 
 		conf.setResolver("foo", resolver1);
 
-		IResolver<Integer> res2 = conf.getResolver("foo");
+		final IResolver<Integer> res2 = conf.getResolver("foo");
 		assertNotNull(res2);
 		assertEquals(resolver1, res2);
-		assertEquals((int) 42, (int) res2.resolve());
+		assertEquals(42, (int) res2.resolve());
 	}
 }

@@ -11,17 +11,17 @@ import org.xydra.xgae.datastore.api.SKey;
 
 /**
  * Configuration data for all GAE application instances.
- * 
+ *
  * A simple map-like configuration object that can be put in datastore and
  * memcache. Has a 'time to live' to minimise data store hits.
- * 
+ *
  * This config information can be manipulated via the
  * {@link GaeConfigurationResource}.
- * 
+ *
  * It is the responsibility of each instance to periodically call <code>
  * GaeConfigurationManager.getCurrentConfiguration().applyIfNecessary();
  * </code>
- * 
+ *
  * @author xamde
  */
 public class GaeConfiguration {
@@ -42,7 +42,7 @@ public class GaeConfiguration {
 	private static SKey KEY_CFG;
 
 	/** Internal state */
-	private Map<String, String> map = new HashMap<String, String>();
+	private final Map<String, String> map = new HashMap<String, String>();
 
 	private transient long validUntilUTC;
 
@@ -58,8 +58,8 @@ public class GaeConfiguration {
 	 * @return a {@link GaeConfiguration} that is valid for lifetimeInMs
 	 *         milliseconds from now on.
 	 */
-	public static GaeConfiguration createWithLifetime(long lifetimeInMs) {
-		GaeConfiguration conf = new GaeConfiguration();
+	public static GaeConfiguration createWithLifetime(final long lifetimeInMs) {
+		final GaeConfiguration conf = new GaeConfiguration();
 		conf.setValidUntilUTC(System.currentTimeMillis() + lifetimeInMs);
 		return conf;
 	}
@@ -67,7 +67,7 @@ public class GaeConfiguration {
 	private GaeConfiguration() {
 	}
 
-	public void setValidUntilUTC(long validUntilUTC) {
+	public void setValidUntilUTC(final long validUntilUTC) {
 		this.map.put(PROP_VALID_UTC, "" + validUntilUTC);
 		this.validUntilUTC = validUntilUTC;
 	}
@@ -88,7 +88,7 @@ public class GaeConfiguration {
 		if (XGae.get().datastore().canWriteDataStore()) {
 			try {
 				XGae.get().datastore().async().putEntity(toEntity());
-			} catch (Throwable t) {
+			} catch (final Throwable t) {
 				log.warn("Could not store config", t);
 			}
 		} else {
@@ -103,9 +103,9 @@ public class GaeConfiguration {
 	}
 
 	private SEntity toEntity() {
-		SEntity entity = XGae.get().datastore().createEntity(getConfKey());
-		for (String key : this.map.keySet()) {
-			String value = this.map.get(key);
+		final SEntity entity = XGae.get().datastore().createEntity(getConfKey());
+		for (final String key : this.map.keySet()) {
+			final String value = this.map.get(key);
 			entity.setAttribute(key, value);
 		}
 		return entity;
@@ -117,23 +117,23 @@ public class GaeConfiguration {
 	 */
 	public static GaeConfiguration load() {
 		log.info("Load conf from data store. It might be out of date.");
-		SEntity entity = XGae.get().datastore().sync().getEntity(getConfKey());
+		final SEntity entity = XGae.get().datastore().sync().getEntity(getConfKey());
 		if (entity == null) {
 			log.warn("No gaeConfiguration in datastore.");
 			return null;
 		}
 		// else:
-		GaeConfiguration conf = new GaeConfiguration();
-		for (String key : entity.getAttributes().keySet()) {
-			String value = (String) entity.getAttribute(key);
+		final GaeConfiguration conf = new GaeConfiguration();
+		for (final String key : entity.getAttributes().keySet()) {
+			final String value = (String) entity.getAttribute(key);
 			conf.map.put(key, value);
 		}
 		conf.assertConsistentState();
 		try {
 			conf.validUntilUTC = Long.parseLong(conf.map.get(PROP_VALID_UTC));
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			log.warn("Bad config in store, setting time to live to 15 minutes");
-			conf.validUntilUTC = System.currentTimeMillis() + (15 * 60 * 1000);
+			conf.validUntilUTC = System.currentTimeMillis() + 15 * 60 * 1000;
 		}
 		return conf;
 	}
@@ -161,19 +161,20 @@ public class GaeConfiguration {
 
 	/**
 	 * A null is interpreted as false.
-	 * 
+	 *
 	 * @param propName
 	 *            ..
 	 * @return the property value as boolean value
 	 */
-	public boolean getAsBoolean(String propName) {
-		String value = this.map.get(propName);
-		if (value == null)
+	public boolean getAsBoolean(final String propName) {
+		final String value = this.map.get(propName);
+		if (value == null) {
 			return false;
+		}
 		return Boolean.parseBoolean(value);
 	}
 
-	public void setLifetime(long ms) {
+	public void setLifetime(final long ms) {
 		setValidUntilUTC(System.currentTimeMillis() + ms);
 	}
 }

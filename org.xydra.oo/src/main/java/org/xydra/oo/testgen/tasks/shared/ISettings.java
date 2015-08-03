@@ -13,7 +13,7 @@ public interface ISettings extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Settings']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("language")
@@ -21,7 +21,7 @@ public interface ISettings extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Settings']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("newItemsAtTop")
@@ -29,7 +29,7 @@ public interface ISettings extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Settings']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("notifyByDesktop")
@@ -37,7 +37,7 @@ public interface ISettings extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Settings']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("notifyByEmail")
@@ -45,7 +45,7 @@ public interface ISettings extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Settings']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("notifyByPush")
@@ -53,7 +53,7 @@ public interface ISettings extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Settings']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("startOfWeek")
@@ -61,7 +61,7 @@ public interface ISettings extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.TasksSpec.Settings']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("timeFormat")
@@ -69,7 +69,7 @@ public interface ISettings extends IHasXId {
 
 	/**
 	 * For GWT-internal use only [generated from: 'toClassSpec 1']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'toClassSpec 2']
 	 * @param id
@@ -80,7 +80,7 @@ public interface ISettings extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Settings']
-	 * 
+	 *
 	 * @param language
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Settings']
@@ -92,7 +92,7 @@ public interface ISettings extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Settings']
-	 * 
+	 *
 	 * @param newItemsAtTop
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Settings']
@@ -104,7 +104,7 @@ public interface ISettings extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Settings']
-	 * 
+	 *
 	 * @param notifyByDesktop
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Settings']
@@ -116,7 +116,7 @@ public interface ISettings extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Settings']
-	 * 
+	 *
 	 * @param notifyByEmail
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Settings']
@@ -128,7 +128,7 @@ public interface ISettings extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Settings']
-	 * 
+	 *
 	 * @param notifyByPush
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Settings']
@@ -140,7 +140,7 @@ public interface ISettings extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Settings']
-	 * 
+	 *
 	 * @param startOfWeek
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Settings']
@@ -152,7 +152,7 @@ public interface ISettings extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.TasksSpec.Settings']
-	 * 
+	 *
 	 * @param timeFormat
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.TasksSpec.Settings']

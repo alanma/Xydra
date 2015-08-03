@@ -3,12 +3,12 @@ package org.xydra.base;
 /**
  * an enumeration used by {@link XAddress XAddresses} to tell what kind of Xydra
  * entity they refer to.
- * 
+ *
  */
 public enum XType {
-	
+
 	XFIELD, XMODEL, XOBJECT, XREPOSITORY;
-	
+
 	/**
 	 * @return the XType of entities contained in entities of this XType or null
 	 *         for XFIELD
@@ -25,7 +25,7 @@ public enum XType {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * @return the XType of entities containing entities of this XType or null
 	 *         for XREPOSITORY
@@ -42,5 +42,5 @@ public enum XType {
 			return null;
 		}
 	}
-	
+
 }

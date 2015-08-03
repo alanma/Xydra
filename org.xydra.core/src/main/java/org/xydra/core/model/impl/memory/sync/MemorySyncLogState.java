@@ -35,49 +35,49 @@ public class MemorySyncLogState implements XSyncLogState {
 	/**
 	 * Creates a new MemorySyncLogState. Make sure to set the
 	 * {@link #setSyncRevisionNumber(long)}.
-	 * 
+	 *
 	 * @param baseAddr The {@link XAddress} of the entity holding the
 	 *            MemorySyncLog which is represented by this MemorySyncLogState
 	 */
-	public MemorySyncLogState(XAddress baseAddr) {
+	public MemorySyncLogState(final XAddress baseAddr) {
 		this.baseAddr = baseAddr;
 	}
 
 	/**
 	 * @param changeLogState
 	 */
-	public MemorySyncLogState(XChangeLogState changeLogState) {
+	public MemorySyncLogState(final XChangeLogState changeLogState) {
 		if (changeLogState instanceof MemorySyncLogState) {
-			MemorySyncLogState msl = (MemorySyncLogState) changeLogState;
+			final MemorySyncLogState msl = (MemorySyncLogState) changeLogState;
 			this.baseAddr = msl.baseAddr;
 			this.baseRevisionNumber = msl.baseRevisionNumber;
 			this.syncRevisionNumber = msl.syncRevisionNumber;
 			this.eventMap = msl.eventMap;
 		} else {
-			long baseRev = changeLogState.getBaseRevisionNumber();
-			long currentRev = changeLogState.getCurrentRevisionNumber();
+			final long baseRev = changeLogState.getBaseRevisionNumber();
+			final long currentRev = changeLogState.getCurrentRevisionNumber();
 			this.baseAddr = changeLogState.getBaseAddress();
 			this.baseRevisionNumber = baseRev;
 			this.syncRevisionNumber = baseRev;
 			for (long i = baseRev + 1; i <= currentRev; i++) {
-				XEvent event = changeLogState.getEvent(i);
-				this.appendEvent(event);
+				final XEvent event = changeLogState.getEvent(i);
+				appendEvent(event);
 			}
 		}
 	}
 
 	@Override
-	public void appendEvent(XEvent event) {
-		MemorySyncLogEntry syncLogEntry = new MemorySyncLogEntry(null, event);
+	public void appendEvent(final XEvent event) {
+		final MemorySyncLogEntry syncLogEntry = new MemorySyncLogEntry(null, event);
 		appendSyncLogEntry(syncLogEntry);
 	}
 
 	@Override
-	public void appendSyncLogEntry(ISyncLogEntry syncLogEntry) {
+	public void appendSyncLogEntry(final ISyncLogEntry syncLogEntry) {
 		if (syncLogEntry == null || syncLogEntry.getEvent() == null) {
 			log.warn("Skipping null-event");
 		} else {
-			XEvent event = syncLogEntry.getEvent();
+			final XEvent event = syncLogEntry.getEvent();
 			XyAssert.xyAssert(this.baseAddr.equalsOrContains(event.getChangedEntity()),
 					"baseAddr=%s does not contain %s", this.baseAddr, event.getChangedEntity());
 			XyAssert.xyAssert(event.getRevisionNumber() > getCurrentRevisionNumber(),
@@ -89,7 +89,7 @@ public class MemorySyncLogState implements XSyncLogState {
 		}
 	}
 
-	private void addEntry(ISyncLogEntry syncLogEntry) {
+	private void addEntry(final ISyncLogEntry syncLogEntry) {
 		this.eventMap.put(syncLogEntry.getEvent().getRevisionNumber(), syncLogEntry);
 	}
 
@@ -114,10 +114,11 @@ public class MemorySyncLogState implements XSyncLogState {
 	}
 
 	@Override
-	public XEvent getEvent(long revisionNumber) {
-		ISyncLogEntry entry = this.eventMap.get(revisionNumber);
-		if (entry == null)
+	public XEvent getEvent(final long revisionNumber) {
+		final ISyncLogEntry entry = this.eventMap.get(revisionNumber);
+		if (entry == null) {
 			return null;
+		}
 		assert entry.getEvent().getRevisionNumber() == revisionNumber;
 		return entry.getEvent();
 	}
@@ -127,23 +128,23 @@ public class MemorySyncLogState implements XSyncLogState {
 		if (this.eventMap.isEmpty()) {
 			return null;
 		}
-		long last = getLast();
+		final long last = getLast();
 		return getEvent(last);
 	}
 
 	private long getLast() {
-		Long lastKey = this.eventMap.lastKey();
+		final Long lastKey = this.eventMap.lastKey();
 		return lastKey;
 	}
 
 	private long getFirst() {
-		Long firstKey = this.eventMap.firstKey();
+		final Long firstKey = this.eventMap.firstKey();
 		return firstKey;
 	}
 
 	@Override
-	public ISyncLogEntry getSyncLogEntry(long revisionNumber) {
-		ISyncLogEntry syncLogEntry = this.eventMap.get(revisionNumber);
+	public ISyncLogEntry getSyncLogEntry(final long revisionNumber) {
+		final ISyncLogEntry syncLogEntry = this.eventMap.get(revisionNumber);
 		XyAssert.xyAssert(syncLogEntry.getEvent() == null
 				|| syncLogEntry.getEvent().getRevisionNumber() == revisionNumber, "event="
 				+ syncLogEntry.getEvent());
@@ -156,12 +157,12 @@ public class MemorySyncLogState implements XSyncLogState {
 	}
 
 	@Override
-	public void setBaseRevisionNumber(long baseRevisionNumber) {
+	public void setBaseRevisionNumber(final long baseRevisionNumber) {
 		this.baseRevisionNumber = baseRevisionNumber;
 	}
 
 	@Override
-	public void setSyncRevisionNumber(long rev) {
+	public void setSyncRevisionNumber(final long rev) {
 		// if(!this.eventMap.isEmpty()) {
 		// throw new IllegalStateException(
 		// "cannot set start revision number of non-empty change log");
@@ -178,7 +179,7 @@ public class MemorySyncLogState implements XSyncLogState {
 	}
 
 	@Override
-	public boolean truncateToRevision(long revisionNumber) {
+	public boolean truncateToRevision(final long revisionNumber) {
 		if (revisionNumber > getCurrentRevisionNumber()) {
 			return false;
 		}
@@ -187,17 +188,18 @@ public class MemorySyncLogState implements XSyncLogState {
 			return false;
 		}
 
-		if (log.isDebugEnabled())
+		if (log.isDebugEnabled()) {
 			log.debug("Truncating local syncLog down to rev="
 					+ revisionNumber
 					+ "; highest was "
-					+ (this.getLastEvent() == null ? "none" : this.getLastEvent()
+					+ (getLastEvent() == null ? "none" : getLastEvent()
 							.getRevisionNumber()));
+		}
 
 		/* Delete all events LATER than syncRev */
-		SortedMap<Long, ISyncLogEntry> toBeDeleted = this.eventMap.tailMap(revisionNumber + 1);
+		final SortedMap<Long, ISyncLogEntry> toBeDeleted = this.eventMap.tailMap(revisionNumber + 1);
 		while (toBeDeleted.size() > 0) {
-			Long key = toBeDeleted.lastKey();
+			final Long key = toBeDeleted.lastKey();
 			assert key != null;
 			this.eventMap.remove(key);
 		}
@@ -209,7 +211,7 @@ public class MemorySyncLogState implements XSyncLogState {
 	}
 
 	@Override
-	public void removeSyncLogEntryAt(Long l) {
+	public void removeSyncLogEntryAt(final Long l) {
 		this.eventMap.remove(l);
 	}
 
@@ -221,7 +223,7 @@ public class MemorySyncLogState implements XSyncLogState {
 
 		private ISyncLogEntry next;
 
-		public SyncLogEntryIterator(long begin, long end) {
+		public SyncLogEntryIterator(final long begin, final long end) {
 			this.i = begin;
 			this.end = end;
 		}
@@ -241,7 +243,7 @@ public class MemorySyncLogState implements XSyncLogState {
 
 		@Override
 		public ISyncLogEntry next() {
-			ISyncLogEntry syncLogEntry = this.next;
+			final ISyncLogEntry syncLogEntry = this.next;
 			this.next = null;
 			getNext();
 			return syncLogEntry;
@@ -255,9 +257,9 @@ public class MemorySyncLogState implements XSyncLogState {
 	}
 
 	@Override
-	public synchronized Iterator<ISyncLogEntry> getSyncLogEntriesBetween(long beginRevision,
-			long endRevision) {
-		SortedMap<Long, ISyncLogEntry> subMap = getSyncLogEntriesBetween_asMap(beginRevision,
+	public synchronized Iterator<ISyncLogEntry> getSyncLogEntriesBetween(final long beginRevision,
+			final long endRevision) {
+		final SortedMap<Long, ISyncLogEntry> subMap = getSyncLogEntriesBetween_asMap(beginRevision,
 				endRevision);
 		if (subMap == null) {
 			return Iterators.none();
@@ -266,21 +268,21 @@ public class MemorySyncLogState implements XSyncLogState {
 		}
 	}
 
-	private SortedMap<Long, ISyncLogEntry> getSyncLogEntriesBetween_asMap(long beginRevision,
-			long endRevision) {
+	private SortedMap<Long, ISyncLogEntry> getSyncLogEntriesBetween_asMap(final long beginRevision,
+			final long endRevision) {
 		/*
 		 * firstRev: the revision number the logged XModel had at the time when
 		 * the first event was recorded by the change log
 		 */
 		long firstRev;
-		XEvent firstEvent = getFirstEvent();
+		final XEvent firstEvent = getFirstEvent();
 		if (firstEvent != null) {
 			firstRev = getFirstEvent().getRevisionNumber();
 		} else {
 			// empty syncLog
 			firstRev = -1;
 		}
-		long curRev = getCurrentRevisionNumber();
+		final long curRev = getCurrentRevisionNumber();
 
 		if (beginRevision < 0) {
 			throw new IndexOutOfBoundsException(
@@ -303,11 +305,12 @@ public class MemorySyncLogState implements XSyncLogState {
 			return null;
 		}
 
-		long begin = beginRevision < firstRev ? firstRev : beginRevision;
-		long end = endRevision > curRev ? curRev + 1 : endRevision;
+		final long begin = beginRevision < firstRev ? firstRev : beginRevision;
+		final long end = endRevision > curRev ? curRev + 1 : endRevision;
 
-		if (begin > end)
+		if (begin > end) {
 			return null;
+		}
 
 		return this.eventMap.subMap(begin, end);
 	}
@@ -316,22 +319,22 @@ public class MemorySyncLogState implements XSyncLogState {
 		if (this.eventMap.isEmpty()) {
 			return null;
 		}
-		long first = getFirst();
+		final long first = getFirst();
 		return getEvent(first);
 	}
 
 	@Override
-	public Iterator<ISyncLogEntry> getSyncLogEntriesSince(long revisionNumber) {
+	public Iterator<ISyncLogEntry> getSyncLogEntriesSince(final long revisionNumber) {
 		return getSyncLogEntriesBetween(revisionNumber, Long.MAX_VALUE);
 	}
 
 	@Override
-	public Iterator<ISyncLogEntry> getSyncLogEntriesUntil(long revisionNumber) {
+	public Iterator<ISyncLogEntry> getSyncLogEntriesUntil(final long revisionNumber) {
 		return getSyncLogEntriesBetween(0, revisionNumber);
 	}
 
 	@Override
-	public ISyncLogEntry getSyncLogEntryAt(long revisionNumber) {
+	public ISyncLogEntry getSyncLogEntryAt(final long revisionNumber) {
 		if (revisionNumber < 0) {
 			throw new IllegalArgumentException("revisionNumber may not be less than zero: "
 					+ revisionNumber);
@@ -348,7 +351,7 @@ public class MemorySyncLogState implements XSyncLogState {
 					"revisionNumber may not be greater than or equal to the current revision"
 							+ "number of this log");
 		}
-		ISyncLogEntry syncLogEntry = getSyncLogEntry(revisionNumber);
+		final ISyncLogEntry syncLogEntry = getSyncLogEntry(revisionNumber);
 		assert syncLogEntry.getEvent() == null
 				|| syncLogEntry.getEvent().getRevisionNumber() == revisionNumber : "event="
 				+ syncLogEntry.getEvent();

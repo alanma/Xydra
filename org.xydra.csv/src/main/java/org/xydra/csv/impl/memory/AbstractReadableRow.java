@@ -29,27 +29,28 @@ public abstract class AbstractReadableRow implements IReadableRow {
 	 * @param value
 	 * @return true if array of String contains value
 	 */
-	protected boolean contains(String[] array, String value) {
+	protected boolean contains(final String[] array, final String value) {
 		for (int i = 0; i < array.length; i++) {
-			if (array[i].equals(value))
+			if (array[i].equals(value)) {
 				return true;
+			}
 		}
 		return false;
 	}
 
-	
+
 	@Override
-	public String getValue(String columnName) {
-		ICell cell = getOrCreateCell(columnName, false);
+	public String getValue(final String columnName) {
+		final ICell cell = getOrCreateCell(columnName, false);
 		return cell == null ? "null" : cell.getValue();
 	}
 
 	public abstract ICell getOrCreateCell(String columnName, boolean create);
 
-	
+
 	@Override
-	public double getValueAsDouble(String columnName) {
-		ICell cell = getOrCreateCell(columnName, false);
+	public double getValueAsDouble(final String columnName) {
+		final ICell cell = getOrCreateCell(columnName, false);
 
 		if (cell == null) {
 			return 0;
@@ -58,10 +59,10 @@ public abstract class AbstractReadableRow implements IReadableRow {
 		}
 	}
 
-	
+
 	@Override
-	public long getValueAsLong(String columnName) {
-		ICell cell = getOrCreateCell(columnName, false);
+	public long getValueAsLong(final String columnName) {
+		final ICell cell = getOrCreateCell(columnName, false);
 
 		if (cell == null) {
 			return 0;
@@ -72,9 +73,9 @@ public abstract class AbstractReadableRow implements IReadableRow {
 
 	@Override
 	public String toString() {
-		StringBuffer buf = new StringBuffer();
+		final StringBuffer buf = new StringBuffer();
 		buf.append("{ \n");
-		for (String colName : getColumnNames()) {
+		for (final String colName : getColumnNames()) {
 			buf.append("  " + colName + ": '" + getValue(colName) + "', \n");
 		}
 		buf.append(" }");

@@ -5,7 +5,7 @@ import org.xydra.log.api.LoggerFactory;
 
 /**
  * Simulate typical web-delays to make dev-mode feel more like real usage.
- * 
+ *
  * @author xamde
  */
 public class Delay {
@@ -27,24 +27,25 @@ public class Delay {
 		delay("ajax", ajaxDelayTimeMs);
 	}
 
-	public static void delay(String cause, int ms) {
-		if (ms == 0)
+	public static void delay(final String cause, final int ms) {
+		if (ms == 0) {
 			return;
+		}
 		log.info("~~~ Artificial delay of " + ms + " ms while doing '" + cause + "'");
 		try {
 			Thread.sleep(ms);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 
 	}
 
-	public static void setAjaxDelayMs(int ms) {
+	public static void setAjaxDelayMs(final int ms) {
 		assert ms >= 0;
 		ajaxDelayTimeMs = ms;
 	}
 
-	public static void setServePageDelayMs(int ms) {
+	public static void setServePageDelayMs(final int ms) {
 		assert ms >= 0;
 		servePageDelayTimeMs = ms;
 	}

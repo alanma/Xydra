@@ -15,16 +15,17 @@ abstract public class AtomicXValueEditor<E extends XValue> extends XValueEditor 
 	private final EditListener listener;
 	private boolean commandQueued;
 
-	public AtomicXValueEditor(EditListener listener) {
+	public AtomicXValueEditor(final EditListener listener) {
 		super();
 		this.listener = listener;
 	}
 
 	@Override
-	public void initWidget(Widget widget) {
+	public void initWidget(final Widget widget) {
 		super.initWidget(widget);
-		if (this.listener != null && widget instanceof HasChangeHandlers)
+		if (this.listener != null && widget instanceof HasChangeHandlers) {
 			((HasChangeHandlers) widget).addChangeHandler(this);
+		}
 
 		setStyleName("editor-xvalue");
 		addStyleName("editor-xvalue-atomic");
@@ -37,9 +38,10 @@ abstract public class AtomicXValueEditor<E extends XValue> extends XValueEditor 
 	}
 
 	@Override
-	public void onChange(ChangeEvent e) {
-		if (this.commandQueued)
+	public void onChange(final ChangeEvent e) {
+		if (this.commandQueued) {
 			return;
+		}
 		Scheduler.get().scheduleDeferred(this);
 		this.commandQueued = true;
 	}

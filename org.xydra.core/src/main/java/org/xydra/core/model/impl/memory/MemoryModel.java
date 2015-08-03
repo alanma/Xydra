@@ -8,6 +8,7 @@ import java.util.Map;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
+import org.xydra.base.Base;
 import org.xydra.base.IHasXAddress;
 import org.xydra.base.XAddress;
 import org.xydra.base.XCompareUtils;
@@ -64,13 +65,13 @@ import org.xydra.sharedutils.XyAssert;
  * The core state information is represented in two ways, which must be kept in
  * sync: (a) a {@link XRevWritableModel} representing the current snapshot, and
  * (b) a {@link ISyncLog} which represents the change history.
- * 
- * 
+ *
+ *
  * Update strategy:
- * 
+ *
  * State reads are handled by (a); change operations are checked on (a),
  * executed on (b) and finally materialised again in (a).
- * 
+ *
  * @author xamde
  * @author kaidel
  */
@@ -94,14 +95,14 @@ Serializable {
 	 * @return a MemoryModel that represents a model that does not exist and
 	 *         never existed before
 	 */
-	public static MemoryModel createNonExistantModel(XId actorId, IMemoryRepository father,
-			XId modelId) {
+	public static MemoryModel createNonExistantModel(final XId actorId, final IMemoryRepository father,
+			final XId modelId) {
 		assert father != null;
 		assert modelId != null;
 
-		XAddress modelAddress = XX.resolveModel(father.getAddress(), modelId);
+		final XAddress modelAddress = Base.resolveModel(father.getAddress(), modelId);
 
-		MemoryModel nonExistingModel = new MemoryModel(modelAddress, Root.createWithActor(actorId,
+		final MemoryModel nonExistingModel = new MemoryModel(modelAddress, Root.createWithActor(actorId,
 				modelAddress, XCommand.NONEXISTANT), father);
 		return nonExistingModel;
 	}
@@ -113,22 +114,22 @@ Serializable {
 	private transient final XRMOFChangeListener changeListener = new XRMOFChangeListener() {
 
 		@Override
-		public void onChangeEvent(XFieldEvent event) {
+		public void onChangeEvent(final XFieldEvent event) {
 		}
 
 		@Override
-		public void onChangeEvent(XModelEvent event) {
+		public void onChangeEvent(final XModelEvent event) {
 			if (event.getChangeType() == ChangeType.REMOVE) {
 				MemoryModel.this.loadedObjects.remove(event.getObjectId());
 			}
 		}
 
 		@Override
-		public void onChangeEvent(XObjectEvent event) {
+		public void onChangeEvent(final XObjectEvent event) {
 		}
 
 		@Override
-		public void onChangeEvent(XRepositoryEvent event) {
+		public void onChangeEvent(final XRepositoryEvent event) {
 			switch (event.getChangeType()) {
 			case ADD:
 				MemoryModel.this.setExists(true);
@@ -144,7 +145,7 @@ Serializable {
 
 	/**
 	 * The father-repository of this MemoryModel
-	 * 
+	 *
 	 * @CanBeNull for stand-alone-models without father; if present, it's used
 	 *            to ensure uniqueness of modelIds
 	 */
@@ -162,7 +163,7 @@ Serializable {
 
 	/**
 	 * Represents the current state as a snapshot.
-	 * 
+	 *
 	 * A model with revision numbers is required to let e.g. each object know
 	 * its current revision number.
 	 */
@@ -170,15 +171,15 @@ Serializable {
 
 	/**
 	 * A model with the given initial state
-	 * 
+	 *
 	 * @param father @CanBeNull
 	 * @param actorId @NeverNull
 	 * @param passwordHash
 	 * @param modelState @NeverNull
 	 * @param changeLogState @CanBeNull
 	 */
-	public MemoryModel(IMemoryRepository father, XId actorId, String passwordHash,
-			XExistsRevWritableModel modelState, XChangeLogState changeLogState) {
+	public MemoryModel(final IMemoryRepository father, final XId actorId, final String passwordHash,
+			final XExistsRevWritableModel modelState, final XChangeLogState changeLogState) {
 		this(
 				Root.createWithActorAndChangeLogState(actorId, modelState.getAddress(),
 						changeLogState), father, actorId, passwordHash, modelState.getAddress(),
@@ -191,7 +192,7 @@ Serializable {
 	/**
 	 * A model that can be synced if it has a father. Internal state is re-used
 	 * or a new internal state is created if none is given.
-	 * 
+	 *
 	 * @param father @CanBeNull
 	 * @param actorId @NeverNull
 	 * @param passwordHash
@@ -202,8 +203,8 @@ Serializable {
 	 * @param createModel If no modelState was given and if true, an initial
 	 *            create-this-model command is added
 	 */
-	private MemoryModel(Root root, IMemoryRepository father, XId actorId, String passwordHash,
-			XAddress modelAddress, XExistsRevWritableModel modelState, boolean createModel) {
+	private MemoryModel(final Root root, final IMemoryRepository father, final XId actorId, final String passwordHash,
+			final XAddress modelAddress, final XExistsRevWritableModel modelState, final boolean createModel) {
 		super(root);
 
 		this.father = father;
@@ -219,17 +220,18 @@ Serializable {
 		if (modelState == null) {
 			this.modelState = new SimpleModel(modelAddress);
 
-			long currentModelRev = root.getSyncLog().getCurrentRevisionNumber();
+			final long currentModelRev = root.getSyncLog().getCurrentRevisionNumber();
 			this.modelState.setRevisionNumber(currentModelRev);
-			XEvent event = root.getSyncLog().getLastEvent();
+			final XEvent event = root.getSyncLog().getLastEvent();
 			boolean modelExists = false;
 			if (event != null) {
 				if (event instanceof XModelEvent) {
-					XModelEvent modelEvent = (XModelEvent) event;
+					final XModelEvent modelEvent = (XModelEvent) event;
 					modelExists = modelEvent.getChangeType() != ChangeType.REMOVE;
-				} else
+				} else {
 					// another event happened, so model must be there
 					modelExists = true;
+				}
 			}
 			this.modelState.setExists(modelExists);
 		} else {
@@ -254,11 +256,11 @@ Serializable {
 
 	/**
 	 * Non-existing model
-	 * 
+	 *
 	 * @param root @NeverNull
 	 * @param father @CanBenull
 	 */
-	private MemoryModel(XAddress modelAddress, Root root, IMemoryRepository father) {
+	private MemoryModel(final XAddress modelAddress, final Root root, final IMemoryRepository father) {
 		super(root);
 		this.father = father;
 		this.modelState = createModelState(modelAddress, father);
@@ -266,18 +268,18 @@ Serializable {
 		this.modelState.setRevisionNumber(XCommand.NONEXISTANT);
 	}
 
-	private static XExistsRevWritableModel createModelState(XAddress modelAddress,
-			IMemoryRepository father) {
+	private static XExistsRevWritableModel createModelState(final XAddress modelAddress,
+			final IMemoryRepository father) {
 		if (father == null) {
 			return new SimpleModel(modelAddress);
 		} else {
-			XId modelId = modelAddress.getModel();
+			final XId modelId = modelAddress.getModel();
 			assert father.getState().getModel(modelId) == null;
 			return father.getState().createModel(modelId);
 		}
 	}
 
-	public MemoryModel(XId actorId, IMemoryRepository father, XRevWritableModel modelState) {
+	public MemoryModel(final XId actorId, final IMemoryRepository father, final XRevWritableModel modelState) {
 		super(Root
 				.createWithActor(actorId, modelState.getAddress(), modelState.getRevisionNumber()));
 
@@ -287,7 +289,7 @@ Serializable {
 		if (modelState instanceof XExistsRevWritableModel) {
 			this.modelState = (XExistsRevWritableModel) modelState;
 		} else {
-			SimpleModel simpleModel = new SimpleModel(modelState.getAddress());
+			final SimpleModel simpleModel = new SimpleModel(modelState.getAddress());
 			XCopyUtils.copyDataAndRevisions(modelState, simpleModel);
 			this.modelState = simpleModel;
 			this.modelState.setExists(true);
@@ -296,39 +298,39 @@ Serializable {
 
 	/**
 	 * Creates a stand-alone model.
-	 * 
+	 *
 	 * Used in tests.
-	 * 
+	 *
 	 * @param actorId
 	 * @param passwordHash
 	 * @param modelAddress
 	 */
-	public MemoryModel(XId actorId, String passwordHash, XAddress modelAddress) {
+	public MemoryModel(final XId actorId, final String passwordHash, final XAddress modelAddress) {
 		this(Root.createWithActor(actorId, modelAddress, XCommand.NONEXISTANT), null, actorId,
 				passwordHash, modelAddress, null, true);
 	}
 
 	/**
 	 * Creates a stand-alone model.
-	 * 
+	 *
 	 * Used in tests.
-	 * 
+	 *
 	 * @param actorId
 	 * @param passwordHash
 	 * @param modelId
 	 */
-	public MemoryModel(XId actorId, String passwordHash, XId modelId) {
-		this(actorId, passwordHash, XX.resolveModel(XId.DEFAULT, modelId));
+	public MemoryModel(final XId actorId, final String passwordHash, final XId modelId) {
+		this(actorId, passwordHash, Base.resolveModel(XId.DEFAULT, modelId));
 	}
 
 	/**
 	 * Used for copy.
-	 * 
+	 *
 	 * @param actorId
 	 * @param passwordHash
 	 * @param modelState @NeverNull
 	 */
-	public MemoryModel(XId actorId, String passwordHash, XExistsRevWritableModel modelState) {
+	public MemoryModel(final XId actorId, final String passwordHash, final XExistsRevWritableModel modelState) {
 		this(
 				Root.createWithActor(actorId, modelState.getAddress(),
 						modelState.getRevisionNumber()), null, actorId, passwordHash, modelState
@@ -337,42 +339,42 @@ Serializable {
 
 	/**
 	 * Used for de-serialisation.
-	 * 
+	 *
 	 * @param actorId
 	 * @param passwordHash
 	 * @param modelState @NeverNull
 	 * @param syncLogState @CanBeNull
 	 */
-	public MemoryModel(XId actorId, String passwordHash, XExistsRevWritableModel modelState,
-			XSyncLogState syncLogState) {
+	public MemoryModel(final XId actorId, final String passwordHash, final XExistsRevWritableModel modelState,
+			final XSyncLogState syncLogState) {
 		this(Root.createWithActorAndChangeLogState(actorId, modelState.getAddress(), syncLogState),
 				null, actorId, passwordHash, modelState.getAddress(), modelState, false);
 	}
 
 	@Override
-	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+	public boolean addListenerForFieldEvents(final XFieldEventListener changeListener) {
 		synchronized (getRoot()) {
-			boolean b = getRoot().addListenerForFieldEvents(getAddress(), changeListener);
+			final boolean b = getRoot().addListenerForFieldEvents(getAddress(), changeListener);
 			return b;
 		}
 	}
 
 	@Override
-	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
+	public boolean addListenerForModelEvents(final XModelEventListener changeListener) {
 		synchronized (getRoot()) {
 			return getRoot().addListenerForModelEvents(getAddress(), changeListener);
 		}
 	}
 
 	@Override
-	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
+	public boolean addListenerForObjectEvents(final XObjectEventListener changeListener) {
 		synchronized (getRoot()) {
 			return getRoot().addListenerForObjectEvents(getAddress(), changeListener);
 		}
 	}
 
 	@Override
-	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	public boolean addListenerForTransactionEvents(final XTransactionEventListener changeListener) {
 		synchronized (getRoot()) {
 			return getRoot().addListenerForTransactionEvents(getAddress(), changeListener);
 		}
@@ -380,13 +382,13 @@ Serializable {
 
 	@Override
 	@ModificationOperation
-	public IMemoryObject createObject(@NeverNull XId objectId) {
-		XModelCommand command = MemoryModelCommand.createAddCommand(getAddress(), true, objectId);
+	public IMemoryObject createObject(@NeverNull final XId objectId) {
+		final XModelCommand command = MemoryModelCommand.createAddCommand(getAddress(), true, objectId);
 
 		// Synchronised so that return is never null if command succeeded
 		synchronized (getRoot()) {
-			long result = executeModelCommand(command);
-			IMemoryObject object = getObject(objectId);
+			final long result = executeModelCommand(command);
+			final IMemoryObject object = getObject(objectId);
 			XyAssert.xyAssert(result == XCommand.FAILED || object != null);
 			return object;
 		}
@@ -397,7 +399,7 @@ Serializable {
 	public XRevWritableModel createSnapshot() {
 		synchronized (getRoot()) {
 			if (exists()) {
-				return XCopyUtils.createSnapshot(this.getState());
+				return XCopyUtils.createSnapshot(getState());
 			} else {
 				return null;
 			}
@@ -408,15 +410,15 @@ Serializable {
 
 		XAddress repositoryAddress = getAddress().getParent();
 		if (repositoryAddress == null) {
-			repositoryAddress = XX.resolveRepository(XId.DEFAULT);
+			repositoryAddress = Base.resolveRepository(XId.DEFAULT);
 		}
 
-		XRepositoryCommand command = MemoryRepositoryCommand.createAddCommand(repositoryAddress,
+		final XRepositoryCommand command = MemoryRepositoryCommand.createAddCommand(repositoryAddress,
 				true, getId());
 
 		// Synchronised so that return is never null if command succeeded
 		synchronized (getRoot()) {
-			long result = Executor.executeCommandOnModel(getSessionActor(), command,
+			final long result = Executor.executeCommandOnModel(getSessionActor(), command,
 					getFatherState(), getState(), getRoot(), null);
 			assert XCommandUtils.success(result);
 			assert XCommandUtils.changedSomething(result);
@@ -427,7 +429,7 @@ Serializable {
 
 	@Override
 	@ReadOperation
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 
 		// FIXME use readablemodel here?
 
@@ -435,24 +437,24 @@ Serializable {
 			return false;
 		}
 
-		MemoryModel other = (MemoryModel) o;
+		final MemoryModel other = (MemoryModel) o;
 		synchronized (getRoot()) {
 			// compare revision number, repositoryId & modelId
 			return XCompareUtils.equalId(this.father, other.getFather())
-					&& XCompareUtils.equalState(this.getState(), other.getState());
+					&& XCompareUtils.equalState(getState(), other.getState());
 		}
 	}
 
 	@Override
-	public long executeCommand(XCommand command) {
+	public long executeCommand(final XCommand command) {
 		assert command != null;
 		assert command instanceof XTransaction || command instanceof XRepositoryCommand
 				|| command instanceof XModelCommand || command instanceof XObjectCommand
 				|| command instanceof XFieldCommand;
 
 		synchronized (getRoot()) {
-			XId actorId = getRoot().getSessionActor();
-			XExistsRevWritableRepository repositoryState = getFatherState();
+			final XId actorId = getRoot().getSessionActor();
+			final XExistsRevWritableRepository repositoryState = getFatherState();
 			return Executor.executeCommandOnModel(actorId, command, repositoryState, getState(),
 					getRoot(), this.changeListener);
 		}
@@ -460,13 +462,13 @@ Serializable {
 
 	/**
 	 * method is responsible for updating the snapshot-like state
-	 * 
+	 *
 	 * @param command @NeverNull
 	 * @return ...
 	 */
 	@Override
 	@ModificationOperation
-	public long executeModelCommand(XModelCommand command) {
+	public long executeModelCommand(final XModelCommand command) {
 		assert command != null;
 		return Executor.executeCommandOnModel(getSessionActor(), command, getFatherState(),
 				getState(), getRoot(), this.changeListener);
@@ -474,7 +476,7 @@ Serializable {
 
 	// implement IMemoryModel
 	@Override
-	public void fireFieldEvent(XFieldEvent event) {
+	public void fireFieldEvent(final XFieldEvent event) {
 		synchronized (getRoot()) {
 			getRoot().fireFieldEvent(getAddress(), event);
 		}
@@ -483,19 +485,19 @@ Serializable {
 	/**
 	 * Notifies all listeners that have registered interest for notification on
 	 * {@link XModelEvent XModelEvents} happening on this MemoryModel.
-	 * 
+	 *
 	 * @param event The {@link XModelEvent} which will be propagated to the
 	 *            registered listeners.
 	 */
 	// implement IMemoryModel
 	@Override
-	public void fireModelEvent(XModelEvent event) {
+	public void fireModelEvent(final XModelEvent event) {
 		getRoot().fireModelEvent(getAddress(), event);
 	}
 
 	// implement IMemoryModel
 	@Override
-	public void fireObjectEvent(XObjectEvent event) {
+	public void fireObjectEvent(final XObjectEvent event) {
 		synchronized (getRoot()) {
 			getRoot().fireObjectEvent(getAddress(), event);
 		}
@@ -503,7 +505,7 @@ Serializable {
 
 	// implement IMemoryModel
 	@Override
-	public void fireTransactionEvent(XTransactionEvent event) {
+	public void fireTransactionEvent(final XTransactionEvent event) {
 		synchronized (getRoot()) {
 			getRoot().fireTransactionEvent(getAddress(), event);
 		}
@@ -517,12 +519,12 @@ Serializable {
 
 	@Override
 	public XChangeLog getChangeLog() {
-		return this.getRoot().getSyncLog();
+		return getRoot().getSyncLog();
 	}
 
 	/**
 	 * Returns the father-{@link MemoryRepository} of this MemoryModel.
-	 * 
+	 *
 	 * @return The father of this MemoryModel (may be null).
 	 */
 	@Override
@@ -532,7 +534,7 @@ Serializable {
 	}
 
 	private XExistsRevWritableRepository getFatherState() {
-		IMemoryRepository father = getFather();
+		final IMemoryRepository father = getFather();
 		return father == null ? null : father.getState();
 	}
 
@@ -544,7 +546,7 @@ Serializable {
 
 	@Override
 	@ReadOperation
-	public IMemoryObject getObject(@NeverNull XId objectId) {
+	public IMemoryObject getObject(@NeverNull final XId objectId) {
 		synchronized (getRoot()) {
 			assertThisEntityExists();
 
@@ -554,7 +556,7 @@ Serializable {
 				return object;
 			}
 
-			XRevWritableObject objectState = this.modelState.getObject(objectId);
+			final XRevWritableObject objectState = this.modelState.getObject(objectId);
 			if (objectState == null) {
 				return null;
 			}
@@ -608,7 +610,7 @@ Serializable {
 
 	/**
 	 * Checks whether this MemoryModel has a father-{@link XRepository} or not.
-	 * 
+	 *
 	 * @return true, if this MemoryModel has a father-{@link XRepository}, false
 	 *         otherwise.
 	 */
@@ -633,7 +635,7 @@ Serializable {
 
 	@Override
 	@ReadOperation
-	public boolean hasObject(@NeverNull XId id) {
+	public boolean hasObject(@NeverNull final XId id) {
 		synchronized (getRoot()) {
 			assertThisEntityExists();
 			return this.modelState.hasObject(id);
@@ -664,7 +666,7 @@ Serializable {
 	}
 
 	@Override
-	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+	public boolean removeListenerForFieldEvents(final XFieldEventListener changeListener) {
 		synchronized (getRoot()) {
 			return getRoot().removeListenerForFieldEvents(getAddress(), changeListener);
 		}
@@ -672,21 +674,21 @@ Serializable {
 
 	// implement IMemoryModel
 	@Override
-	public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
+	public boolean removeListenerForModelEvents(final XModelEventListener changeListener) {
 		synchronized (getRoot()) {
 			return getRoot().removeListenerForModelEvents(getAddress(), changeListener);
 		}
 	}
 
 	@Override
-	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
+	public boolean removeListenerForObjectEvents(final XObjectEventListener changeListener) {
 		synchronized (getRoot()) {
 			return getRoot().removeListenerForObjectEvents(getAddress(), changeListener);
 		}
 	}
 
 	@Override
-	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	public boolean removeListenerForTransactionEvents(final XTransactionEventListener changeListener) {
 		synchronized (getRoot()) {
 			return getRoot().removeListenerForTransactionEvents(getAddress(), changeListener);
 		}
@@ -694,21 +696,21 @@ Serializable {
 
 	@Override
 	@ModificationOperation
-	public boolean removeObject(@NeverNull XId objectId) {
+	public boolean removeObject(@NeverNull final XId objectId) {
 		/*
 		 * no synchronisation necessary here (except that in
 		 * executeModelCommand())
 		 */
-		XModelCommand command = MemoryModelCommand.createRemoveCommand(getAddress(),
+		final XModelCommand command = MemoryModelCommand.createRemoveCommand(getAddress(),
 				XCommand.FORCED, objectId);
-		long result = executeModelCommand(command);
+		final long result = executeModelCommand(command);
 		XyAssert.xyAssert(result >= 0 || result == XCommand.NOCHANGE);
 		return result != XCommand.NOCHANGE;
 	}
 
 	// implement XSynchronizesChanges
 	@Override
-	public void setSessionActor(XId actorId, String passwordHash) {
+	public void setSessionActor(final XId actorId, final String passwordHash) {
 		getRoot().setSessionActor(actorId);
 		getRoot().setSessionPasswordHash(passwordHash);
 	}
@@ -716,7 +718,7 @@ Serializable {
 	@Override
 	@ReadOperation
 	public String toString() {
-		return this.getId() + " rev[" + this.getRevisionNumber() + "]";
+		return getId() + " rev[" + getRevisionNumber() + "]";
 	}
 
 	@Override
@@ -725,7 +727,7 @@ Serializable {
 	}
 
 	@Override
-	public void setExists(boolean entityExists) {
+	public void setExists(final boolean entityExists) {
 		this.modelState.setExists(entityExists);
 	}
 }

@@ -19,23 +19,23 @@ import org.xydra.xgae.memcache.impl.LocalMemcache.IdentifiableImpl;
 
 /**
  * A wrapper around an IMemCache to gather runtime access statistics.
- * 
+ *
  * Records every cache get and put, as well as all values a key ever has.
- * 
+ *
  * Very memory expensive!
- * 
+ *
  * @author xamde
- * 
+ *
  */
 @RunsInGWT(false)
 public class StatsGatheringMemCacheWrapper implements IMemCache {
 
-	private MapStats mapstats = new MapStats();
-	private Map<String, Long> stats = new HashMap<String, Long>();
+	private final MapStats mapstats = new MapStats();
+	private final Map<String, Long> stats = new HashMap<String, Long>();
 	/** Allows any other process easy runtime-access to the stats */
 	public static StatsGatheringMemCacheWrapper INSTANCE;
 
-	public StatsGatheringMemCacheWrapper(IMemCache memcache) {
+	public StatsGatheringMemCacheWrapper(final IMemCache memcache) {
 		this.base = memcache;
 		INSTANCE = this;
 	}
@@ -51,14 +51,14 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	}
 
 	@Override
-	public boolean containsKey(Object key) {
+	public boolean containsKey(final Object key) {
 		XyAssert.xyAssert(key instanceof String);
 		count("containsKey");
 		return this.base.containsKey(key instanceof String ? key : key.toString());
 	}
 
-	private void count(String action) {
-		Long l = this.stats.get(action);
+	private void count(final String action) {
+		final Long l = this.stats.get(action);
 		if (l == null) {
 			this.stats.put(action, 1L);
 		} else {
@@ -67,13 +67,13 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	}
 
 	@Override
-	public boolean containsValue(Object value) {
+	public boolean containsValue(final Object value) {
 		count("containsValue");
 		return this.base.containsValue(value);
 	}
 
 	@Override
-	public Object get(Object key) {
+	public Object get(final Object key) {
 		XyAssert.xyAssert(key instanceof String);
 		count("get");
 		String usedKey;
@@ -82,17 +82,17 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 		} else {
 			usedKey = key.toString();
 		}
-		Object value = this.base.get(usedKey);
+		final Object value = this.base.get(usedKey);
 		this.mapstats.recordGet(key.toString(), value != null, 1);
 		return value;
 	}
 
 	@Override
-	public Map<String, Object> getAll(Collection<String> keys) {
+	public Map<String, Object> getAll(final Collection<String> keys) {
 		count("getAll");
-		Map<String, Object> result = new HashMap<String, Object>();
-		for (String key : keys) {
-			Object value = this.base.get(key);
+		final Map<String, Object> result = new HashMap<String, Object>();
+		for (final String key : keys) {
+			final Object value = this.base.get(key);
 			this.mapstats.recordGet(key.toString(), value != null, keys.size());
 			if (value != null) {
 				result.put(key, value);
@@ -102,27 +102,27 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	}
 
 	@Override
-	public Object put(String key, Object value) {
+	public Object put(final String key, final Object value) {
 		count("put");
 		this.mapstats.recordPut(key.toString(), value);
 		return this.base.put(key, value);
 	}
 
 	@Override
-	public void putIfValueIsNull(String key, Object value) {
+	public void putIfValueIsNull(final String key, final Object value) {
 		count("putIfValueIsNull");
 		this.mapstats.recordPut(key.toString(), value);
 		this.base.putIfValueIsNull(key, value);
 	}
 
 	@Override
-	public Object remove(Object key) {
+	public Object remove(final Object key) {
 		count("remove");
 		return this.base.remove(key);
 	}
 
 	@Override
-	public void putAll(Map<? extends String, ? extends Object> m) {
+	public void putAll(final Map<? extends String, ? extends Object> m) {
 		count("putAll");
 		this.base.putAll(m);
 	}
@@ -155,7 +155,7 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		return this.base.equals(o);
 	}
 
@@ -164,20 +164,20 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 		return this.base.hashCode();
 	}
 
-	private IMemCache base;
+	private final IMemCache base;
 
 	@Override
 	public String stats() {
-		StringBuffer buf = new StringBuffer();
-		for (String s : this.stats.keySet()) {
+		final StringBuffer buf = new StringBuffer();
+		for (final String s : this.stats.keySet()) {
 			buf.append(s + " = " + this.stats.get(s) + "<br />\n");
 		}
 		buf.append("Access stats ===================================================== <br />\n");
 		try {
-			StringWriter sw = new StringWriter();
+			final StringWriter sw = new StringWriter();
 			this.mapstats.writeStats(new MiniStreamWriter(sw));
 			buf.append(sw.toString());
-		} catch (MiniIOException e) {
+		} catch (final MiniIOException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -188,11 +188,11 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	}
 
 	@Override
-	public boolean putIfUntouched(@NeverNull String key, @NeverNull IdentifiableValue oldValue,
-			@CanBeNull Object newValue) {
+	public boolean putIfUntouched(@NeverNull final String key, @NeverNull final IdentifiableValue oldValue,
+			@CanBeNull final Object newValue) {
 		count("putIfUntouched");
 		synchronized (this.base) {
-			Object current = get(key);
+			final Object current = get(key);
 			if (current.equals(oldValue.getValue())) {
 				// indirect count
 				put(key, newValue);
@@ -204,25 +204,25 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	}
 
 	@Override
-	public IdentifiableValue getIdentifiable(String key) {
+	public IdentifiableValue getIdentifiable(final String key) {
 		// no counting needed
-		Object o = get(key);
+		final Object o = get(key);
 		return new IdentifiableImpl(o);
 	}
 
 	@Override
-	public Map<String, Long> incrementAll(Map<String, Long> offsets, long initialValue) {
+	public Map<String, Long> incrementAll(final Map<String, Long> offsets, final long initialValue) {
 		count("incrementAll");
 		Map<String, Long> result = new HashMap<String, Long>();
 		result = this.base.incrementAll(offsets, initialValue);
-		for (java.util.Map.Entry<String, Long> entry : result.entrySet()) {
+		for (final java.util.Map.Entry<String, Long> entry : result.entrySet()) {
 			this.mapstats.recordPut(entry.getKey(), entry.getValue());
 		}
 		return result;
 	}
 
 	@Override
-	public Object putChecked(String key, Object value) throws IOException {
+	public Object putChecked(final String key, final Object value) throws IOException {
 		return put(key, value);
 	}
 

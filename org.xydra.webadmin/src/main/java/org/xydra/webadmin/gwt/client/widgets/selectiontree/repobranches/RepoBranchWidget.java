@@ -42,32 +42,32 @@ public class RepoBranchWidget extends Composite implements IRepoBranchWidget {
 	@UiField
 	Button addButton;
 
-	private RepoBranchPresenter presenter;
+	private final RepoBranchPresenter presenter;
 
-	public RepoBranchWidget(RepoBranchPresenter repoBranchPresenter) {
+	public RepoBranchWidget(final RepoBranchPresenter repoBranchPresenter) {
 		this.presenter = repoBranchPresenter;
 	}
 
 	@UiHandler("expandButton")
-	void onClickExpand(ClickEvent event) {
+	void onClickExpand(final ClickEvent event) {
 		this.presenter.handleExpand(this);
 	}
 
 	@UiHandler("fetchModelsButton")
-	void onClickFetch(ClickEvent event) {
+	void onClickFetch(final ClickEvent event) {
 
 		this.presenter.fetchModels();
 
 	}
 
 	@UiHandler("anchor")
-	void onClickGet(ClickEvent event) {
+	void onClickGet(final ClickEvent event) {
 		this.expandButton.click();
 
 	}
 
 	@UiHandler("addButton")
-	void onClickAdd(ClickEvent event) {
+	void onClickAdd(final ClickEvent event) {
 
 		this.presenter.openAddElementDialog("enter Element name");
 	}
@@ -77,7 +77,7 @@ public class RepoBranchWidget extends Composite implements IRepoBranchWidget {
 		initWidget(uiBinder.createAndBindUi(this));
 		this.mainPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
 		this.mainPanel.addStyleName("repoBranchBorder");
-		String plusButtonText = "Add Model";
+		final String plusButtonText = "Add Model";
 		this.addButton.setText(plusButtonText);
 
 		this.mainPanel
@@ -85,7 +85,7 @@ public class RepoBranchWidget extends Composite implements IRepoBranchWidget {
 	}
 
 	@Override
-	public void setExpandButtonText(String string) {
+	public void setExpandButtonText(final String string) {
 		RepoBranchWidget.this.expandButton.setText(string);
 
 	}
@@ -97,13 +97,13 @@ public class RepoBranchWidget extends Composite implements IRepoBranchWidget {
 	}
 
 	@Override
-	public void setAnchorText(String anchorText) {
+	public void setAnchorText(final String anchorText) {
 		this.anchor.setText(anchorText);
 
 	}
 
 	@Override
-	public void addBranch(ModelBranchWidget newBranch) {
+	public void addBranch(final ModelBranchWidget newBranch) {
 		if (this.branches.getWidgetCount() == 0) {
 			this.buttonPanel.getElement().setAttribute("style",
 					"border-bottom: 1px solid #009; margin-bottom: 5px");

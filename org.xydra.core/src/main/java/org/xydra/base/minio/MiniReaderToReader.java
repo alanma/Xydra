@@ -8,14 +8,14 @@ import org.xydra.annotations.RunsInGWT;
 @RunsInGWT(false)
 public class MiniReaderToReader extends Reader {
 
-	private MiniReader miniReader;
+	private final MiniReader miniReader;
 
-	public MiniReaderToReader(MiniReader miniReader) {
+	public MiniReaderToReader(final MiniReader miniReader) {
 		this.miniReader = miniReader;
 	}
 
 	@Override
-	public int read(char[] cbuf, int off, int len) throws IOException {
+	public int read(final char[] cbuf, final int off, final int len) throws IOException {
 		return this.miniReader.read(cbuf, off, len);
 	}
 

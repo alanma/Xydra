@@ -12,7 +12,7 @@ import org.xydra.log.impl.universal.UniversalLogger;
 
 /**
  * TODO test normal {@link XmlParser} and {@link XmlStreamParser}
- * 
+ *
  * @author xamde
  */
 public class XmlParserTest {
@@ -26,10 +26,10 @@ public class XmlParserTest {
 
 	@Test
 	public void testDocumentXmlParser() {
-		XmlParser xp = new XmlParser();
-		MiniReader miniReader = new MiniStringReader(this.xml1);
-		XydraElement doc = xp.parse(miniReader);
-		String xml2 = XmlUtils.toString(doc);
+		final XmlParser xp = new XmlParser();
+		final MiniReader miniReader = new MiniStringReader(this.xml1);
+		final XydraElement doc = xp.parse(miniReader);
+		final String xml2 = XmlUtils.toString(doc);
 		assertEquals(this.xml1, xml2);
 	}
 

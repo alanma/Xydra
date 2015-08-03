@@ -20,13 +20,14 @@ public class GPreparedQuery extends RawWrapper<PreparedQuery, SPreparedQuery> im
 	private int limit;
 	private int chunkSize;
 
-	private GPreparedQuery(PreparedQuery raw) {
+	private GPreparedQuery(final PreparedQuery raw) {
 		super(raw);
 	}
 
-	public static GPreparedQuery wrap(PreparedQuery raw) {
-		if (raw == null)
+	public static GPreparedQuery wrap(final PreparedQuery raw) {
+		if (raw == null) {
 			return null;
+		}
 
 		return new GPreparedQuery(raw);
 	}
@@ -38,7 +39,7 @@ public class GPreparedQuery extends RawWrapper<PreparedQuery, SPreparedQuery> im
 
 	@Override
 	@Deprecated
-	public List<SEntity> asListWithChunkSize(int chunkSize) {
+	public List<SEntity> asListWithChunkSize(final int chunkSize) {
 		setChunkSize(chunkSize);
 		return asList();
 	}
@@ -49,7 +50,7 @@ public class GPreparedQuery extends RawWrapper<PreparedQuery, SPreparedQuery> im
 				new ITransformer<Entity, SEntity>() {
 
 					@Override
-					public SEntity transform(Entity in) {
+					public SEntity transform(final Entity in) {
 						return GEntity.wrap(in);
 					}
 				});
@@ -63,7 +64,7 @@ public class GPreparedQuery extends RawWrapper<PreparedQuery, SPreparedQuery> im
 					new ITransformer<Entity, SKey>() {
 
 						@Override
-						public SKey transform(Entity in) {
+						public SKey transform(final Entity in) {
 							return GKey.wrap(in.getKey());
 						}
 					});
@@ -77,12 +78,12 @@ public class GPreparedQuery extends RawWrapper<PreparedQuery, SPreparedQuery> im
 	}
 
 	@Override
-	public void setLimit(int limit) {
+	public void setLimit(final int limit) {
 		this.limit = limit;
 	}
 
 	private FetchOptions toFetchOptions() {
-		FetchOptions fo = FetchOptions.Builder.withDefaults();
+		final FetchOptions fo = FetchOptions.Builder.withDefaults();
 		if (this.limit > 0) {
 			fo.limit(this.limit);
 		}
@@ -94,12 +95,12 @@ public class GPreparedQuery extends RawWrapper<PreparedQuery, SPreparedQuery> im
 
 	@Override
 	public List<SEntity> asList() {
-		List<Entity> rawList = raw().asList(toFetchOptions());
+		final List<Entity> rawList = raw().asList(toFetchOptions());
 		return TransformerTool.transformListEntries(rawList, GEntity.TRANSFOMER_ENTITY_SENTITY);
 	}
 
 	@Override
-	public void setChunkSize(int chunkSize) {
+	public void setChunkSize(final int chunkSize) {
 		this.chunkSize = chunkSize;
 	}
 

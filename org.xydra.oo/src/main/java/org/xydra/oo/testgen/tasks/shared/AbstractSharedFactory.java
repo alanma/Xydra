@@ -1,5 +1,6 @@
 package org.xydra.oo.testgen.tasks.shared;
 
+import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.core.XX;
@@ -13,33 +14,33 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-HqDUE']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'generateFactories-76emU']
 	 */
-	public AbstractSharedFactory(XWritableModel model) {
+	public AbstractSharedFactory(final XWritableModel model) {
 		super(model);
 	}
 
 	/**
 	 * [generated from: 'generateFactories-gn0BV']
-	 * 
+	 *
 	 * @param idStr
 	 *            [generated from: 'generateFactories-myHOp']
 	 * @return ...
 	 */
-	public IBaseList createBaseList(String idStr) {
-		return createBaseList(XX.toId(idStr));
+	public IBaseList createBaseList(final String idStr) {
+		return createBaseList(Base.toId(idStr));
 	}
 
 	/**
 	 * [generated from: 'generateFactories-2m6U1']
-	 * 
+	 *
 	 * @param id
 	 *            [generated from: 'generateFactories-n8c8H']
 	 * @return ...
 	 */
-	public IBaseList createBaseList(XId id) {
+	public IBaseList createBaseList(final XId id) {
 		if (!hasXObject(id)) {
 			createXObject(id);
 		}
@@ -48,23 +49,23 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-gn0BV']
-	 * 
+	 *
 	 * @param idStr
 	 *            [generated from: 'generateFactories-myHOp']
 	 * @return ...
 	 */
-	public IHome createHome(String idStr) {
-		return createHome(XX.toId(idStr));
+	public IHome createHome(final String idStr) {
+		return createHome(Base.toId(idStr));
 	}
 
 	/**
 	 * [generated from: 'generateFactories-2m6U1']
-	 * 
+	 *
 	 * @param id
 	 *            [generated from: 'generateFactories-n8c8H']
 	 * @return ...
 	 */
-	public IHome createHome(XId id) {
+	public IHome createHome(final XId id) {
 		if (!hasXObject(id)) {
 			createXObject(id);
 		}
@@ -73,23 +74,23 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-gn0BV']
-	 * 
+	 *
 	 * @param idStr
 	 *            [generated from: 'generateFactories-myHOp']
 	 * @return ...
 	 */
-	public ISettings createSettings(String idStr) {
-		return createSettings(XX.toId(idStr));
+	public ISettings createSettings(final String idStr) {
+		return createSettings(Base.toId(idStr));
 	}
 
 	/**
 	 * [generated from: 'generateFactories-2m6U1']
-	 * 
+	 *
 	 * @param id
 	 *            [generated from: 'generateFactories-n8c8H']
 	 * @return ...
 	 */
-	public ISettings createSettings(XId id) {
+	public ISettings createSettings(final XId id) {
 		if (!hasXObject(id)) {
 			createXObject(id);
 		}
@@ -98,23 +99,23 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-gn0BV']
-	 * 
+	 *
 	 * @param idStr
 	 *            [generated from: 'generateFactories-myHOp']
 	 * @return ...
 	 */
-	public ISmartList createSmartList(String idStr) {
-		return createSmartList(XX.toId(idStr));
+	public ISmartList createSmartList(final String idStr) {
+		return createSmartList(Base.toId(idStr));
 	}
 
 	/**
 	 * [generated from: 'generateFactories-2m6U1']
-	 * 
+	 *
 	 * @param id
 	 *            [generated from: 'generateFactories-n8c8H']
 	 * @return ...
 	 */
-	public ISmartList createSmartList(XId id) {
+	public ISmartList createSmartList(final XId id) {
 		if (!hasXObject(id)) {
 			createXObject(id);
 		}
@@ -123,23 +124,23 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-gn0BV']
-	 * 
+	 *
 	 * @param idStr
 	 *            [generated from: 'generateFactories-myHOp']
 	 * @return ...
 	 */
-	public ITaskList createTaskList(String idStr) {
-		return createTaskList(XX.toId(idStr));
+	public ITaskList createTaskList(final String idStr) {
+		return createTaskList(Base.toId(idStr));
 	}
 
 	/**
 	 * [generated from: 'generateFactories-2m6U1']
-	 * 
+	 *
 	 * @param id
 	 *            [generated from: 'generateFactories-n8c8H']
 	 * @return ...
 	 */
-	public ITaskList createTaskList(XId id) {
+	public ITaskList createTaskList(final XId id) {
 		if (!hasXObject(id)) {
 			createXObject(id);
 		}
@@ -148,23 +149,23 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-gn0BV']
-	 * 
+	 *
 	 * @param idStr
 	 *            [generated from: 'generateFactories-myHOp']
 	 * @return ...
 	 */
-	public ITask createTask(String idStr) {
-		return createTask(XX.toId(idStr));
+	public ITask createTask(final String idStr) {
+		return createTask(Base.toId(idStr));
 	}
 
 	/**
 	 * [generated from: 'generateFactories-2m6U1']
-	 * 
+	 *
 	 * @param id
 	 *            [generated from: 'generateFactories-n8c8H']
 	 * @return ...
 	 */
-	public ITask createTask(XId id) {
+	public ITask createTask(final XId id) {
 		if (!hasXObject(id)) {
 			createXObject(id);
 		}
@@ -173,23 +174,23 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-gn0BV']
-	 * 
+	 *
 	 * @param idStr
 	 *            [generated from: 'generateFactories-myHOp']
 	 * @return ...
 	 */
-	public IUser createUser(String idStr) {
-		return createUser(XX.toId(idStr));
+	public IUser createUser(final String idStr) {
+		return createUser(Base.toId(idStr));
 	}
 
 	/**
 	 * [generated from: 'generateFactories-2m6U1']
-	 * 
+	 *
 	 * @param id
 	 *            [generated from: 'generateFactories-n8c8H']
 	 * @return ...
 	 */
-	public IUser createUser(XId id) {
+	public IUser createUser(final XId id) {
 		if (!hasXObject(id)) {
 			createXObject(id);
 		}
@@ -198,7 +199,7 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-n6Zvf']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'generateFactories-bnAB6']
 	 * @param id
@@ -209,23 +210,23 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-UN0yH']
-	 * 
+	 *
 	 * @param idStr
 	 *            [generated from: 'generateFactories-2QL32']
 	 * @return ...
 	 */
-	public IBaseList getBaseList(String idStr) {
-		return getBaseList(XX.toId(idStr));
+	public IBaseList getBaseList(final String idStr) {
+		return getBaseList(Base.toId(idStr));
 	}
 
 	/**
 	 * [generated from: 'generateFactories-Xz0r2']
-	 * 
+	 *
 	 * @param id
 	 *            [generated from: 'generateFactories-usnO3']
 	 * @return ...
 	 */
-	public IBaseList getBaseList(XId id) {
+	public IBaseList getBaseList(final XId id) {
 		if (!hasXObject(id)) {
 			return null;
 		}
@@ -234,7 +235,7 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-n6Zvf']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'generateFactories-bnAB6']
 	 * @param id
@@ -245,23 +246,23 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-UN0yH']
-	 * 
+	 *
 	 * @param idStr
 	 *            [generated from: 'generateFactories-2QL32']
 	 * @return ...
 	 */
-	public IHome getHome(String idStr) {
-		return getHome(XX.toId(idStr));
+	public IHome getHome(final String idStr) {
+		return getHome(Base.toId(idStr));
 	}
 
 	/**
 	 * [generated from: 'generateFactories-Xz0r2']
-	 * 
+	 *
 	 * @param id
 	 *            [generated from: 'generateFactories-usnO3']
 	 * @return ...
 	 */
-	public IHome getHome(XId id) {
+	public IHome getHome(final XId id) {
 		if (!hasXObject(id)) {
 			return null;
 		}
@@ -270,7 +271,7 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-n6Zvf']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'generateFactories-bnAB6']
 	 * @param id
@@ -281,23 +282,23 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-UN0yH']
-	 * 
+	 *
 	 * @param idStr
 	 *            [generated from: 'generateFactories-2QL32']
 	 * @return ...
 	 */
-	public ISettings getSettings(String idStr) {
-		return getSettings(XX.toId(idStr));
+	public ISettings getSettings(final String idStr) {
+		return getSettings(Base.toId(idStr));
 	}
 
 	/**
 	 * [generated from: 'generateFactories-Xz0r2']
-	 * 
+	 *
 	 * @param id
 	 *            [generated from: 'generateFactories-usnO3']
 	 * @return ...
 	 */
-	public ISettings getSettings(XId id) {
+	public ISettings getSettings(final XId id) {
 		if (!hasXObject(id)) {
 			return null;
 		}
@@ -306,7 +307,7 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-n6Zvf']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'generateFactories-bnAB6']
 	 * @param id
@@ -317,23 +318,23 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-UN0yH']
-	 * 
+	 *
 	 * @param idStr
 	 *            [generated from: 'generateFactories-2QL32']
 	 * @return ...
 	 */
-	public ISmartList getSmartList(String idStr) {
-		return getSmartList(XX.toId(idStr));
+	public ISmartList getSmartList(final String idStr) {
+		return getSmartList(Base.toId(idStr));
 	}
 
 	/**
 	 * [generated from: 'generateFactories-Xz0r2']
-	 * 
+	 *
 	 * @param id
 	 *            [generated from: 'generateFactories-usnO3']
 	 * @return ...
 	 */
-	public ISmartList getSmartList(XId id) {
+	public ISmartList getSmartList(final XId id) {
 		if (!hasXObject(id)) {
 			return null;
 		}
@@ -342,7 +343,7 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-n6Zvf']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'generateFactories-bnAB6']
 	 * @param id
@@ -353,7 +354,7 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-n6Zvf']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'generateFactories-bnAB6']
 	 * @param id
@@ -364,23 +365,23 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-UN0yH']
-	 * 
+	 *
 	 * @param idStr
 	 *            [generated from: 'generateFactories-2QL32']
 	 * @return ...
 	 */
-	public ITaskList getTaskList(String idStr) {
-		return getTaskList(XX.toId(idStr));
+	public ITaskList getTaskList(final String idStr) {
+		return getTaskList(Base.toId(idStr));
 	}
 
 	/**
 	 * [generated from: 'generateFactories-Xz0r2']
-	 * 
+	 *
 	 * @param id
 	 *            [generated from: 'generateFactories-usnO3']
 	 * @return ...
 	 */
-	public ITaskList getTaskList(XId id) {
+	public ITaskList getTaskList(final XId id) {
 		if (!hasXObject(id)) {
 			return null;
 		}
@@ -389,23 +390,23 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-UN0yH']
-	 * 
+	 *
 	 * @param idStr
 	 *            [generated from: 'generateFactories-2QL32']
 	 * @return ...
 	 */
-	public ITask getTask(String idStr) {
-		return getTask(XX.toId(idStr));
+	public ITask getTask(final String idStr) {
+		return getTask(Base.toId(idStr));
 	}
 
 	/**
 	 * [generated from: 'generateFactories-Xz0r2']
-	 * 
+	 *
 	 * @param id
 	 *            [generated from: 'generateFactories-usnO3']
 	 * @return ...
 	 */
-	public ITask getTask(XId id) {
+	public ITask getTask(final XId id) {
 		if (!hasXObject(id)) {
 			return null;
 		}
@@ -414,7 +415,7 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-n6Zvf']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'generateFactories-bnAB6']
 	 * @param id
@@ -425,23 +426,23 @@ public abstract class AbstractSharedFactory extends AbstractFactory {
 
 	/**
 	 * [generated from: 'generateFactories-UN0yH']
-	 * 
+	 *
 	 * @param idStr
 	 *            [generated from: 'generateFactories-2QL32']
 	 * @return ...
 	 */
-	public IUser getUser(String idStr) {
-		return getUser(XX.toId(idStr));
+	public IUser getUser(final String idStr) {
+		return getUser(Base.toId(idStr));
 	}
 
 	/**
 	 * [generated from: 'generateFactories-Xz0r2']
-	 * 
+	 *
 	 * @param id
 	 *            [generated from: 'generateFactories-usnO3']
 	 * @return ...
 	 */
-	public IUser getUser(XId id) {
+	public IUser getUser(final XId id) {
 		if (!hasXObject(id)) {
 			return null;
 		}

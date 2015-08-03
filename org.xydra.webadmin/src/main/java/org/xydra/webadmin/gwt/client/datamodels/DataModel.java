@@ -3,6 +3,7 @@ package org.xydra.webadmin.gwt.client.datamodels;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableField;
@@ -22,9 +23,9 @@ import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
  * {@link SessionCachedModel}s. <br>
  * <font color=RED> Performs all add- and remove-requests (does some checks
  * first and fires the appropriate events) </font>
- * 
+ *
  * @author kahmann
- * 
+ *
  */
 public class DataModel {
 
@@ -33,23 +34,24 @@ public class DataModel {
 	public static final String REPO = "REPO";
 	public static final String MODEL = "MODEL";
 
-	private HashMap<XId, RepoDataModel> repoModels;
+	private final HashMap<XId, RepoDataModel> repoModels;
 
 	public DataModel() {
 		this.repoModels = new HashMap<XId, RepoDataModel>();
 	}
 
-	public void addRepoID(XId repoId) {
+	public void addRepoID(final XId repoId) {
 		if (!this.repoModels.containsKey(repoId)) {
 
-			RepoDataModel repoDataModel = new RepoDataModel(repoId);
+			final RepoDataModel repoDataModel = new RepoDataModel(repoId);
 			this.repoModels.put(repoId, repoDataModel);
 			log.info("added new repo: " + repoId.toString());
 
-			EventHelper.fireRepoChangeEvent(XX.resolveRepository(XX.toId("newRepo")),
+			EventHelper.fireRepoChangeEvent(Base.resolveRepository(Base.toId("newRepo")),
 					EntityStatus.EXTENDED, repoDataModel);
 		} else {
 			@SuppressWarnings("unused")
+			final
 			WarningDialog warning = new WarningDialog("repo already existed!");
 		}
 	}
@@ -64,17 +66,17 @@ public class DataModel {
 
 		Iterator<XId> iterator = null;
 
-		iterator = this.getRepo(repoId).getModelIDs();
+		iterator = getRepo(repoId).getModelIDs();
 
 		return iterator;
 	}
 
-	public RepoDataModel getRepo(XId id) {
+	public RepoDataModel getRepo(final XId id) {
 
 		return this.repoModels.get(id);
 	}
 
-	public boolean isLoaded(String type, XId id) {
+	public boolean isLoaded(final String type, final XId id) {
 
 		boolean result = false;
 		if (type.equals(REPO)) {
@@ -86,32 +88,33 @@ public class DataModel {
 		return result;
 	}
 
-	public void changeValue(XAddress address, XValue value) {
+	public void changeValue(final XAddress address, final XValue value) {
 
-		RepoDataModel repo = this.repoModels.get(address.getRepository());
-		SessionCachedModel model = repo.getModel(address.getModel());
-		XWritableObject object = model.getObject(address.getObject());
-		XWritableField field = object.getField(address.getField());
-		String beforeString = "changed value " + field.getValue() + " (rev. "
+		final RepoDataModel repo = this.repoModels.get(address.getRepository());
+		final SessionCachedModel model = repo.getModel(address.getModel());
+		final XWritableObject object = model.getObject(address.getObject());
+		final XWritableField field = object.getField(address.getField());
+		final String beforeString = "changed value " + field.getValue() + " (rev. "
 				+ field.getRevisionNumber() + ")";
 		field.setValue(value);
 
-		String afterString = " to " + field.getValue().toString() + " (new rev. "
+		final String afterString = " to " + field.getValue().toString() + " (new rev. "
 				+ field.getRevisionNumber() + ")";
 		log.warn(beforeString + afterString);
 
-		EventHelper.fireObjectChangedEvent(XX.resolveObject(address), EntityStatus.CHANGED, null);
+		EventHelper.fireObjectChangedEvent(Base.resolveObject(address), EntityStatus.CHANGED, null);
 	}
 
-	public void addObject(XAddress modelAddress, XId objectID) {
+	public void addObject(final XAddress modelAddress, final XId objectID) {
 		String logMessage = "";
-		RepoDataModel repo = this.repoModels.get(modelAddress.getRepository());
-		SessionCachedModel model = repo.getModel(modelAddress.getModel());
+		final RepoDataModel repo = this.repoModels.get(modelAddress.getRepository());
+		final SessionCachedModel model = repo.getModel(modelAddress.getModel());
 		log.info("attempting to create object " + objectID.toString());
 		if (model.hasObject(objectID)) {
 			logMessage = "" + objectID.toString() + " already existed in model "
 					+ modelAddress.toString();
 			@SuppressWarnings("unused")
+			final
 			WarningDialog warning = new WarningDialog(logMessage);
 			log.info(logMessage);
 			XyAdmin.getInstance().getController().getAddressWidgetPresenter()
@@ -127,17 +130,18 @@ public class DataModel {
 
 	}
 
-	public void addModel(XId repoId, XId modelID) {
-		RepoDataModel repo = this.repoModels.get(repoId);
-		int result = repo.addModelID(modelID);
+	public void addModel(final XId repoId, final XId modelID) {
+		final RepoDataModel repo = this.repoModels.get(repoId);
+		final int result = repo.addModelID(modelID);
 
 		if (result == RepoDataModel.SUCCESS) {
 			log.info("model " + modelID.toString() + " added to " + repoId.toString()
 					+ ", now firing RepoChangedEvent: EXTENDED");
-			EventHelper.fireRepoChangeEvent(XX.toAddress(repoId, null, null, null),
+			EventHelper.fireRepoChangeEvent(Base.toAddress(repoId, null, null, null),
 					EntityStatus.EXTENDED, null);
 		} else {
 			@SuppressWarnings("unused")
+			final
 			WarningDialog warning = new WarningDialog("" + modelID.toString()
 					+ " already existed in repo " + repoId.toString());
 			XyAdmin.getInstance().getController().getAddressWidgetPresenter()
@@ -150,8 +154,8 @@ public class DataModel {
 
 		log.info("remove-request for item " + address.toString());
 
-		RepoDataModel repo = this.repoModels.get(address.getRepository());
-		SessionCachedModel model = repo.getModel(address.getModel());
+		final RepoDataModel repo = this.repoModels.get(address.getRepository());
+		final SessionCachedModel model = repo.getModel(address.getModel());
 
 		switch (address.getAddressedType()) {
 		case XREPOSITORY:
@@ -162,15 +166,15 @@ public class DataModel {
 			log.info("deleted model " + address.getModel().toString()
 					+ ", now firing MOodelChangedEvent: DELETED");
 
-			EventHelper.fireModelChangedEvent(address, EntityStatus.DELETED, XX.toId("dummy"));
+			EventHelper.fireModelChangedEvent(address, EntityStatus.DELETED, Base.toId("dummy"));
 
 			break;
 		case XFIELD:
-			XWritableObject object = model.getObject(address.getObject());
+			final XWritableObject object = model.getObject(address.getObject());
 			object.removeField(address.getField());
 			log.info("deleted field " + address.getField().toString()
 					+ ", now firing ObjectChangedEvent: Changed");
-			EventHelper.fireObjectChangedEvent(XX.resolveObject(address), EntityStatus.CHANGED,
+			EventHelper.fireObjectChangedEvent(Base.resolveObject(address), EntityStatus.CHANGED,
 					address.getField());
 			break;
 		case XOBJECT:
@@ -184,16 +188,17 @@ public class DataModel {
 
 	}
 
-	public void addField(XAddress address, XValue value) {
-		RepoDataModel repo = this.repoModels.get(address.getRepository());
-		SessionCachedModel model = repo.getModel(address.getModel());
-		XWritableObject object = model.getObject(address.getObject());
-		XId fieldId = address.getField();
+	public void addField(final XAddress address, final XValue value) {
+		final RepoDataModel repo = this.repoModels.get(address.getRepository());
+		final SessionCachedModel model = repo.getModel(address.getModel());
+		final XWritableObject object = model.getObject(address.getObject());
+		final XId fieldId = address.getField();
 		if (object.hasField(fieldId)) {
-			String logMessage = "" + fieldId.toString() + " already existed in object "
+			final String logMessage = "" + fieldId.toString() + " already existed in object "
 					+ object.getAddress().toString();
 			log.info(logMessage);
 			@SuppressWarnings("unused")
+			final
 			WarningDialog warning = new WarningDialog(logMessage);
 			XyAdmin.getInstance().getController().getAddressWidgetPresenter()
 					.unregisterAllListeners();
@@ -202,26 +207,26 @@ public class DataModel {
 
 			log.info("added field " + address.toString()
 					+ ", now firing ObjectChanged - EXTENDED - event!");
-			EventHelper.fireObjectChangedEvent(XX.resolveObject(address), EntityStatus.EXTENDED,
+			EventHelper.fireObjectChangedEvent(Base.resolveObject(address), EntityStatus.EXTENDED,
 					address.getField());
 		}
 	}
 
-	public void loadEntity(XAddress typedAddress) {
+	public void loadEntity(final XAddress typedAddress) {
 
-		XId repoID = typedAddress.getRepository();
-		RepoDataModel repoDataModel = this.repoModels.get(repoID);
+		final XId repoID = typedAddress.getRepository();
+		final RepoDataModel repoDataModel = this.repoModels.get(repoID);
 		if (repoDataModel == null) {
 
 			log.error("no such repo found!");
 			return;
 		} else {
-			SessionCachedModel model = repoDataModel.getModel(typedAddress.getModel());
+			final SessionCachedModel model = repoDataModel.getModel(typedAddress.getModel());
 			if (model == null) {
 				log.error("no such model found!");
 				return;
 			} else {
-				XId objectID = typedAddress.getObject();
+				final XId objectID = typedAddress.getObject();
 				if (objectID == null) {
 					// XyAdmin.getInstance().getController().openView(model);
 				} else {

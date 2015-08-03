@@ -2,13 +2,13 @@ package org.xydra.base.value;
 
 /**
  * An XValue that contains a single value.
- * 
+ *
  * @author dscharrer
  * @param <T> value type
- * 
+ *
  */
 public interface XSingleValue<T> extends XValue {
-    
+
     /**
      * @return This value in it's primitive type as determined by
      *         {@link ValueType#getJavaClass()}. Implementations must guarantee
@@ -17,5 +17,5 @@ public interface XSingleValue<T> extends XValue {
      *         (and the value's content isn't null).
      */
     T getValue();
-    
+
 }

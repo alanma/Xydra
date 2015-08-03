@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.value.ValueType;
@@ -96,35 +97,35 @@ public class AddEditorDialog extends DialogBox {
 
 	XValueEditor valueEditor;
 
-	private XAddress address;
+	private final XAddress address;
 
 	public AddEditorDialog(final XAddress address) {
 
 		this.address = address;
 
-		XId fieldName = address.getField();
+		final XId fieldName = address.getField();
 
 		String textFieldInput = null;
 		if (fieldName != null) {
 			textFieldInput = fieldName.toString();
 		}
-		ClickHandler okHandler = new ClickHandler() {
+		final ClickHandler okHandler = new ClickHandler() {
 
 			@SuppressWarnings("unused")
 			@Override
-			public void onClick(ClickEvent event) {
+			public void onClick(final ClickEvent event) {
 
 				XAddress eventualAddress = null;
 
-				XId fieldName = address.getField();
+				final XId fieldName = address.getField();
 				if (fieldName != null) {
 					eventualAddress = address;
 				} else {
-					String desiredFieldName = AddEditorDialog.this.textArea.getText();
-					XId newFieldID = XX.toId(desiredFieldName);
-					eventualAddress = XX.resolveField(address, newFieldID);
+					final String desiredFieldName = AddEditorDialog.this.textArea.getText();
+					final XId newFieldID = Base.toId(desiredFieldName);
+					eventualAddress = Base.resolveField(address, newFieldID);
 				}
-				XValue value = AddEditorDialog.this.valueEditor.getValue();
+				final XValue value = AddEditorDialog.this.valueEditor.getValue();
 				// DataModel.getInstance().addField(eventualAddress, value);
 				AddEditorDialog.this.removeFromParent();
 			}
@@ -134,16 +135,16 @@ public class AddEditorDialog extends DialogBox {
 		this.textArea = new TextAreaWidget(textFieldInput, this.buttonPanel);
 
 		setWidget(uiBinder.createAndBindUi(this));
-		for (ValueType valueType : ValueType.values()) {
+		for (final ValueType valueType : ValueType.values()) {
 			this.listBox.addItem(valueType.toString());
 		}
-		this.valueEditor = this.getDefaultValueEditorForType(ValueType.Address, this.address);
+		this.valueEditor = getDefaultValueEditorForType(ValueType.Address, this.address);
 		this.editorPanel.add(this.valueEditor);
 
 		this.setStyleName("dialogStyle");
-		this.setText("add Element");
+		setText("add Element");
 
-		this.center();
+		center();
 		// this.textArea.selectEverything();
 	}
 
@@ -152,35 +153,35 @@ public class AddEditorDialog extends DialogBox {
 	}
 
 	@UiHandler("listBox")
-	void onChange(ChangeEvent event) {
-		String selectedItem = this.listBox.getItemText(this.listBox.getSelectedIndex());
-		ValueType valueType = ValueType.valueOf(selectedItem);
+	void onChange(final ChangeEvent event) {
+		final String selectedItem = this.listBox.getItemText(this.listBox.getSelectedIndex());
+		final ValueType valueType = ValueType.valueOf(selectedItem);
 
 		this.editorPanel.clear();
-		this.valueEditor = this.getDefaultValueEditorForType(valueType, this.address);
+		this.valueEditor = getDefaultValueEditorForType(valueType, this.address);
 		this.editorPanel.add(this.valueEditor);
 	}
 
-	private XValueEditor getDefaultValueEditorForType(ValueType valueType, final XAddress address) {
+	private XValueEditor getDefaultValueEditorForType(final ValueType valueType, final XAddress address) {
 
 		XValueEditor editor = null;
-		EditedValueListener editListener = new EditedValueListener();
+		final EditedValueListener editListener = new EditedValueListener();
 
-		XAddress addressValue = XX.toAddress("/" + address.getRepository() + "/-/-/-");
-		HashSet<XAddress> addressSet = new HashSet<XAddress>();
+		final XAddress addressValue = Base.toAddress("/" + address.getRepository() + "/-/-/-");
+		final HashSet<XAddress> addressSet = new HashSet<XAddress>();
 		addressSet.add(addressValue);
 
-		XBooleanValue booleanValue = XV.toValue(false);
-		HashSet<Boolean> booleanSet = new HashSet<Boolean>();
+		final XBooleanValue booleanValue = XV.toValue(false);
+		final HashSet<Boolean> booleanSet = new HashSet<Boolean>();
 		booleanSet.add(false);
 
-		XDoubleValue doubleValue = XV.toValue(0.0);
+		final XDoubleValue doubleValue = XV.toValue(0.0);
 
-		XId idValue = XX.toId("id");
-		ArrayList<XId> idList = new ArrayList<XId>();
+		final XId idValue = Base.toId("id");
+		final ArrayList<XId> idList = new ArrayList<XId>();
 		idList.add(idValue);
 
-		ArrayList<String> stringList = new ArrayList<String>();
+		final ArrayList<String> stringList = new ArrayList<String>();
 		stringList.add("string");
 
 		switch (valueType) {
@@ -190,27 +191,27 @@ public class AddEditorDialog extends DialogBox {
 			break;
 		case AddressList:
 
-			XAddressListValue addressListValue = XV.toAddressListValue(addressSet);
+			final XAddressListValue addressListValue = XV.toAddressListValue(addressSet);
 
 			editor = new XAddressListEditor(addressListValue.iterator(), editListener);
 			break;
 		case AddressSet:
 
-			XAddressSetValue addressSetValue = XV.toAddressSetValue(addressSet);
+			final XAddressSetValue addressSetValue = XV.toAddressSetValue(addressSet);
 
 			editor = new XAddressSetEditor(addressSetValue.iterator(), editListener);
 			break;
 		case AddressSortedSet:
 
-			XAddressSortedSetValue addressSortedSetValue = XV.toAddressSortedSetValue(addressSet);
+			final XAddressSortedSetValue addressSortedSetValue = XV.toAddressSortedSetValue(addressSet);
 
 			editor = new XAddressSortedSetEditor(addressSortedSetValue.iterator(), editListener);
 
 			break;
 		case Binary:
-			Collection<Byte> bytes = new ArrayList<Byte>();
+			final Collection<Byte> bytes = new ArrayList<Byte>();
 			bytes.add(new Byte("1"));
-			XBinaryValue binaryValue = XV.toBinaryValue(bytes);
+			final XBinaryValue binaryValue = XV.toBinaryValue(bytes);
 
 			editor = new XBinaryValueEditor(binaryValue.getValue(), editListener);
 			break;
@@ -219,7 +220,7 @@ public class AddEditorDialog extends DialogBox {
 			editor = new XBooleanEditor(booleanValue.contents(), editListener);
 			break;
 		case BooleanList:
-			XBooleanListValue booleanListValue = XV.toBooleanListValue(booleanSet);
+			final XBooleanListValue booleanListValue = XV.toBooleanListValue(booleanSet);
 
 			editor = new XBooleanListEditor(booleanListValue.iterator(), editListener);
 			break;
@@ -229,10 +230,10 @@ public class AddEditorDialog extends DialogBox {
 			break;
 		case DoubleList:
 
-			ArrayList<Double> doubleList = new ArrayList<Double>();
+			final ArrayList<Double> doubleList = new ArrayList<Double>();
 			doubleList.add(0.0);
 
-			XDoubleListValue doubleListValue = XV.toDoubleListValue(doubleList);
+			final XDoubleListValue doubleListValue = XV.toDoubleListValue(doubleList);
 
 			editor = new XDoubleListEditor(doubleListValue.iterator(), editListener);
 			break;
@@ -241,58 +242,58 @@ public class AddEditorDialog extends DialogBox {
 			editor = new XIdEditor(idValue, editListener);
 			break;
 		case IdList:
-			XIdListValue idListValue = XV.toIdListValue(idList);
+			final XIdListValue idListValue = XV.toIdListValue(idList);
 
 			editor = new XIdListEditor(idListValue.iterator(), editListener);
 			break;
 		case IdSet:
-			XIdSetValue idSetValue = XV.toIdSetValue(idList);
+			final XIdSetValue idSetValue = XV.toIdSetValue(idList);
 
 			editor = new XIdSetEditor(idSetValue.iterator(), editListener);
 			break;
 		case IdSortedSet:
-			XIdSortedSetValue idSortedSetValue = XV.toIdSortedSetValue(idList);
+			final XIdSortedSetValue idSortedSetValue = XV.toIdSortedSetValue(idList);
 
 			editor = new XIdSortedSetEditor(idSortedSetValue.iterator(), editListener);
 			break;
 		case Integer:
-			XIntegerValue integerValue = XV.toValue(0);
+			final XIntegerValue integerValue = XV.toValue(0);
 			editor = new XIntegerEditor(integerValue.contents(), editListener);
 			break;
 		case IntegerList:
 
-			ArrayList<Integer> integerList = new ArrayList<Integer>();
+			final ArrayList<Integer> integerList = new ArrayList<Integer>();
 			integerList.add(0);
-			XIntegerListValue integerListValue = XV.toIntegerListValue(integerList);
+			final XIntegerListValue integerListValue = XV.toIntegerListValue(integerList);
 
 			editor = new XIntegerListEditor(integerListValue.iterator(), editListener);
 			break;
 		case Long:
-			XLongValue longValue = XV.toValue(0l);
+			final XLongValue longValue = XV.toValue(0l);
 
 			editor = new XLongEditor(longValue.contents(), editListener);
 			break;
 		case LongList:
-			ArrayList<Long> longList = new ArrayList<Long>();
+			final ArrayList<Long> longList = new ArrayList<Long>();
 			longList.add(0l);
-			XLongListValue longListValue = XV.toLongListValue(longList);
+			final XLongListValue longListValue = XV.toLongListValue(longList);
 
 			editor = new XLongListEditor(longListValue.iterator(), editListener);
 			break;
 		case String:
 
-			XStringValue stringValue = XV.toValue("string");
+			final XStringValue stringValue = XV.toValue("string");
 
 			editor = new XStringEditor(stringValue.contents(), editListener);
 			break;
 		case StringList:
 
-			XStringListValue stringListValue = XV.toStringListValue(stringList);
+			final XStringListValue stringListValue = XV.toStringListValue(stringList);
 
 			editor = new XStringListEditor(stringListValue.iterator(), editListener);
 			break;
 		case StringSet:
-			XStringSetValue stringSetValue = XV.toStringSetValue(stringList);
+			final XStringSetValue stringSetValue = XV.toStringSetValue(stringList);
 
 			editor = new XStringSetEditor(stringSetValue.iterator(), editListener);
 			break;
@@ -306,12 +307,12 @@ public class AddEditorDialog extends DialogBox {
 	class EditedValueListener implements EditListener {
 
 		@Override
-		public void newValue(XValue value) {
+		public void newValue(final XValue value) {
 		}
 
 	}
 
-	public void setFieldEditable(boolean b) {
+	public void setFieldEditable(final boolean b) {
 		this.textArea.setEnabled(b);
 
 	}

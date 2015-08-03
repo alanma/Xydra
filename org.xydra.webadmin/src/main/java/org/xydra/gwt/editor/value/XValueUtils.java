@@ -2,6 +2,7 @@ package org.xydra.gwt.editor.value;
 
 import java.util.Iterator;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.value.XAddressListValue;
@@ -32,7 +33,7 @@ import org.xydra.index.iterator.SingleValueIterator;
  */
 abstract public class XValueUtils {
 
-	protected static Object listGetFirst(XListValue<?> v) {
+	protected static Object listGetFirst(final XListValue<?> v) {
 		if (!v.isEmpty()) {
 			return v.get(0);
 		} else {
@@ -40,7 +41,7 @@ abstract public class XValueUtils {
 		}
 	}
 
-	static public String asString(XValue value) {
+	static public String asString(final XValue value) {
 		if (value == null) {
 			return "";
 		}
@@ -53,15 +54,15 @@ abstract public class XValueUtils {
 		}
 	}
 
-	private static String byteArrayToString(byte[] bytes) {
-		char[] chars = new char[bytes.length];
+	private static String byteArrayToString(final byte[] bytes) {
+		final char[] chars = new char[bytes.length];
 		for (int i = 0; i < bytes.length; i++) {
 			chars[i] = (char) bytes[i];
 		}
 		return new String(chars);
 	}
 
-	static public Iterator<String> asStringList(XValue value) {
+	static public Iterator<String> asStringList(final XValue value) {
 		if (value == null) {
 			return NoneIterator.<String> create();
 		} else if (value instanceof XStringListValue) {
@@ -78,10 +79,10 @@ abstract public class XValueUtils {
 		}
 	}
 
-	static private <E> Iterator<String> transform(XListValue<E> value) {
+	static private <E> Iterator<String> transform(final XListValue<E> value) {
 		return new AbstractTransformingIterator<E, String>(value.iterator()) {
 			@Override
-			public String transform(E in) {
+			public String transform(final E in) {
 				if (in == null) {
 					return null;
 				}
@@ -90,52 +91,52 @@ abstract public class XValueUtils {
 		};
 	}
 
-	static public XId asXID(XValue value) {
+	static public XId asXID(final XValue value) {
 
 		if (value == null) {
-			return XX.createUniqueId();
+			return Base.createUniqueId();
 		}
 
 		if (value instanceof XId) {
-			return ((XId) value);
+			return (XId) value;
 		} else if (value instanceof XIdListValue) {
-			XIdListValue lv = (XIdListValue) value;
+			final XIdListValue lv = (XIdListValue) value;
 			if (!lv.isEmpty()) {
 				return lv.get(0);
 			} else {
-				return XX.createUniqueId();
+				return Base.createUniqueId();
 			}
 		} else {
-			XId id = generateXid(asString(value));
+			final XId id = generateXid(asString(value));
 			if (id == null) {
-				return XX.createUniqueId();
+				return Base.createUniqueId();
 			}
 			return id;
 		}
 	}
 
-	static public XAddress asAddress(XValue value) {
+	static public XAddress asAddress(final XValue value) {
 
 		if (value == null) {
-			return XX.toAddress(XX.createUniqueId(), XX.createUniqueId(), XX.createUniqueId(),
-					XX.createUniqueId());
+			return Base.toAddress(Base.createUniqueId(), Base.createUniqueId(), Base.createUniqueId(),
+					Base.createUniqueId());
 		}
 
 		if (value instanceof XAddress) {
-			return ((XAddress) value);
+			return (XAddress) value;
 		} else if (value instanceof XAddressListValue) {
-			XAddressListValue lv = (XAddressListValue) value;
+			final XAddressListValue lv = (XAddressListValue) value;
 			if (!lv.isEmpty()) {
 				return lv.get(0);
 			} else {
-				return XX.toAddress(XX.createUniqueId(), XX.createUniqueId(), XX.createUniqueId(),
-						XX.createUniqueId());
+				return Base.toAddress(Base.createUniqueId(), Base.createUniqueId(), Base.createUniqueId(),
+						Base.createUniqueId());
 			}
 		} else {
-			XAddress id = generateAddress(asString(value));
+			final XAddress id = generateAddress(asString(value));
 			if (id == null) {
-				return XX.toAddress(XX.createUniqueId(), XX.createUniqueId(), XX.createUniqueId(),
-						XX.createUniqueId());
+				return Base.toAddress(Base.createUniqueId(), Base.createUniqueId(), Base.createUniqueId(),
+						Base.createUniqueId());
 			}
 			return id;
 		}
@@ -148,7 +149,7 @@ abstract public class XValueUtils {
 			+ "\\-\\.0-9\\xB7\\u0300-\u036F\\u203F-\\u2040";
 	private static final String startClass = "[" + nameStartChar + "]";
 
-	public static XId generateXid(String string) {
+	public static XId generateXid(final String string) {
 
 		String cleaned = string.replaceAll("[^" + nameChar + "]+", "");
 
@@ -160,19 +161,19 @@ abstract public class XValueUtils {
 			cleaned = "_" + cleaned;
 		}
 
-		return XX.toId(cleaned);
+		return Base.toId(cleaned);
 	}
 
-	public static XAddress generateAddress(String text) {
+	public static XAddress generateAddress(final String text) {
 
 		try {
-			return XX.toAddress(text);
-		} catch (Exception e) {
-			return XX.toAddress("/dummy");
+			return Base.toAddress(text);
+		} catch (final Exception e) {
+			return Base.toAddress("/dummy");
 		}
 	}
 
-	static public Iterator<XAddress> asAddressList(XValue value) {
+	static public Iterator<XAddress> asAddressList(final XValue value) {
 		if (value == null) {
 			return NoneIterator.<XAddress> create();
 		} else if (value instanceof XAddressListValue) {
@@ -181,10 +182,10 @@ abstract public class XValueUtils {
 		if (value instanceof XAddressListValue) {
 			return ((XAddressListValue) value).iterator();
 		} else if (value instanceof XListValue<?>) {
-			Iterator<XAddress> it = new AbstractTransformingIterator<String, XAddress>(
+			final Iterator<XAddress> it = new AbstractTransformingIterator<String, XAddress>(
 					transform((XListValue<?>) value)) {
 				@Override
-				public XAddress transform(String in) {
+				public XAddress transform(final String in) {
 					if (in == null) {
 						return null;
 					}
@@ -193,12 +194,12 @@ abstract public class XValueUtils {
 			};
 			return new AbstractFilteringIterator<XAddress>(it) {
 				@Override
-				protected boolean matchesFilter(XAddress entry) {
+				protected boolean matchesFilter(final XAddress entry) {
 					return entry != null;
 				}
 			};
 		} else {
-			XAddress xid = asAddress(value);
+			final XAddress xid = asAddress(value);
 			if (xid == null) {
 				return NoneIterator.<XAddress> create();
 			}
@@ -206,7 +207,7 @@ abstract public class XValueUtils {
 		}
 	}
 
-	static public Iterator<XId> asXIDList(XValue value) {
+	static public Iterator<XId> asXIDList(final XValue value) {
 		if (value == null) {
 			return NoneIterator.<XId> create();
 		} else if (value instanceof XIdListValue) {
@@ -215,10 +216,10 @@ abstract public class XValueUtils {
 		if (value instanceof XIdSetValue) {
 			return ((XIdSetValue) value).iterator();
 		} else if (value instanceof XListValue<?>) {
-			Iterator<XId> it = new AbstractTransformingIterator<String, XId>(
+			final Iterator<XId> it = new AbstractTransformingIterator<String, XId>(
 					transform((XListValue<?>) value)) {
 				@Override
-				public XId transform(String in) {
+				public XId transform(final String in) {
 					if (in == null) {
 						return null;
 					}
@@ -227,12 +228,12 @@ abstract public class XValueUtils {
 			};
 			return new AbstractFilteringIterator<XId>(it) {
 				@Override
-				protected boolean matchesFilter(XId entry) {
+				protected boolean matchesFilter(final XId entry) {
 					return entry != null;
 				}
 			};
 		} else {
-			XId xid = asXID(value);
+			final XId xid = asXID(value);
 			if (xid == null) {
 				return NoneIterator.<XId> create();
 			}
@@ -240,7 +241,7 @@ abstract public class XValueUtils {
 		}
 	}
 
-	static public double asDouble(XValue value) {
+	static public double asDouble(final XValue value) {
 
 		if (value == null) {
 			return 0.;
@@ -256,7 +257,7 @@ abstract public class XValueUtils {
 			return ((XLongValue) value).contents();
 		}
 		if (value instanceof XListValue<?>) {
-			Object o = listGetFirst((XListValue<?>) value);
+			final Object o = listGetFirst((XListValue<?>) value);
 			if (o == null) {
 				return 0.;
 			} else if (o instanceof Double) {
@@ -273,27 +274,27 @@ abstract public class XValueUtils {
 
 	}
 
-	static public double generateDouble(Object object) {
+	static public double generateDouble(final Object object) {
 		if (object instanceof Number) {
 			return ((Number) object).doubleValue();
 		}
-		String string = object.toString();
+		final String string = object.toString();
 		try {
 			return Double.parseDouble(string);
-		} catch (NumberFormatException nfe) {
-			String cleaned = string.replaceAll("[^0-9.]", "");
+		} catch (final NumberFormatException nfe) {
+			final String cleaned = string.replaceAll("[^0-9.]", "");
 			try {
 				return Double.parseDouble(cleaned);
-			} catch (NumberFormatException nfe2) {
+			} catch (final NumberFormatException nfe2) {
 				return 0.0;
 			}
 		}
 	}
 
-	static public <E> Iterator<Double> transformToDoubles(XListValue<E> value) {
+	static public <E> Iterator<Double> transformToDoubles(final XListValue<E> value) {
 		return new AbstractTransformingIterator<E, Double>(value.iterator()) {
 			@Override
-			public Double transform(E in) {
+			public Double transform(final E in) {
 				if (in == null) {
 					return 0.;
 				}
@@ -302,10 +303,10 @@ abstract public class XValueUtils {
 		};
 	}
 
-	static public <E> Iterator<Integer> transformToIntegers(XListValue<E> value) {
+	static public <E> Iterator<Integer> transformToIntegers(final XListValue<E> value) {
 		return new AbstractTransformingIterator<E, Integer>(value.iterator()) {
 			@Override
-			public Integer transform(E in) {
+			public Integer transform(final E in) {
 				if (in == null) {
 					return 0;
 				}
@@ -314,10 +315,10 @@ abstract public class XValueUtils {
 		};
 	}
 
-	static public <E> Iterator<Long> transformToLongs(XListValue<E> value) {
+	static public <E> Iterator<Long> transformToLongs(final XListValue<E> value) {
 		return new AbstractTransformingIterator<E, Long>(value.iterator()) {
 			@Override
-			public Long transform(E in) {
+			public Long transform(final E in) {
 				if (in == null) {
 					return 0l;
 				}
@@ -326,7 +327,7 @@ abstract public class XValueUtils {
 		};
 	}
 
-	static public Iterator<Double> asDoubleList(XValue value) {
+	static public Iterator<Double> asDoubleList(final XValue value) {
 		if (value == null) {
 			return NoneIterator.<Double> create();
 		} else if (value instanceof XDoubleListValue) {
@@ -338,7 +339,7 @@ abstract public class XValueUtils {
 		}
 	}
 
-	static public Iterator<Long> asLongList(XValue value) {
+	static public Iterator<Long> asLongList(final XValue value) {
 		if (value == null) {
 			return NoneIterator.<Long> create();
 		} else if (value instanceof XLongListValue) {
@@ -350,7 +351,7 @@ abstract public class XValueUtils {
 		}
 	}
 
-	static public Iterator<Integer> asIntegerList(XValue value) {
+	static public Iterator<Integer> asIntegerList(final XValue value) {
 		if (value == null) {
 			return NoneIterator.<Integer> create();
 		} else if (value instanceof XIntegerListValue) {
@@ -362,14 +363,14 @@ abstract public class XValueUtils {
 		}
 	}
 
-	static public boolean asBoolean(XValue value) {
+	static public boolean asBoolean(final XValue value) {
 		if (value == null) {
 			return false;
 		}
 		if (value instanceof XBooleanValue) {
 			return ((XBooleanValue) value).contents();
 		} else if (value instanceof XBooleanListValue) {
-			XBooleanListValue lv = (XBooleanListValue) value;
+			final XBooleanListValue lv = (XBooleanListValue) value;
 			if (!lv.isEmpty()) {
 				return lv.get(0);
 			} else {
@@ -380,15 +381,15 @@ abstract public class XValueUtils {
 		}
 	}
 
-	public static boolean generateBoolean(String s) {
+	public static boolean generateBoolean(final String s) {
 		try {
 			return Double.parseDouble(s) != 0;
-		} catch (NumberFormatException nfe) {
+		} catch (final NumberFormatException nfe) {
 			return Boolean.parseBoolean(s);
 		}
 	}
 
-	static public Iterator<Boolean> asBooleanList(XValue value) {
+	static public Iterator<Boolean> asBooleanList(final XValue value) {
 		if (value == null) {
 			return NoneIterator.<Boolean> create();
 		} else if (value instanceof XBooleanListValue) {
@@ -400,10 +401,10 @@ abstract public class XValueUtils {
 		}
 	}
 
-	static private <E> Iterator<Boolean> transformToBoolean(XListValue<E> value) {
+	static private <E> Iterator<Boolean> transformToBoolean(final XListValue<E> value) {
 		return new AbstractTransformingIterator<E, Boolean>(value.iterator()) {
 			@Override
-			public Boolean transform(E in) {
+			public Boolean transform(final E in) {
 				if (in == null) {
 					return false;
 				}
@@ -412,7 +413,7 @@ abstract public class XValueUtils {
 		};
 	}
 
-	static public long asLong(XValue value) {
+	static public long asLong(final XValue value) {
 
 		if (value == null) {
 			return 0L;
@@ -428,7 +429,7 @@ abstract public class XValueUtils {
 			return ((XLongValue) value).contents();
 		}
 		if (value instanceof XListValue<?>) {
-			Object o = listGetFirst((XListValue<?>) value);
+			final Object o = listGetFirst((XListValue<?>) value);
 			if (o == null) {
 				return 0L;
 			} else if (o instanceof Double) {
@@ -445,28 +446,28 @@ abstract public class XValueUtils {
 
 	}
 
-	static public long generateLong(Object object) {
+	static public long generateLong(final Object object) {
 		if (object instanceof Number) {
 			return ((Number) object).longValue();
 		}
-		String string = object.toString();
+		final String string = object.toString();
 		try {
 			return Long.parseLong(string);
-		} catch (NumberFormatException nfe) {
-			String cleaned = string.replaceAll("[^0-9]", "");
+		} catch (final NumberFormatException nfe) {
+			final String cleaned = string.replaceAll("[^0-9]", "");
 			try {
 				return Long.parseLong(cleaned);
-			} catch (NumberFormatException nfe2) {
+			} catch (final NumberFormatException nfe2) {
 				return 0L;
 			}
 		}
 	}
 
-	static public int asInteger(XValue value) {
+	static public int asInteger(final XValue value) {
 		return (int) asLong(value);
 	}
 
-	static public byte[] asByteList(XValue value) {
+	static public byte[] asByteList(final XValue value) {
 		if (value == null) {
 			return new byte[0];
 		}
@@ -474,8 +475,8 @@ abstract public class XValueUtils {
 		if (value instanceof XBinaryValue) {
 			return ((XBinaryValue) value).getValue();
 		} else {
-			char[] chars = value.toString().toCharArray();
-			byte[] bytes = new byte[chars.length];
+			final char[] chars = value.toString().toCharArray();
+			final byte[] bytes = new byte[chars.length];
 			for (int i = 0; i < chars.length; i++) {
 				bytes[i] = (byte) chars[i];
 			}

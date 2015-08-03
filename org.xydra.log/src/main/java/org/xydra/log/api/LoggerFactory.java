@@ -13,17 +13,17 @@ import org.xydra.log.spi.ILoggerFactorySPI;
  * The basic logger factory. Same signature to obtain a {@link Logger} as slf4j.
  * You only need to change the import to switch from one logging framework to
  * the other.
- * 
+ *
  * <pre>
  * private static final Logger log = LoggerFactory.getLogger(Foo.class);
  * </pre>
- * 
+ *
  * <h2>How To Solve Log Config Problems</h2>
- * 
+ *
  * Set {@link LoggerFactory#DEBUG_LOG_CONFIG} to true to see the stacktrace of
  * the calls that cause the log system to fall-back to auto-config.
- * 
- * 
+ *
+ *
  * @author xamde
  */
 @ThreadSafe
@@ -53,10 +53,10 @@ public class LoggerFactory {
 	/**
 	 * All log messages are also sent to the registered {@link ILogListener}.
 	 * This is only effective for Logger instances, created after this setting.
-	 * 
+	 *
 	 * @param logListener a listener to receive all log messages
 	 */
-	public static synchronized void addLogListener(ILogListener logListener) {
+	public static synchronized void addLogListener(final ILogListener logListener) {
 		ensureLoggerFactoryDefined();
 		LoggerFactory.logListeners.add(logListener);
 		getSelfLogger().info("Logging: Attached log listener " + logListener.getClass().getName());
@@ -87,7 +87,7 @@ public class LoggerFactory {
 	private static Exception createException() {
 		try {
 			throw new RuntimeException("+++ This is not an error. +++");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return e;
 		}
 	}
@@ -96,25 +96,25 @@ public class LoggerFactory {
 	 * @param clazz used as a name for the logger
 	 * @return a logger, using the sub-system configured by
 	 */
-	public static synchronized Logger getLogger(Class<?> clazz) {
+	public static synchronized Logger getLogger(final Class<?> clazz) {
 		return getLogger(clazz.getName());
 	}
 
 	/**
 	 * Note {@link #getLogger(Class)} is preferred. It survives refactorings
 	 * better.
-	 * 
+	 *
 	 * @param name for the logger
 	 * @return a logger, using the sub-system configured by
 	 */
-	public static synchronized Logger getLogger(String name) {
+	public static synchronized Logger getLogger(final String name) {
 		ensureLoggerFactoryDefined();
 		return loggerFactorySPI.getLogger(name, LoggerFactory.logListeners);
 	}
 
 	/**
 	 * Helps debugging.
-	 * 
+	 *
 	 * @return @CanBeNull
 	 */
 	public static ILoggerFactorySPI getLoggerFactorySPI() {
@@ -127,8 +127,9 @@ public class LoggerFactory {
 	 *         default level of INFO.
 	 */
 	public static synchronized Logger getSelfLogger() {
-		if (loggerFactorySPI == null)
+		if (loggerFactorySPI == null) {
 			throw new IllegalStateException("Cannot use self-logger before SPI is set");
+		}
 		assert loggerFactorySPI != null;
 		if (SELF_LOGGER == null) {
 			SELF_LOGGER = loggerFactorySPI.getThreadSafeLogger(LOGGER_NAME_SELF_LOGGING, null);
@@ -137,11 +138,11 @@ public class LoggerFactory {
 		return SELF_LOGGER;
 	}
 
-	public static synchronized Logger getThreadSafeLogger(Class<?> clazz) {
+	public static synchronized Logger getThreadSafeLogger(final Class<?> clazz) {
 		return getThreadSafeLogger(clazz.getName());
 	}
 
-	public static synchronized Logger getThreadSafeLogger(String name) {
+	public static synchronized Logger getThreadSafeLogger(final String name) {
 		ensureLoggerFactoryDefined();
 		return loggerFactorySPI.getThreadSafeLogger(name, LoggerFactory.logListeners);
 	}
@@ -202,10 +203,10 @@ public class LoggerFactory {
 	/**
 	 * Stop adding the given {@link ILogListener} to newly created loggers.
 	 * Rarely used in practice.
-	 * 
+	 *
 	 * @param logListener the listener to be removed from the set of listeners.
 	 */
-	public static synchronized void removeLogListener(ILogListener logListener) {
+	public static synchronized void removeLogListener(final ILogListener logListener) {
 		ensureLoggerFactoryDefined();
 		LoggerFactory.logListeners.remove(logListener);
 		getSelfLogger().info("Logging: Removed log listener " + logListener.getClass().getName());
@@ -216,10 +217,10 @@ public class LoggerFactory {
 	 * @param configSource
 	 * @CanBeNull an optional String indicating where this can be configured
 	 */
-	public static synchronized void setLoggerFactorySPI(ILoggerFactorySPI spi, String configSource) {
-		ILoggerFactorySPI lastLoggerFactorySPI = loggerFactorySPI;
+	public static synchronized void setLoggerFactorySPI(final ILoggerFactorySPI spi, final String configSource) {
+		final ILoggerFactorySPI lastLoggerFactorySPI = loggerFactorySPI;
 		loggerFactorySPI = spi;
-		Exception currentCallerException = createException();
+		final Exception currentCallerException = createException();
 
 		// avoid redundant ops
 		if (lastLoggerFactorySPI != null

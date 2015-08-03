@@ -11,7 +11,7 @@ public class Shared {
 	 * @return true if the set composed of items 'aaa|bbb|ccc' contains the
 	 *         string 's', e.g. is s == 'aaa'.
 	 */
-	public static boolean contains(String concatenated, String s) {
+	public static boolean contains(final String concatenated, final String s) {
 		if (concatenated == null) {
 			return false;
 		}
@@ -19,9 +19,9 @@ public class Shared {
 		return toSet(concatenated, true, true).contains(s.trim());
 	}
 
-	public static Set<String> toSet(String concatenated, boolean trim, boolean lowercase) {
-		String[] uniques = concatenated.split("[|]");
-		Set<String> uniqueSet = new HashSet<String>();
+	public static Set<String> toSet(final String concatenated, final boolean trim, final boolean lowercase) {
+		final String[] uniques = concatenated.split("[|]");
+		final Set<String> uniqueSet = new HashSet<String>();
 		for (String t : uniques) {
 			if (trim) {
 				t = t.trim();
@@ -35,7 +35,7 @@ public class Shared {
 
 	}
 
-	public static boolean isNotNullOrEmpty(String q) {
+	public static boolean isNotNullOrEmpty(final String q) {
 		return q != null && !q.trim().equals("") && !q.equals("null");
 	}
 

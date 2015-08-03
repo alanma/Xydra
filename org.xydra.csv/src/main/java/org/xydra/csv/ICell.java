@@ -2,7 +2,7 @@ package org.xydra.csv;
 
 /**
  * A cell is a string with some utility functions.
- * 
+ *
  * @author xamde
  */
 public interface ICell {
@@ -10,7 +10,7 @@ public interface ICell {
 	/**
 	 * Append 's' to current value until maximal field length is reached. Then
 	 * only a sub-string is appended to fully utilise available chars.
-	 * 
+	 *
 	 * @param s
 	 *            to be appended
 	 * @param maximalFieldLength
@@ -26,7 +26,7 @@ public interface ICell {
 
 	/**
 	 * Treat value as long and increment
-	 * 
+	 *
 	 * @param increment
 	 *            to be added
 	 * @throws WrongDatatypeException

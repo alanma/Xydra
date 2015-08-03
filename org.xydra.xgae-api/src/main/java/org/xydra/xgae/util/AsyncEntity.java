@@ -7,7 +7,7 @@ import org.xydra.xgae.datastore.api.SKey;
 
 /**
  * Wraps a Future<Entity> and remember the result of {@link Future#get()}
- * 
+ *
  * @author dscharrer
  */
 // TODO remove this class or what purpose does it serve?
@@ -16,15 +16,15 @@ public class AsyncEntity {
 	private Future<SEntity> future;
 	private SEntity entity;
 	@SuppressWarnings("unused")
-	private SKey key;
+	private final SKey key;
 
-	public AsyncEntity(SKey key, Future<SEntity> future) {
+	public AsyncEntity(final SKey key, final Future<SEntity> future) {
 		this.future = future;
 		this.entity = null;
 		this.key = key;
 	}
 
-	public AsyncEntity(SEntity entity) {
+	public AsyncEntity(final SEntity entity) {
 		this.future = null;
 		this.entity = entity;
 		this.key = null;

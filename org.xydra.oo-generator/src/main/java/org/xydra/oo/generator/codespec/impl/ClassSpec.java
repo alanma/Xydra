@@ -16,7 +16,7 @@ import org.xydra.oo.runtime.shared.IType;
 /**
  * state: required imports, implemented intefaces, kind, members, package,
  * superclass
- * 
+ *
  * @author xamde
  */
 public class ClassSpec extends NamedElement {
@@ -32,9 +32,9 @@ public class ClassSpec extends NamedElement {
 
 	/** back-ref */
 	@NeverNull
-	private PackageSpec packageSpec;
+	private final PackageSpec packageSpec;
 
-	private Set<String> requiredImports = new HashSet<String>();
+	private final Set<String> requiredImports = new HashSet<String>();
 
 	@CanBeNull
 	public ClassSpec superClass;
@@ -48,28 +48,28 @@ public class ClassSpec extends NamedElement {
 	 *            "interface" or "class" or "abstract class"
 	 * @param name
 	 */
-	ClassSpec(PackageSpec packageSpec, String kind, String name) {
+	ClassSpec(final PackageSpec packageSpec, final String kind, final String name) {
 		super(name);
 		this.packageSpec = packageSpec;
 		packageSpec.classes.add(this);
 		this.kind = kind;
 	}
 
-	public ConstructorSpec addConstructor(String generatedFrom) {
-		ConstructorSpec constructorSpec = new ConstructorSpec(this, generatedFrom);
+	public ConstructorSpec addConstructor(final String generatedFrom) {
+		final ConstructorSpec constructorSpec = new ConstructorSpec(this, generatedFrom);
 		this.members.add(constructorSpec);
 		return constructorSpec;
 	}
 
-	public MethodSpec addMethod(Method m, String generatedFrom) {
-		MethodSpec methodSpec = new MethodSpec(m, generatedFrom);
+	public MethodSpec addMethod(final Method m, final String generatedFrom) {
+		final MethodSpec methodSpec = new MethodSpec(m, generatedFrom);
 		this.members.add(methodSpec);
 		return methodSpec;
 	}
 
-	public MethodSpec addMethod(String name, String typePackageName, String typeName,
-			String generatedFrom) {
-		MethodSpec methodSpec = new MethodSpec(name, typePackageName, typeName, generatedFrom);
+	public MethodSpec addMethod(final String name, final String typePackageName, final String typeName,
+			final String generatedFrom) {
+		final MethodSpec methodSpec = new MethodSpec(name, typePackageName, typeName, generatedFrom);
 		this.members.add(methodSpec);
 		return methodSpec;
 	}
@@ -83,23 +83,23 @@ public class ClassSpec extends NamedElement {
 	 *            debug comment
 	 * @return new MethodSpec
 	 */
-	public MethodSpec addMethod(String name, IType returnType, String generatedFrom) {
-		MethodSpec methodSpec = new MethodSpec(name, returnType, generatedFrom);
+	public MethodSpec addMethod(final String name, final IType returnType, final String generatedFrom) {
+		final MethodSpec methodSpec = new MethodSpec(name, returnType, generatedFrom);
 		this.members.add(methodSpec);
 		return methodSpec;
 	}
 
-	public void addRequiredImports(Class<?> c) {
+	public void addRequiredImports(final Class<?> c) {
 		addRequiredImports(c.getCanonicalName());
 	}
 
-	public void addRequiredImports(String canonicalName) {
+	public void addRequiredImports(final String canonicalName) {
 		assert !canonicalName.equals("void");
 		this.requiredImports.add(canonicalName);
 	}
 
-	public MethodSpec addVoidMethod(String name, String generatedFrom) {
-		MethodSpec methodSpec = MethodSpec.createVoid(name, generatedFrom);
+	public MethodSpec addVoidMethod(final String name, final String generatedFrom) {
+		final MethodSpec methodSpec = MethodSpec.createVoid(name, generatedFrom);
 		this.members.add(methodSpec);
 		return methodSpec;
 	}
@@ -107,16 +107,16 @@ public class ClassSpec extends NamedElement {
 	public void dump() {
 		System.out.println("Class "
 				+ getName()
-				+ (this.superClass != null ? (" extends " + this.superClass.getCanonicalName())
+				+ (this.superClass != null ? " extends " + this.superClass.getCanonicalName()
 						: ""));
-		for (IMember t : this.members) {
+		for (final IMember t : this.members) {
 			t.dump();
 		}
 	}
 
 	@Override
-	public boolean equals(Object other) {
-		return other instanceof ClassSpec && ((ClassSpec) other).id().equals(this.id());
+	public boolean equals(final Object other) {
+		return other instanceof ClassSpec && ((ClassSpec) other).id().equals(id());
 	}
 
 	public String getCanonicalName() {
@@ -128,13 +128,13 @@ public class ClassSpec extends NamedElement {
 	}
 
 	public Set<String> getRequiredImports() {
-		Set<String> imports = new HashSet<String>();
+		final Set<String> imports = new HashSet<String>();
 		imports.addAll(this.requiredImports);
 		if (this.superClass != null) {
 			imports.add(this.superClass.getCanonicalName());
 		}
-		for (IMember t : this.members) {
-			for (String req : t.getRequiredImports()) {
+		for (final IMember t : this.members) {
+			for (final String req : t.getRequiredImports()) {
 				imports.add(req);
 			}
 		}
@@ -147,14 +147,14 @@ public class ClassSpec extends NamedElement {
 	}
 
 	public String id() {
-		return this.getName();
+		return getName();
 	}
 
 	public boolean isBuiltIn() {
 		return this.packageSpec.isBuiltIn();
 	}
 
-	public void setComment(String s) {
+	public void setComment(final String s) {
 		this.comment = s;
 	}
 
@@ -232,7 +232,7 @@ public class ClassSpec extends NamedElement {
 		}
 
 		@Override
-		public void setComment(String comment) {
+		public void setComment(final String comment) {
 			ClassSpec.this.setComment(comment);
 		}
 
@@ -244,6 +244,6 @@ public class ClassSpec extends NamedElement {
 
 	@Override
 	public String toString() {
-		return this.kind + " " + this.getCanonicalName();
+		return this.kind + " " + getCanonicalName();
 	}
 }

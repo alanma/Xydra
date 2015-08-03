@@ -48,35 +48,36 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 /**
  * Generates GWT classes during gwt:compile -- does the same in code what the
  * {@link OOJavaOnlyProxy} does via reflection
- * 
+ *
  * TODO super source factory
- * 
+ *
  * TODO take method comment from @Comment
- * 
+ *
  * TODO dont copy .gen module
- * 
+ *
  * @author xamde
  */
 public class GwtCodeGenerator extends Generator {
 
 	public static final String INTERFACES_PACKAGE = "shared";
 
-	private static String tryToGetAnnotatedFieldId(AccessibleObject ao) {
+	private static String tryToGetAnnotatedFieldId(final AccessibleObject ao) {
 		String text = null;
-		org.xydra.oo.Field annotation = ao.getAnnotation(org.xydra.oo.Field.class);
-		if (annotation != null)
+		final org.xydra.oo.Field annotation = ao.getAnnotation(org.xydra.oo.Field.class);
+		if (annotation != null) {
 			text = annotation.value();
+		}
 		return text;
 	}
 
 	@Override
-	public String generate(TreeLogger logger, GeneratorContext ctx, String requestedClass)
+	public String generate(final TreeLogger logger, final GeneratorContext ctx, final String requestedClass)
 			throws UnableToCompleteException {
 
-		TypeOracle typeOracle = ctx.getTypeOracle();
-		assert (typeOracle != null);
+		final TypeOracle typeOracle = ctx.getTypeOracle();
+		assert typeOracle != null;
 
-		JClassType remoteService = typeOracle.findType(requestedClass);
+		final JClassType remoteService = typeOracle.findType(requestedClass);
 		if (remoteService == null) {
 			logger.log(TreeLogger.ERROR, "Unable to find metadata for type '" + requestedClass
 					+ "'", null);
@@ -93,19 +94,19 @@ public class GwtCodeGenerator extends Generator {
 
 		// org.xydra.oo.test.tasks . client.Gwt Task
 
-		String javaInterfaceFqName = remoteService.getQualifiedSourceName();
-		int index = javaInterfaceFqName.indexOf("." + INTERFACES_PACKAGE);
+		final String javaInterfaceFqName = remoteService.getQualifiedSourceName();
+		final int index = javaInterfaceFqName.indexOf("." + INTERFACES_PACKAGE);
 		if (index < 0) {
 			logger.log(TreeLogger.ERROR, remoteService.getQualifiedSourceName()
 					+ " is not in a package named '" + INTERFACES_PACKAGE + "'", null);
 			throw new UnableToCompleteException();
 		}
-		String basePackage = javaInterfaceFqName.substring(0, index);
-		String typeName = javaInterfaceFqName.replace(
+		final String basePackage = javaInterfaceFqName.substring(0, index);
+		final String typeName = javaInterfaceFqName.replace(
 				basePackage + "." + INTERFACES_PACKAGE + ".I", "");
-		String gwtPackageName = basePackage + ".client";
-		String gwtSimpleName = "Gwt" + typeName;
-		String gwtFqName = gwtPackageName + "." + gwtSimpleName;
+		final String gwtPackageName = basePackage + ".client";
+		final String gwtSimpleName = "Gwt" + typeName;
+		final String gwtFqName = gwtPackageName + "." + gwtSimpleName;
 
 		logger.log(
 				TreeLogger.DEBUG,
@@ -125,18 +126,18 @@ public class GwtCodeGenerator extends Generator {
 	 *            foo.client
 	 * @param gwtSimpleName
 	 */
-	private static void generateSourceCode(TreeLogger logger, GeneratorContext ctx,
-			String javaInterfaceFqName, String gwtPackageName, String gwtSimpleName) {
-		TreeLogger logger2 = logger.branch(Type.INFO, "Generating source code to implement "
+	private static void generateSourceCode(final TreeLogger logger, final GeneratorContext ctx,
+			final String javaInterfaceFqName, final String gwtPackageName, final String gwtSimpleName) {
+		final TreeLogger logger2 = logger.branch(Type.INFO, "Generating source code to implement "
 				+ javaInterfaceFqName + " into " + gwtPackageName + "." + gwtSimpleName);
 
 		// construct
 		try {
-			PackageSpec packageSpec = new PackageSpec(gwtPackageName, false);
-			ClassSpec c = constructClassSpec(packageSpec, gwtPackageName, javaInterfaceFqName,
+			final PackageSpec packageSpec = new PackageSpec(gwtPackageName, false);
+			final ClassSpec c = constructClassSpec(packageSpec, gwtPackageName, javaInterfaceFqName,
 					gwtSimpleName);
 			// write
-			PrintWriter pw = ctx.tryCreate(logger, gwtPackageName, gwtSimpleName);
+			final PrintWriter pw = ctx.tryCreate(logger, gwtPackageName, gwtSimpleName);
 			if (pw == null) {
 				/*
 				 * If the named types already exists, null is returned to
@@ -145,7 +146,7 @@ public class GwtCodeGenerator extends Generator {
 			} else {
 				try {
 					SpecWriter.writeClass(pw, gwtPackageName, c);
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					logger2.log(Type.ERROR, "IO", e);
 				}
 				/*
@@ -154,7 +155,7 @@ public class GwtCodeGenerator extends Generator {
 				 */
 				ctx.commit(logger2, pw);
 			}
-		} catch (ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			logger2.log(Type.ERROR, "Could not instantiate the java interface '"
 					+ javaInterfaceFqName
 					+ "'\n  Make sure your code is compiled, e.g. 'mvn compile' first.", e);
@@ -169,21 +170,21 @@ public class GwtCodeGenerator extends Generator {
 	 * @return ...
 	 * @throws ClassNotFoundException
 	 */
-	public static ClassSpec constructClassSpec(PackageSpec packageSpec, String gwtPackagename,
-			String javaInterfaceFqName, String gwtSimpleName) throws ClassNotFoundException {
-		ClassSpec c = packageSpec.addClass(gwtSimpleName);
-		PackageSpec builtIn = new PackageSpec(GwtXydraMapped.class.getPackage().getName(), true);
+	public static ClassSpec constructClassSpec(final PackageSpec packageSpec, final String gwtPackagename,
+			final String javaInterfaceFqName, final String gwtSimpleName) throws ClassNotFoundException {
+		final ClassSpec c = packageSpec.addClass(gwtSimpleName);
+		final PackageSpec builtIn = new PackageSpec(GwtXydraMapped.class.getPackage().getName(), true);
 		c.superClass = builtIn.addClass(GwtXydraMapped.class.getSimpleName());
 		c.implementedInterfaces.add(javaInterfaceFqName);
 		Class<?> javaInterface;
 		javaInterface = Class.forName(javaInterfaceFqName);
-		String generatedFrom = "" + javaInterface.getCanonicalName();
-		for (Method m : javaInterface.getDeclaredMethods()) {
-			String fieldId = tryToGetAnnotatedFieldId(m);
+		final String generatedFrom = "" + javaInterface.getCanonicalName();
+		for (final Method m : javaInterface.getDeclaredMethods()) {
+			final String fieldId = tryToGetAnnotatedFieldId(m);
 			if (fieldId != null) {
-				MethodSpec methodSpec = c.addMethod(m, generatedFrom);
+				final MethodSpec methodSpec = c.addMethod(m, generatedFrom);
 				methodSpec.setAccess("public");
-				KindOfMethod kindOfMethod = OOReflectionUtils.extractKindOfMethod(m);
+				final KindOfMethod kindOfMethod = OOReflectionUtils.extractKindOfMethod(m);
 				switch (kindOfMethod) {
 
 				case Get:
@@ -192,8 +193,8 @@ public class GwtCodeGenerator extends Generator {
 
 				case Set:
 					assert m.getParameterTypes().length == 1;
-					java.lang.reflect.Type t = m.getGenericParameterTypes()[0];
-					TypeSpec type = JavaTypeSpecUtils.createTypeSpec(
+					final java.lang.reflect.Type t = m.getGenericParameterTypes()[0];
+					final TypeSpec type = JavaTypeSpecUtils.createTypeSpec(
 							JavaReflectionUtils.getRawType(t),
 							JavaReflectionUtils.getComponentType(t), generatedFrom);
 					addSetter(gwtPackagename, c, methodSpec, fieldId, type, generatedFrom);
@@ -212,24 +213,24 @@ public class GwtCodeGenerator extends Generator {
 		return c;
 	}
 
-	private static void addCollectionGetter(String gwtPackagename, String gwtSimpleName,
-			ClassSpec c, MethodSpec methodSpec, String fieldId) {
-		IType returnType = methodSpec.returnType;
+	private static void addCollectionGetter(final String gwtPackagename, final String gwtSimpleName,
+			final ClassSpec c, final MethodSpec methodSpec, final String fieldId) {
+		final IType returnType = methodSpec.returnType;
 
 		/** <J> java base type */
 		/** <C> java component type */
-		IBaseType typeJ = returnType.getBaseType();
-		String gJ = typeJ.getCanonicalName();
-		String sJ = typeJ.getSimpleName();
-		IBaseType typeC = returnType.getComponentType();
-		String gC = typeC.getCanonicalName();
-		String sC = typeC.getSimpleName();
+		final IBaseType typeJ = returnType.getBaseType();
+		final String gJ = typeJ.getCanonicalName();
+		final String sJ = typeJ.getSimpleName();
+		final IBaseType typeC = returnType.getComponentType();
+		final String gC = typeC.getCanonicalName();
+		final String sC = typeC.getSimpleName();
 
 		/** <X> xydra base type, extends XCollectionValue<T> */
 		/** <T> xydra OR java component type, NOT always extends XValue */
 		Class<?> classX;
 		Class<?> classT;
-		SharedTypeMapping mapping = SharedTypeMapping.getMapping(returnType);
+		final SharedTypeMapping mapping = SharedTypeMapping.getMapping(returnType);
 		if (mapping == null) {
 			assert OOReflectionUtils.hasAnId(typeC) : "no mapping found for type="
 					+ returnType.id();
@@ -237,7 +238,7 @@ public class GwtCodeGenerator extends Generator {
 			classT = XId.class;
 		} else {
 
-			ValueType valueTypeX = mapping.getXydraBaseValueType();
+			final ValueType valueTypeX = mapping.getXydraBaseValueType();
 			assert valueTypeX.isCollection() : "Should be a collection type: " + valueTypeX
 					+ " in " + c.getCanonicalName() + "." + methodSpec.getName() + "(..)";
 			// component type is already a java type
@@ -246,10 +247,10 @@ public class GwtCodeGenerator extends Generator {
 		}
 		c.addRequiredImports(classX);
 		c.addRequiredImports(classT);
-		IBaseType typeX = JavaTypeSpecUtils.createBaseTypeSpec(classX);
-		IBaseType typeT = JavaTypeSpecUtils.createBaseTypeSpec(classT);
-		String gX = typeX.getCanonicalName();
-		String gT = typeT.getCanonicalName();
+		final IBaseType typeX = JavaTypeSpecUtils.createBaseTypeSpec(classX);
+		final IBaseType typeT = JavaTypeSpecUtils.createBaseTypeSpec(classT);
+		final String gX = typeX.getCanonicalName();
+		final String gT = typeT.getCanonicalName();
 
 		// e.g. X, T extends XValue, J, C =
 		// XIdSetValue,XAddressSetValue,Set<XAddress>,XAddress
@@ -268,12 +269,12 @@ public class GwtCodeGenerator extends Generator {
 				// no need to convert
 				x2j = "x";
 			} else {
-				ValueType baseValueType = mapping.getXydraBaseValueType();
+				final ValueType baseValueType = mapping.getXydraBaseValueType();
 				x2j = "XValueJavaUtils.from" + baseValueType.name() + "(x)";
 				c.addRequiredImports(XValueJavaUtils.class);
 			}
 		} else {
-			String gC_basename = NameUtils.firstLetterUppercased(sC.substring(1));
+			final String gC_basename = NameUtils.firstLetterUppercased(sC.substring(1));
 			x2j = "GwtFactory.wrap" + gC_basename + "(" + gwtSimpleName
 					+ ".this.oop.getXModel(), (XId) x)";
 			c.addRequiredImports(XId.class);
@@ -291,7 +292,7 @@ public class GwtCodeGenerator extends Generator {
 				// no need to convert
 				j2x = "javaType";
 			} else {
-				ValueType baseValueType = mapping.getXydraBaseValueType();
+				final ValueType baseValueType = mapping.getXydraBaseValueType();
 				j2x = "XValueJavaUtils.to" + baseValueType.name() + "(javaType)";
 				c.addRequiredImports(XValueJavaUtils.class);
 			}
@@ -344,24 +345,24 @@ public class GwtCodeGenerator extends Generator {
 		c.addRequiredImports(XX.class);
 	}
 
-	private static void addGetter(String gwtPackagename, ClassSpec classSpec, MethodSpec m,
-			String fieldId, String generatedFrom) {
+	private static void addGetter(final String gwtPackagename, final ClassSpec classSpec, final MethodSpec m,
+			final String fieldId, final String generatedFrom) {
 
-		IType returnType = m.getReturnType();
-		IBaseType baseType = returnType.getBaseType();
-		SharedTypeMapping mapping = SharedTypeMapping.getMapping(returnType);
+		final IType returnType = m.getReturnType();
+		final IBaseType baseType = returnType.getBaseType();
+		final SharedTypeMapping mapping = SharedTypeMapping.getMapping(returnType);
 
 		/* 1) Mapped types */
 		if (mapping != null) {
-			ValueType valueType = mapping.getXydraBaseValueType();
-			String xydraType = valueType.getXydraInterface().getSimpleName();
+			final ValueType valueType = mapping.getXydraBaseValueType();
+			final String xydraType = valueType.getXydraInterface().getSimpleName();
 			m.addSourceLine(xydraType + " x = ((" + xydraType + ")this.oop.getValue(\"" + fieldId
 					+ "\"));");
 			m.addSourceLine("if(x == null)");
 			if (JavaReflectionUtils.isJavaPrimitiveType(baseType)) {
 				/* 1.1) Java primitive type */
 				m.addSourceLine("// Java primitive type");
-				String returnValue = JavaReflectionUtils
+				final String returnValue = JavaReflectionUtils
 						.returnDefaultValueOfPrimitiveTypeAsSourceCodeLiteral(baseType
 								.getSimpleName());
 				m.addSourceLine("    return " + returnValue + ";");
@@ -415,11 +416,11 @@ public class GwtCodeGenerator extends Generator {
 		}
 
 		/* 3) Collections of built-in Xydra types */
-		ValueType componentValueType = returnType.getComponentType() == null ? null
+		final ValueType componentValueType = returnType.getComponentType() == null ? null
 				: SharedTypeMapping.getValueType(returnType.getComponentType(), null);
 		if (JavaReflectionUtils.isJavaCollectionType(returnType) && !returnType.isArray()
 				&& componentValueType != null) {
-			MethodCallSpec methodCallSpec = new MethodCallSpec(XValueJavaUtils.class, "get"
+			final MethodCallSpec methodCallSpec = new MethodCallSpec(XValueJavaUtils.class, "get"
 					+ componentValueType.name()).addParam("this.oop.getXObject()").addParam(
 					"XX.toId(\"" + fieldId + "\")");
 			m.addSourceLine("return " + methodCallSpec.toMethodCall() + ";");
@@ -429,7 +430,7 @@ public class GwtCodeGenerator extends Generator {
 
 		/* 4) Enum types */
 		if (JavaReflectionUtils.isEnumType(returnType)) {
-			MethodCallSpec methodCallSpec = new MethodCallSpec(XValueJavaUtils.class, "getString")
+			final MethodCallSpec methodCallSpec = new MethodCallSpec(XValueJavaUtils.class, "getString")
 					.addParam("this.oop.getXObject()").addParam("XX.toId(\"" + fieldId + "\")");
 			m.addSourceLine("String s = " + methodCallSpec.toMethodCall() + ";");
 			m.addSourceLine("if(s == null)");
@@ -442,8 +443,8 @@ public class GwtCodeGenerator extends Generator {
 
 		/* 5) Java types corresponding to Xydra types */
 		// determine correct method in XValueJavaUtils
-		String getterMethod = "get" + getPropertyName(returnType);
-		MethodCallSpec methodCallSpec = new MethodCallSpec(XValueJavaUtils.class, getterMethod)
+		final String getterMethod = "get" + getPropertyName(returnType);
+		final MethodCallSpec methodCallSpec = new MethodCallSpec(XValueJavaUtils.class, getterMethod)
 				.addParam("this.oop.getXObject()").addParam("XX.toId(\"" + fieldId + "\")");
 		m.addSourceLine("return " + methodCallSpec.toMethodCall() + ";");
 		m.setComment("Java types corresponding to Xydra types");
@@ -451,10 +452,10 @@ public class GwtCodeGenerator extends Generator {
 	}
 
 	// all setters return the class itself for more fluent api usage
-	private static void addSetter(String gwtPackagename, ClassSpec c, MethodSpec m, String fieldId,
-			TypeSpec type, String generatedFrom) {
+	private static void addSetter(final String gwtPackagename, final ClassSpec c, final MethodSpec m, final String fieldId,
+			final TypeSpec type, final String generatedFrom) {
 		m.addParam(fieldId, type, generatedFrom);
-		SharedTypeMapping mapping = SharedTypeMapping.getMapping(type);
+		final SharedTypeMapping mapping = SharedTypeMapping.getMapping(type);
 		if (mapping != null) {
 			/* 1) Mapped types */
 			if (XydraReflectionUtils.isXydraValueType(type.getBaseType())) {
@@ -471,9 +472,9 @@ public class GwtCodeGenerator extends Generator {
 				m.sourceLines
 						.add("SharedTypeMapping mapping = SharedTypeMapping.getMapping(new TypeSpec(new BaseTypeSpec(");
 				// FIXME was "org.xydra.oo.testgen.alltypes.shared"
-				String packageName = type.getBaseType().getPackageName() == null ? "null" : "\""
+				final String packageName = type.getBaseType().getPackageName() == null ? "null" : "\""
 						+ type.getBaseType().getPackageName() + "\"";
-				String simpleName = type.getTypeString();
+				final String simpleName = type.getTypeString();
 				m.sourceLines.add("  " + packageName + ", \"" + simpleName
 						+ "\"), null, \"gwt\"));");
 				m.sourceLines.add("" + mapping.getXydraBaseType().getSimpleName() + " x = ("
@@ -486,7 +487,7 @@ public class GwtCodeGenerator extends Generator {
 				return;
 			}
 		}
-		String propertyName = getPropertyName(type);
+		final String propertyName = getPropertyName(type);
 		if (OOReflectionUtils.isProxyType(type)) {
 			/* 2) Proxy types */
 			m.sourceLines.add("XValueJavaUtils.setId" + "(this.oop.getXObject(), XX.toId(\""
@@ -498,11 +499,11 @@ public class GwtCodeGenerator extends Generator {
 		}
 
 		/* 3) Collections of built-in Xydra types */
-		ValueType componentValueType = type.getComponentType() == null ? null : SharedTypeMapping
+		final ValueType componentValueType = type.getComponentType() == null ? null : SharedTypeMapping
 				.getValueType(type.getComponentType(), null);
 		if (JavaReflectionUtils.isJavaCollectionType(type) && !type.isArray()
 				&& componentValueType != null) {
-			MethodCallSpec methodCallSpec = new MethodCallSpec(XValueJavaUtils.class, "set"
+			final MethodCallSpec methodCallSpec = new MethodCallSpec(XValueJavaUtils.class, "set"
 					+ componentValueType.name()).addParam("this.oop.getXObject()")
 					.addParam("XX.toId(\"" + fieldId + "\")").addParam(fieldId);
 			m.addSourceLine("return " + methodCallSpec.toMethodCall() + ";");
@@ -534,7 +535,7 @@ public class GwtCodeGenerator extends Generator {
 	 * @param returnType
 	 * @return a name starting with "get" or throws an exception @NeverNull
 	 */
-	private static String getPropertyName(IType typeSpec) {
+	private static String getPropertyName(final IType typeSpec) {
 		String s = null;
 		ValueType valueType = XydraReflectionUtils.getValueType(typeSpec);
 		if (valueType != null) {
@@ -554,7 +555,7 @@ public class GwtCodeGenerator extends Generator {
 		return s;
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		assert XydraReflectionUtils.getValueType(new TypeSpec(BaseTypeSpec.ARRAY, JavaTypeSpecUtils
 				.createBaseTypeSpec(byte.class), "test")) == ValueType.Binary;
 	}

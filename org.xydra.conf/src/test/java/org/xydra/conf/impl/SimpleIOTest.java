@@ -31,19 +31,19 @@ public class SimpleIOTest {
 
 	/**
 	 * create config file, write it, read it again
-	 * 
+	 *
 	 * special regard to *escaping*
-	 * 
+	 *
 	 */
 	@Before
 	public void setUp() {
 		this.memoryConfig = new MemoryConfig();
 
-		String dotSlashTarget = "./target/testConfig.conf";
+		final String dotSlashTarget = "./target/testConfig.conf";
 		this.targetFile = new File(dotSlashTarget);
 		try {
 			this.targetFile.createNewFile();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 
@@ -67,29 +67,30 @@ public class SimpleIOTest {
 
 		try {
 			ConfigFiles.write(this.memoryConfig, this.targetFile);
-		} catch (IOException e1) {
+		} catch (final IOException e1) {
 			e1.printStackTrace();
 		}
 
-		MemoryConfig confAgain = new MemoryConfig();
+		final MemoryConfig confAgain = new MemoryConfig();
 		try {
 			ConfigFiles.read(this.targetFile, confAgain);
-		} catch (IOException e1) {
+		} catch (final IOException e1) {
 			e1.printStackTrace();
 		}
 
 		System.out.println("keySet original: " + this.memoryConfig.toString() + "\n");
 		System.out.println("keySet duplicate: " + confAgain.toString());
 
-		for (String key : keys) {
+		for (final String key : keys) {
 			String original = this.memoryConfig.getString(key);
 			System.out.println("successfully gotten value from original");
-			String reRead = confAgain.getString(key);
+			final String reRead = confAgain.getString(key);
 			System.out.println("key: '" + key + "', expected \n'" + Escaping.toCodepoints(original)
 					+ "', got \n'" + Escaping.toCodepoints(reRead) + "'\n\n");
 
-			if (original.equals(""))
+			if (original.equals("")) {
 				original = "\uF8FF";
+			}
 			assertTrue(original.equals(reRead));
 		}
 

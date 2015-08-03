@@ -3,6 +3,7 @@ package org.xydra.server.rest.demo;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
@@ -19,38 +20,38 @@ import org.xydra.store.XydraStore;
 
 /**
  * Add a demo data (phonebook) to the repository
- * 
+ *
  * @author xamde
  */
 public class AddDemoDataResource {
 
-	public static void restless(Restless restless, String prefix) {
+	public static void restless(final Restless restless, final String prefix) {
 		restless.addGet(prefix + "/demodata", AddDemoDataResource.class, "init");
 	}
 
-	public void init(Restless restless, HttpServletRequest req, HttpServletResponse res) {
+	public void init(final Restless restless, final HttpServletRequest req, final HttpServletResponse res) {
 
-		XydraStore store = XydraRestServer.getStore(restless);
+		final XydraStore store = XydraRestServer.getStore(restless);
 
 		// TODO use a real user
-		XId actorId = XX.toId("admin");
-		String passwordHash = "secret";
+		final XId actorId = Base.toId("admin");
+		final String passwordHash = "secret";
 
-		WaitingCallback<XId> repoAddr = new WaitingCallback<XId>();
+		final WaitingCallback<XId> repoAddr = new WaitingCallback<XId>();
 		store.getRepositoryId(actorId, passwordHash, repoAddr);
 
-		WaitingCallback<BatchedResult<Long>[]> result = new WaitingCallback<BatchedResult<Long>[]>();
+		final WaitingCallback<BatchedResult<Long>[]> result = new WaitingCallback<BatchedResult<Long>[]>();
 
 		// TODO move command into transaction
-		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
-				XX.toAddress(repoAddr.getResult(), null, null, null), XCommand.SAFE_STATE_BOUND,
+		final XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
+				Base.toAddress(repoAddr.getResult(), null, null, null), XCommand.SAFE_STATE_BOUND,
 				DemoModelUtil.PHONEBOOK_ID);
 		store.executeCommands(actorId, passwordHash, new XCommand[] { createCommand }, result);
 
 		result.getException(); // wait for command to execute
 
-		XAddress modelAddr = createCommand.getChangedEntity();
-		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
+		final XAddress modelAddr = createCommand.getChangedEntity();
+		final XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
 		DemoModelUtil.setupPhonebook(modelAddr, tb, true);
 		store.executeCommands(actorId, passwordHash, new XCommand[] { tb.build() }, null);
 

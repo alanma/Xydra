@@ -8,12 +8,12 @@ import org.xydra.log.api.LoggerFactory;
 
 /**
  * A singleton for managing the {@link GaeConfiguration} on each instance.
- * 
+ *
  * Every servlet handler should call
  * {@link GaeConfigurationManager#assertValidGaeConfiguration()}
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class GaeConfigurationManager {
 
@@ -62,7 +62,7 @@ public class GaeConfigurationManager {
 	/**
 	 * Maybe found in memcache or data store. If coming from memcache and too
 	 * old, a fresh one is fetched from data store and put in memcache.
-	 * 
+	 *
 	 * @return a valid {@link GaeConfiguration}.
 	 */
 	public static synchronized GaeConfiguration loadConfigOrUseDefaults() {
@@ -87,11 +87,11 @@ public class GaeConfigurationManager {
 
 	/**
 	 * Makes sure current config is valid.
-	 * 
+	 *
 	 * Force a running instance to apply the current configuration to
 	 * XydraRuntime.
-	 * 
-	 * 
+	 *
+	 *
 	 * The current configuration is distributed via data store, memcache and
 	 * timeToLive. It is applied only by means of this method.
 	 */
@@ -103,7 +103,7 @@ public class GaeConfigurationManager {
 		/**
 		 * Called whenever the GaeConfiguration changes (i.e. is reloaded from
 		 * back-end).
-		 * 
+		 *
 		 * @param conf
 		 */
 		void onChange(GaeConfiguration conf);
@@ -111,12 +111,12 @@ public class GaeConfigurationManager {
 
 	private static transient Set<Listener> listeners = new HashSet<Listener>();
 
-	public static void addListener(Listener listener) {
+	public static void addListener(final Listener listener) {
 		listeners.add(listener);
 	}
 
-	public static void fireOnChange(GaeConfiguration conf) {
-		for (Listener l : listeners) {
+	public static void fireOnChange(final GaeConfiguration conf) {
+		for (final Listener l : listeners) {
 			l.onChange(conf);
 		}
 	}

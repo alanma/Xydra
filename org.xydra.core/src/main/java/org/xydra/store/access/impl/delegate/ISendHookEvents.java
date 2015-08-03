@@ -5,13 +5,13 @@ package org.xydra.store.access.impl.delegate;
  * {@link IHookListener#beforeRead()} and/or {@link IHookListener#beforeWrite()}
  * which are invoked before calling the read/write functionality of the
  * instance.
- * 
+ *
  * @author xamde
  */
 public interface ISendHookEvents {
-	
+
 	void addHookListener(IHookListener listener);
-	
+
 	void removeHookListener(IHookListener listener);
-	
+
 }

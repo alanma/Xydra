@@ -7,10 +7,10 @@ import org.xydra.core.change.XFieldEventListener;
 
 public class DummyFieldEventListener implements XFieldEventListener {
 	XEvent event;
-	
+
 	@Override
-	public void onChangeEvent(XFieldEvent event) {
+	public void onChangeEvent(final XFieldEvent event) {
 		this.event = event;
 	}
-	
+
 }

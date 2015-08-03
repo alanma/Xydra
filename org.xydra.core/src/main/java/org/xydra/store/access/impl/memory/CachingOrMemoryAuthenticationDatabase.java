@@ -16,48 +16,48 @@ import org.xydra.store.access.XAuthenticationDatabase;
 /**
  * An in-memory implementation of {@link XAuthenticationDatabase}. An second,
  * optional {@link XAuthenticationDatabase} can act as a persistence layer.
- * 
+ *
  * @author xamde
  */
 @RunsInAppEngine(true)
 @RunsInGWT(true)
 @RequiresAppEngine(false)
 public class CachingOrMemoryAuthenticationDatabase implements XAuthenticationDatabase {
-    
+
     private static class Actor {
         public int failedLoginAttempts = 0;
-        
+
         public String passwordHash = null;
-        
-        public Actor(int i) {
+
+        public Actor(final int i) {
             this.failedLoginAttempts = i;
         }
-        
-        public Actor(String s) {
+
+        public Actor(final String s) {
             this.passwordHash = s;
         }
-        
-        public Actor(String s, int i) {
+
+        public Actor(final String s, final int i) {
             this.passwordHash = s;
             this.failedLoginAttempts = i;
         }
     }
-    
-    private Map<XId,Actor> actors;
-    
+
+    private final Map<XId,Actor> actors;
+
     private XAuthenticationDatabase secondLevel = null;
-    
+
     /**
      * @param secondLevel @CanBeNull. If not null, the second level is checked
      *            whenever there is no data in this database. This instance then
      *            acts as a cache. All write are also performed on second level
      *            (if not null).
      */
-    public CachingOrMemoryAuthenticationDatabase(XAuthenticationDatabase secondLevel) {
+    public CachingOrMemoryAuthenticationDatabase(final XAuthenticationDatabase secondLevel) {
         this.actors = new HashMap<XId,Actor>();
         this.secondLevel = secondLevel;
     }
-    
+
     /**
      * Clear this database and try to clear the underlying database as well.
      */
@@ -66,7 +66,7 @@ public class CachingOrMemoryAuthenticationDatabase implements XAuthenticationDat
         clearCache();
         this.secondLevel.clear();
     }
-    
+
     /**
      * Clears this database, but not the underlying second level persistence (if
      * there is any).
@@ -74,27 +74,28 @@ public class CachingOrMemoryAuthenticationDatabase implements XAuthenticationDat
     public void clearCache() {
         this.actors.clear();
     }
-    
+
     @Override
     @ReadOperation
-    public int getFailedLoginAttempts(XId actorId) {
+    public int getFailedLoginAttempts(final XId actorId) {
         XyAssert.xyAssert(actorId != null);
         assert actorId != null;
-        Actor actor = this.actors.get(actorId);
+        final Actor actor = this.actors.get(actorId);
         if(actor == null) {
             // try to get from 2nd level
             if(this.secondLevel != null) {
-                int i = this.secondLevel.getFailedLoginAttempts(actorId);
+                final int i = this.secondLevel.getFailedLoginAttempts(actorId);
                 if(i != 0) {
                     this.actors.put(actorId, new Actor(i));
                 }
             }
             return 0;
-        } else
-            return actor.failedLoginAttempts;
+        } else {
+			return actor.failedLoginAttempts;
+		}
     }
-    
-    private Actor getOrCreateActor(XId actorId) {
+
+    private Actor getOrCreateActor(final XId actorId) {
         Actor actor = this.actors.get(actorId);
         if(actor == null) {
             // try to get from 2nd level
@@ -103,35 +104,36 @@ public class CachingOrMemoryAuthenticationDatabase implements XAuthenticationDat
             if(this.secondLevel != null) {
                 i = this.secondLevel.getFailedLoginAttempts(actorId);
                 s = this.secondLevel.getPasswordHash(actorId);
-                
+
             }
             actor = new Actor(s, i);
             this.actors.put(actorId, actor);
         }
         return actor;
     }
-    
+
     @Override
     @ReadOperation
-    public String getPasswordHash(XId actorId) {
+    public String getPasswordHash(final XId actorId) {
         XyAssert.xyAssert(actorId != null);
         assert actorId != null;
-        Actor actor = this.actors.get(actorId);
+        final Actor actor = this.actors.get(actorId);
         if(actor == null) {
             if(this.secondLevel != null) {
-                String s = this.secondLevel.getPasswordHash(actorId);
+                final String s = this.secondLevel.getPasswordHash(actorId);
                 if(s != null) {
                     this.actors.put(actorId, new Actor(s));
                 }
             }
             return null;
-        } else
-            return actor.passwordHash;
+        } else {
+			return actor.passwordHash;
+		}
     }
-    
+
     @Override
     @ModificationOperation
-    public int incrementFailedLoginAttempts(XId actorId) {
+    public int incrementFailedLoginAttempts(final XId actorId) {
         int failedLoginAttepts = getFailedLoginAttempts(actorId);
         failedLoginAttepts++;
         getOrCreateActor(actorId).failedLoginAttempts = failedLoginAttepts;
@@ -140,13 +142,13 @@ public class CachingOrMemoryAuthenticationDatabase implements XAuthenticationDat
         }
         return failedLoginAttepts;
     }
-    
+
     @Override
     @ModificationOperation
-    public void removePasswordHash(XId actorId) {
+    public void removePasswordHash(final XId actorId) {
         XyAssert.xyAssert(actorId != null);
         assert actorId != null;
-        Actor actor = this.actors.get(actorId);
+        final Actor actor = this.actors.get(actorId);
         if(actor != null) {
             actor.passwordHash = null;
         }
@@ -154,11 +156,11 @@ public class CachingOrMemoryAuthenticationDatabase implements XAuthenticationDat
             this.secondLevel.removePasswordHash(actorId);
         }
     }
-    
+
     @Override
     @ModificationOperation
-    public void resetFailedLoginAttempts(XId actorId) {
-        Actor actor = this.actors.get(actorId);
+    public void resetFailedLoginAttempts(final XId actorId) {
+        final Actor actor = this.actors.get(actorId);
         if(actor != null) {
             actor.failedLoginAttempts = 0;
         }
@@ -166,14 +168,14 @@ public class CachingOrMemoryAuthenticationDatabase implements XAuthenticationDat
             this.secondLevel.resetFailedLoginAttempts(actorId);
         }
     }
-    
+
     @Override
     @ModificationOperation
-    public void setPasswordHash(XId actorId, String passwordHash) {
+    public void setPasswordHash(final XId actorId, final String passwordHash) {
         getOrCreateActor(actorId).passwordHash = passwordHash;
         if(this.secondLevel != null) {
             this.secondLevel.setPasswordHash(actorId, passwordHash);
         }
     }
-    
+
 }

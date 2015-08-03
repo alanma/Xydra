@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.core.XX;
@@ -25,37 +26,37 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
  * Performs all the logic for {@link RepoBranchWidget}s.
- * 
+ *
  * So it
- * 
+ *
  * <ul>
  * <li>fetches Model IDs from the server (and deactivates the option afterwards)
  * <li>adds new Models
  * <li>builds {@link ModelBranchWidget}s
  * <li>registers listeners for {@link RepoChangedEvent}s which
  * </ul>
- * 
+ *
  * The listeners react, when
  * <ul>
  * <li>models from the persistence are indexed (IDs fetched from the server and
  * locally indexed) and
  * <li>when a new model is created
  * </ul>
- * 
+ *
  * @author kahmann
- * 
+ *
  */
 public class RepoBranchPresenter extends SelectionTreePresenter {
 
 	private static final Logger log = LoggerFactory.getLogger(RepoBranchPresenter.class);
 
-	private XAddress repoAddress;
+	private final XAddress repoAddress;
 	private HashMap<XId, ModelBranchPresenter> existingBranches;
 	private IRepoBranchWidget widget;
 	boolean expanded = false;
-	private Set<HandlerRegistration> registrations = new HashSet<HandlerRegistration>();
+	private final Set<HandlerRegistration> registrations = new HashSet<HandlerRegistration>();
 
-	public RepoBranchPresenter(XAddress address) {
+	public RepoBranchPresenter(final XAddress address) {
 		this.repoAddress = address;
 
 	}
@@ -69,7 +70,7 @@ public class RepoBranchPresenter extends SelectionTreePresenter {
 		EventHelper.addRepoChangeListener(this.repoAddress, new IRepoChangedEventHandler() {
 
 			@Override
-			public void onRepoChange(RepoChangedEvent event) {
+			public void onRepoChange(final RepoChangedEvent event) {
 				processRepoDataChanges(event.getStatus());
 			}
 
@@ -79,20 +80,20 @@ public class RepoBranchPresenter extends SelectionTreePresenter {
 		return this.widget.asWidget();
 	}
 
-	private void processRepoDataChanges(EntityStatus status) {
+	private void processRepoDataChanges(final EntityStatus status) {
 		if (status.equals(EntityStatus.INDEXED)) {
-			this.collapse();
-			this.expand();
+			collapse();
+			expand();
 		} else if (status.equals(EntityStatus.EXTENDED)) {
 			if (!this.expanded) {
-				this.expand();
+				expand();
 			} else {
-				Iterator<XId> iterator = XyAdmin.getInstance().getModel()
+				final Iterator<XId> iterator = XyAdmin.getInstance().getModel()
 						.getLocallyStoredModelIDs(this.repoAddress);
 				while (iterator.hasNext()) {
-					XId xId = (XId) iterator.next();
+					final XId xId = iterator.next();
 					if (!this.existingBranches.containsKey(xId)) {
-						this.addModelBranch(xId);
+						addModelBranch(xId);
 					}
 				}
 			}
@@ -102,20 +103,20 @@ public class RepoBranchPresenter extends SelectionTreePresenter {
 
 	private void build() {
 
-		XId id = this.repoAddress.getRepository();
+		final XId id = this.repoAddress.getRepository();
 		this.widget.setAnchorText(id.toString());
 
-		Iterator<XId> iterator = XyAdmin.getInstance().getModel()
+		final Iterator<XId> iterator = XyAdmin.getInstance().getModel()
 				.getLocallyStoredModelIDs(this.repoAddress);
 
 		buildModelBranches(iterator);
 
 	}
 
-	private void buildModelBranches(Iterator<XId> iterator) {
+	private void buildModelBranches(final Iterator<XId> iterator) {
 
 		while (iterator.hasNext()) {
-			XId modelId = iterator.next();
+			final XId modelId = iterator.next();
 			if (!this.existingBranches.keySet().contains(modelId)) {
 
 				addModelBranch(modelId);
@@ -123,9 +124,9 @@ public class RepoBranchPresenter extends SelectionTreePresenter {
 		}
 	}
 
-	private void addModelBranch(XId modelId) {
-		XAddress modelAddress = XX.resolveModel(this.repoAddress, modelId);
-		ModelBranchPresenter newBranch = new ModelBranchPresenter(this, modelAddress);
+	private void addModelBranch(final XId modelId) {
+		final XAddress modelAddress = Base.resolveModel(this.repoAddress, modelId);
+		final ModelBranchPresenter newBranch = new ModelBranchPresenter(this, modelAddress);
 		this.widget.addBranch((ModelBranchWidget) newBranch.presentWidget());
 		// XyAdmin.getInstance().getModel().getRepo(this.repoAddress.getRepository())
 		// .getModel(modelId).getRevisionNumber();
@@ -133,7 +134,7 @@ public class RepoBranchPresenter extends SelectionTreePresenter {
 		this.existingBranches.put(modelId, newBranch);
 	}
 
-	void handleExpand(IRepoBranchWidget repoBranchWidget) {
+	void handleExpand(final IRepoBranchWidget repoBranchWidget) {
 		if (this.expanded) {
 			collapse();
 		} else {
@@ -143,7 +144,7 @@ public class RepoBranchPresenter extends SelectionTreePresenter {
 
 	void expand() {
 		this.existingBranches = new HashMap<XId, ModelBranchPresenter>();
-		this.build();
+		build();
 		this.widget.setExpandButtonText("-");
 		this.expanded = true;
 
@@ -164,23 +165,23 @@ public class RepoBranchPresenter extends SelectionTreePresenter {
 		this.existingBranches = null;
 		this.widget.setExpandButtonText("+");
 
-		this.unregistrateAllHandlers();
+		unregistrateAllHandlers();
 
 		this.expanded = false;
 	}
 
 	public void fetchModels() {
 		XyAdmin.getInstance().getController().fetchModelIds(this.repoAddress);
-		this.collapse();
+		collapse();
 		this.widget.deActivateFetchChilds();
 	}
 
-	public void openAddElementDialog(String string) {
+	public void openAddElementDialog(final String string) {
 		super.openAddElementDialog(this.repoAddress, string);
 
 	}
 
-	public void addRegistration(HandlerRegistration handler) {
+	public void addRegistration(final HandlerRegistration handler) {
 		this.registrations.add(handler);
 	}
 
@@ -194,7 +195,7 @@ public class RepoBranchPresenter extends SelectionTreePresenter {
 		log.info("unregistrated all handlers!");
 	}
 
-	public void removeRegistration(HandlerRegistration handler) {
+	public void removeRegistration(final HandlerRegistration handler) {
 		this.registrations.remove(handler);
 	}
 

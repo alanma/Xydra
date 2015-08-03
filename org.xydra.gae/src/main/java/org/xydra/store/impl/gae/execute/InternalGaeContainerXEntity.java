@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.xydra.store.impl.gae.execute;
 
@@ -23,12 +23,12 @@ import org.xydra.xgae.datastore.api.SEntity;
 /**
  * Internal helper class used by {@link IGaeChangesService} to access the
  * current model state.
- * 
+ *
  * Shared functionality between {@link InternalGaeModel} and
  * {@link InternalGaeObject}.
- * 
+ *
  * @author dscharrer
- * 
+ *
  * @param <C>
  *            type of child entities
  */
@@ -42,10 +42,10 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 	private final GaeLocks locks;
 	private final long rev;
 
-	protected InternalGaeContainerXEntity(IGaeChangesService changesService, XAddress addr,
-			long rev, GaeLocks locks) {
+	protected InternalGaeContainerXEntity(final IGaeChangesService changesService, final XAddress addr,
+			final long rev, final GaeLocks locks) {
 		assert rev >= 0
-				|| (rev == XEvent.REVISION_NOT_AVAILABLE && addr.getAddressedType() == XType.XOBJECT) : "rev="
+				|| rev == XEvent.REVISION_NOT_AVAILABLE && addr.getAddressedType() == XType.XOBJECT : "rev="
 				+ rev + " adressedType=" + addr.getAddressedType();
 		this.changesService = changesService;
 		assert addr.getAddressedType() == XType.XMODEL || addr.getAddressedType() == XType.XOBJECT;
@@ -68,7 +68,7 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 
 	protected abstract C loadChild(XAddress childAddr, SEntity childEntity);
 
-	public C getChild(XId fieldId) {
+	public C getChild(final XId fieldId) {
 
 		// don't look in this.cachedIds, as this might contain outdated
 		// information due to being based on GAE queries
@@ -81,10 +81,10 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 			return gf;
 		}
 
-		XAddress childAddr = resolveChild(this.addr, fieldId);
+		final XAddress childAddr = resolveChild(this.addr, fieldId);
 		assert this.locks.canRead(childAddr);
 
-		SEntity e = XGae.get().datastore().sync()
+		final SEntity e = XGae.get().datastore().sync()
 				.getEntity(KeyStructure.createEntityKey(childAddr));
 		if (e == null) {
 			this.cachedMisses.add(fieldId);
@@ -96,7 +96,7 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 		return gf;
 	}
 
-	public boolean hasChild(XId fieldId) {
+	public boolean hasChild(final XId fieldId) {
 		return this.cachedIds != null ? this.cachedIds.contains(fieldId)
 				: getChild(fieldId) != null;
 	}

@@ -8,6 +8,7 @@ import java.util.List;
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.Setting;
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -33,7 +34,7 @@ import org.xydra.xgae.datastore.api.SPreparedQuery;
 /**
  * The outside (standard) execution context, which is different from the
  * {@link ContextInTxn}.
- * 
+ *
  * @author xamde
  */
 public class ContextBeforeCommand implements XRevWritableModel,
@@ -41,22 +42,22 @@ public class ContextBeforeCommand implements XRevWritableModel,
 
 	private static final Logger log = LoggerFactory.getLogger(ContextBeforeCommand.class);
 
-	private IGaeSnapshotService snapshotService;
+	private final IGaeSnapshotService snapshotService;
 
-	public ContextBeforeCommand(@NeverNull XAddress modelAddress, @NeverNull GaeModelRevInfo info,
-			IGaeSnapshotService snapshotService) {
+	public ContextBeforeCommand(@NeverNull final XAddress modelAddress, @NeverNull final GaeModelRevInfo info,
+			final IGaeSnapshotService snapshotService) {
 		super();
 		this.modelAddress = modelAddress;
 		this.info = info;
 		this.snapshotService = snapshotService;
 	}
 
-	private GaeModelRevInfo info;
+	private final GaeModelRevInfo info;
 
 	public XReadableModel getModelSnapshot() {
 		// TODO using tentative here - good idea?
-		long modelRev = getInfo().getLastSuccessChange();
-		XRevWritableModel modelSnapshot = this.snapshotService.getModelSnapshot(modelRev, false);
+		final long modelRev = getInfo().getLastSuccessChange();
+		final XRevWritableModel modelSnapshot = this.snapshotService.getModelSnapshot(modelRev, false);
 		return modelSnapshot;
 	}
 
@@ -72,21 +73,21 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	}
 
 	@SuppressWarnings("unused")
-	private static XAddress fromKey(SKey key) {
+	private static XAddress fromKey(final SKey key) {
 		String localName = key.getName();
 		XyAssert.xyAssert(localName.startsWith("tos"));
 		localName = localName.substring("tos".length());
-		XAddress address = XX.toAddress(localName);
+		final XAddress address = Base.toAddress(localName);
 		return address;
 	}
 
 	/**
 	 * Internally used also to generate the key prefix
-	 * 
+	 *
 	 * @param objectOrModelAddress
 	 * @return key
 	 */
-	private static String toKey(XAddress objectOrModelAddress) {
+	private static String toKey(final XAddress objectOrModelAddress) {
 		return "tos" + objectOrModelAddress;
 	}
 
@@ -94,29 +95,29 @@ public class ContextBeforeCommand implements XRevWritableModel,
 
 	UniCache<TentativeObjectState> tosCache = new UniCache<TentativeObjectState>(this, KIND_TOS);
 
-	private XAddress modelAddress;
+	private final XAddress modelAddress;
 
 	// FIXME was 1,false,true before - makes tests fail
 	@Setting("Where to cache TOS")
-	private StorageOptions storeOpts = StorageOptions.create(0, false, true, false);
+	private final StorageOptions storeOpts = StorageOptions.create(0, false, true, false);
 
 	/** implement {@link CacheEntryHandler} */
 	@Override
-	public TentativeObjectState fromEntity(SEntity entity) {
+	public TentativeObjectState fromEntity(final SEntity entity) {
 		return TosUtils.fromEntity_static(entity, this.modelAddress);
 	}
 
 	/** implement {@link CacheEntryHandler} */
 	@Override
-	public TentativeObjectState fromSerializable(Serializable s) {
+	public TentativeObjectState fromSerializable(final Serializable s) {
 		return (TentativeObjectState) s;
 	}
 
 	public static List<TentativeObjectState> getAllTentativeObjectStatesOfModel(
-			XAddress modelAddress) {
+			final XAddress modelAddress) {
 
 		/* Make sure to keep in sync with #toKey(..) */
-		String keyPrefix = "tos/" + modelAddress.getRepository() + "/" + modelAddress.getModel();
+		final String keyPrefix = "tos/" + modelAddress.getRepository() + "/" + modelAddress.getModel();
 
 		// Query query = new Query(KIND_TOS);
 
@@ -140,7 +141,7 @@ public class ContextBeforeCommand implements XRevWritableModel,
 
 		// log.info("Firing query " + prepQuery.toString());
 
-		SPreparedQuery preparedQuery = XGae
+		final SPreparedQuery preparedQuery = XGae
 				.get()
 				.datastore()
 				.sync()
@@ -149,13 +150,13 @@ public class ContextBeforeCommand implements XRevWritableModel,
 
 		log.info("Firing query " + preparedQuery.toString());
 		preparedQuery.setChunkSize(128);
-		List<SEntity> entityList = preparedQuery.asList();
+		final List<SEntity> entityList = preparedQuery.asList();
 
-		List<TentativeObjectState> tosList = new ArrayList<TentativeObjectState>(entityList.size());
+		final List<TentativeObjectState> tosList = new ArrayList<TentativeObjectState>(entityList.size());
 		log.info("got " + entityList.size() + " results");
 
-		for (SEntity entity : entityList) {
-			TentativeObjectState tos = TosUtils.fromEntity_static(entity, modelAddress);
+		for (final SEntity entity : entityList) {
+			final TentativeObjectState tos = TosUtils.fromEntity_static(entity, modelAddress);
 			tosList.add(tos);
 		}
 
@@ -163,16 +164,16 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	}
 
 	@CanBeNull
-	TentativeObjectState getTentativeObjectState(XId objectId) {
+	TentativeObjectState getTentativeObjectState(final XId objectId) {
 		// look in datastore
-		XAddress objectAddress = XX.resolveObject(this.modelAddress, objectId);
-		String key = toKey(objectAddress);
+		final XAddress objectAddress = Base.resolveObject(this.modelAddress, objectId);
+		final String key = toKey(objectAddress);
 		TentativeObjectState tos = this.tosCache.get(key, this.storeOpts);
 
 		// FIXME how to deal with legacy?
 		if (tos == null) {
-			long tentativeModelRev = getInfo().getLastSuccessChange();
-			SimpleObject simpleObject = new SimpleObject(objectAddress);
+			final long tentativeModelRev = getInfo().getLastSuccessChange();
+			final SimpleObject simpleObject = new SimpleObject(objectAddress);
 			simpleObject.setRevisionNumber(tentativeModelRev);
 			tos = new TentativeObjectState(simpleObject, false, tentativeModelRev);
 
@@ -192,23 +193,23 @@ public class ContextBeforeCommand implements XRevWritableModel,
 		return tos;
 	}
 
-	void saveTentativeObjectState(@NeverNull TentativeObjectState tos) {
+	void saveTentativeObjectState(@NeverNull final TentativeObjectState tos) {
 		XyAssert.xyAssert(tos != null);
 		assert tos != null;
 
-		String key = toKey(tos.getAddress());
+		final String key = toKey(tos.getAddress());
 		this.tosCache.put(key, tos, this.storeOpts);
 	}
 
 	/** implement {@link CacheEntryHandler} */
 	@Override
-	public SEntity toEntity(SKey datastoreKey, @CanBeNull TentativeObjectState tos) {
+	public SEntity toEntity(final SKey datastoreKey, @CanBeNull final TentativeObjectState tos) {
 		return TosUtils.toEntity(datastoreKey, tos);
 	}
 
 	/** implement {@link CacheEntryHandler} */
 	@Override
-	public Serializable toSerializable(TentativeObjectState entry) {
+	public Serializable toSerializable(final TentativeObjectState entry) {
 		return entry;
 	}
 
@@ -219,7 +220,7 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	}
 
 	@Override
-	public boolean hasObject(XId objectId) {
+	public boolean hasObject(final XId objectId) {
 		return getObject(objectId) != null;
 	}
 
@@ -249,8 +250,8 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	}
 
 	@Override
-	public boolean removeObject(XId objectId) {
-		TentativeObjectState tos = getTentativeObjectState(objectId);
+	public boolean removeObject(final XId objectId) {
+		final TentativeObjectState tos = getTentativeObjectState(objectId);
 		tos.setObjectExists(false);
 		// FIXME which model rev?
 		tos.setModelRev(getRevisionNumber());
@@ -259,8 +260,8 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	}
 
 	@Override
-	public void addObject(XRevWritableObject object) {
-		TentativeObjectState tos = getTentativeObjectState(object.getId());
+	public void addObject(final XRevWritableObject object) {
+		final TentativeObjectState tos = getTentativeObjectState(object.getId());
 		tos.setObjectExists(true);
 		tos.setObjectState(object);
 		// FIXME which model rev?
@@ -269,10 +270,10 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	}
 
 	@Override
-	public TentativeObjectState createObject(XId objectId) {
+	public TentativeObjectState createObject(final XId objectId) {
 		TentativeObjectState object = getObject(objectId);
 		if (object == null) {
-			SimpleObject simpleObject = new SimpleObject(getObjectAddress(objectId));
+			final SimpleObject simpleObject = new SimpleObject(getObjectAddress(objectId));
 			object = new TentativeObjectState(simpleObject, true, getRevisionNumber());
 		} else {
 			object.setObjectExists(true);
@@ -282,13 +283,13 @@ public class ContextBeforeCommand implements XRevWritableModel,
 		return object;
 	}
 
-	private XAddress getObjectAddress(XId objectId) {
-		return XX.resolveObject(getAddress(), objectId);
+	private XAddress getObjectAddress(final XId objectId) {
+		return Base.resolveObject(getAddress(), objectId);
 	}
 
 	@Override
-	public TentativeObjectState getObject(XId objectId) {
-		TentativeObjectState tos = getTentativeObjectState(objectId);
+	public TentativeObjectState getObject(final XId objectId) {
+		final TentativeObjectState tos = getTentativeObjectState(objectId);
 		if (tos == null) {
 			// TODO really?
 			return null;
@@ -300,13 +301,13 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	}
 
 	@Override
-	public void setRevisionNumber(long rev) {
+	public void setRevisionNumber(final long rev) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public String toString() {
-		return "ctxBefore @" + this.modelAddress + " r" + this.getRevisionNumber();
+		return "ctxBefore @" + this.modelAddress + " r" + getRevisionNumber();
 	}
 
 	@Override

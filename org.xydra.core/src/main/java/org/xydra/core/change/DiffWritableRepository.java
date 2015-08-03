@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.rmof.XWritableModel;
@@ -21,27 +22,27 @@ import org.xydra.log.api.LoggerFactory;
 /**
  * All write operations are kept here and can be retrieved as a set of added
  * models, removed models and changed models.
- * 
+ *
  * TODO manage pre-fetching config (currently: always on)
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class DiffWritableRepository extends AbstractDelegatingWritableRepository {
-	
+
 	private static final Logger log = LoggerFactory.getLogger(DiffWritableRepository.class);
-	
-	public DiffWritableRepository(XWritableRepository baseRepository) {
+
+	public DiffWritableRepository(final XWritableRepository baseRepository) {
 		super(baseRepository);
 	}
-	
+
 	protected Map<XId,DiffWritableModel> added = new HashMap<XId,DiffWritableModel>();
 	protected Map<XId,DiffWritableModel> potentiallyChanged = new HashMap<XId,DiffWritableModel>();
 	protected Set<XId> removed = new HashSet<XId>();
-	
+
 	/* make sure to return always the same DiffWritableModel references */
 	@Override
-	public XWritableModel createModel(XId modelId) {
+	public XWritableModel createModel(final XId modelId) {
 		if(this.added.containsKey(modelId)) {
 			return this.added.get(modelId);
 		}
@@ -49,14 +50,18 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 			return this.potentiallyChanged.get(modelId);
 		}
 		if(this.baseRepository.hasModel(modelId)) {
-			if(log.isDebugEnabled()) log.debug("model '" + modelId + "' existed already");
-			XWritableModel baseModel = this.baseRepository.getModel(modelId);
-			DiffWritableModel diffModel = new DiffWritableModel(baseModel);
+			if(log.isDebugEnabled()) {
+				log.debug("model '" + modelId + "' existed already");
+			}
+			final XWritableModel baseModel = this.baseRepository.getModel(modelId);
+			final DiffWritableModel diffModel = new DiffWritableModel(baseModel);
 			this.potentiallyChanged.put(modelId, diffModel);
 			return diffModel;
 		} else {
-			if(log.isDebugEnabled()) log.debug("model '" + modelId + "' did not exist yet");
-			DiffWritableModel diffModel = new DiffWritableModel(new SimpleModel(XX.toAddress(
+			if(log.isDebugEnabled()) {
+				log.debug("model '" + modelId + "' did not exist yet");
+			}
+			final DiffWritableModel diffModel = new DiffWritableModel(new SimpleModel(Base.toAddress(
 			        getId(), modelId, null, null)));
 			this.added.put(modelId, diffModel);
 			this.removed.remove(modelId);
@@ -64,36 +69,36 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 			return diffModel;
 		}
 	}
-	
+
 	@Override
 	public Iterator<XId> iterator() {
 		return modelIds().iterator();
 	}
-	
+
 	private Set<XId> modelIds() {
-		Set<XId> ids = IndexUtils.toSet(this.baseRepository.iterator());
-		for(XId id : this.removed) {
+		final Set<XId> ids = IndexUtils.toSet(this.baseRepository.iterator());
+		for(final XId id : this.removed) {
 			ids.remove(id);
 		}
-		for(XId id : this.added.keySet()) {
+		for(final XId id : this.added.keySet()) {
 			ids.add(id);
 		}
 		return ids;
 	}
-	
+
 	@Override
-	public boolean hasModel(XId id) {
+	public boolean hasModel(final XId id) {
 		return modelIds().contains(id);
 	}
-	
+
 	@Override
 	public boolean isEmpty() {
 		return modelIds().isEmpty();
 	}
-	
+
 	/* make sure to return always the same DiffWritableModel references */
 	@Override
-	public XWritableModel getModel(XId modelId) {
+	public XWritableModel getModel(final XId modelId) {
 		XWritableModel model = this.added.get(modelId);
 		if(model == null) {
 			model = this.potentiallyChanged.get(modelId);
@@ -107,59 +112,59 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 		}
 		return model;
 	}
-	
+
 	@Override
-	public boolean removeModel(XId modelId) {
+	public boolean removeModel(final XId modelId) {
 		this.added.remove(modelId);
 		this.potentiallyChanged.remove(modelId);
 		return this.removed.add(modelId);
 	}
-	
+
 	public Collection<DiffWritableModel> getAdded() {
 		return this.added.values();
 	}
-	
+
 	public Collection<DiffWritableModel> getPotentiallyChanged() {
 		return this.potentiallyChanged.values();
 	}
-	
+
 	public Set<XId> getRemoved() {
 		return this.removed;
 	}
-	
+
 	public boolean hasChanges() {
 		if(!this.added.isEmpty() || !this.removed.isEmpty()) {
 			return true;
 		}
-		for(DiffWritableModel model : this.potentiallyChanged.values()) {
+		for(final DiffWritableModel model : this.potentiallyChanged.values()) {
 			if(model.hasChanges()) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	public String changesToString() {
-		StringBuffer buf = new StringBuffer();
-		for(XId modelId : this.added.keySet()) {
+		final StringBuffer buf = new StringBuffer();
+		for(final XId modelId : this.added.keySet()) {
 			buf.append("=== ADDED " + modelId + " ===<br/>\n");
-			DiffWritableModel model = this.added.get(modelId);
-			for(XAtomicCommand command : model.toCommandList(true)) {
+			final DiffWritableModel model = this.added.get(modelId);
+			for(final XAtomicCommand command : model.toCommandList(true)) {
 				buf.append(" " + command + " <br/>\n");
 			}
 		}
-		for(XId modelId : this.removed) {
+		for(final XId modelId : this.removed) {
 			buf.append("=== REMOVED " + modelId + " ===<br/>\n");
 		}
-		for(DiffWritableModel model : this.potentiallyChanged.values()) {
+		for(final DiffWritableModel model : this.potentiallyChanged.values()) {
 			if(model.hasChanges()) {
 				buf.append("=== CHANGED " + model.getId() + " === <br/>\n");
-				for(XAtomicCommand command : model.toCommandList(true)) {
+				for(final XAtomicCommand command : model.toCommandList(true)) {
 					buf.append(" " + command + " <br/>\n");
 				}
 			}
 		}
 		return buf.toString();
 	}
-	
+
 }

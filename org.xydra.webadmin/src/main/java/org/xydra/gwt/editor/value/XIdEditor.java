@@ -1,5 +1,6 @@
 package org.xydra.gwt.editor.value;
 
+import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.core.XX;
 
@@ -23,11 +24,12 @@ public class XIdEditor extends AtomicXValueEditor<XId> implements KeyPressHandle
 
 	private final TextBox editor = new TextBox();
 
-	public XIdEditor(XId value, EditListener listener) {
+	public XIdEditor(final XId value, final EditListener listener) {
 		super(listener);
 
-		if (value != null)
+		if (value != null) {
 			this.editor.setText(value.toString());
+		}
 
 		this.editor.addKeyPressHandler(this);
 		this.editor.addKeyDownHandler(this);
@@ -39,7 +41,7 @@ public class XIdEditor extends AtomicXValueEditor<XId> implements KeyPressHandle
 	public XId getValue() {
 		XId xid;
 		// try {
-		xid = XX.toId(this.editor.getText());
+		xid = Base.toId(this.editor.getText());
 		// } catch(IllegalArgumentException iae) {
 		// xid = XValueUtils.generateXid(this.editor.getText());
 		// if(xid == null) {
@@ -51,7 +53,7 @@ public class XIdEditor extends AtomicXValueEditor<XId> implements KeyPressHandle
 	}
 
 	@Override
-	public void onKeyPress(KeyPressEvent e) {
+	public void onKeyPress(final KeyPressEvent e) {
 
 		// char cc = e.getCharCode();
 		//
@@ -87,7 +89,7 @@ public class XIdEditor extends AtomicXValueEditor<XId> implements KeyPressHandle
 	}
 
 	@Override
-	public void onKeyDown(KeyDownEvent e) {
+	public void onKeyDown(final KeyDownEvent e) {
 		// boolean allowed = true;
 		//
 		// switch(e.getNativeKeyCode()) {

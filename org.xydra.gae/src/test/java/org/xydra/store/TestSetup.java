@@ -1,6 +1,8 @@
 package org.xydra.store;
 
 import org.junit.Test;
+import org.xydra.base.Base;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
@@ -30,25 +32,25 @@ public class TestSetup {
 	public void testSetup() throws Exception {
 		XydraRuntime.init();
 
-		XId repoId = XX.toId("repo1");
+		final XId repoId = Base.toId("repo1");
 
 		if (this.store == null) {
 			this.store = new DelegatingAllowAllStore(new GaePersistence(repoId));
 		}
 
-		this.factory = X.getCommandFactory();
+		this.factory = BaseRuntime.getCommandFactory();
 
-		XId modelId1 = XX.toId("TestModel1");
-		XId objectId1 = XX.toId("TestObject1");
+		final XId modelId1 = Base.toId("TestModel1");
+		final XId objectId1 = Base.toId("TestObject1");
 
-		XCommand modelCommand1 = this.factory.createAddModelCommand(repoId, modelId1, true);
+		final XCommand modelCommand1 = this.factory.createAddModelCommand(repoId, modelId1, true);
 
-		XCommand objectCommand1 = this.factory.createAddObjectCommand(
-				XX.resolveModel(repoId, modelId1), objectId1, true);
+		final XCommand objectCommand1 = this.factory.createAddObjectCommand(
+				Base.resolveModel(repoId, modelId1), objectId1, true);
 
-		XCommand[] commands = { modelCommand1, objectCommand1 };
+		final XCommand[] commands = { modelCommand1, objectCommand1 };
 
-		XId actorId = XX.toId("actor1");
+		final XId actorId = Base.toId("actor1");
 		this.store.executeCommands(actorId, "bla", commands, new CB<BatchedResult<Long>[]>());
 		XydraRuntime.finishRequest();
 	}
@@ -60,20 +62,20 @@ public class TestSetup {
 		log.debug("logtest 1-2-3");
 		XydraRuntime.init();
 
-		XId actorId = XX.toId("actor1");
-		XId repoId = XX.toId("repo1");
-		XId modelId1 = XX.toId("TestModel1");
-		XId objectId1 = XX.toId("TestObject1");
-		GetWithAddressRequest modelAddressRequest = new GetWithAddressRequest(XX.resolveModel(
+		final XId actorId = Base.toId("actor1");
+		final XId repoId = Base.toId("repo1");
+		final XId modelId1 = Base.toId("TestModel1");
+		final XId objectId1 = Base.toId("TestObject1");
+		final GetWithAddressRequest modelAddressRequest = new GetWithAddressRequest(Base.resolveModel(
 				repoId, modelId1));
 
-		this.factory = X.getCommandFactory();
-		XCommand modelCommand1 = this.factory.createAddModelCommand(repoId, modelId1, true);
-		XCommand objectCommand1 = this.factory.createAddObjectCommand(
-				XX.resolveModel(repoId, modelId1), objectId1, true);
+		this.factory = BaseRuntime.getCommandFactory();
+		final XCommand modelCommand1 = this.factory.createAddModelCommand(repoId, modelId1, true);
+		final XCommand objectCommand1 = this.factory.createAddObjectCommand(
+				Base.resolveModel(repoId, modelId1), objectId1, true);
 
-		XydraPersistence pers = new GaePersistence(repoId);
-		ModelRevision modelRev = pers.getModelRevision(modelAddressRequest);
+		final XydraPersistence pers = new GaePersistence(repoId);
+		final ModelRevision modelRev = pers.getModelRevision(modelAddressRequest);
 		log.debug("modelRev = " + modelRev);
 		// assertFalse("persistence has just been created",
 		// modelRev.modelExists());
@@ -88,19 +90,19 @@ public class TestSetup {
 	public void testSetupPersistenceModelCommand() throws Exception {
 		XydraRuntime.init();
 
-		XId repoId = XX.toId("repo1");
-		XId actorId = XX.toId("actor1");
-		XId modelId1 = XX.toId("TestModel1");
-		XId objectId1 = XX.toId("TestObject1");
+		final XId repoId = Base.toId("repo1");
+		final XId actorId = Base.toId("actor1");
+		final XId modelId1 = Base.toId("TestModel1");
+		final XId objectId1 = Base.toId("TestObject1");
 
-		XydraPersistence pers = new GaePersistence(repoId);
+		final XydraPersistence pers = new GaePersistence(repoId);
 
-		XCommand modelCommand1 = X.getCommandFactory()
+		final XCommand modelCommand1 = BaseRuntime.getCommandFactory()
 				.createAddModelCommand(repoId, modelId1, true);
 		pers.executeCommand(actorId, modelCommand1);
 
-		XCommand objectCommand1 = X.getCommandFactory().createAddObjectCommand(
-				XX.resolveModel(repoId, modelId1), objectId1, true);
+		final XCommand objectCommand1 = BaseRuntime.getCommandFactory().createAddObjectCommand(
+				Base.resolveModel(repoId, modelId1), objectId1, true);
 		pers.executeCommand(actorId, objectCommand1);
 		XydraRuntime.finishRequest();
 	}
@@ -108,12 +110,12 @@ public class TestSetup {
 	static class CB<T> implements Callback<T> {
 
 		@Override
-		public void onFailure(Throwable exception) {
+		public void onFailure(final Throwable exception) {
 			throw new RuntimeException(exception);
 		}
 
 		@Override
-		public void onSuccess(T object) {
+		public void onSuccess(final T object) {
 			System.out.println("Success " + object);
 		}
 

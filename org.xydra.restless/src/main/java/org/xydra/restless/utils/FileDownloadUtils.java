@@ -18,7 +18,7 @@ public class FileDownloadUtils {
 
 	/**
 	 * A ZOS is used like this
-	 * 
+	 *
 	 * <pre>
 	 * For each entry:
 	 * ...
@@ -29,7 +29,7 @@ public class FileDownloadUtils {
 	 * ...
 	 * zos.finish();
 	 * </pre>
-	 * 
+	 *
 	 * @param res
 	 *            ..
 	 * @param archivename
@@ -40,9 +40,9 @@ public class FileDownloadUtils {
 	 *             ...
 	 */
 
-	public static ZipOutputStream toZipFileDownload(@NeverNull HttpServletResponse res,
-			@NeverNull String archivename) throws IOException {
-		String fullArchiveName = archivename + ".zip";
+	public static ZipOutputStream toZipFileDownload(@NeverNull final HttpServletResponse res,
+			@NeverNull final String archivename) throws IOException {
+		final String fullArchiveName = archivename + ".zip";
 
 		log.info("Wrapping in zipfile named " + fullArchiveName);
 
@@ -51,13 +51,13 @@ public class FileDownloadUtils {
 		res.setContentType("application/zip");
 		res.addHeader("Content-Disposition", "attachment; filename=\"" + fullArchiveName + "\"");
 
-		ZipOutputStream zos = new ZipOutputStream(res.getOutputStream());
+		final ZipOutputStream zos = new ZipOutputStream(res.getOutputStream());
 		return zos;
 	}
 
 	/**
 	 * This sets no "Content-Type" headers.
-	 * 
+	 *
 	 * @param res
 	 * @NeverNull
 	 * @param archivename
@@ -67,20 +67,20 @@ public class FileDownloadUtils {
 	 * @return an OutputStream to which you can write
 	 * @throws IOException
 	 */
-	public static OutputStream toFileDownload(@NeverNull HttpServletResponse res,
-			@NeverNull String archivename, @NeverNull String extension) throws IOException {
+	public static OutputStream toFileDownload(@NeverNull final HttpServletResponse res,
+			@NeverNull final String archivename, @NeverNull final String extension) throws IOException {
 
-		String fullFileName = archivename + "." + extension;
+		final String fullFileName = archivename + "." + extension;
 		log.info("Wrapping in file named " + fullFileName);
 		res.addHeader("Content-Disposition", "attachment; filename=\"" + fullFileName + "\"");
-		OutputStream os = res.getOutputStream();
+		final OutputStream os = res.getOutputStream();
 		return os;
 
 	}
 
 	/**
 	 * This sets also "Content-Type" headers.
-	 * 
+	 *
 	 * @param res
 	 * @NeverNull
 	 * @param archivename
@@ -92,9 +92,9 @@ public class FileDownloadUtils {
 	 * @return an OutputStream to which you can write
 	 * @throws IOException
 	 */
-	public static OutputStream toFileDownload(@NeverNull HttpServletResponse res,
-			@NeverNull String archivename, @NeverNull String extension,
-			@NeverNull String contentType) throws IOException {
+	public static OutputStream toFileDownload(@NeverNull final HttpServletResponse res,
+			@NeverNull final String archivename, @NeverNull final String extension,
+			@NeverNull final String contentType) throws IOException {
 		/*
 		 * via
 		 * http://stackoverflow.com/questions/398237/how-to-use-the-csv-mime-

@@ -11,9 +11,9 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * In-memory representation for some change events. Required for
  * {@link GaeChangesServiceImpl3}
- * 
+ *
  * This class is NOT thread-safe.
- * 
+ *
  * @author xamde
  */
 public class AllChanges {
@@ -22,13 +22,13 @@ public class AllChanges {
 	private static final Logger log = LoggerFactory.getLogger(AllChanges.class);
 
 	/** Just the debug name */
-	private Map<Long, GaeChange> localMap = new HashMap<Long, GaeChange>();
-	private CommitedChanges commitedChanges;
+	private final Map<Long, GaeChange> localMap = new HashMap<Long, GaeChange>();
+	private final CommitedChanges commitedChanges;
 
 	/**
 	 * @param modelAddress
 	 */
-	public AllChanges(XAddress modelAddress) {
+	public AllChanges(final XAddress modelAddress) {
 		this.commitedChanges = new CommitedChanges(modelAddress);
 	}
 
@@ -37,7 +37,7 @@ public class AllChanges {
 	 * @return cached change for this revisions. Can be null if (1) is really
 	 *         null, (2) was just never indexed
 	 */
-	GaeChange getCachedChange(long rev) {
+	GaeChange getCachedChange(final long rev) {
 		GaeChange change = this.commitedChanges.getCachedChange(rev);
 		if (change == null) {
 			change = this.localMap.get(rev);
@@ -47,11 +47,11 @@ public class AllChanges {
 
 	/**
 	 * Cache given change
-	 * 
+	 *
 	 * @param change
 	 *            to be cached; never null
 	 */
-	public void cacheCommittedChange(GaeChange change) {
+	public void cacheCommittedChange(final GaeChange change) {
 		XyAssert.xyAssert(change != null);
 		assert change != null;
 

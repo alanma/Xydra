@@ -4,6 +4,7 @@ import java.net.URI;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.xydra.base.Base;
 import org.xydra.core.XX;
 import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.XydraSerializer;
@@ -16,7 +17,7 @@ public class LocalJsonRestClientWriteMethodsTest extends AbstractRestClientWrite
 
 	static {
 		serverconfig = new ServerConfig(URI.create("http://localhost:8973/xydra/store/v1/"),
-				XX.toId("testActor"), "secret", SecureMemoryStore.DEFAULT_REPOSITORY_ID);
+				Base.toId("testActor"), "secret", SecureMemoryStore.DEFAULT_REPOSITORY_ID);
 	}
 
 	private static TestServer server;

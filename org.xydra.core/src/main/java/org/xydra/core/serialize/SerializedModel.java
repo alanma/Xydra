@@ -7,6 +7,7 @@ import java.util.List;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
@@ -53,9 +54,9 @@ import org.xydra.sharedutils.XyAssert;
  * Collection of methods to (de-)serialize variants of
  * {@link XReadableRepository}, {@link XReadableModel}, {@link XReadableObject}
  * and {@link XReadableField} to and from their XML/JSON representation.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 @RunsInGWT(true)
 @RunsInAppEngine(true)
@@ -89,44 +90,44 @@ public class SerializedModel {
 	private static final String XOBJECT_ELEMENT = "xobject";
 	private static final String XREPOSITORY_ELEMENT = "xrepository";
 
-	private static long getBaseRevisionAttribute(XydraElement element) {
-		Object revisionString = element.getAttribute(STARTREVISION_ATTRIBUTE);
+	private static long getBaseRevisionAttribute(final XydraElement element) {
+		final Object revisionString = element.getAttribute(STARTREVISION_ATTRIBUTE);
 		if (revisionString == null) {
 			return NO_REVISION;
 		}
 		return SerializingUtils.toLong(revisionString);
 	}
 
-	private static long getRevisionAttribute(XydraElement element) {
-		Object revisionString = element.getAttribute(REVISION_ATTRIBUTE);
+	private static long getRevisionAttribute(final XydraElement element) {
+		final Object revisionString = element.getAttribute(REVISION_ATTRIBUTE);
 		if (revisionString == null) {
 			return NO_REVISION;
 		}
 		return SerializingUtils.toLong(revisionString);
 	}
 
-	public static long getSyncRevisionAttribute(XydraElement element) {
-		Object revisionString = element.getAttribute(SYNC_REVISION_ATTRIBUTE);
+	public static long getSyncRevisionAttribute(final XydraElement element) {
+		final Object revisionString = element.getAttribute(SYNC_REVISION_ATTRIBUTE);
 		if (revisionString == null) {
 			return NO_REVISION;
 		}
 		return SerializingUtils.toLong(revisionString);
 	}
 
-	public static boolean isModel(XydraElement element) {
+	public static boolean isModel(final XydraElement element) {
 		return element == null || XMODEL_ELEMENT.equals(element.getType());
 	}
 
-	public static XChangeLogState loadChangeLogState(XydraElement element, XAddress baseAddr) {
+	public static XChangeLogState loadChangeLogState(final XydraElement element, final XAddress baseAddr) {
 		XydraElement logElement = element.getChild(SYNCLOG_NAME, SYNCLOG_ELEMENT);
 		if (logElement != null) {
-			XSyncLogState log = new MemorySyncLogState(baseAddr);
+			final XSyncLogState log = new MemorySyncLogState(baseAddr);
 			loadSyncLogState(logElement, log);
 			return log;
 		}
 		logElement = element.getChild(LOG_NAME, XCHANGELOG_ELEMENT);
 		if (logElement != null) {
-			XChangeLogState log = new MemoryChangeLogState(baseAddr);
+			final XChangeLogState log = new MemoryChangeLogState(baseAddr);
 			loadChangeLogState(logElement, log);
 			return log;
 		}
@@ -136,26 +137,26 @@ public class SerializedModel {
 	/**
 	 * Load the change log represented by the given XML/JSON element into an
 	 * {@link XChangeLogState}.
-	 * 
+	 *
 	 * @param element
-	 * 
+	 *
 	 * @param state The change log state to load into.
 	 */
-	public static void loadChangeLogState(XydraElement element, XChangeLogState state) {
+	public static void loadChangeLogState(final XydraElement element, final XChangeLogState state) {
 		SerializingUtils.checkElementType(element, XCHANGELOG_ELEMENT);
 
 		long startRev = 0L;
-		Object revisionString = element.getAttribute(STARTREVISION_ATTRIBUTE);
+		final Object revisionString = element.getAttribute(STARTREVISION_ATTRIBUTE);
 		if (revisionString != null) {
 			startRev = SerializingUtils.toLong(revisionString);
 		}
 
 		state.setBaseRevisionNumber(startRev);
 
-		Iterator<XydraElement> eventElementIt = element.getChildrenByName(NAME_EVENTS);
+		final Iterator<XydraElement> eventElementIt = element.getChildrenByName(NAME_EVENTS);
 		while (eventElementIt.hasNext()) {
-			XydraElement e = eventElementIt.next();
-			XEvent event = SerializedEvent.toEvent(e, state.getBaseAddress());
+			final XydraElement e = eventElementIt.next();
+			final XEvent event = SerializedEvent.toEvent(e, state.getBaseAddress());
 			state.appendEvent(event);
 		}
 	}
@@ -163,9 +164,9 @@ public class SerializedModel {
 	/**
 	 * Load the local changes represented by the given XML/JSON element into a
 	 * list of {@link XCommand}.
-	 * 
+	 *
 	 * @param element
-	 * 
+	 *
 	 * @param localChangesAsCommands The localChangesAsCommands list to load
 	 *            into.
 	 * @param context The {@link XId XIds} of the repository, model, object and
@@ -173,23 +174,23 @@ public class SerializedModel {
 	 *            given element represents a transaction, the context for the
 	 *            contained commands will be given by the transaction.
 	 */
-	public static void loadLocalChangesAsCommands(XydraElement element,
-			List<XCommand> localChangesAsCommands, XAddress context) {
+	public static void loadLocalChangesAsCommands(final XydraElement element,
+			final List<XCommand> localChangesAsCommands, final XAddress context) {
 		SerializingUtils.checkElementType(element, XLOCALCHANGES_ELEMENT);
 
-		Iterator<XydraElement> commandElementIt = element.getChildrenByName(NAME_COMMANDS);
+		final Iterator<XydraElement> commandElementIt = element.getChildrenByName(NAME_COMMANDS);
 		while (commandElementIt.hasNext()) {
-			XydraElement e = commandElementIt.next();
-			XCommand command = SerializedCommand.toCommand(e, context);
+			final XydraElement e = commandElementIt.next();
+			final XCommand command = SerializedCommand.toCommand(e, context);
 			localChangesAsCommands.add(command);
 		}
 	}
 
-	public static List<XCommand> loadLocalChangesAsCommands(XydraElement element, XAddress baseAddr) {
-		XydraElement localChangesElement = element.getChild(LOCALCHANGES_NAME,
+	public static List<XCommand> loadLocalChangesAsCommands(final XydraElement element, final XAddress baseAddr) {
+		final XydraElement localChangesElement = element.getChild(LOCALCHANGES_NAME,
 				XLOCALCHANGES_ELEMENT);
 		if (localChangesElement != null) {
-			List<XCommand> localChangesAsCommands = new ArrayList<XCommand>();
+			final List<XCommand> localChangesAsCommands = new ArrayList<XCommand>();
 
 			loadLocalChangesAsCommands(localChangesElement, localChangesAsCommands, baseAddr);
 			return localChangesAsCommands;
@@ -200,12 +201,12 @@ public class SerializedModel {
 	/**
 	 * Load the change log represented by the given XML/JSON element into an
 	 * {@link XChangeLogState}.
-	 * 
+	 *
 	 * @param element
-	 * 
+	 *
 	 * @param state The change log state to load into.
 	 */
-	public static void loadSyncLogState(XydraElement element, XSyncLogState state) {
+	public static void loadSyncLogState(final XydraElement element, final XSyncLogState state) {
 
 		// FIXME is 'xmap' not 'synclog'
 		SerializingUtils.checkElementType(element, SYNCLOG_ELEMENT);
@@ -214,23 +215,23 @@ public class SerializedModel {
 
 		state.setSyncRevisionNumber(getSyncRevisionAttribute(element));
 
-		XydraElement eventListElement = element.getChild(NAME_EVENTLIST, NAME_EVENTS);
+		final XydraElement eventListElement = element.getChild(NAME_EVENTLIST, NAME_EVENTS);
 		assert eventListElement != null;
 		Iterator<XydraElement> iterator = eventListElement.getChildrenByName(NAME_EVENTS);
-		List<XEvent> eventList = new ArrayList<XEvent>();
+		final List<XEvent> eventList = new ArrayList<XEvent>();
 		while (iterator.hasNext()) {
-			XydraElement e = iterator.next();
-			XEvent event = SerializedEvent.toEvent(e, state.getBaseAddress());
+			final XydraElement e = iterator.next();
+			final XEvent event = SerializedEvent.toEvent(e, state.getBaseAddress());
 			eventList.add(event);
 		}
 
-		XydraElement commandList = element.getChild(NAME_COMMANDLIST, NAME_COMMANDS);
+		final XydraElement commandList = element.getChild(NAME_COMMANDLIST, NAME_COMMANDS);
 		iterator = commandList.getChildrenByName(NAME_COMMANDS);
 		int count = 0;
 		while (iterator.hasNext()) {
-			XydraElement e = iterator.next();
-			XCommand command = SerializedCommand.toCommand(e, state.getBaseAddress());
-			MemorySyncLogEntry syncLogEntry = new MemorySyncLogEntry(command, eventList.get(count));
+			final XydraElement e = iterator.next();
+			final XCommand command = SerializedCommand.toCommand(e, state.getBaseAddress());
+			final MemorySyncLogEntry syncLogEntry = new MemorySyncLogEntry(command, eventList.get(count));
 
 			state.appendSyncLogEntry(syncLogEntry);
 			count++;
@@ -239,7 +240,7 @@ public class SerializedModel {
 
 	/**
 	 * Encode the given synclog {@link ISyncLog} as an XML/JSON element.
-	 * 
+	 *
 	 * @param syncLog the non-empty sync log
 	 * @param out the {@link XydraOut} that a partial XML/JSON document is
 	 *            written to.
@@ -247,32 +248,32 @@ public class SerializedModel {
 	 *            to be encoded in the element. Usually this is the model
 	 *            address.
 	 */
-	public static void serialize(ISyncLog syncLog, XydraOut out, XAddress context) {
-		List<XCommand> commandList = new ArrayList<XCommand>();
+	public static void serialize(final ISyncLog syncLog, final XydraOut out, final XAddress context) {
+		final List<XCommand> commandList = new ArrayList<XCommand>();
 		Iterator<XCommand> commands;
 
-		long rev = syncLog.getBaseRevisionNumber();
+		final long rev = syncLog.getBaseRevisionNumber();
 
 		out.open(SYNCLOG_ELEMENT);
 		out.attribute(STARTREVISION_ATTRIBUTE, rev);
 
-		long syncRev = syncLog.getSynchronizedRevision();
+		final long syncRev = syncLog.getSynchronizedRevision();
 		out.attribute(SYNC_REVISION_ATTRIBUTE, syncRev);
 
 		out.child(NAME_EVENTLIST);
 		out.open(NAME_EVENTS);
 		out.child(NAME_EVENTS);
 		out.beginArray();
-		Iterator<ISyncLogEntry> syncLogEntryIterator = syncLog.getSyncLogEntriesSince(rev + 1);
+		final Iterator<ISyncLogEntry> syncLogEntryIterator = syncLog.getSyncLogEntriesSince(rev + 1);
 		while (syncLogEntryIterator.hasNext()) {
-			ISyncLogEntry entry = syncLogEntryIterator.next();
-			XEvent event = entry.getEvent();
+			final ISyncLogEntry entry = syncLogEntryIterator.next();
+			final XEvent event = entry.getEvent();
 
 			/* handle event */
 			SerializedEvent.serialize(event, out, context);
 
 			/* handle command */
-			XCommand command = entry.getCommand();
+			final XCommand command = entry.getCommand();
 			commandList.add(command);
 		}
 		out.endArray();
@@ -284,7 +285,7 @@ public class SerializedModel {
 		out.child(NAME_COMMANDS);
 		out.beginArray();
 		while (commands.hasNext()) {
-			XCommand command = commands.next();
+			final XCommand command = commands.next();
 			if (command != null) {
 				SerializedCommand.serialize(command, out, context);
 			}
@@ -296,16 +297,16 @@ public class SerializedModel {
 
 	/**
 	 * Encode the given {@link XChangeLog} as an XML/JSON element.
-	 * 
+	 *
 	 * @param log an {@link XChangeLog}
 	 * @param out the {@link XydraOut} that a partial XML/JSON document is
 	 *            written to.
 	 */
-	public static void serialize(XChangeLog log, XydraOut out) {
+	public static void serialize(final XChangeLog log, final XydraOut out) {
 		// get values before outputting anything to prevent incomplete
 		// elements on errors
-		long rev = log.getBaseRevisionNumber();
-		Iterator<XEvent> events = log.getEventsBetween(rev + 1, Long.MAX_VALUE);
+		final long rev = log.getBaseRevisionNumber();
+		final Iterator<XEvent> events = log.getEventsBetween(rev + 1, Long.MAX_VALUE);
 
 		out.open(XCHANGELOG_ELEMENT);
 		if (rev != 0) {
@@ -323,13 +324,13 @@ public class SerializedModel {
 
 	/**
 	 * Encode the given {@link XChangeLogState} as an XML/JSON element.
-	 * 
+	 *
 	 * @param logState an {@link XChangeLogState}
 	 * @param out the {@link XydraOut} that a partial XML/JSON document is
 	 *            written to.
 	 */
-	public static void serialize(XChangeLogState logState, XydraOut out) {
-		long rev = logState.getBaseRevisionNumber();
+	public static void serialize(final XChangeLogState logState, final XydraOut out) {
+		final long rev = logState.getBaseRevisionNumber();
 
 		out.open(XCHANGELOG_ELEMENT);
 		if (rev != 0) {
@@ -339,10 +340,10 @@ public class SerializedModel {
 		out.child(NAME_EVENTS);
 		out.beginArray();
 
-		XEvent last = logState.getLastEvent();
+		final XEvent last = logState.getLastEvent();
 		if (last != null) {
 			for (long i = rev + 1; i <= last.getRevisionNumber(); i++) {
-				XEvent event = logState.getEvent(i);
+				final XEvent event = logState.getEvent(i);
 				// there can be gaps in rev numbers
 				if (event != null) {
 					SerializedEvent.serialize(event, out, logState.getBaseAddress());
@@ -357,20 +358,20 @@ public class SerializedModel {
 	/**
 	 * Encode the given {@link XReadableField} as an XML/JSON element, including
 	 * revision numbers.
-	 * 
+	 *
 	 * @param xfield an {@link XReadableField}
 	 * @param out the {@link XydraOut} that a partial XML/JSON document is
 	 *            written to.
 	 * @throws IllegalArgumentException if the field contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void serialize(XReadableField xfield, XydraOut out) {
+	public static void serialize(final XReadableField xfield, final XydraOut out) {
 		serialize(xfield, out, true);
 	}
 
 	/**
 	 * Encode the given {@link XReadableField} as an XML/JSON element.
-	 * 
+	 *
 	 * @param xfield an {@link XReadableField}
 	 * @param out the {@link XydraOut} that a partial XML/JSON document is
 	 *            written to.
@@ -379,16 +380,16 @@ public class SerializedModel {
 	 * @throws IllegalArgumentException if the field contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void serialize(XReadableField xfield, XydraOut out, boolean saveRevision) {
+	public static void serialize(final XReadableField xfield, final XydraOut out, final boolean saveRevision) {
 		serialize(xfield, out, saveRevision, true);
 	}
 
-	public static void serialize(XReadableField xfield, XydraOut out, boolean saveRevision,
-			boolean saveId) {
+	public static void serialize(final XReadableField xfield, final XydraOut out, final boolean saveRevision,
+			final boolean saveId) {
 		// get values before outputting anything to prevent incomplete
 		// elements on errors
-		XValue xvalue = xfield.getValue();
-		long rev = xfield.getRevisionNumber();
+		final XValue xvalue = xfield.getValue();
+		final long rev = xfield.getRevisionNumber();
 
 		out.open(XFIELD_ELEMENT);
 		if (saveId) {
@@ -409,20 +410,20 @@ public class SerializedModel {
 	/**
 	 * Encode the given {@link XReadableModel} as an XML/JSON element, including
 	 * revision numbers and ignoring inaccessible entities.
-	 * 
+	 *
 	 * @param xmodel an {@link XReadableModel}
 	 * @param out the {@link XydraOut} that a partial XML/JSON document is
 	 *            written to.
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void serialize(XReadableModel xmodel, XydraOut out) {
+	public static void serialize(final XReadableModel xmodel, final XydraOut out) {
 		serialize(xmodel, out, true, true, true);
 	}
 
 	/**
 	 * Encode the given {@link XReadableModel} as an XML/JSON element.
-	 * 
+	 *
 	 * @param xmodel an {@link XReadableModel}
 	 * @param out the {@link XydraOut} that a partial XML/JSON document is
 	 *            written to.
@@ -434,8 +435,8 @@ public class SerializedModel {
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void serialize(XReadableModel xmodel, XydraOut out, boolean saveRevision,
-			boolean ignoreInaccessible, boolean saveChangeLog) {
+	public static void serialize(final XReadableModel xmodel, final XydraOut out, final boolean saveRevision,
+			final boolean ignoreInaccessible, final boolean saveChangeLog) {
 		serialize(xmodel, out, saveRevision, ignoreInaccessible, saveChangeLog, true);
 	}
 
@@ -447,15 +448,15 @@ public class SerializedModel {
 	 * @param saveChangeLog
 	 * @param saveId iff true, saves the model id
 	 */
-	public static void serialize(XReadableModel xmodel, XydraOut out, boolean saveRevision,
-			boolean ignoreInaccessible, boolean saveChangeLog, boolean saveId) {
+	public static void serialize(final XReadableModel xmodel, final XydraOut out, final boolean saveRevision,
+			final boolean ignoreInaccessible, final boolean saveChangeLog, final boolean saveId) {
 		if (!saveRevision && saveChangeLog) {
 			throw new IllegalArgumentException("cannot save change log without saving revisions");
 		}
 
 		// get revision before outputting anything to prevent incomplete
 		// elements on errors
-		long rev = xmodel.getRevisionNumber();
+		final long rev = xmodel.getRevisionNumber();
 
 		out.open(XMODEL_ELEMENT);
 		if (saveId) {
@@ -467,12 +468,12 @@ public class SerializedModel {
 
 		out.child(NAME_OBJECTS);
 		out.beginMap(SerializingUtils.XID_ATTRIBUTE, XOBJECT_ELEMENT);
-		for (XId objectId : xmodel) {
+		for (final XId objectId : xmodel) {
 			out.entry(objectId.toString());
 			try {
 				serialize(xmodel.getObject(objectId), out, saveRevision, ignoreInaccessible, false,
 						false);
-			} catch (AccessException ae) {
+			} catch (final AccessException ae) {
 				if (!ignoreInaccessible) {
 					throw ae;
 				}
@@ -480,11 +481,11 @@ public class SerializedModel {
 		}
 		out.endMap();
 		if (saveChangeLog && xmodel instanceof XSynchronizesChanges) {
-			XSynchronizesChanges synchronizesChanges = (XSynchronizesChanges) xmodel;
+			final XSynchronizesChanges synchronizesChanges = (XSynchronizesChanges) xmodel;
 
-			XChangeLog changeLog = synchronizesChanges.getChangeLog();
-			assert (changeLog instanceof ISyncLog);
-			ISyncLog syncLog = (ISyncLog) changeLog;
+			final XChangeLog changeLog = synchronizesChanges.getChangeLog();
+			assert changeLog instanceof ISyncLog;
+			final ISyncLog syncLog = (ISyncLog) changeLog;
 
 			// if(syncLog.getLastEvent() != null) {
 			out.child(SYNCLOG_NAME);
@@ -513,20 +514,20 @@ public class SerializedModel {
 	/**
 	 * Encode the given {@link XReadableObject} as an XML/JSON element,
 	 * including revision numbers and ignoring inaccessible entities.
-	 * 
+	 *
 	 * @param xobject an {@link XReadableObject}
 	 * @param out the {@link XydraOut} that a partial XML/JSON document is
 	 *            written to.
 	 * @throws IllegalArgumentException if the object contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void serialize(XReadableObject xobject, XydraOut out) {
+	public static void serialize(final XReadableObject xobject, final XydraOut out) {
 		serialize(xobject, out, true, true, true);
 	}
 
 	/**
 	 * Encode the given {@link XReadableObject} as an XML/JSON element.
-	 * 
+	 *
 	 * @param xobject an {@link XObject}
 	 * @param out the {@link XydraOut} that a partial XML/JSON document is
 	 *            written to.
@@ -538,13 +539,13 @@ public class SerializedModel {
 	 * @throws IllegalArgumentException if the object contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void serialize(XReadableObject xobject, XydraOut out, boolean saveRevision,
-			boolean ignoreInaccessible, boolean saveChangeLog) {
+	public static void serialize(final XReadableObject xobject, final XydraOut out, final boolean saveRevision,
+			final boolean ignoreInaccessible, final boolean saveChangeLog) {
 		serialize(xobject, out, saveRevision, ignoreInaccessible, saveChangeLog, true);
 	}
 
-	public static void serialize(XReadableObject xobject, XydraOut out, boolean saveRevision,
-			boolean ignoreInaccessible, boolean saveChangeLog, boolean saveId) {
+	public static void serialize(final XReadableObject xobject, final XydraOut out, final boolean saveRevision,
+			final boolean ignoreInaccessible, final boolean saveChangeLog, final boolean saveId) {
 
 		if (!saveRevision && saveChangeLog) {
 			throw new IllegalArgumentException("cannot save change log without saving revisions");
@@ -552,7 +553,7 @@ public class SerializedModel {
 
 		// get revision before outputting anything to prevent incomplete
 		// elements on errors
-		long rev = xobject.getRevisionNumber();
+		final long rev = xobject.getRevisionNumber();
 
 		out.open(XOBJECT_ELEMENT);
 		if (saveId) {
@@ -564,11 +565,11 @@ public class SerializedModel {
 
 		out.child(NAME_FIELDS);
 		out.beginMap(SerializingUtils.XID_ATTRIBUTE, XFIELD_ELEMENT);
-		for (XId fieldId : xobject) {
+		for (final XId fieldId : xobject) {
 			out.entry(fieldId.toString());
 			try {
 				serialize(xobject.getField(fieldId), out, saveRevision, false);
-			} catch (AccessException ae) {
+			} catch (final AccessException ae) {
 				if (!ignoreInaccessible) {
 					throw ae;
 				}
@@ -577,9 +578,9 @@ public class SerializedModel {
 		out.endMap();
 
 		if (saveChangeLog && xobject instanceof XSynchronizesChanges) {
-			XChangeLog log = ((XSynchronizesChanges) xobject).getChangeLog();
+			final XChangeLog log = ((XSynchronizesChanges) xobject).getChangeLog();
 			if (log != null && log.getBaseAddress().equals(xobject.getAddress())) {
-				ISyncLog syncLog = (ISyncLog) log;
+				final ISyncLog syncLog = (ISyncLog) log;
 				out.child(SYNCLOG_NAME);
 				out.setChildType(SYNCLOG_ELEMENT);
 				serialize(syncLog, out, xobject.getAddress());
@@ -595,20 +596,20 @@ public class SerializedModel {
 	/**
 	 * Encode the given {@link XReadableRepository} as an XML/JSON element,
 	 * including revision numbers and ignoring inaccessible entities.
-	 * 
+	 *
 	 * @param xrepository an {@link XReadableRepository}
 	 * @param out the {@link XydraOut} that a partial XML/JSON document is
 	 *            written to.
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void serialize(XReadableRepository xrepository, XydraOut out) {
+	public static void serialize(final XReadableRepository xrepository, final XydraOut out) {
 		serialize(xrepository, out, true, true, true);
 	}
 
 	/**
 	 * Encode the given {@link XReadableRepository} as an XML/JSON element.
-	 * 
+	 *
 	 * @param xrepository an {@link XReadableRepository}
 	 * @param out the {@link XydraOut} that a partial XML document is written
 	 *            to.
@@ -620,19 +621,19 @@ public class SerializedModel {
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void serialize(XReadableRepository xrepository, XydraOut out,
-			boolean saveRevision, boolean ignoreInaccessible, boolean saveChangeLog) {
+	public static void serialize(final XReadableRepository xrepository, final XydraOut out,
+			final boolean saveRevision, final boolean ignoreInaccessible, final boolean saveChangeLog) {
 		out.open(XREPOSITORY_ELEMENT);
 		out.attribute(SerializingUtils.XID_ATTRIBUTE, xrepository.getId());
 
 		out.child(NAME_MODELS);
 		out.beginMap(SerializingUtils.XID_ATTRIBUTE, XMODEL_ELEMENT);
-		for (XId modelId : xrepository) {
+		for (final XId modelId : xrepository) {
 			out.entry(modelId.toString());
 			try {
 				serialize(xrepository.getModel(modelId), out, saveRevision, ignoreInaccessible,
 						saveChangeLog, false);
-			} catch (AccessException ae) {
+			} catch (final AccessException ae) {
 				if (!ignoreInaccessible) {
 					throw ae;
 				}
@@ -645,30 +646,30 @@ public class SerializedModel {
 
 	/**
 	 * Get the {@link XField} represented by the given XML/JSON element.
-	 * 
+	 *
 	 * @param actorId
 	 * @param element
-	 * 
+	 *
 	 * @return an {@link XField}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XField element.
 	 */
-	public static XField toField(XId actorId, XydraElement element) {
+	public static XField toField(final XId actorId, final XydraElement element) {
 		return new MemoryField(actorId, toFieldState(element, null));
 	}
 
 	/**
 	 * Load the field represented by the given XML/JSON element into an
 	 * {@link XRevWritableField}.
-	 * 
+	 *
 	 * @param element
-	 * 
+	 *
 	 * @param parent If parent is null, the field is loaded into a
 	 *            {@link SimpleField}, otherwise it is loaded into a child state
 	 *            of parent.
 	 * @return the created {@link XRevWritableField}
 	 */
-	public static XRevWritableField toFieldState(XydraElement element, XRevWritableObject parent) {
+	public static XRevWritableField toFieldState(final XydraElement element, final XRevWritableObject parent) {
 		return toFieldState(element, parent, null);
 	}
 
@@ -678,8 +679,8 @@ public class SerializedModel {
 	 * @param context
 	 * @return ...
 	 */
-	public static XRevWritableField toFieldState(XydraElement element, XRevWritableObject parent,
-			XAddress context) {
+	public static XRevWritableField toFieldState(final XydraElement element, final XRevWritableObject parent,
+			final XAddress context) {
 		SerializingUtils.checkElementType(element, XFIELD_ELEMENT);
 
 		XId xid;
@@ -689,17 +690,17 @@ public class SerializedModel {
 			xid = SerializingUtils.getRequiredXidAttribute(element);
 		}
 
-		long revision = getRevisionAttribute(element);
+		final long revision = getRevisionAttribute(element);
 
 		XValue xvalue = null;
-		XydraElement valueElement = element.getElement(NAME_VALUE);
+		final XydraElement valueElement = element.getElement(NAME_VALUE);
 		if (valueElement != null) {
 			xvalue = SerializedValue.toValue(valueElement);
 		}
 
 		XRevWritableField fieldState;
 		if (parent == null) {
-			XAddress fieldAddr = XX.toAddress(XId.DEFAULT, XId.DEFAULT, XId.DEFAULT, xid);
+			final XAddress fieldAddr = Base.toAddress(XId.DEFAULT, XId.DEFAULT, XId.DEFAULT, xid);
 			fieldState = new SimpleField(fieldAddr);
 		} else {
 			fieldState = parent.createField(xid);
@@ -713,18 +714,18 @@ public class SerializedModel {
 	/**
 	 * Get the {@link XModel} represented by the given XML/JSON element.
 	 * Including the change log, if available.
-	 * 
+	 *
 	 * @param actorId
 	 * @param passwordHash
 	 * @param element
-	 * 
+	 *
 	 * @return an {@link XModel}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XModel element.
 	 */
-	public static XModel toModel(XId actorId, String passwordHash, XydraElement element) {
-		XExistsRevWritableModel state = toModelState(element, null, null);
-		XChangeLogState log = loadChangeLogState(element, state.getAddress());
+	public static XModel toModel(final XId actorId, final String passwordHash, final XydraElement element) {
+		final XExistsRevWritableModel state = toModelState(element, null, null);
+		final XChangeLogState log = loadChangeLogState(element, state.getAddress());
 
 		if (log == null) {
 			return new MemoryModel(actorId, passwordHash, state);
@@ -735,23 +736,23 @@ public class SerializedModel {
 		}
 	}
 
-	public static XExistsRevWritableModel toModelState(XydraElement element, XAddress context) {
+	public static XExistsRevWritableModel toModelState(final XydraElement element, final XAddress context) {
 		return toModelState(element, null, context);
 	}
 
 	/**
 	 * Load the model represented by the given XML/JSON element into an
 	 * {@link XRevWritableModel}.
-	 * 
+	 *
 	 * @param element
-	 * 
+	 *
 	 * @param parent @CanBeNull If parent is null, the field is loaded into a
 	 *            {@link SimpleModel}, otherwise it is loaded into a child state
 	 *            of parent.
 	 * @return the created {@link XRevWritableModel}
 	 */
-	public static XExistsRevWritableModel toModelState(XydraElement element,
-			XExistsRevWritableRepository parent) {
+	public static XExistsRevWritableModel toModelState(final XydraElement element,
+			final XExistsRevWritableRepository parent) {
 		return toModelState(element, parent, null);
 	}
 
@@ -761,8 +762,8 @@ public class SerializedModel {
 	 * @param context @CanBeNull
 	 * @return @NeverNull
 	 */
-	private static XExistsRevWritableModel toModelState(XydraElement element,
-			XExistsRevWritableRepository parent, XAddress context) {
+	private static XExistsRevWritableModel toModelState(final XydraElement element,
+			final XExistsRevWritableRepository parent, final XAddress context) {
 
 		SerializingUtils.checkElementType(element, XMODEL_ELEMENT);
 
@@ -773,15 +774,15 @@ public class SerializedModel {
 			xid = SerializingUtils.getRequiredXidAttribute(element);
 		}
 
-		long revision = getRevisionAttribute(element);
+		final long revision = getRevisionAttribute(element);
 
 		XExistsRevWritableModel modelState;
 		XAddress modelAddr;
 		if (parent == null) {
 			if (context != null) {
-				modelAddr = XX.toAddress(context.getRepository(), xid, null, null);
+				modelAddr = Base.toAddress(context.getRepository(), xid, null, null);
 			} else {
-				modelAddr = XX.toAddress(XId.DEFAULT, xid, null, null);
+				modelAddr = Base.toAddress(XId.DEFAULT, xid, null, null);
 			}
 			modelState = new SimpleModel(modelAddr);
 		} else {
@@ -794,15 +795,15 @@ public class SerializedModel {
 			modelState.setRevisionNumber(revision);
 		}
 
-		XydraElement objects = element.getChild(NAME_OBJECTS);
+		final XydraElement objects = element.getChild(NAME_OBJECTS);
 
-		Iterator<Pair<String, XydraElement>> objectElementIt = objects.getEntriesByType(
+		final Iterator<Pair<String, XydraElement>> objectElementIt = objects.getEntriesByType(
 				SerializingUtils.XID_ATTRIBUTE, XOBJECT_ELEMENT);
 		while (objectElementIt.hasNext()) {
-			Pair<String, XydraElement> objectElement = objectElementIt.next();
-			XId objectId = XX.toId(objectElement.getFirst());
-			XAddress objectAddr = XX.resolveObject(modelAddr, objectId);
-			XRevWritableObject objectState = toObjectState(objectElement.getSecond(), modelState,
+			final Pair<String, XydraElement> objectElement = objectElementIt.next();
+			final XId objectId = Base.toId(objectElement.getFirst());
+			final XAddress objectAddr = Base.resolveObject(modelAddr, objectId);
+			final XRevWritableObject objectState = toObjectState(objectElement.getSecond(), modelState,
 					objectAddr);
 			XyAssert.xyAssert(modelState.getObject(objectState.getId()) == objectState);
 		}
@@ -812,42 +813,42 @@ public class SerializedModel {
 
 	/**
 	 * Get the {@link XObject} represented by the given XML/JSON element.
-	 * 
+	 *
 	 * @param actorId
 	 * @param passwordHash
 	 * @param element
-	 * 
+	 *
 	 * @return an {@link XObject}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XObject element.
 	 */
-	public static XObject toObject(XId actorId, String passwordHash, XydraElement element) {
-		XRevWritableObject state = toObjectState(element, null, null);
-		XChangeLogState log = loadChangeLogState(element, state.getAddress());
+	public static XObject toObject(final XId actorId, final String passwordHash, final XydraElement element) {
+		final XRevWritableObject state = toObjectState(element, null, null);
+		final XChangeLogState log = loadChangeLogState(element, state.getAddress());
 		return new MemoryObject(actorId, passwordHash, state, log);
 	}
 
-	public static XRevWritableObject toObjectState(XydraElement element, XAddress context) {
+	public static XRevWritableObject toObjectState(final XydraElement element, final XAddress context) {
 		return toObjectState(element, null, context);
 	}
 
 	/**
 	 * Load the object represented by the given XML/JSON element into an
 	 * {@link XRevWritableObject}.
-	 * 
+	 *
 	 * @param element
-	 * 
+	 *
 	 * @param parent If parent is null, the field is loaded into a
 	 *            {@link SimpleObject}, otherwise it is loaded into a child
 	 *            state of parent.
 	 * @return the created {@link XRevWritableObject}
 	 */
-	public static XRevWritableObject toObjectState(XydraElement element, XRevWritableModel parent) {
+	public static XRevWritableObject toObjectState(final XydraElement element, final XRevWritableModel parent) {
 		return toObjectState(element, parent, null);
 	}
 
-	private static XRevWritableObject toObjectState(XydraElement element, XRevWritableModel parent,
-			XAddress context) {
+	private static XRevWritableObject toObjectState(final XydraElement element, final XRevWritableModel parent,
+			final XAddress context) {
 
 		SerializingUtils.checkElementType(element, XOBJECT_ELEMENT);
 
@@ -858,15 +859,15 @@ public class SerializedModel {
 			xid = SerializingUtils.getRequiredXidAttribute(element);
 		}
 
-		long revision = getRevisionAttribute(element);
+		final long revision = getRevisionAttribute(element);
 
 		XRevWritableObject objectState;
 		XAddress objectAddr;
 		if (parent == null) {
 			if (context != null) {
-				objectAddr = XX.toAddress(context.getRepository(), context.getModel(), xid, null);
+				objectAddr = Base.toAddress(context.getRepository(), context.getModel(), xid, null);
 			} else {
-				objectAddr = XX.toAddress(XId.DEFAULT, XId.DEFAULT, xid, null);
+				objectAddr = Base.toAddress(XId.DEFAULT, XId.DEFAULT, xid, null);
 			}
 			objectState = new SimpleObject(objectAddr);
 		} else {
@@ -876,15 +877,15 @@ public class SerializedModel {
 
 		objectState.setRevisionNumber(revision);
 
-		XydraElement fields = element.getChild(NAME_FIELDS);
+		final XydraElement fields = element.getChild(NAME_FIELDS);
 
-		Iterator<Pair<String, XydraElement>> fieldElementIt = fields.getEntriesByType(
+		final Iterator<Pair<String, XydraElement>> fieldElementIt = fields.getEntriesByType(
 				SerializingUtils.XID_ATTRIBUTE, XFIELD_ELEMENT);
 		while (fieldElementIt.hasNext()) {
-			Pair<String, XydraElement> fieldElement = fieldElementIt.next();
-			XId fieldId = XX.toId(fieldElement.getFirst());
-			XAddress fieldAddr = XX.resolveField(objectAddr, fieldId);
-			XRevWritableField fieldState = toFieldState(fieldElement.getSecond(), objectState,
+			final Pair<String, XydraElement> fieldElement = fieldElementIt.next();
+			final XId fieldId = Base.toId(fieldElement.getFirst());
+			final XAddress fieldAddr = Base.resolveField(objectAddr, fieldId);
+			final XRevWritableField fieldState = toFieldState(fieldElement.getSecond(), objectState,
 					fieldAddr);
 			XyAssert.xyAssert(objectState.getField(fieldState.getId()) == fieldState);
 		}
@@ -894,45 +895,45 @@ public class SerializedModel {
 
 	/**
 	 * Get the {@link XRepository} represented by the given XML/JSON element.
-	 * 
+	 *
 	 * @param actorId
 	 * @param passwordHash
 	 * @param element
-	 * 
+	 *
 	 * @return an {@link XRepository}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XRepository element.
 	 */
-	public static XRepository toRepository(XId actorId, String passwordHash, XydraElement element) {
+	public static XRepository toRepository(final XId actorId, final String passwordHash, final XydraElement element) {
 		return new MemoryRepository(actorId, passwordHash, toRepositoryState(element));
 	}
 
 	/**
 	 * Load the repository represented by the given XML/JSON element into an
 	 * {@link XRevWritableRepository}.
-	 * 
+	 *
 	 * @param element
-	 * 
+	 *
 	 * @return the created {@link XRevWritableRepository}
 	 */
-	public static XRevWritableRepository toRepositoryState(XydraElement element) {
+	public static XRevWritableRepository toRepositoryState(final XydraElement element) {
 		SerializingUtils.checkElementType(element, XREPOSITORY_ELEMENT);
 
-		XId xid = SerializingUtils.getRequiredXidAttribute(element);
+		final XId xid = SerializingUtils.getRequiredXidAttribute(element);
 
-		XAddress repoAddr = XX.toAddress(xid, null, null, null);
-		XExistsRevWritableRepository repositoryState = new SimpleRepository(repoAddr);
+		final XAddress repoAddr = Base.toAddress(xid, null, null, null);
+		final XExistsRevWritableRepository repositoryState = new SimpleRepository(repoAddr);
 
-		XydraElement models = element.getChild(NAME_MODELS);
+		final XydraElement models = element.getChild(NAME_MODELS);
 
-		Iterator<Pair<String, XydraElement>> modelElementIt = models.getEntriesByType(
+		final Iterator<Pair<String, XydraElement>> modelElementIt = models.getEntriesByType(
 				SerializingUtils.XID_ATTRIBUTE, XMODEL_ELEMENT);
 		while (modelElementIt.hasNext()) {
-			Pair<String, XydraElement> modelElement = modelElementIt.next();
-			XId modelId = XX.toId(modelElement.getFirst());
-			XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
+			final Pair<String, XydraElement> modelElement = modelElementIt.next();
+			final XId modelId = Base.toId(modelElement.getFirst());
+			final XAddress modelAddr = Base.resolveModel(repoAddr, modelId);
 
-			XExistsRevWritableModel modelState = toModelState(modelElement.getSecond(),
+			final XExistsRevWritableModel modelState = toModelState(modelElement.getSecond(),
 					repositoryState, modelAddr);
 
 			XyAssert.xyAssert(repositoryState.getModel(modelState.getId()) == modelState);

@@ -11,14 +11,14 @@ class Cell implements ICell {
 	public Cell() {
 	}
 
-	public Cell(String string) {
+	public Cell(final String string) {
 		this.value = string;
 	}
 
-	
+
 	@Override
-	public void appendString(String s, int maximalFieldLength) {
-		int sLen = this.value == null ? 0 : this.value.length();
+	public void appendString(final String s, final int maximalFieldLength) {
+		final int sLen = this.value == null ? 0 : this.value.length();
 		// if we have any space left
 		if (sLen < maximalFieldLength) {
 			// initialise
@@ -30,35 +30,35 @@ class Cell implements ICell {
 		}
 	}
 
-	
+
 	@Override
 	public String getValue() {
 		return this.value;
 	}
 
-	
+
 	@Override
 	public double getValueAsDouble() throws WrongDatatypeException {
 		return TypeHandler.asDouble(this.value);
 	}
 
-	
+
 	@Override
 	public long getValueAsLong() throws WrongDatatypeException {
 		return TypeHandler.asLong(this.value);
 	}
 
-	
+
 	@Override
-	public void incrementValue(int increment) throws WrongDatatypeException {
+	public void incrementValue(final int increment) throws WrongDatatypeException {
 		long l = getValueAsLong();
 		l = l + increment;
 		this.value = "" + l;
 	}
 
-	
+
 	@Override
-	public void setValue(String value, boolean initial) {
+	public void setValue(final String value, final boolean initial) {
 		if (initial && this.value != null) {
 			throw new IllegalStateException("Value was not null but '" + this.value
 					+ "' so could not set to '" + value + "'");

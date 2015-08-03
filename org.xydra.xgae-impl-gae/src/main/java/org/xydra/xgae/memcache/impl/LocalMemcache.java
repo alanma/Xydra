@@ -27,9 +27,9 @@ import org.xydra.xgae.memcache.api.IMemCache;
  * To fix an issue with the Gae local test implementation (takes more and more
  * memory), this implementation can be restricted in memory use. This
  * implementation keeps 5 MB of memory free.
- * 
+ *
  * @author xamde
- * 
+ *
  */
 @RunsInGWT(true)
 @RunsInAppEngine(true)
@@ -51,37 +51,37 @@ public class LocalMemcache implements IMemCache {
 	}
 
 	@Override
-	public boolean containsKey(Object key) {
+	public boolean containsKey(final Object key) {
 		return this.internalMap.containsKey(key);
 	}
 
 	@Override
-	public boolean containsValue(Object value) {
+	public boolean containsValue(final Object value) {
 		return this.internalMap.containsValue(valueToStored(value));
 	}
 
 	@Override
-	public Object get(Object key) {
-		byte[] bytes = this.internalMap.get(key);
+	public Object get(final Object key) {
+		final byte[] bytes = this.internalMap.get(key);
 		if (bytes == null) {
 			return null;
 		}
-		Object result = storedToValue(bytes);
+		final Object result = storedToValue(bytes);
 		return result;
 	}
 
 	@Override
-	public Object put(String key, Object value) {
+	public Object put(final String key, final Object value) {
 		controlCacheSize();
 		// transform null value & clone value
-		byte[] oldValue = this.internalMap.put(key, valueToStored(value));
+		final byte[] oldValue = this.internalMap.put(key, valueToStored(value));
 		if (oldValue == null) {
 			return null;
 		}
 		return storedToValue(oldValue);
 	}
 
-	private static final Object storedToValue(byte[] stored) {
+	private static final Object storedToValue(final byte[] stored) {
 		XyAssert.xyAssert(stored != null);
 		assert stored != null;
 		if (stored == NULL_VALUE) {
@@ -89,31 +89,31 @@ public class LocalMemcache implements IMemCache {
 		}
 		// else
 		try {
-			ByteArrayInputStream bis = new ByteArrayInputStream(stored);
-			ObjectInputStream oin = new ObjectInputStream(bis);
-			Object result = oin.readObject();
+			final ByteArrayInputStream bis = new ByteArrayInputStream(stored);
+			final ObjectInputStream oin = new ObjectInputStream(bis);
+			final Object result = oin.readObject();
 			oin.close();
 			return result;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
-		} catch (ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private static final byte[] valueToStored(Object value) {
+	private static final byte[] valueToStored(final Object value) {
 		if (value == null) {
 			return NULL_VALUE;
 		}
 		// else
 		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			final ObjectOutputStream oos = new ObjectOutputStream(bos);
 			oos.writeObject(value);
 			oos.close();
-			byte[] bytes = bos.toByteArray();
+			final byte[] bytes = bos.toByteArray();
 			return bytes;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -121,24 +121,24 @@ public class LocalMemcache implements IMemCache {
 	private static final long RESERVE_MEMORY = 5 * 1024 * 1024;
 
 	private void controlCacheSize() {
-		long free = Runtime.getRuntime().freeMemory();
+		final long free = Runtime.getRuntime().freeMemory();
 		if (free < RESERVE_MEMORY) {
 			log.warn("Free memory = " + free + ", require " + RESERVE_MEMORY + " -> Auto-clear.");
-			this.clear();
+			clear();
 			System.gc();
 		}
 	}
 
 	@Override
-	public Object remove(Object key) {
+	public Object remove(final Object key) {
 		return this.internalMap.remove(key);
 	}
 
 	@Override
-	public void putAll(Map<? extends String, ? extends Object> m) {
+	public void putAll(final Map<? extends String, ? extends Object> m) {
 		// transform values implicitly
-		for (Map.Entry<? extends String, ? extends Object> entry : m.entrySet()) {
-			this.put(entry.getKey(), entry.getValue());
+		for (final Map.Entry<? extends String, ? extends Object> entry : m.entrySet()) {
+			put(entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -155,8 +155,8 @@ public class LocalMemcache implements IMemCache {
 	@Override
 	public Collection<Object> values() {
 		// transform null values
-		List<Object> result = new LinkedList<Object>();
-		for (byte[] o : this.internalMap.values()) {
+		final List<Object> result = new LinkedList<Object>();
+		for (final byte[] o : this.internalMap.values()) {
 			result.add(storedToValue(o));
 		}
 		return result;
@@ -165,15 +165,15 @@ public class LocalMemcache implements IMemCache {
 	@Override
 	public Set<java.util.Map.Entry<String, Object>> entrySet() {
 		// transform null values
-		Map<String, Object> result = new HashMap<String, Object>();
-		for (Map.Entry<String, byte[]> e : this.internalMap.entrySet()) {
+		final Map<String, Object> result = new HashMap<String, Object>();
+		for (final Map.Entry<String, byte[]> e : this.internalMap.entrySet()) {
 			result.put(e.getKey(), storedToValue(e.getValue()));
 		}
 		return result.entrySet();
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		return this.internalMap.equals(o);
 	}
 
@@ -182,7 +182,7 @@ public class LocalMemcache implements IMemCache {
 		return this.internalMap.hashCode();
 	}
 
-	private ConcurrentHashMap<String, byte[]> internalMap;
+	private final ConcurrentHashMap<String, byte[]> internalMap;
 
 	public LocalMemcache() {
 		log.info("Using LocalMemcache");
@@ -195,10 +195,10 @@ public class LocalMemcache implements IMemCache {
 	}
 
 	@Override
-	public Map<String, Object> getAll(Collection<String> keys) {
-		Map<String, Object> result = new HashMap<String, Object>();
-		for (String key : keys) {
-			Object value = this.get(key);
+	public Map<String, Object> getAll(final Collection<String> keys) {
+		final Map<String, Object> result = new HashMap<String, Object>();
+		for (final String key : keys) {
+			final Object value = get(key);
 			if (value != null) {
 				result.put(key, value);
 			}
@@ -207,15 +207,15 @@ public class LocalMemcache implements IMemCache {
 	}
 
 	@Override
-	public void putIfValueIsNull(String key, Object value) {
+	public void putIfValueIsNull(final String key, final Object value) {
 		this.internalMap.putIfAbsent(key, valueToStored(value));
 	}
 
 	public static class IdentifiableImpl implements IdentifiableValue {
 
-		private Object o;
+		private final Object o;
 
-		public IdentifiableImpl(Object o) {
+		public IdentifiableImpl(final Object o) {
 			this.o = o;
 		}
 
@@ -227,10 +227,10 @@ public class LocalMemcache implements IMemCache {
 	}
 
 	@Override
-	public boolean putIfUntouched(@NeverNull String key, @NeverNull IdentifiableValue oldValue,
-			@CanBeNull Object newValue) {
+	public boolean putIfUntouched(@NeverNull final String key, @NeverNull final IdentifiableValue oldValue,
+			@CanBeNull final Object newValue) {
 		synchronized (this.internalMap) {
-			Object current = get(key);
+			final Object current = get(key);
 			if (oldValue.getValue() == null) {
 				if (current == null) {
 					put(key, newValue);
@@ -250,25 +250,25 @@ public class LocalMemcache implements IMemCache {
 	}
 
 	@Override
-	public IdentifiableValue getIdentifiable(String key) {
-		Object o = get(key);
+	public IdentifiableValue getIdentifiable(final String key) {
+		final Object o = get(key);
 		return new IdentifiableImpl(o);
 	}
 
 	@Override
-	public Map<String, Long> incrementAll(Map<String, Long> offsets, long initialValue) {
-		Map<String, Long> result = new HashMap<String, Long>();
+	public Map<String, Long> incrementAll(final Map<String, Long> offsets, final long initialValue) {
+		final Map<String, Long> result = new HashMap<String, Long>();
 		synchronized (this.internalMap) {
-			for (java.util.Map.Entry<String, Long> entry : offsets.entrySet()) {
-				String key = entry.getKey();
+			for (final java.util.Map.Entry<String, Long> entry : offsets.entrySet()) {
+				final String key = entry.getKey();
 				byte[] valueBytes = this.internalMap.get(key);
 				long newValue;
 				if (valueBytes == null) {
 					newValue = initialValue;
 				} else {
-					Object value = storedToValue(valueBytes);
+					final Object value = storedToValue(valueBytes);
 					XyAssert.xyAssert(value instanceof Long);
-					long oldValue = (Long) value;
+					final long oldValue = (Long) value;
 					newValue = oldValue + entry.getValue();
 				}
 				result.put(key, newValue);
@@ -280,7 +280,7 @@ public class LocalMemcache implements IMemCache {
 	}
 
 	@Override
-	public Object putChecked(String key, Object value) throws IOException {
+	public Object putChecked(final String key, final Object value) throws IOException {
 		return put(key, value);
 	}
 

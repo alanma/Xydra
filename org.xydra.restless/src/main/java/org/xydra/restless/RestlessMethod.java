@@ -41,12 +41,11 @@ import org.xydra.restless.utils.QueryStringUtils;
 import org.xydra.restless.utils.ServletUtils;
 
 /**
- * A HTTP method (GET, PUT,.... ) and a {@link PathTemplate} mapped to an object
- * and a method name.
- * 
- * Restless can inject {@link HttpServletRequest}, {@link HttpServletResponse},
- * and {@link Restless} (which gives access to servlet context etc).
- * 
+ * A HTTP method (GET, PUT,.... ) and a {@link PathTemplate} mapped to an object and a method name.
+ *
+ * Restless can inject {@link HttpServletRequest}, {@link HttpServletResponse}, and {@link Restless} (which gives access
+ * to servlet context etc).
+ *
  * @author xamde
  */
 
@@ -55,22 +54,17 @@ class RestlessMethod {
 
 	private static final String UPLOAD_PARAM = "_upload_";
 
-	/*
-	 * See
-	 * http://ria101.wordpress.com/2011/12/12/concurrenthashmap-avoid-a-common
-	 * -misuse/ for a discussion of the different parameters.
-	 * 
-	 * Important: The way we're using the ConcurrentHashMap is only safe if
-	 * nothings changed here. If other methods which operate on instanceCache
-	 * are added, the current implementation might not necessarily be
-	 * thread-safe anymore.
-	 * 
-	 * TODO test/check performance with different ConcurrentHashMap. Different
-	 * parameters might improve/degrade the performance of Restless, so some
-	 * fine-tuning might be necessary.
-	 */
-	private static ConcurrentHashMap<Class<?>, Object> instanceCache = new ConcurrentHashMap<Class<?>, Object>(
-			20, 0.75f, 5);
+	/* See http://ria101.wordpress.com/2011/12/12/concurrenthashmap-avoid-a-common -misuse/ for a discussion of the
+	 * different parameters.
+	 *
+	 * Important: The way we're using the ConcurrentHashMap is only safe if nothings changed here. If other methods
+	 * which operate on instanceCache are added, the current implementation might not necessarily be thread-safe
+	 * anymore.
+	 *
+	 * TODO test/check performance with different ConcurrentHashMap. Different parameters might improve/degrade the
+	 * performance of Restless, so some fine-tuning might be necessary. */
+	private static ConcurrentHashMap<Class<?>, Object> instanceCache = new ConcurrentHashMap<Class<?>, Object>(20,
+			0.75f, 5);
 
 	private static Logger log = LoggerFactory.getThreadSafeLogger(RestlessMethod.class);
 
@@ -78,71 +72,49 @@ class RestlessMethod {
 	/**
 	 * GET, PUT, POST, DELETE
 	 */
-	/*
-	 * currently, httpMethod (and its contents) is never written after creation
-	 * and all methods only read this variable -> no synchronization necessary
-	 * at the moment
-	 */
+	/* currently, httpMethod (and its contents) is never written after creation and all methods only read this variable
+	 * -> no synchronization necessary at the moment */
 	private final String httpMethod;
 
-	/*
-	 * Only thread-safe classes are allowed here!
-	 */
-	private Object instanceOrClass;
+	/* Only thread-safe classes are allowed here! */
+	private final Object instanceOrClass;
 
-	/*
-	 * currently, methodName is never written after creation and all methods
-	 * only read this variable -> no synchronization necessary at the moment
-	 */
+	/* currently, methodName is never written after creation and all methods only read this variable -> no
+	 * synchronization necessary at the moment */
 	private final String methodName;
 
 	/** The parameter required by this restless method */
-	/*
-	 * currently, requiredNamedParameter (and its contents) is never written
-	 * after creation and all methods only read this variable -> no
-	 * synchronization necessary at the moment
-	 */
+	/* currently, requiredNamedParameter (and its contents) is never written after creation and all methods only read
+	 * this variable -> no synchronization necessary at the moment */
 	private final RestlessParameter[] requiredNamedParameters;
 
-	/*
-	 * currently, pathTemplate (and its contents) is never written after
-	 * creation and all methods only read this variable -> no synchronization
-	 * necessary at the moment
-	 */
+	/* currently, pathTemplate (and its contents) is never written after creation and all methods only read this
+	 * variable -> no synchronization necessary at the moment */
 	private final PathTemplate pathTemplate;
 
 	/**
-	 * @param object instance to be called when web method is used - or class to
-	 *            be instantiated @NeverNull
+	 * @param object instance to be called when web method is used - or class to be instantiated @NeverNull
 	 * @param httpMethod 'GET', 'PUT', 'POST', or' DELETE' @NeverNull
-	 * @param methodName instance method to be called. This method may not have
-	 *            several signatures with the same name.
-	 * 
-	 *            The method signature can use {@link HttpServletRequest} and
-	 *            {@link HttpServletResponse} in any position. It is set with
-	 *            the corresponding instances from the servlet environment.
-	 * 
-	 *            If no {@link HttpServletResponse} is used, a default content
-	 *            type of text/plain is used and the method return type is
-	 *            expected to be of type String. This facility is designer to
-	 *            return status information at development time. @NeverNull
+	 * @param methodName instance method to be called. This method may not have several signatures with the same name.
+	 *
+	 *        The method signature can use {@link HttpServletRequest} and {@link HttpServletResponse} in any position.
+	 *        It is set with the corresponding instances from the servlet environment.
+	 *
+	 *        If no {@link HttpServletResponse} is used, a default content type of text/plain is used and the method
+	 *        return type is expected to be of type String. This facility is designer to return status information at
+	 *        development time. @NeverNull
 	 * @param pathTemplate see {@link PathTemplate} for syntax @NeverNull
-	 * @param adminOnly if true, this method can only be executed it the request
-	 *            URL starts with '/admin'.
-	 * @param parameter in order of variables in 'method'. See
-	 *            {@link RestlessParameter}. @NeverNull TODO is this correct?
+	 * @param adminOnly if true, this method can only be executed it the request URL starts with '/admin'.
+	 * @param parameter in order of variables in 'method'. See {@link RestlessParameter}. @NeverNull TODO is this
+	 *        correct?
 	 */
-	protected RestlessMethod(@NeverNull Object object, @NeverNull String httpMethod,
-			@NeverNull String methodName, @NeverNull PathTemplate pathTemplate, boolean adminOnly,
-			@NeverNull RestlessParameter[] parameter) {
+	protected RestlessMethod(@NeverNull final Object object, @NeverNull final String httpMethod, @NeverNull final String methodName,
+			@NeverNull final PathTemplate pathTemplate, final boolean adminOnly, @NeverNull final RestlessParameter[] parameter) {
 		this.instanceOrClass = object;
 		this.httpMethod = httpMethod;
 
-		/*
-		 * TODO why is the given methodName not checked for well-formedness?
-		 * What if an instance is created with a methodName which is not GET,
-		 * PUT, POST or DELETE?
-		 */
+		/* TODO why is the given methodName not checked for well-formedness? What if an instance is created with a
+		 * methodName which is not GET, PUT, POST or DELETE? */
 		this.methodName = methodName;
 		this.pathTemplate = pathTemplate;
 		this.adminOnly = adminOnly;
@@ -150,21 +122,20 @@ class RestlessMethod {
 	}
 
 	/**
-	 * Checks whether this method fits to the given parameters and returns
-	 * parameters which are necessary for executing the method after this check.
-	 * 
+	 * Checks whether this method fits to the given parameters and returns parameters which are necessary for executing
+	 * the method after this check.
+	 *
 	 * @param restless
 	 * @param req
 	 * @param res
 	 * @param requestClock
-	 * @return the necessary parameters for executing this method or null if
-	 *         this method doesn't fit the given parameters.
+	 * @return the necessary parameters for executing this method or null if this method doesn't fit the given
+	 *         parameters.
 	 * @throws IOException
 	 */
-	public RestlessMethodExecutionParameters prepareMethodExecution(
-			@NeverNull final Restless restless, @NeverNull final HttpServletRequest req,
-			@NeverNull final HttpServletResponse res, @NeverNull NanoClock requestClock)
-			throws IOException {
+	public RestlessMethodExecutionParameters prepareMethodExecution(@NeverNull final Restless restless,
+			@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse res,
+			@NeverNull final NanoClock requestClock) throws IOException {
 
 		requestClock.stopAndStart("servlet->restless.run");
 
@@ -177,54 +148,39 @@ class RestlessMethod {
 			method = RestlessStatic.methodByName(this.instanceOrClass, this.methodName);
 		}
 
-		/*
-		 * TODO is this okay? instanceOrClass might change after the method was
-		 * returned, which might result in slightly inconsistent behavior...
-		 * 
-		 * Would only be a problem if methods can be removed or their behavior
-		 * could be changed... is this possible?
-		 */
+		/* TODO is this okay? instanceOrClass might change after the method was returned, which might result in slightly
+		 * inconsistent behavior...
+		 *
+		 * Would only be a problem if methods can be removed or their behavior could be changed... is this possible? */
 
 		if (method == null) {
-			/*
-			 * TODO synchronization necessary here? Can the name change?
-			 */
-			res.sendError(500,
-					"Malconfigured server. Method '" + this.methodName + "' not found in '"
-							+ RestlessStatic.instanceOrClass_className(this.instanceOrClass) + "'");
+			/* TODO synchronization necessary here? Can the name change? */
+			res.sendError(500, "Malconfigured server. Method '" + this.methodName + "' not found in '"
+					+ RestlessStatic.instanceOrClass_className(this.instanceOrClass) + "'");
 			return null;
 		} else {
 			// try to prepare parameters for execution of the method
-			List<Object> javaMethodArgs = new ArrayList<Object>();
+			final List<Object> javaMethodArgs = new ArrayList<Object>();
 
 			/** build up parameters */
 			// extract values from path
-			/*
-			 * PathTemplate is thread-safe, so no synchronization is necessary
-			 * here
-			 */
-			Map<String, String> urlPathParameterMap = RestlessUtils.getUrlParametersAsMap(req,
-					this.pathTemplate);
+			/* PathTemplate is thread-safe, so no synchronization is necessary here */
+			final Map<String, String> urlPathParameterMap = RestlessUtils.getUrlParametersAsMap(req, this.pathTemplate);
 
 			// extract Cookie values
-			Map<String, String> cookieMap = ServletUtils.getCookiesAsMap(req);
+			final Map<String, String> cookieMap = ServletUtils.getCookiesAsMap(req);
 
-			final String uniqueRequestId = reuseOrCreateUniqueRequestIdentifier(
-					urlPathParameterMap, cookieMap);
+			final String uniqueRequestId = reuseOrCreateUniqueRequestIdentifier(urlPathParameterMap, cookieMap);
 
 			// define context
-			IRestlessContext restlessContext = new RestlessContextImpl(restless, req, res,
-					uniqueRequestId);
+			final IRestlessContext restlessContext = new RestlessContextImpl(restless, req, res, uniqueRequestId);
 
-			Flag hasHttpServletResponseParameter = new Flag(false);
-			/*
-			 * now we need to decide who parses the request body: default
-			 * servlet methods or a specialist streaming multi-part handler?
-			 */
-			boolean isMultiPartStreamHandlerMethod = isMultiPartFormEncoded_HandlerMethod(method);
+			final Flag hasHttpServletResponseParameter = new Flag(false);
+			/* now we need to decide who parses the request body: default servlet methods or a specialist streaming
+			 * multi-part handler? */
+			final boolean isMultiPartStreamHandlerMethod = isMultiPartFormEncoded_HandlerMethod(method);
 
-			boolean mayReadRequestBody = req.getMethod().equals("GET")
-					|| !isMultiPartStreamHandlerMethod;
+			final boolean mayReadRequestBody = req.getMethod().equals("GET") || !isMultiPartStreamHandlerMethod;
 
 			Map<String, Object> multipartMap = null;
 			Map<String, List<String>> queryMap = null;
@@ -236,88 +192,70 @@ class RestlessMethod {
 				queryMap = QueryStringUtils.parse(req.getQueryString());
 			}
 
-			assert !mayReadRequestBody || multipartMap != null;
+			assert!mayReadRequestBody || multipartMap != null;
 			assert mayReadRequestBody || queryMap != null;
 
 			int boundNamedParameterNumber = 0;
 
 			// try to fill each parameter
-			for (Class<?> requiredParamType : method.getParameterTypes()) {
+			for (final Class<?> requiredParamType : method.getParameterTypes()) {
 				// fill the built-in predefined types
-				boolean filled = fillBuiltInInjectedParameter(requiredParamType, javaMethodArgs,
+				final boolean filled = fillBuiltInInjectedParameter(requiredParamType, javaMethodArgs,
 						hasHttpServletResponseParameter, restlessContext, requestClock);
 				if (!filled) {
-					/*
-					 * Method might require a non-trivial parameter type for a
-					 * named parameter (usually: String)
-					 */
+					/* Method might require a non-trivial parameter type for a named parameter (usually: String) */
 					if (this.requiredNamedParameters.length == 0) {
-						/*
-						 * Java method tries to fill a non-built-in parameter
-						 * type, i.e. a parameter type for which we need to get
-						 * a value from the request. If there is no named
-						 * parameter from which we can even try to fill the
-						 * value, throw a usage error
-						 */
-						throw new IllegalArgumentException(
-								"It looks like you have parameters in your java method '"
-										+ methodReference(this.instanceOrClass, method)
-										+ "' for which there have no RestlessParameter been defined.");
+						/* Java method tries to fill a non-built-in parameter type, i.e. a parameter type for which we
+						 * need to get a value from the request. If there is no named parameter from which we can even
+						 * try to fill the value, throw a usage error */
+						throw new IllegalArgumentException("It looks like you have parameters in your java method '"
+								+ methodReference(this.instanceOrClass, method)
+								+ "' for which there have no RestlessParameter been defined.");
 					}
 					if (this.requiredNamedParameters.length <= boundNamedParameterNumber) {
 						throw new IllegalArgumentException(
-								"Require "
-										+ this.requiredNamedParameters.length
-										+ " named parameters in method '"
-										+ RestlessStatic.toClass(this.instanceOrClass)
-												.getCanonicalName()
-										+ ":"
-										+ method.getName()
-										+ "', processed "
-										+ boundNamedParameterNumber
+								"Require " + this.requiredNamedParameters.length + " named parameters in method '"
+										+ RestlessStatic.toClass(this.instanceOrClass).getCanonicalName() + ":"
+										+ method.getName() + "', processed " + boundNamedParameterNumber
 										+ " parameters from request so far. Required parameters: "
-										+ Arrays.toString(this.requiredNamedParameters)
+										+ Arrays.toString(
+												this.requiredNamedParameters)
 										+ ". I.e. your Java method wants more parameters than defined in your restless() method.");
 					}
-					RestlessParameter requiredParam = this.requiredNamedParameters[boundNamedParameterNumber];
+					final RestlessParameter requiredParam = this.requiredNamedParameters[boundNamedParameterNumber];
 
-					Object value = getNamedParameter(requiredParam.isArray(),
-							requiredParam.getName(), requiredParam.getDefaultValue(),
-							requiredParam.isRequired(),
+					final Object value = getNamedParameter(requiredParam.isArray(), requiredParam.getName(),
+							requiredParam.getDefaultValue(), requiredParam.isRequired(),
 
-							mayReadRequestBody, req, urlPathParameterMap, cookieMap, queryMap,
-							multipartMap);
+							mayReadRequestBody, req, urlPathParameterMap, cookieMap, queryMap, multipartMap);
 
 					javaMethodArgs.add(value);
 					boundNamedParameterNumber++;
 					if (boundNamedParameterNumber > this.requiredNamedParameters.length) {
-						log.debug("More non-trivial parameter required by Java method than mapped via RestlessParameters");
+						log.debug(
+								"More non-trivial parameter required by Java method than mapped via RestlessParameters");
 						return null;
 					}
 				}
 			}
 
-			String progressToken = (String) getNamedParameter(false,
-					IMultipartFormDataHandler.PARAM_PROGRESS_TOKEN, null, false,
-					mayReadRequestBody, req, urlPathParameterMap, cookieMap, queryMap, multipartMap);
+			final String progressToken = (String) getNamedParameter(false, IMultipartFormDataHandler.PARAM_PROGRESS_TOKEN,
+					null, false, mayReadRequestBody, req, urlPathParameterMap, cookieMap, queryMap, multipartMap);
 
-			return new RestlessMethodExecutionParameters(method, isMultiPartStreamHandlerMethod,
-					progressToken, restlessContext, javaMethodArgs,
-					hasHttpServletResponseParameter.getValue(), uniqueRequestId, requestClock);
+			return new RestlessMethodExecutionParameters(method, isMultiPartStreamHandlerMethod, progressToken,
+					restlessContext, javaMethodArgs, hasHttpServletResponseParameter.getValue(), uniqueRequestId,
+					requestClock);
 		}
 
 	}
 
-	private static Object getNamedParameter(boolean parameterIsArray, String parameterName,
-			Object defaultValue, boolean isRequired, boolean mayReadRequestBody,
-			HttpServletRequest req, Map<String, String> urlPathParameterMap,
-			Map<String, String> cookieMap, Map<String, List<String>> queryMap,
-			Map<String, Object> multipartMap) {
+	private static Object getNamedParameter(final boolean parameterIsArray, final String parameterName, final Object defaultValue,
+			final boolean isRequired, final boolean mayReadRequestBody, final HttpServletRequest req,
+			final Map<String, String> urlPathParameterMap, final Map<String, String> cookieMap, final Map<String, List<String>> queryMap,
+			final Map<String, Object> multipartMap) {
 		Object value = null;
 
-		/*
-		 * 1) look in urlParameters (path params, not query params)
-		 */
+		/* 1) look in urlParameters (path params, not query params) */
 		if (!parameterIsArray) {
 			value = urlPathParameterMap.get(parameterName);
 		}
@@ -325,33 +263,30 @@ class RestlessMethod {
 		/* 2) look in POST params and query params */
 		if (notSet(value)) {
 			if (mayReadRequestBody) {
-				String[] values = req.getParameterValues(parameterName);
+				final String[] values = req.getParameterValues(parameterName);
 				if (values != null) {
 					// handle POST and query param values
 					if (parameterIsArray) {
 						value = values;
 					} else if (values.length > 1) {
 						// remove redundant
-						Set<String> uniqueValues = new HashSet<String>();
-						for (String s : values) {
+						final Set<String> uniqueValues = new HashSet<String>();
+						for (final String s : values) {
 							uniqueValues.add(s);
 						}
 						if (uniqueValues.size() > 1) {
-							StringBuffer buf = new StringBuffer();
+							final StringBuffer buf = new StringBuffer();
 							for (int j = 0; j < values.length; j++) {
 								buf.append(values[j]);
 								buf.append(", ");
 							}
 
 							if (isRequired) {
-								throw new IllegalArgumentException(
-										"Parameter '"
-												+ parameterName
-												+ "' required but not explicitly defined. Found multiple values.");
+								throw new IllegalArgumentException("Parameter '" + parameterName
+										+ "' required but not explicitly defined. Found multiple values.");
 							} else {
-								log.warn("Multiple values for parameter '" + parameterName
-										+ "' (values=" + buf.toString()
-										+ ") from queryString and POST params, using default ("
+								log.warn("Multiple values for parameter '" + parameterName + "' (values="
+										+ buf.toString() + ") from queryString and POST params, using default ("
 										+ defaultValue + ")");
 								value = defaultValue;
 							}
@@ -366,33 +301,30 @@ class RestlessMethod {
 				}
 			} else {
 				assert queryMap != null;
-				List<String> values = queryMap.get(parameterName);
+				final List<String> values = queryMap.get(parameterName);
 				if (values != null) {
 					// handle query param values
 					if (parameterIsArray) {
 						value = values.toArray();
 					} else if (values.size() > 1) {
 						// remove redundant
-						Set<String> uniqueValues = new HashSet<String>();
-						for (String s : values) {
+						final Set<String> uniqueValues = new HashSet<String>();
+						for (final String s : values) {
 							uniqueValues.add(s);
 						}
 						if (uniqueValues.size() > 1) {
-							StringBuffer buf = new StringBuffer();
+							final StringBuffer buf = new StringBuffer();
 							for (int j = 0; j < values.size(); j++) {
 								buf.append(values.get(j));
 								buf.append(", ");
 							}
 
 							if (isRequired) {
-								throw new IllegalArgumentException(
-										"Parameter '"
-												+ parameterName
-												+ "' required but not explicitly defined. Found multiple values.");
+								throw new IllegalArgumentException("Parameter '" + parameterName
+										+ "' required but not explicitly defined. Found multiple values.");
 							} else {
-								log.warn("Multiple values for parameter '" + parameterName
-										+ "' (values=" + buf.toString()
-										+ ") from queryString and POST params, using default ("
+								log.warn("Multiple values for parameter '" + parameterName + "' (values="
+										+ buf.toString() + ") from queryString and POST params, using default ("
 										+ defaultValue + ")");
 								value = defaultValue;
 							}
@@ -422,8 +354,7 @@ class RestlessMethod {
 		/* 5) use default values, if defined */
 		if (notSet(value)) {
 			if (isRequired) {
-				log.debug("Parameter '" + parameterName
-						+ "' required but no explicitly defined. Found no value.");
+				log.debug("Parameter '" + parameterName + "' required but no explicitly defined. Found no value.");
 				return null;
 			} else {
 				value = defaultValue;
@@ -441,9 +372,8 @@ class RestlessMethod {
 	 * @param requestClock
 	 * @return
 	 */
-	private static boolean fillBuiltInInjectedParameter(Class<?> requiredParamType,
-			List<Object> javaMethodArgs, Flag hasHttpServletResponseParameter,
-			IRestlessContext restlessContext, NanoClock requestClock) {
+	private static boolean fillBuiltInInjectedParameter(final Class<?> requiredParamType, final List<Object> javaMethodArgs,
+			final Flag hasHttpServletResponseParameter, final IRestlessContext restlessContext, final NanoClock requestClock) {
 		if (requiredParamType.equals(HttpServletResponse.class)) {
 			javaMethodArgs.add(restlessContext.getResponse());
 			hasHttpServletResponseParameter.setTrue();
@@ -466,54 +396,46 @@ class RestlessMethod {
 	}
 
 	/**
-	 * Please note: Great care must be taken, that instanceOrClass isn't changed
-	 * between calling prepareMethodExecution() and actually executing the
-	 * method with the returned parameters in such a fundamental way, that the
-	 * parameters which were returned by prepareMethodExecution() become
-	 * outdated. This might result in all kinds of problems.
-	 * 
-	 * This shouldn't be a problem at the moment, since only thread-safe classes
-	 * are allowed for instanceOrClass and all things which are read on
-	 * instanceOrClass (and on which the following method execution depends)
-	 * during prepareMethodExecution() only look for the correct method and it's
-	 * name. These parameters cannot be changed during runtime, so there
-	 * shouldn't be a problem.
-	 * 
-	 * But, if it would be for example possible to remove methods from
-	 * instanceOrClass, no guarantees could be made and splitting the
-	 * preparation and execution wouldn't work with the current implementation.
-	 * In this example-case, we would need to make sure that the method which is
-	 * returned in the parameters by prepareMethodExecution() isn't removed
-	 * until it was executed.
+	 * Please note: Great care must be taken, that instanceOrClass isn't changed between calling
+	 * prepareMethodExecution() and actually executing the method with the returned parameters in such a fundamental
+	 * way, that the parameters which were returned by prepareMethodExecution() become outdated. This might result in
+	 * all kinds of problems.
+	 *
+	 * This shouldn't be a problem at the moment, since only thread-safe classes are allowed for instanceOrClass and all
+	 * things which are read on instanceOrClass (and on which the following method execution depends) during
+	 * prepareMethodExecution() only look for the correct method and it's name. These parameters cannot be changed
+	 * during runtime, so there shouldn't be a problem.
+	 *
+	 * But, if it would be for example possible to remove methods from instanceOrClass, no guarantees could be made and
+	 * splitting the preparation and execution wouldn't work with the current implementation. In this example-case, we
+	 * would need to make sure that the method which is returned in the parameters by prepareMethodExecution() isn't
+	 * removed until it was executed.
 	 */
 
 	/**
-	 * Checks if the given required parameter types of a Java method look like
-	 * the method is a pure stream handler or an ordinary Restless parameter
-	 * handler
-	 * 
+	 * Checks if the given required parameter types of a Java method look like the method is a pure stream handler or an
+	 * ordinary Restless parameter handler
+	 *
 	 * @param method
-	 * @return true if method handles 100% of request body in a streaming
-	 *         fashion
+	 * @return true if method handles 100% of request body in a streaming fashion
 	 */
-	private static boolean isMultiPartFormEncoded_HandlerMethod(Method method) {
+	private static boolean isMultiPartFormEncoded_HandlerMethod(final Method method) {
 		return method.getReturnType().equals(IMultipartFormDataHandler.class);
 	}
 
 	/**
 	 * Executes the method on the mapped instance.
-	 * 
-	 * Precedence of variable extraction: urlPath (before questionmark) >
-	 * httpParams (query params + POST params ) > default value
-	 * 
-	 * IMPROVE distinguish query params from POST params to define a clearer
-	 * precedence
-	 * 
+	 *
+	 * Precedence of variable extraction: urlPath (before questionmark) > httpParams (query params + POST params ) >
+	 * default value
+	 *
+	 * IMPROVE distinguish query params from POST params to define a clearer precedence
+	 *
 	 * @param params @NeverNull
 	 * @param restless @NeverNull
 	 * @param req @NeverNull
 	 * @param res @NeverNull
-	 * 
+	 *
 	 * @return true if method launched successfully, i.e. parameters matched
 	 * @throws IOException if result writing fails
 	 */
@@ -524,33 +446,31 @@ class RestlessMethod {
 		/* Help debugging */
 		Thread.currentThread().setName("Restless-exe-" + method.getName());
 
-		IRestlessContext restlessContext = params.getRestlessContext();
-		List<Object> javaMethodArgs = params.getJavaMethodArgs();
-		boolean hasHttpServletResponseParameter = params.hasHttpServletResponseParameter();
-		String uniqueRequestId = params.getUniqueRequestId();
-		NanoClock requestClock = params.getClock();
+		final IRestlessContext restlessContext = params.getRestlessContext();
+		final List<Object> javaMethodArgs = params.getJavaMethodArgs();
+		final boolean hasHttpServletResponseParameter = params.hasHttpServletResponseParameter();
+		final String uniqueRequestId = params.getUniqueRequestId();
+		final NanoClock requestClock = params.getClock();
 
 		try {
 			requestClock.stopAndStart("restless.execute->invoke");
 			// onBefore-run-event
 			restless.fireRequestStarted(restlessContext);
 			// run
-			Object result = invokeMethod(method, this.instanceOrClass, javaMethodArgs);
+			final Object result = invokeMethod(method, this.instanceOrClass, javaMethodArgs);
 			requestClock.stopAndStart("invoke " + methodReference(this.instanceOrClass, method));
 
 			// stream
 			if (params.isMultipartFormDataHandler()) {
-				String progressToken = params.getProgressToken();
-				IMultipartFormDataHandler multipartFormDataHandler = (IMultipartFormDataHandler) result;
+				final String progressToken = params.getProgressToken();
+				final IMultipartFormDataHandler multipartFormDataHandler = (IMultipartFormDataHandler) result;
 				handleStreaming(restlessContext, multipartFormDataHandler, progressToken);
-				requestClock
-						.stopAndStart("stream " + methodReference(this.instanceOrClass, method));
+				requestClock.stopAndStart("stream " + methodReference(this.instanceOrClass, method));
 			} else if (!hasHttpServletResponseParameter) {
 				// we need to send back something standard ourselves
-				res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
-						+ Restless.CONTENT_TYPE_CHARSET_UTF8);
+				res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset=" + Restless.CONTENT_TYPE_CHARSET_UTF8);
 				res.setStatus(200);
-				Writer w = res.getWriter();
+				final Writer w = res.getWriter();
 				w.write("Executed " + methodReference(this.instanceOrClass, method) + "\n");
 				if (result != null && result instanceof String) {
 					w.write("Result: " + result);
@@ -562,55 +482,52 @@ class RestlessMethod {
 
 			requestClock.stopAndStart("response");
 
-		} catch (InvocationTargetException e) {
+		} catch (final InvocationTargetException e) {
 			Throwable cause = e.getCause();
 			if (cause instanceof RestlessException) {
-				RestlessException re = (RestlessException) cause;
+				final RestlessException re = (RestlessException) cause;
 				res.setStatus(re.getStatusCode());
-				res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
-						+ Restless.CONTENT_TYPE_CHARSET_UTF8);
-				Writer w = res.getWriter();
+				res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset=" + Restless.CONTENT_TYPE_CHARSET_UTF8);
+				final Writer w = res.getWriter();
 				w.write(re.getMessage());
 			} else {
 
-				IRestlessContext context = new RestlessContextImpl(restless, req, res,
-						uniqueRequestId);
+				final IRestlessContext context = new RestlessContextImpl(restless, req, res, uniqueRequestId);
 
 				boolean handled = false;
 
 				try {
 					handled = callLocalExceptionHandler(cause, this.instanceOrClass, context);
-				} catch (InvocationTargetException ite) {
+				} catch (final InvocationTargetException ite) {
 					cause = new ExceptionHandlerException(e.getCause());
-				} catch (Throwable th) {
+				} catch (final Throwable th) {
 					cause = new ExceptionHandlerException(th);
 				}
 
 				if (!handled) {
 					try {
 						handled = callGlobalExceptionHandlers(cause, context);
-					} catch (Throwable th) {
+					} catch (final Throwable th) {
 						cause = new ExceptionHandlerException(th);
 					}
 				}
 
 				if (!handled) {
 					// TODO hide internal messages better from user
-					StringWriter sw = new StringWriter();
-					PrintWriter pw = new PrintWriter(sw);
+					final StringWriter sw = new StringWriter();
+					final PrintWriter pw = new PrintWriter(sw);
 					e.printStackTrace(pw);
-					String stacktrace = sw.toString();
+					final String stacktrace = sw.toString();
 					if (!res.isCommitted()) {
 						res.sendError(500, e + " -- " + stacktrace);
 					}
-					log.error("Exception while executing RESTless method. Stacktrace: "
-							+ stacktrace, cause);
+					log.error("Exception while executing RESTless method. Stacktrace: " + stacktrace, cause);
 				}
 			}
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			res.sendError(500, e.toString());
 			log.error("RESTless method registered with wrong arguments: ", e);
-		} catch (IllegalAccessException e) {
+		} catch (final IllegalAccessException e) {
 			res.sendError(500, e.toString());
 			log.error("", e);
 		}
@@ -626,64 +543,62 @@ class RestlessMethod {
 	 * @throws IOException
 	 * @throws FileUploadException
 	 */
-	private static void handleStreaming(IRestlessContext ctx,
-			IMultipartFormDataHandler multipartFormDataHandler, final String progressToken)
-			throws IOException {
+	private static void handleStreaming(final IRestlessContext ctx, final IMultipartFormDataHandler multipartFormDataHandler,
+			final String progressToken) throws IOException {
 		// Check that we have a file upload request
-		boolean isMultipart = ServletFileUpload.isMultipartContent(ctx.getRequest());
+		final boolean isMultipart = ServletFileUpload.isMultipartContent(ctx.getRequest());
 		assert isMultipart;
 
-		@CanBeNull
-		IProgressReporter progressReporter = null;
+		@CanBeNull IProgressReporter progressReporter = null;
 		if (progressToken != null) {
 			progressReporter = new IProgressReporter() {
 
 				@Override
-				public void reportProgress(String progressMessage) {
-					ProgressManager.DEFAULT_PROGRESS_BROKER.appendProgress(progressToken,
-							progressMessage);
+				public void reportProgress(final String progressMessage) {
+					ProgressManager.DEFAULT_PROGRESS_BROKER.appendProgress(progressToken, progressMessage);
 				}
 			};
 		}
 
 		// Create a new file upload handler = really the parser
-		ServletFileUpload upload = new ServletFileUpload();
+		final ServletFileUpload upload = new ServletFileUpload();
 
 		// Parse the request
 		try {
-			FileItemIterator itemStreamIt = upload.getItemIterator(ctx.getRequest());
+			final FileItemIterator itemStreamIt = upload.getItemIterator(ctx.getRequest());
 			while (itemStreamIt.hasNext()) {
-				FileItemStream item = itemStreamIt.next();
+				final FileItemStream item = itemStreamIt.next();
 
-				String fieldName = item.getFieldName();
-				String contentType = item.getContentType();
-				String contentName = item.getName();
-				Map<String, String> requestHeaderMapOfOneItem = new HashMap<String, String>();
-				FileItemHeaders headers = item.getHeaders();
-				Iterator<String> headerNameIt = headers.getHeaderNames();
+				final String fieldName = item.getFieldName();
+				final String contentType = item.getContentType();
+				final String contentName = item.getName();
+				final Map<String, String> requestHeaderMapOfOneItem = new HashMap<String, String>();
+				final FileItemHeaders headers = item.getHeaders();
+				final Iterator<String> headerNameIt = headers.getHeaderNames();
 				while (headerNameIt.hasNext()) {
-					String headerName = headerNameIt.next();
-					String headerValue = headers.getHeader(headerName);
+					final String headerName = headerNameIt.next();
+					final String headerValue = headers.getHeader(headerName);
 					requestHeaderMapOfOneItem.put(headerName, headerValue);
 				}
-				InputStream is = item.openStream();
+				final InputStream is = item.openStream();
 
 				if (item.isFormField()) {
-					String value = Streams.asString(is, "UTF-8");
-					multipartFormDataHandler.onContentPartString(fieldName, contentName,
-							requestHeaderMapOfOneItem, contentType, value, progressReporter);
+					final String value = Streams.asString(is, "UTF-8");
+					multipartFormDataHandler.onContentPartString(fieldName, contentName, requestHeaderMapOfOneItem,
+							contentType, value, progressReporter);
 				} else {
-					multipartFormDataHandler.onContentPartStream(fieldName, contentName,
-							requestHeaderMapOfOneItem, contentType, is, progressReporter);
+					multipartFormDataHandler.onContentPartStream(fieldName, contentName, requestHeaderMapOfOneItem,
+							contentType, is, progressReporter);
 				}
 
 				is.close();
 			}
 			multipartFormDataHandler.onEndOfRequest(ctx, progressReporter);
-		} catch (FileUploadException e) {
+		} catch (final FileUploadException e) {
 			// IMPROVE good idea?
-			if (progressReporter != null)
+			if (progressReporter != null) {
 				progressReporter.reportProgress("ERROR");
+			}
 			throw new IOException("while uploading", e);
 		}
 
@@ -693,26 +608,26 @@ class RestlessMethod {
 	 * @param req
 	 * @return @NeverNull an empty map if not a multi-part content
 	 */
-	private static Map<String, Object> getMultiPartPostAsMap(HttpServletRequest req) {
-		Map<String, Object> map = new HashMap<String, Object>();
+	private static Map<String, Object> getMultiPartPostAsMap(final HttpServletRequest req) {
+		final Map<String, Object> map = new HashMap<String, Object>();
 		if (!ServletFileUpload.isMultipartContent(req)) {
 			return map;
 		}
-		ServletFileUpload upload = new ServletFileUpload();
+		final ServletFileUpload upload = new ServletFileUpload();
 		FileItemIterator it;
 		try {
 			it = upload.getItemIterator(req);
 			while (it.hasNext()) {
-				FileItemStream item = it.next();
-				String fieldName = item.getFieldName();
-				InputStream stream = item.openStream();
+				final FileItemStream item = it.next();
+				final String fieldName = item.getFieldName();
+				final InputStream stream = item.openStream();
 				if (item.isFormField()) {
-					String value = Streams.asString(stream);
+					final String value = Streams.asString(stream);
 					map.put(fieldName, value);
 				} else {
 					// IMPROVE security, performance: add protection against
 					// gigantic uploads
-					byte[] bytes = IOUtils.toByteArray(stream);
+					final byte[] bytes = IOUtils.toByteArray(stream);
 					if (fieldName.equals(UPLOAD_PARAM)) {
 						map.put(UPLOAD_PARAM, bytes);
 					} else {
@@ -722,10 +637,10 @@ class RestlessMethod {
 					}
 				}
 			}
-		} catch (FileUploadException e) {
+		} catch (final FileUploadException e) {
 			log.warn("", e);
 			throw new RestlessException(500, "Could not process file upload", e);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			log.warn("", e);
 			throw new RestlessException(500, "Could not process file upload", e);
 		}
@@ -738,20 +653,18 @@ class RestlessMethod {
 	}
 
 	/**
-	 * Attention: Do not write on the returned object, only read-access is
-	 * allowed. No guarantees to the behavior of the application can be made if
-	 * you write on the returned object (for example, this might result in
-	 * synchronization problems).
+	 * Attention: Do not write on the returned object, only read-access is allowed. No guarantees to the behavior of the
+	 * application can be made if you write on the returned object (for example, this might result in synchronization
+	 * problems).
 	 */
 	protected PathTemplate getPathTemplate() {
 		return this.pathTemplate;
 	}
 
 	/**
-	 * Attention: Do not write on the returned object, only read-access is
-	 * allowed. No guarantees to the behavior of the application can be made if
-	 * you write on the returned object (for example, this might result in
-	 * synchronization problems).
+	 * Attention: Do not write on the returned object, only read-access is allowed. No guarantees to the behavior of the
+	 * application can be made if you write on the returned object (for example, this might result in synchronization
+	 * problems).
 	 */
 	protected Object getInstanceOrClass() {
 		return this.instanceOrClass;
@@ -766,27 +679,25 @@ class RestlessMethod {
 	}
 
 	/**
-	 * Attention: Do not write on the returned object, only read-access is
-	 * allowed. No guarantees to the behavior of the application can be made if
-	 * you write on the returned object (for example, this might result in
-	 * synchronization problems).
+	 * Attention: Do not write on the returned object, only read-access is allowed. No guarantees to the behavior of the
+	 * application can be made if you write on the returned object (for example, this might result in synchronization
+	 * problems).
 	 */
 	protected RestlessParameter[] getRequiredNamedParameter() {
 		return this.requiredNamedParameters;
 	}
 
 	/**
-	 * 
+	 *
 	 * @param value
 	 * @CanBeNull
 	 * @return true, if the given value is null or equals the empty string
 	 */
-	private static boolean notSet(@CanBeNull Object value) {
+	private static boolean notSet(@CanBeNull final Object value) {
 		return value == null || value.equals("");
 	}
 
-	private static String methodReference(@NeverNull Object instanceOrClass,
-			@NeverNull Method method) {
+	private static String methodReference(@NeverNull final Object instanceOrClass, @NeverNull final Method method) {
 		Class<?> clazz;
 		if (instanceOrClass instanceof Class<?>) {
 			clazz = (Class<?>) instanceOrClass;
@@ -796,21 +707,19 @@ class RestlessMethod {
 		return clazz.getSimpleName() + "." + method.getName() + "(..)";
 	}
 
-	private static Object invokeMethod(@NeverNull Method method, @NeverNull Object instanceOrClass,
-			@NeverNull List<Object> javaMethodArgs) throws IllegalArgumentException,
-			IllegalAccessException, InvocationTargetException {
+	private static Object invokeMethod(@NeverNull final Method method, @NeverNull final Object instanceOrClass,
+			@NeverNull final List<Object> javaMethodArgs)
+					throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		/* Instantiate only for non-static methods */
-		boolean isStatic = Modifier.isStatic(method.getModifiers());
+		final boolean isStatic = Modifier.isStatic(method.getModifiers());
 		Object result;
 		if (isStatic) {
 			result = method.invoke(null, javaMethodArgs.toArray(new Object[0]));
 		} else {
-			Object instance = toInstance(instanceOrClass);
+			final Object instance = toInstance(instanceOrClass);
 
-			/*
-			 * synchronization on the instance is necessary here, since the
-			 * instances might be shared through the instanceCache
-			 */
+			/* synchronization on the instance is necessary here, since the instances might be shared through the
+			 * instanceCache */
 			synchronized (instance) {
 				result = method.invoke(instance, javaMethodArgs.toArray(new Object[0]));
 			}
@@ -819,10 +728,9 @@ class RestlessMethod {
 	}
 
 	/**
-	 * Each class can provide its own local exception handler with a method
-	 * 'onException'. Injectable parameters are: Throwable and the usual
-	 * standard restless built-ins.
-	 * 
+	 * Each class can provide its own local exception handler with a method 'onException'. Injectable parameters are:
+	 * Throwable and the usual standard restless built-ins.
+	 *
 	 * @param cause
 	 * @param instanceOrClass
 	 * @param context
@@ -831,19 +739,19 @@ class RestlessMethod {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	private static boolean callLocalExceptionHandler(@NeverNull Throwable cause,
-			@NeverNull Object instanceOrClass, @NeverNull IRestlessContext context)
-			throws InvocationTargetException, IllegalArgumentException, IllegalAccessException {
+	private static boolean callLocalExceptionHandler(@NeverNull final Throwable cause, @NeverNull final Object instanceOrClass,
+			@NeverNull final IRestlessContext context)
+					throws InvocationTargetException, IllegalArgumentException, IllegalAccessException {
 
-		Method method = RestlessStatic.methodByName(instanceOrClass, "onException");
+		final Method method = RestlessStatic.methodByName(instanceOrClass, "onException");
 		if (method == null) {
 			// no local exception handler available
 			return false;
 		}
 
-		List<Object> javaMethodArgs = new ArrayList<Object>();
+		final List<Object> javaMethodArgs = new ArrayList<Object>();
 
-		for (Class<?> requiredParamType : method.getParameterTypes()) {
+		for (final Class<?> requiredParamType : method.getParameterTypes()) {
 
 			if (requiredParamType.equals(Throwable.class)) {
 				javaMethodArgs.add(cause);
@@ -858,7 +766,7 @@ class RestlessMethod {
 			}
 		}
 
-		Object result = invokeMethod(method, instanceOrClass, javaMethodArgs);
+		final Object result = invokeMethod(method, instanceOrClass, javaMethodArgs);
 
 		if (result instanceof Boolean) {
 			return (Boolean) result;
@@ -870,18 +778,18 @@ class RestlessMethod {
 	/**
 	 * Handle exceptions via handlers registered before at
 	 * {@link Restless#addExceptionHandler(RestlessExceptionHandler)}
-	 * 
+	 *
 	 * @param cause
 	 * @NeverNull
 	 * @param context
 	 * @NeverNull
 	 * @return
 	 */
-	private static boolean callGlobalExceptionHandlers(@NeverNull Throwable cause,
-			@NeverNull IRestlessContext context) {
-		List<RestlessExceptionHandler> exceptionHandlers = context.getRestless().exceptionHandlers;
+	private static boolean callGlobalExceptionHandlers(@NeverNull final Throwable cause,
+			@NeverNull final IRestlessContext context) {
+		final List<RestlessExceptionHandler> exceptionHandlers = context.getRestless().exceptionHandlers;
 		synchronized (exceptionHandlers) {
-			for (RestlessExceptionHandler handler : exceptionHandlers) {
+			for (final RestlessExceptionHandler handler : exceptionHandlers) {
 				if (handler.handleException(cause, context)) {
 					return true;
 				}
@@ -891,17 +799,16 @@ class RestlessMethod {
 	}
 
 	/**
-	 * If the given parameter is a Class, return an instance of it, otherwise
-	 * simply return the given parameter itself.
-	 * 
+	 * If the given parameter is a Class, return an instance of it, otherwise simply return the given parameter itself.
+	 *
 	 * @param instanceOrClass
 	 * @NeverNull
 	 * @return an instance
 	 */
-	private static Object toInstance(@NeverNull Object instanceOrClass) {
+	private static Object toInstance(@NeverNull final Object instanceOrClass) {
 		if (instanceOrClass instanceof Class<?>) {
 			// need to created instance
-			Class<?> clazz = (Class<?>) instanceOrClass;
+			final Class<?> clazz = (Class<?>) instanceOrClass;
 
 			Object instance;
 
@@ -912,51 +819,43 @@ class RestlessMethod {
 			}
 
 			try {
-				Constructor<?> constructor = clazz.getConstructor();
+				final Constructor<?> constructor = clazz.getConstructor();
 				try {
 					instance = constructor.newInstance();
 					// cache and return
-					Object previousInstance = instanceCache.putIfAbsent(clazz, instance);
+					final Object previousInstance = instanceCache.putIfAbsent(clazz, instance);
 
-					/*
-					 * if another thread added an instance of the class between
-					 * our instanceCache.get(), we should return this instance,
-					 * to keep everything consistent. "putIfAbsent" atomically
-					 * checks whether an instance was added to the cache and if
-					 * this is the case, it returns this instance and keeps the
-					 * cache unchanged. If still no such instance exists, our
-					 * newly created instance is added to the cache and
-					 * putIfAbsent returns null.
-					 * 
-					 * This might result in an unnecessary object instantiation,
-					 * but at least keeps everything consistent and is not as
-					 * restricting as blocking the whole cache completely every
-					 * time we need to access it.
-					 * 
-					 * This looks like dangerous double checked locking, but
-					 * this should be safe because of the behavior of
-					 * ConcurrentHashMap and the way we're using it here.
-					 */
+					/* if another thread added an instance of the class between our instanceCache.get(), we should
+					 * return this instance, to keep everything consistent. "putIfAbsent" atomically checks whether an
+					 * instance was added to the cache and if this is the case, it returns this instance and keeps the
+					 * cache unchanged. If still no such instance exists, our newly created instance is added to the
+					 * cache and putIfAbsent returns null.
+					 *
+					 * This might result in an unnecessary object instantiation, but at least keeps everything
+					 * consistent and is not as restricting as blocking the whole cache completely every time we need to
+					 * access it.
+					 *
+					 * This looks like dangerous double checked locking, but this should be safe because of the behavior
+					 * of ConcurrentHashMap and the way we're using it here. */
 					if (previousInstance != null) {
 						return previousInstance;
 					} else {
 						return instance;
 					}
-				} catch (IllegalArgumentException e) {
-					throw new RestlessException(500,
-							"Server misconfigured - constructor needs to have no parameters", e);
-				} catch (InstantiationException e) {
+				} catch (final IllegalArgumentException e) {
+					throw new RestlessException(500, "Server misconfigured - constructor needs to have no parameters",
+							e);
+				} catch (final InstantiationException e) {
 					throw new RestlessException(500, "Server misconfigured", e);
-				} catch (IllegalAccessException e) {
+				} catch (final IllegalAccessException e) {
 					throw new RestlessException(500, "Server misconfigured", e);
-				} catch (InvocationTargetException e) {
+				} catch (final InvocationTargetException e) {
 					throw new RestlessException(500, "Server misconfigured", e);
 				}
-			} catch (SecurityException e) {
+			} catch (final SecurityException e) {
 				throw new RestlessException(500, "Server misconfigured", e);
-			} catch (NoSuchMethodException e) {
-				throw new RestlessException(500,
-						"Server misconfigured - constructor needs to have no parameters", e);
+			} catch (final NoSuchMethodException e) {
+				throw new RestlessException(500, "Server misconfigured - constructor needs to have no parameters", e);
 			}
 
 		} else {
@@ -969,22 +868,20 @@ class RestlessMethod {
 	}
 
 	/**
-	 * Creates an identifier unique for the current request to assist
-	 * correlating web server responses with corresponding log files. To further
-	 * assist the common case of POST-redirect-GET, where the second get might
-	 * end up on a completely different machine, the request identifier can also
-	 * be set via a cookie or query parameter.
-	 * 
+	 * Creates an identifier unique for the current request to assist correlating web server responses with
+	 * corresponding log files. To further assist the common case of POST-redirect-GET, where the second get might end
+	 * up on a completely different machine, the request identifier can also be set via a cookie or query parameter.
+	 *
 	 * Note: POST-parameters are ignored.
-	 * 
+	 *
 	 * @param urlParameter
 	 * @NeverNull
 	 * @param cookieMap
 	 * @NeverNull
 	 * @return an existing request id found in URL parameters or cookies.
 	 */
-	private static String reuseOrCreateUniqueRequestIdentifier(
-			@NeverNull Map<String, String> urlParameter, @NeverNull Map<String, String> cookieMap) {
+	private static String reuseOrCreateUniqueRequestIdentifier(@NeverNull final Map<String, String> urlParameter,
+			@NeverNull final Map<String, String> cookieMap) {
 		String requestId = urlParameter.get(IRestlessContext.PARAM_REQUEST_ID);
 		if (requestId == null) {
 			requestId = cookieMap.get(IRestlessContext.PARAM_REQUEST_ID);
@@ -997,7 +894,6 @@ class RestlessMethod {
 
 	@Override
 	public String toString() {
-		return this.pathTemplate + " ==> " + this.instanceOrClass.getClass() + "."
-				+ this.methodName + "(...)";
+		return this.pathTemplate + " ==> " + this.instanceOrClass.getClass() + "." + this.methodName + "(...)";
 	}
 }

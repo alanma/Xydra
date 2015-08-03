@@ -28,7 +28,7 @@ public interface IDatastoreSync extends IDatastoreShared {
 
 	/**
 	 * Deletes the entity with the given key from GAE
-	 * 
+	 *
 	 * @param key
 	 *            The entity to remove from the datastore.
 	 */
@@ -37,7 +37,7 @@ public interface IDatastoreSync extends IDatastoreShared {
 
 	/**
 	 * Deletes the E with the given K asynchronously from GAE
-	 * 
+	 *
 	 * @param key
 	 *            The entity to remove from the datastore.
 	 * @param txn
@@ -49,17 +49,17 @@ public interface IDatastoreSync extends IDatastoreShared {
 
 	/**
 	 * Batch get.
-	 * 
+	 *
 	 * Retrieves the set of Entities matching keys. The result Map will only
 	 * contain Ks for which Entities could be found.
-	 * 
+	 *
 	 * Note: If there is a current Transaction, this operation will execute
 	 * within that Transaction. In this case it is up to the caller to commit or
 	 * rollback. If there is no current Transaction, the behavior of this method
 	 * with respect to Transactions will be determined by the
 	 * ImplicitTransactionManagementPolicy available on the
 	 * DatastoreServiceConfig.
-	 * 
+	 *
 	 * @param keys
 	 *            never null
 	 * @param txn
@@ -86,7 +86,7 @@ public interface IDatastoreSync extends IDatastoreShared {
 
 	/**
 	 * Batch put
-	 * 
+	 *
 	 * @param it
 	 */
 	@ModificationOperation
@@ -94,7 +94,7 @@ public interface IDatastoreSync extends IDatastoreShared {
 
 	/**
 	 * Stores a GAE entity asynchronously in the GAE back-end
-	 * 
+	 *
 	 * @param entity
 	 *            The entity to write to the datastore.
 	 */
@@ -103,7 +103,7 @@ public interface IDatastoreSync extends IDatastoreShared {
 
 	/**
 	 * Stores a GAE entity asynchronously in the GAE back-end
-	 * 
+	 *
 	 * @param entity
 	 *            The entity to write to the datastore.
 	 * @param txn
@@ -113,14 +113,14 @@ public interface IDatastoreSync extends IDatastoreShared {
 
 	/**
 	 * Begin a synchronous GAE Transaction.
-	 * 
+	 *
 	 * @return The started Transaction.
 	 */
 	STransaction beginTransaction();
 
 	/**
 	 * Commit the given GAE Transaction.
-	 * 
+	 *
 	 * @param txn
 	 *            The Transaction to commit.
 	 * @throws ConcurrentModificationException

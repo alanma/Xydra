@@ -4,7 +4,7 @@ public class AnnotationSpec<T> {
 
 	public Class<?> annot;
 
-	private T[] values;
+	private final T[] values;
 
 	/**
 	 * @param annot
@@ -13,7 +13,7 @@ public class AnnotationSpec<T> {
 	 *            of the annotation
 	 */
 	// @SafeVarargs
-	AnnotationSpec(Class<?> annot, @SuppressWarnings("unchecked") T... values) {
+	AnnotationSpec(final Class<?> annot, @SuppressWarnings("unchecked") final T... values) {
 		this.annot = annot;
 		this.values = values;
 	}
@@ -22,7 +22,7 @@ public class AnnotationSpec<T> {
 	 * @return the first of the values or null
 	 */
 	public T getValue() {
-		return this.values == null ? null : (this.values.length == 0 ? null : this.values[0]);
+		return this.values == null ? null : this.values.length == 0 ? null : this.values[0];
 	}
 
 	public T[] getValues() {

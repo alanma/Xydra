@@ -13,8 +13,8 @@ import org.xydra.log.api.LoggerFactory;
 public class CsvReader {
 
 	private static Logger log = LoggerFactory.getLogger(CsvTable.class);
-	private int readMaxRows;
-	private BufferedReader br;
+	private final int readMaxRows;
+	private final BufferedReader br;
 	private List<String> colNames;
 	private long lineNumber;
 
@@ -24,7 +24,7 @@ public class CsvReader {
 	 * @param readMaxRows
 	 *            maximum number of rows to read. -1 = infinite.
 	 */
-	public CsvReader(Reader reader, int readMaxRows) {
+	public CsvReader(final Reader reader, final int readMaxRows) {
 		this.br = new BufferedReader(reader);
 		this.readMaxRows = readMaxRows;
 	}
@@ -41,18 +41,18 @@ public class CsvReader {
 	 */
 	public List<String> readHeaders() throws IllegalStateException, IOException,
 			IllegalArgumentException {
-		String line = this.br.readLine();
+		final String line = this.br.readLine();
 		if (line == null) {
 			throw new IllegalArgumentException("CSV file has no content, not even headers");
 		}
 		// read header
-		String[] headers = CsvCodec.splitAtUnquotedSemicolon(line);
+		final String[] headers = CsvCodec.splitAtUnquotedSemicolon(line);
 		if (headers.length < 1) {
 			throw new IllegalArgumentException("Found no first column");
 		}
 		this.colNames = new ArrayList<String>();
-		for (String s : headers) {
-			String decoded = CsvCodec.excelDecode(s);
+		for (final String s : headers) {
+			final String decoded = CsvCodec.excelDecode(s);
 			this.colNames.add(decoded == null ? "NULL" : decoded);
 		}
 		this.lineNumber = 1;
@@ -67,13 +67,13 @@ public class CsvReader {
 	 *             from underlying reader
 	 */
 	public IReadableRow readDataRow() throws IllegalStateException, IOException {
-		String line = this.br.readLine();
+		final String line = this.br.readLine();
 		SingleRow row = null;
 		if (line != null && /*
 							 * maybe we have to limit the number of read lines
 							 */
 		(this.readMaxRows == -1 || this.lineNumber < this.readMaxRows)) {
-			String[] datas = CsvCodec.splitAtUnquotedSemicolon(line);
+			final String[] datas = CsvCodec.splitAtUnquotedSemicolon(line);
 			if (this.colNames.size() != datas.length) {
 				throw new IllegalArgumentException("Line " + this.lineNumber + ": Header length ("
 						+ this.colNames.size() + ") is different from data length (" + datas.length
@@ -81,14 +81,14 @@ public class CsvReader {
 			}
 
 			// prepare row
-			String rowName = CsvCodec.excelDecode(datas[0]);
+			final String rowName = CsvCodec.excelDecode(datas[0]);
 			row = new SingleRow(rowName);
 			for (int i = 1; i < this.colNames.size(); i++) {
 				try {
-					String value = CsvCodec.excelDecode(datas[i]);
-					String colName = CsvCodec.excelDecode(this.colNames.get(i));
+					final String value = CsvCodec.excelDecode(datas[i]);
+					final String colName = CsvCodec.excelDecode(this.colNames.get(i));
 					row.setValue(colName, value, true);
-				} catch (IllegalStateException e) {
+				} catch (final IllegalStateException e) {
 					throw new IllegalArgumentException("Line " + this.lineNumber
 							+ "> Could not parse '" + line + "'", e);
 				}

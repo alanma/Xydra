@@ -2,14 +2,14 @@ package org.xydra.testgae.client;
 
 /**
  * Benchmark test for a remote server
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class RemoteBenchmarkOnLocalhost extends RemoteBenchmark {
 
-	public RemoteBenchmarkOnLocalhost(String absoluteUrl, String path, int iterations,
-			int maxAmount, Integer[] range) {
+	public RemoteBenchmarkOnLocalhost(final String absoluteUrl, final String path, final int iterations,
+			final int maxAmount, final Integer[] range) {
 		super(absoluteUrl, path, iterations, maxAmount, range);
 	}
 }

@@ -7,10 +7,10 @@ import org.xydra.core.change.XObjectEventListener;
 
 public class DummyObjectEventListener implements XObjectEventListener {
 	XEvent event;
-	
+
 	@Override
-	public void onChangeEvent(XObjectEvent event) {
+	public void onChangeEvent(final XObjectEvent event) {
 		this.event = event;
 	}
-	
+
 }

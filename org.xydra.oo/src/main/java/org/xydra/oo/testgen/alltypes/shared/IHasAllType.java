@@ -36,7 +36,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("bestFriends")
@@ -44,7 +44,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("friends")
@@ -52,7 +52,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("color")
@@ -60,7 +60,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jBoolean")
@@ -68,7 +68,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jBooleanarray")
@@ -76,7 +76,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jDouble")
@@ -84,7 +84,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jDoublearray")
@@ -92,7 +92,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jInteger")
@@ -100,7 +100,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jIntegerarray")
@@ -108,7 +108,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jLong")
@@ -116,7 +116,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jLongarray")
@@ -124,7 +124,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jString")
@@ -132,7 +132,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jaddressarray")
@@ -140,7 +140,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jbinary")
@@ -148,7 +148,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jboolean")
@@ -156,7 +156,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jbooleanarray")
@@ -164,7 +164,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jdouble")
@@ -172,7 +172,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jdoublearray")
@@ -180,7 +180,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jiddarray")
@@ -188,7 +188,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jint")
@@ -196,7 +196,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jintarray")
@@ -204,7 +204,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jlong")
@@ -212,7 +212,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jlongarray")
@@ -220,7 +220,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("jstringarray")
@@ -228,7 +228,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("myLongBasedType")
@@ -236,7 +236,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("partner")
@@ -244,7 +244,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xaddress")
@@ -252,7 +252,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xaddresslist")
@@ -260,7 +260,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xaddressset")
@@ -268,7 +268,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xaddresssortedset")
@@ -276,7 +276,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xbinary")
@@ -284,7 +284,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xboolean")
@@ -292,7 +292,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xbooleanlist")
@@ -300,7 +300,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xdouble")
@@ -308,7 +308,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xdoublelist")
@@ -316,7 +316,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xid")
@@ -324,7 +324,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xidlist")
@@ -332,7 +332,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xidset")
@@ -340,7 +340,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xidsortedset")
@@ -348,7 +348,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xinteger")
@@ -356,7 +356,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xintegerlist")
@@ -364,7 +364,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xlong")
@@ -372,7 +372,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xlonglist")
@@ -380,7 +380,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xstring")
@@ -388,7 +388,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xstringlist")
@@ -396,7 +396,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return the current value or null if not defined
 	 */
 	@Field("xstringset")
@@ -404,7 +404,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * For GWT-internal use only [generated from: 'toClassSpec 1']
-	 * 
+	 *
 	 * @param model
 	 *            [generated from: 'toClassSpec 2']
 	 * @param id
@@ -414,7 +414,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("jaddresset")
@@ -422,7 +422,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("jaddresslist")
@@ -430,7 +430,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("jaddresssortedset")
@@ -438,7 +438,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("jbooleanlist")
@@ -446,7 +446,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("jdoublelist")
@@ -454,7 +454,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("jintegerlist")
@@ -462,7 +462,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("jlonglist")
@@ -470,7 +470,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("jstringlist")
@@ -478,7 +478,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("jstringset")
@@ -486,7 +486,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("jxidlist")
@@ -494,7 +494,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("jxidset")
@@ -502,7 +502,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("jxidsortedset")
@@ -510,7 +510,7 @@ public interface IHasAllType extends IHasXId {
 
 	/**
 	 * [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @return a writable collection proxy, never null
 	 */
 	@Field("nextBirthdays")
@@ -519,7 +519,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param color
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -531,7 +531,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jBooleanarray
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -543,7 +543,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jBoolean
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -555,7 +555,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jDoublearray
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -567,7 +567,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jDouble
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -579,7 +579,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jIntegerarray
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -591,7 +591,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jInteger
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -603,7 +603,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jLongarray
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -615,7 +615,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jLong
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -627,7 +627,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jString
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -639,7 +639,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jaddressarray
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -651,7 +651,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jbinary
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -663,7 +663,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jbooleanarray
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -675,7 +675,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jboolean
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -687,7 +687,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jdoublearray
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -699,7 +699,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jdouble
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -711,7 +711,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jiddarray
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -723,7 +723,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jintarray
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -735,7 +735,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jint
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -747,7 +747,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jlongarray
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -759,7 +759,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jlong
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -771,7 +771,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param jstringarray
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -783,7 +783,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param myLongBasedType
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -795,7 +795,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param partner
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -807,7 +807,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xaddresslist
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -819,7 +819,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xaddressset
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -831,7 +831,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xaddresssortedset
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -843,7 +843,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xaddress
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -855,7 +855,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xbinary
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -867,7 +867,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xbooleanlist
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -879,7 +879,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xboolean
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -891,7 +891,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xdoublelist
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -903,7 +903,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xdouble
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -915,7 +915,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xidlist
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -927,7 +927,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xidset
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -939,7 +939,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xidsortedset
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -951,7 +951,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xid
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -963,7 +963,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xintegerlist
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -975,7 +975,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xinteger
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -987,7 +987,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xlonglist
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -999,7 +999,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xlong
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -1011,7 +1011,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xstringlist
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -1023,7 +1023,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xstringset
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
@@ -1035,7 +1035,7 @@ public interface IHasAllType extends IHasXId {
 	/**
 	 * Set a value, silently overwriting existing values, if any. [generated
 	 * from: 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']
-	 * 
+	 *
 	 * @param xstring
 	 *            the value to set [generated from:
 	 *            'org.xydra.oo.testspecs.AllTypesSpec.HasAllType']

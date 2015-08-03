@@ -5,5 +5,5 @@ import org.xydra.base.rmof.XRevWritableModel;
 
 public interface XExistsRevWritableModel extends XRevWritableModel, XExistsWritableModel,
         XExistsReadableModel, XExists {
-    
+
 }

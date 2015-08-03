@@ -4,7 +4,7 @@ import org.xydra.annotations.NeverNull;
 
 /**
  * Main facade class for accessing Xydra Base functionality.
- * 
+ *
  * @author xamde
  */
 public class Base {
@@ -18,7 +18,7 @@ public class Base {
 	 * @throws IllegalArgumentException if repositoryAddress doesn't refer to an
 	 *             repository
 	 */
-	public static XAddress resolveModel(XAddress repositoryAddress, XId modelId) {
+	public static XAddress resolveModel(final XAddress repositoryAddress, final XId modelId) {
 		if (repositoryAddress == null) {
 			return toAddress(null, modelId, null, null);
 		}
@@ -28,7 +28,7 @@ public class Base {
 		return toAddress(repositoryAddress.getRepository(), modelId, null, null);
 	}
 
-	public static XAddress resolveObject(XAddress objectAddress) {
+	public static XAddress resolveObject(final XAddress objectAddress) {
 		if (objectAddress.getAddressedType() == XType.XREPOSITORY
 				|| objectAddress.getAddressedType() == XType.XMODEL) {
 			throw new IllegalArgumentException("Given address '" + objectAddress
@@ -47,7 +47,7 @@ public class Base {
 	 * @throws IllegalArgumentException if modelAddress doesn't refer to an
 	 *             model
 	 */
-	public static XAddress resolveObject(XAddress modelAddress, XId objectId) {
+	public static XAddress resolveObject(final XAddress modelAddress, final XId objectId) {
 		if (modelAddress == null) {
 			return toAddress(null, null, objectId, null);
 		}
@@ -71,7 +71,7 @@ public class Base {
 	 * @throws IllegalArgumentException if repositoryAddress doesn't refer to an
 	 *             repository
 	 */
-	public static XAddress resolveObject(XAddress repositoryAddress, XId modelId, XId objectId) {
+	public static XAddress resolveObject(final XAddress repositoryAddress, final XId modelId, final XId objectId) {
 		if (repositoryAddress == null) {
 			return toAddress(null, modelId, objectId, null);
 		}
@@ -81,7 +81,7 @@ public class Base {
 		return toAddress(repositoryAddress.getRepository(), modelId, objectId, null);
 	}
 
-	public static XAddress resolveRepository(XAddress repositoryAddress) {
+	public static XAddress resolveRepository(final XAddress repositoryAddress) {
 		if (repositoryAddress.getAddressedType() != XType.XREPOSITORY) {
 			throw new IllegalArgumentException("Given address '" + repositoryAddress
 					+ "' cannot be resolved to a repository");
@@ -111,8 +111,8 @@ public class Base {
 	 * @throws IllegalArgumentException if repositoryAddress doesn't refer to an
 	 *             repository
 	 */
-	public static XAddress resolveField(XAddress repositoryAddress, XId modelId, XId objectId,
-			XId fieldId) {
+	public static XAddress resolveField(final XAddress repositoryAddress, final XId modelId, final XId objectId,
+			final XId fieldId) {
 		if (repositoryAddress == null) {
 			return toAddress(null, modelId, objectId, fieldId);
 		}
@@ -128,7 +128,7 @@ public class Base {
 	 * @throws IllegalArgumentException if the given address addresses a
 	 *             repository
 	 */
-	public static XAddress resolveModel(XAddress mofAddress) {
+	public static XAddress resolveModel(final XAddress mofAddress) {
 		if (mofAddress.getAddressedType() == XType.XREPOSITORY) {
 			throw new IllegalArgumentException("Given address '" + mofAddress
 					+ "' cannot be resolved to a model");
@@ -144,7 +144,7 @@ public class Base {
 	 * "modelId/objectId" and "modelId" where modelId, objectId and fieldId are
 	 * valid string representations of {@link XId XIds} (ie: allowed parameters
 	 * for the fromString() method).
-	 * 
+	 *
 	 * @param addressString A string with the described format
 	 * @return an new {@link XAddress} object representing the specified address
 	 * @throws IllegalArgumentException if one of the given URI components is
@@ -153,7 +153,7 @@ public class Base {
 	 * @throws URIFormatException if the given address contains too many
 	 *             components.
 	 */
-	public static @NeverNull XAddress toAddress(@NeverNull String addressString) {
+	public static @NeverNull XAddress toAddress(@NeverNull final String addressString) {
 		return BaseRuntime.getIDProvider().fromAddress(addressString);
 	}
 
@@ -166,7 +166,7 @@ public class Base {
 	 * @throws IllegalArgumentException if objectAddress doesn't refer to an
 	 *             object
 	 */
-	public static XAddress resolveField(XAddress objectAddress, XId fieldId) {
+	public static XAddress resolveField(final XAddress objectAddress, final XId fieldId) {
 		if (objectAddress == null) {
 			return toAddress(null, null, null, fieldId);
 		}
@@ -188,7 +188,7 @@ public class Base {
 	 * @throws IllegalArgumentException if modelAddress doesn't refer to an
 	 *             model
 	 */
-	public static XAddress resolveField(XAddress modelAddress, XId objectId, XId fieldId) {
+	public static XAddress resolveField(final XAddress modelAddress, final XId objectId, final XId fieldId) {
 		if (modelAddress == null) {
 			return toAddress(null, null, objectId, fieldId);
 		}
@@ -202,20 +202,20 @@ public class Base {
 	 * Creates a new {@link XAddress} from the given components using the
 	 * default {@link XIdProvider}. The {@link XAddress} will have the following
 	 * format: repositoryId/modelId/objectId/fieldId
-	 * 
+	 *
 	 * Some parameters can be null. An {@link XAddress} can address an
 	 * repository (repositoryId set, the rest null) model (modelId set,
 	 * repositoryId may be set, rest null), a object (objectId not null, fieldId
 	 * null, rest is set), or an field (fieldId not null, rest may or may not be
 	 * null).
-	 * 
+	 *
 	 * Legal addresses are (R---),(RM--),(-M--), (RMO-), (RMOF),(---F),
 	 * (--O-),(-MO-),(-MOF)? ...?
-	 * 
+	 *
 	 * Illegal addresses are (R-M-),(R-MF),(-M-F),(RM-F),(R--F),(R-O-),(----)
-	 * 
+	 *
 	 * TODO what about (
-	 * 
+	 *
 	 * @param repositoryId The {@link XId} for the repository field of the
 	 *            {@link XAddress}
 	 * @param modelId The {@link XId} for the model field of the
@@ -230,7 +230,7 @@ public class Base {
 	 *             example if repositoryId is set, modelId not set and objectId
 	 *             is set)
 	 */
-	public static XAddress toAddress(XId repositoryId, XId modelId, XId objectId, XId fieldId) {
+	public static XAddress toAddress(final XId repositoryId, final XId modelId, final XId objectId, final XId fieldId) {
 		return BaseRuntime.getIDProvider().fromComponents(repositoryId, modelId, objectId, fieldId);
 	}
 
@@ -240,29 +240,29 @@ public class Base {
 	 * not contain any ':' characters. The string SHOULD be at most 100
 	 * characters long for maximum compatibility with all back-ends (e.g. Google
 	 * AppEngine).
-	 * 
+	 *
 	 * @param idString The String which will be used to create the {@link XId}.
 	 * @return a new unique {@link XId} object calculated from the given URI
 	 * @throws IllegalArgumentException if the given name is not a valid
 	 *             {@link XId} string
 	 */
-	public static XId toId(String idString) {
+	public static XId toId(final String idString) {
 		return BaseRuntime.getIDProvider().fromString(idString);
 	}
 
-	public static XAddress resolveRepository(XId repositoryId) {
+	public static XAddress resolveRepository(final XId repositoryId) {
 		return toAddress(repositoryId, null, null, null);
 	}
 
-	public static XAddress resolveModel(XId repositoryId, XId modelId) {
+	public static XAddress resolveModel(final XId repositoryId, final XId modelId) {
 		return toAddress(repositoryId, modelId, null, null);
 	}
 
-	public static XAddress resolveObject(XId repositoryId, XId modelId, XId objectId) {
+	public static XAddress resolveObject(final XId repositoryId, final XId modelId, final XId objectId) {
 		return toAddress(repositoryId, modelId, objectId, null);
 	}
 
-	public static XAddress resolveField(XId repositoryId, XId modelId, XId objectId, XId fieldId) {
+	public static XAddress resolveField(final XId repositoryId, final XId modelId, final XId objectId, final XId fieldId) {
 		return toAddress(repositoryId, modelId, objectId, fieldId);
 	}
 

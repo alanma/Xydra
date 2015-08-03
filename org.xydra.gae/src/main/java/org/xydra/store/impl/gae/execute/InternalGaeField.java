@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.xydra.store.impl.gae.execute;
 
@@ -25,9 +25,9 @@ import org.xydra.xgae.datastore.api.SKey;
 /**
  * Internal helper class used by {@link IGaeChangesService} to access the
  * current field state.
- * 
+ *
  * @author dscharrer
- * 
+ *
  */
 class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 
@@ -42,13 +42,13 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	/**
 	 * Construct a read-only interface to an {@link XFieldEvent} in the GAE
 	 * datastore.
-	 * 
+	 *
 	 * {@link InternalGaeField}s are not constructed directly by
 	 * {@link IGaeChangesService} but through
 	 * {@link InternalGaeObject#getField(XId)}.
-	 * 
+	 *
 	 */
-	protected InternalGaeField(IGaeChangesService gcs, XAddress fieldAddr, SEntity fieldEntity) {
+	protected InternalGaeField(final IGaeChangesService gcs, final XAddress fieldAddr, final SEntity fieldEntity) {
 		this.gcs = gcs;
 		assert fieldAddr.getAddressedType() == XType.XFIELD;
 		this.fieldAddr = fieldAddr;
@@ -87,10 +87,10 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 
 	/**
 	 * Create or update an {@link XField} in the GAE datastore.
-	 * 
+	 *
 	 * It is up to the caller to acquire enough locks. It is sufficient to only
 	 * lock the field itself.
-	 * 
+	 *
 	 * @param fieldAddr
 	 *            The address of the field to add.
 	 * @param fieldRev
@@ -105,11 +105,11 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	 *            The locks held by the current process. These are used to
 	 *            assert that we are actually allowed to create the entity.
 	 */
-	protected static Future<SKey> set(XAddress fieldAddr, long fieldRev, int transindex,
-			GaeLocks locks) {
+	protected static Future<SKey> set(final XAddress fieldAddr, final long fieldRev, final int transindex,
+			final GaeLocks locks) {
 		assert locks.canWrite(fieldAddr);
 		assert fieldAddr.getAddressedType() == XType.XFIELD;
-		SEntity e = XGae.get().datastore().createEntity(KeyStructure.createEntityKey(fieldAddr));
+		final SEntity e = XGae.get().datastore().createEntity(KeyStructure.createEntityKey(fieldAddr));
 		e.setAttribute(PROP_REVISION, fieldRev);
 		e.setAttribute(PROP_TRANSINDEX, transindex);
 
@@ -120,10 +120,10 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	 * Create or update an empty {@link XField} in the GAE datastore. The
 	 * created field will have no {@link XValue} and if there existed a field
 	 * with a {@link XValue} before, the {@link XValue} will be removed.
-	 * 
+	 *
 	 * It is up to the caller to acquire enough locks. It is sufficient to only
 	 * lock the field itself.
-	 * 
+	 *
 	 * @param fieldAddr
 	 *            The address of the field to add.
 	 * @param fieldRev
@@ -133,17 +133,17 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	 *            The locks held by the current process. These are used to
 	 *            assert that we are actually allowed to create the entity.
 	 */
-	protected static Future<SKey> set(XAddress fieldAddr, long fieldRev, GaeLocks locks) {
+	protected static Future<SKey> set(final XAddress fieldAddr, final long fieldRev, final GaeLocks locks) {
 		return set(fieldAddr, fieldRev, GaeEvents.TRANSINDEX_NONE, locks);
 	}
 
-	private static int getTransIndex(SEntity fieldEntity) {
-		Number transindex = (Number) fieldEntity.getAttribute(PROP_TRANSINDEX);
+	private static int getTransIndex(final SEntity fieldEntity) {
+		final Number transindex = (Number) fieldEntity.getAttribute(PROP_TRANSINDEX);
 		return transindex.intValue();
 	}
 
-	private static long getFieldRev(SEntity fieldEntity) {
-		long fieldRev = (Long) fieldEntity.getAttribute(PROP_REVISION);
+	private static long getFieldRev(final SEntity fieldEntity) {
+		final long fieldRev = (Long) fieldEntity.getAttribute(PROP_REVISION);
 		return fieldRev;
 	}
 

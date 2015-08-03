@@ -8,6 +8,7 @@ import java.util.List;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.Base;
 import org.xydra.base.URIFormatException;
 import org.xydra.base.XId;
 import org.xydra.base.value.XIdListValue;
@@ -24,7 +25,7 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * This interface provides de-serialization support for Xydra from a Java
  * properties files.
- * 
+ *
  * Syntax:
  * <ul>
  * <li>Comment lines start with '#'</li>
@@ -50,9 +51,9 @@ import org.xydra.sharedutils.XyAssert;
  * <li>Whitespace in key names is not permitted</li>
  * <li>Encoding must be UTF-8</li>
  * </ul>
- * 
- * 
- * 
+ *
+ *
+ *
  * The following example uses some syntax constructs: <code><pre>
  * # declares the XObject 'hans' and the property 'phone', sets value of hans.phone to '123'.
  * hans.phone=123
@@ -62,31 +63,31 @@ import org.xydra.sharedutils.XyAssert;
  * igor
  * john.phone=1234
  * </pre></code>
- * 
+ *
  * TODO define behaviour for line-breaks in values
- * 
+ *
  * @author xamde
  */
 @RequiresAppEngine(false)
 @RunsInAppEngine(true)
 @RunsInGWT(true)
 public class SimpleSyntaxUtils {
-	
+
 	/**
 	 * Like a java.io.BufferedReader but based completely on Strings. GWT
 	 * compatible.
-	 * 
+	 *
 	 * @author xamde
-	 * 
+	 *
 	 */
 	public static class PseudoBufferedReader {
 		private int index = 0;
-		private String[] lines;
-		
-		public PseudoBufferedReader(String source) {
+		private final String[] lines;
+
+		public PseudoBufferedReader(final String source) {
 			this.lines = source.split("[\\n\\r]");
 		}
-		
+
 		public String readLine() {
 			if(this.index == this.lines.length) {
 				return null;
@@ -100,13 +101,13 @@ public class SimpleSyntaxUtils {
 				return line;
 			}
 		}
-		
+
 	}
-	
+
 	private static final XId ACTOR_THIS = XX.toId("SimpleSyntaxUtils");
-	
+
 	private static final String PSW_THIS = null;
-	
+
 	/**
 	 * @param modelId
 	 * @param simpleSyntax a String in a restricted syntax, inspired from Java
@@ -115,11 +116,11 @@ public class SimpleSyntaxUtils {
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XModel.
 	 */
-	public static XModel toModel(XId modelId, String simpleSyntax) throws IllegalArgumentException {
-		PseudoBufferedReader br = new PseudoBufferedReader(simpleSyntax);
+	public static XModel toModel(final XId modelId, final String simpleSyntax) throws IllegalArgumentException {
+		final PseudoBufferedReader br = new PseudoBufferedReader(simpleSyntax);
 		String line;
-		
-		XModel model = new MemoryModel(ACTOR_THIS, PSW_THIS, modelId);
+
+		final XModel model = new MemoryModel(ACTOR_THIS, PSW_THIS, modelId);
 		int lineNo = 1;
 		line = br.readLine();
 		while(line != null) {
@@ -127,7 +128,7 @@ public class SimpleSyntaxUtils {
 				// it's a comment
 			} else {
 				// parse
-				int first = line.indexOf("=");
+				final int first = line.indexOf("=");
 				String key;
 				String value;
 				if(first == -1) {
@@ -138,27 +139,27 @@ public class SimpleSyntaxUtils {
 					value = line.substring(first + 1, line.length()).trim();
 				}
 				// pre-parse key
-				String[] keyComponents = key.split("\\.");
+				final String[] keyComponents = key.split("\\.");
 				if(keyComponents.length > 2) {
 					throw new IllegalArgumentException("Line " + lineNo
 					        + ": Found more than one dot in key name '" + key + "'.");
 				}
-				
+
 				XId objectId = null;
 				try {
-					objectId = XX.toId(keyComponents[0].trim());
-				} catch(URIFormatException e) {
+					objectId = Base.toId(keyComponents[0].trim());
+				} catch(final URIFormatException e) {
 					throw new IllegalArgumentException("Line " + lineNo + ": Key name syntax '"
 					        + keyComponents[0].trim() + "' is not a valid XId.");
 				}
-				XObject object = model.createObject(objectId);
-				
+				final XObject object = model.createObject(objectId);
+
 				XId fieldId = null;
 				XField field = null;
 				if(keyComponents.length == 2) {
 					try {
-						fieldId = XX.toId(keyComponents[1].trim());
-					} catch(URIFormatException e) {
+						fieldId = Base.toId(keyComponents[1].trim());
+					} catch(final URIFormatException e) {
 						throw new IllegalArgumentException("Line " + lineNo + ": Key name syntax '"
 						        + keyComponents[1].trim() + "' is not a valid XId.");
 					}
@@ -169,7 +170,7 @@ public class SimpleSyntaxUtils {
 						        + ": An object cannot have a value.");
 					}
 				}
-				
+
 				if(value != null) {
 					XyAssert.xyAssert(field != null); assert field != null;
 					if(field.getValue() != null) {
@@ -183,14 +184,14 @@ public class SimpleSyntaxUtils {
 							throw new IllegalArgumentException("Line " + lineNo
 							        + ": Starts with '[' but does not end with ']'.");
 						}
-						String idValue = value.substring(1, value.length() - 1);
-						String[] ids = idValue.split(",");
+						final String idValue = value.substring(1, value.length() - 1);
+						final String[] ids = idValue.split(",");
 						if(ids.length == 1) {
-							xvalue = XX.toId(ids[0]);
+							xvalue = Base.toId(ids[0]);
 						} else {
-							XId[] xids = new XId[ids.length];
+							final XId[] xids = new XId[ids.length];
 							for(int i = 0; i < xids.length; i++) {
-								xids[i] = XX.toId(ids[i].trim());
+								xids[i] = Base.toId(ids[i].trim());
 							}
 							xvalue = XV.toValue(xids);
 						}
@@ -203,20 +204,20 @@ public class SimpleSyntaxUtils {
 			line = br.readLine();
 			lineNo++;
 		}
-		
+
 		return model;
 	}
-	
-	public static String toSimpleSyntax(XId xid) {
-		StringBuffer buf = new StringBuffer();
+
+	public static String toSimpleSyntax(final XId xid) {
+		final StringBuffer buf = new StringBuffer();
 		buf.append("[");
 		buf.append(xid.toString());
 		buf.append("]");
 		return buf.toString();
 	}
-	
-	public static String toSimpleSyntax(XIdListValue xidListValue) {
-		StringBuffer buf = new StringBuffer();
+
+	public static String toSimpleSyntax(final XIdListValue xidListValue) {
+		final StringBuffer buf = new StringBuffer();
 		buf.append("[");
 		for(int i = 0; i < xidListValue.size(); i++) {
 			buf.append(xidListValue.get(i));
@@ -226,48 +227,48 @@ public class SimpleSyntaxUtils {
 		}
 		buf.append("]");
 		return buf.toString();
-		
+
 	}
-	
-	public static String toSimpleSyntax(XModel model) {
-		StringBuffer buf = new StringBuffer();
-		
+
+	public static String toSimpleSyntax(final XModel model) {
+		final StringBuffer buf = new StringBuffer();
+
 		// TODO add XModel.size() ?
-		List<XId> sortedObjectIdS = new ArrayList<XId>();
-		for(XId objectId : model) {
+		final List<XId> sortedObjectIdS = new ArrayList<XId>();
+		for(final XId objectId : model) {
 			sortedObjectIdS.add(objectId);
 		}
 		Collections.sort(sortedObjectIdS, new Comparator<XId>() {
 			@Override
-			public int compare(XId o1, XId o2) {
+			public int compare(final XId o1, final XId o2) {
 				return o1.toString().compareTo(o2.toString());
 			}
 		});
-		
-		for(XId objectId : sortedObjectIdS) {
-			XObject object = model.getObject(objectId);
+
+		for(final XId objectId : sortedObjectIdS) {
+			final XObject object = model.getObject(objectId);
 			if(object.isEmpty()) {
 				buf.append(objectId.toString()).append("\n");
 			} else {
-				
+
 				// sort
-				List<XId> sortedFieldIdS = new ArrayList<XId>();
-				for(XId fieldId : object) {
+				final List<XId> sortedFieldIdS = new ArrayList<XId>();
+				for(final XId fieldId : object) {
 					sortedFieldIdS.add(fieldId);
 				}
 				Collections.sort(sortedFieldIdS, new Comparator<XId>() {
 					@Override
-					public int compare(XId o1, XId o2) {
+					public int compare(final XId o1, final XId o2) {
 						return o1.toString().compareTo(o2.toString());
 					}
 				});
-				
-				for(XId fieldId : sortedFieldIdS) {
+
+				for(final XId fieldId : sortedFieldIdS) {
 					buf.append(objectId.toString()).append(".").append(fieldId.toString())
 					        .append("=");
-					XField field = object.getField(fieldId);
+					final XField field = object.getField(fieldId);
 					if(!field.isEmpty()) {
-						XValue value = field.getValue();
+						final XValue value = field.getValue();
 						buf.append(toSimpleSyntax(value));
 					}
 					buf.append("\n");
@@ -276,9 +277,9 @@ public class SimpleSyntaxUtils {
 		}
 		return buf.toString();
 	}
-	
-	public static String toSimpleSyntax(XValue xvalue) {
+
+	public static String toSimpleSyntax(final XValue xvalue) {
 		return xvalue.toString();
 	}
-	
+
 }

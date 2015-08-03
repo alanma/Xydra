@@ -10,10 +10,10 @@ public class TestStreamingCsv {
 
 	@Test
 	public void testReadStreamAndWroteStream() throws IllegalStateException, IOException {
-		Iterator<IReadableRow> rowIt = new RowDataGenerator();
-		IRowHandler rowHandler = new RowHandler();
+		final Iterator<IReadableRow> rowIt = new RowDataGenerator();
+		final IRowHandler rowHandler = new RowHandler();
 		while (rowIt.hasNext()) {
-			IReadableRow row = rowIt.next();
+			final IReadableRow row = rowIt.next();
 			rowHandler.handleRow("rowName", row);
 		}
 	}
@@ -21,12 +21,12 @@ public class TestStreamingCsv {
 	class RowHandler implements IRowHandler {
 
 		@Override
-		public void handleRow(String rowName, IReadableRow readableRow) {
+		public void handleRow(final String rowName, final IReadableRow readableRow) {
 			System.out.println("row: " + rowName + " " + readableRow.toString());
 		}
 
 		@Override
-		public void handleHeaderRow(Collection<String> columnNames) {
+		public void handleHeaderRow(final Collection<String> columnNames) {
 			System.out.println("HEADER " + columnNames);
 		}
 

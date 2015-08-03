@@ -13,7 +13,7 @@ import org.xydra.index.iterator.AbstractFilteringIterator;
 
 /**
  * Implements the algorithms on top of an {@link XSyncLogState}
- * 
+ *
  * @author xamde
  */
 public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
@@ -21,35 +21,36 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	private static final long serialVersionUID = -7008700708157729184L;
 
 	/** serialisable state */
-	private XSyncLogState state;
+	private final XSyncLogState state;
 
 	/**
 	 * @param state
 	 * @NeverNull
 	 */
-	public MemorySyncLog(XSyncLogState state) {
-		if (state == null)
+	public MemorySyncLog(final XSyncLogState state) {
+		if (state == null) {
 			throw new IllegalArgumentException("state may not be null");
+		}
 		this.state = state;
 	}
 
 	/**
 	 * Wrap an existing {@link XChangeLogState} into {@link Analysis}
 	 * {@link ISyncLog}
-	 * 
+	 *
 	 * @param changeLogState
 	 */
-	public MemorySyncLog(XChangeLogState changeLogState) {
+	public MemorySyncLog(final XChangeLogState changeLogState) {
 		this(new MemorySyncLogState(changeLogState));
 	}
 
-	public MemorySyncLog(XAddress modelAddress) {
+	public MemorySyncLog(final XAddress modelAddress) {
 		this(new MemorySyncLogState(modelAddress));
 	}
 
 	@Override
 	@ModificationOperation
-	public synchronized void appendSyncLogEntry(ISyncLogEntry syncLogEntry) {
+	public synchronized void appendSyncLogEntry(final ISyncLogEntry syncLogEntry) {
 		assert this.changeRecordMode == ChangeRecordMode.Normal;
 		this.state.appendSyncLogEntry(syncLogEntry);
 	}
@@ -65,7 +66,7 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	}
 
 	@Override
-	synchronized public ISyncLogEntry getSyncLogEntryAt(long revisionNumber) {
+	synchronized public ISyncLogEntry getSyncLogEntryAt(final long revisionNumber) {
 		return this.state.getSyncLogEntryAt(revisionNumber);
 	}
 
@@ -84,21 +85,21 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 
 	@Override
 	@ModificationOperation
-	public synchronized boolean truncateToRevision(long revisionNumber) {
+	public synchronized boolean truncateToRevision(final long revisionNumber) {
 		return this.state.truncateToRevision(revisionNumber);
 	}
 
-	public static ISyncLog create(XAddress baseAddress, long syncRevision) {
+	public static ISyncLog create(final XAddress baseAddress, final long syncRevision) {
 		assert baseAddress != null;
 		assert baseAddress.getRepository() != null;
-		MemorySyncLogState syncLogState = new MemorySyncLogState(baseAddress);
+		final MemorySyncLogState syncLogState = new MemorySyncLogState(baseAddress);
 		syncLogState.setSyncRevisionNumber(syncRevision);
 		syncLogState.setBaseRevisionNumber(syncRevision);
 		return new MemorySyncLog(syncLogState);
 	}
 
 	@Override
-	public XEvent getEventAt(long revisionNumber) {
+	public XEvent getEventAt(final long revisionNumber) {
 		return this.state.getEvent(revisionNumber);
 	}
 
@@ -120,8 +121,7 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	@Override
 	public int countUnappliedLocalChanges() {
 		// IMPROVE would be faster if ISyncLogState supported this natively
-		Iterator<ISyncLogEntry> it = this.state.getSyncLogEntriesSince(this
-				.getSynchronizedRevision());
+		final Iterator<ISyncLogEntry> it = this.state.getSyncLogEntriesSince(getSynchronizedRevision());
 		int count = 0;
 		while (it.hasNext()) {
 			count++;
@@ -136,20 +136,20 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	private ChangeRecordMode changeRecordMode = ChangeRecordMode.Normal;
 
 	@Override
-	public void setChangeRecordMode(ChangeRecordMode changeRecordMode) {
+	public void setChangeRecordMode(final ChangeRecordMode changeRecordMode) {
 		this.changeRecordMode = changeRecordMode;
 	}
 
 	@Override
 	@ModificationOperation
-	public void appendSyncLogEntry(XCommand command, XEvent event) {
+	public void appendSyncLogEntry(final XCommand command, final XEvent event) {
 		switch (this.changeRecordMode) {
 		case Normal:
-			ISyncLogEntry syncLogEntry = new MemorySyncLogEntry(command, event);
+			final ISyncLogEntry syncLogEntry = new MemorySyncLogEntry(command, event);
 			appendSyncLogEntry(syncLogEntry);
 			break;
 		case SnapshotLoading:
-			long rev = event.getRevisionNumber();
+			final long rev = event.getRevisionNumber();
 			this.state.setBaseRevisionNumber(rev);
 			if (getSynchronizedRevision() < rev) {
 				setSynchronizedRevision(rev);
@@ -160,24 +160,24 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 
 	@Override
 	@ModificationOperation
-	public void setSynchronizedRevision(long syncronizedRevision) {
+	public void setSynchronizedRevision(final long syncronizedRevision) {
 		this.state.setSyncRevisionNumber(syncronizedRevision);
 	}
 
 	@Override
 	@ModificationOperation
-	public void appendEvent(XEvent event) {
+	public void appendEvent(final XEvent event) {
 		this.state.appendEvent(event);
 	}
 
 	class LocalChangesIterator extends AbstractFilteringIterator<ISyncLogEntry> {
 
-		public LocalChangesIterator(Iterator<ISyncLogEntry> base) {
+		public LocalChangesIterator(final Iterator<ISyncLogEntry> base) {
 			super(base);
 		}
 
 		@Override
-		protected boolean matchesFilter(ISyncLogEntry entry) {
+		protected boolean matchesFilter(final ISyncLogEntry entry) {
 			return entry.getCommand() != null;
 		}
 
@@ -191,58 +191,60 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	@Override
 	@ModificationOperation
 	public void clearLocalChanges() {
-		List<Long> toRemove = new LinkedList<Long>();
-		Iterator<ISyncLogEntry> it = getLocalChanges();
+		final List<Long> toRemove = new LinkedList<Long>();
+		final Iterator<ISyncLogEntry> it = getLocalChanges();
 		while (it.hasNext()) {
-			ISyncLogEntry sle = it.next();
+			final ISyncLogEntry sle = it.next();
 			toRemove.add(sle.getEvent().getRevisionNumber());
 		}
-		for (Long l : toRemove) {
+		for (final Long l : toRemove) {
 			this.state.removeSyncLogEntryAt(l);
 		}
 	}
 
 	@Override
-	public boolean equals(Object b) {
+	public boolean equals(final Object b) {
 
 		boolean equal = true;
-		MemorySyncLog syncLogB = (MemorySyncLog) b;
+		final MemorySyncLog syncLogB = (MemorySyncLog) b;
 
-		if (!this.getBaseAddress().equals(syncLogB.getBaseAddress())
-				|| !(this.getBaseRevisionNumber() == syncLogB.getBaseRevisionNumber())
-				|| !(this.getSynchronizedRevision() == syncLogB.getSynchronizedRevision())) {
+		if (!getBaseAddress().equals(syncLogB.getBaseAddress())
+				|| !(getBaseRevisionNumber() == syncLogB.getBaseRevisionNumber())
+				|| !(getSynchronizedRevision() == syncLogB.getSynchronizedRevision())) {
 			equal = false;
 			return equal;
 		}
 
-		if (this.getCurrentRevisionNumber() < 0)
+		if (getCurrentRevisionNumber() < 0) {
 			return true;
+		}
 
-		Iterator<ISyncLogEntry> iteratorA = this.getSyncLogEntriesBetween(
+		final Iterator<ISyncLogEntry> iteratorA = getSyncLogEntriesBetween(
 				getBaseRevisionNumber() + 1, getCurrentRevisionNumber());
-		Iterator<ISyncLogEntry> iteratorB = syncLogB.getSyncLogEntriesBetween(
+		final Iterator<ISyncLogEntry> iteratorB = syncLogB.getSyncLogEntriesBetween(
 				getBaseRevisionNumber() + 1, getCurrentRevisionNumber());
 
 		try {
 			while (iteratorA.hasNext() && iteratorB.hasNext()) {
-				ISyncLogEntry itemA = iteratorA.next();
-				ISyncLogEntry itemB = iteratorB.next();
+				final ISyncLogEntry itemA = iteratorA.next();
+				final ISyncLogEntry itemB = iteratorB.next();
 
-				XEvent eventA = itemA.getEvent();
-				XEvent eventB = itemB.getEvent();
+				final XEvent eventA = itemA.getEvent();
+				final XEvent eventB = itemB.getEvent();
 
-				XCommand commandA = itemA.getCommand();
-				XCommand commandB = itemB.getCommand();
-				equal = (eventA.equals(eventB) && commandA.equals(commandB));
-				if (!equal)
+				final XCommand commandA = itemA.getCommand();
+				final XCommand commandB = itemB.getCommand();
+				equal = eventA.equals(eventB) && commandA.equals(commandB);
+				if (!equal) {
 					return false;
+				}
 
 			}
 
 			if (iteratorA.hasNext() || iteratorA.hasNext()) {
 				equal = false;
 			}
-		} catch (NullPointerException e) {
+		} catch (final NullPointerException e) {
 			equal = false;
 		}
 
@@ -252,22 +254,21 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	@Override
 	public int hashCode() {
 		// works, but doesn't spread well
-		return (int) (this.getBaseAddress().hashCode() + this.getBaseRevisionNumber() + this
-				.getSynchronizedRevision());
+		return (int) (getBaseAddress().hashCode() + getBaseRevisionNumber() + getSynchronizedRevision());
 	}
 
 	@Override
-	public Iterator<ISyncLogEntry> getSyncLogEntriesBetween(long beginRevision, long endRevision) {
+	public Iterator<ISyncLogEntry> getSyncLogEntriesBetween(final long beginRevision, final long endRevision) {
 		return this.state.getSyncLogEntriesBetween(beginRevision, endRevision);
 	}
 
 	@Override
-	public Iterator<ISyncLogEntry> getSyncLogEntriesSince(long revisionNumber) {
+	public Iterator<ISyncLogEntry> getSyncLogEntriesSince(final long revisionNumber) {
 		return this.state.getSyncLogEntriesSince(revisionNumber);
 	}
 
 	@Override
-	public Iterator<ISyncLogEntry> getSyncLogEntriesUntil(long revisionNumber) {
+	public Iterator<ISyncLogEntry> getSyncLogEntriesUntil(final long revisionNumber) {
 		return this.state.getSyncLogEntriesUntil(revisionNumber);
 	}
 

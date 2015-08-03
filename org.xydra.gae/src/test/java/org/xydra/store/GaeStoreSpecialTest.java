@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xydra.base.Base;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
@@ -31,9 +33,9 @@ public class GaeStoreSpecialTest {
 
 	public void doStuff() {
 		// creating some models
-		XId objectId1 = XX.toId("TestObject1");
-		XId objectId2 = XX.toId("TestObject2");
-		XId objectId3 = XX.toId("TestObject3");
+		final XId objectId1 = Base.toId("TestObject1");
+		final XId objectId2 = Base.toId("TestObject2");
+		final XId objectId3 = Base.toId("TestObject3");
 
 		/*
 		 * FIXME In a secure store you need to give the correctUser the rights
@@ -46,20 +48,20 @@ public class GaeStoreSpecialTest {
 		 * this method is allowed to execute the following commands ~Bjoern
 		 */
 
-		XCommand modelCommand1 = X.getCommandFactory().createAddModelCommand(this.repoID,
+		final XCommand modelCommand1 = BaseRuntime.getCommandFactory().createAddModelCommand(this.repoID,
 				this.modelId1, true);
 
-		XCommand objectCommand1 = X.getCommandFactory().createAddObjectCommand(
-				XX.resolveModel(this.repoID, this.modelId1), objectId1, true);
-		XCommand objectCommand2 = X.getCommandFactory().createAddObjectCommand(
-				XX.resolveModel(this.repoID, this.modelId1), objectId2, true);
-		XCommand objectCommand3 = X.getCommandFactory().createAddObjectCommand(
-				XX.resolveModel(this.repoID, this.modelId1), objectId3, true);
+		final XCommand objectCommand1 = BaseRuntime.getCommandFactory().createAddObjectCommand(
+				Base.resolveModel(this.repoID, this.modelId1), objectId1, true);
+		final XCommand objectCommand2 = BaseRuntime.getCommandFactory().createAddObjectCommand(
+				Base.resolveModel(this.repoID, this.modelId1), objectId2, true);
+		final XCommand objectCommand3 = BaseRuntime.getCommandFactory().createAddObjectCommand(
+				Base.resolveModel(this.repoID, this.modelId1), objectId3, true);
 
-		XCommand[] commands = { modelCommand1, objectCommand1, objectCommand2, objectCommand3 };
+		final XCommand[] commands = { modelCommand1, objectCommand1, objectCommand2, objectCommand3 };
 
-		for (XCommand command : commands) {
-			long result = this.pers.executeCommand(this.actorId, command);
+		for (final XCommand command : commands) {
+			final long result = this.pers.executeCommand(this.actorId, command);
 			assert result >= 0 : result;
 			if (result == XCommand.FAILED) {
 				throw new RuntimeException(
@@ -74,14 +76,14 @@ public class GaeStoreSpecialTest {
 			}
 		}
 
-		this.modelAddress1 = XX.toAddress(this.repoID, this.modelId1, null, null);
+		this.modelAddress1 = Base.toAddress(this.repoID, this.modelId1, null, null);
 
 	}
 
 	public void deleteModel1() {
-		XCommand removeCommand = MemoryRepositoryCommand.createRemoveCommand(this.repoAddr,
+		final XCommand removeCommand = MemoryRepositoryCommand.createRemoveCommand(this.repoAddr,
 				XCommand.FORCED, this.modelId1);
-		long l = this.pers.executeCommand(this.actorId, removeCommand);
+		final long l = this.pers.executeCommand(this.actorId, removeCommand);
 		assert l >= 0;
 		assert !this.pers.getModelRevision(new GetWithAddressRequest(this.modelAddress1))
 				.modelExists();
@@ -89,21 +91,21 @@ public class GaeStoreSpecialTest {
 
 	@Test
 	public void doTest() {
-		this.modelId1 = XX.toId("TestModel1");
-		this.actorId = XX.toId("actor");
-		this.pers = new GaePersistence(XX.toId("special"));
+		this.modelId1 = Base.toId("TestModel1");
+		this.actorId = Base.toId("actor");
+		this.pers = new GaePersistence(Base.toId("special"));
 		this.repoID = this.pers.getRepositoryId();
-		this.repoAddr = XX.toAddress(this.pers.getRepositoryId(), null, null, null);
+		this.repoAddr = Base.toAddress(this.pers.getRepositoryId(), null, null, null);
 
 		doStuff();
 		deleteModel1();
 		doStuff();
 		deleteModel1();
 		doStuff();
-		ModelRevision rev1 = this.pers.getModelRevision(new GetWithAddressRequest(
+		final ModelRevision rev1 = this.pers.getModelRevision(new GetWithAddressRequest(
 				this.modelAddress1));
 		assertEquals(13, rev1.revision());
-		ModelRevision rev2 = this.pers.getModelRevision(new GetWithAddressRequest(
+		final ModelRevision rev2 = this.pers.getModelRevision(new GetWithAddressRequest(
 				this.modelAddress1));
 		assertEquals(rev1.revision(), rev2.revision());
 	}

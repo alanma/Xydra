@@ -28,15 +28,15 @@ public class TextAreaWidget extends Composite {
 	@UiField
 	TextBox textArea;
 
-	private ButtonPanel buttonPanelReference;
+	private final ButtonPanel buttonPanelReference;
 
-	public TextAreaWidget(String text, ButtonPanel buttonPanelReference) {
+	public TextAreaWidget(final String text, final ButtonPanel buttonPanelReference) {
 
 		super();
 
 		this.buttonPanelReference = buttonPanelReference;
 
-		this.initWidget(uiBinder.createAndBindUi(this));
+		initWidget(uiBinder.createAndBindUi(this));
 
 		if (text != null) {
 			this.textArea.setText(text);
@@ -47,9 +47,10 @@ public class TextAreaWidget extends Composite {
 	}
 
 	@UiHandler("textArea")
-	void onKeyDown(KeyDownEvent event) {
-		if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER)
+	void onKeyDown(final KeyDownEvent event) {
+		if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
 			this.buttonPanelReference.clickOk();
+		}
 	}
 
 	public void selectEverything() {
@@ -60,7 +61,7 @@ public class TextAreaWidget extends Composite {
 		return this.textArea.getText();
 	}
 
-	public void setEnabled(boolean b) {
+	public void setEnabled(final boolean b) {
 		this.textArea.setEnabled(b);
 	}
 
