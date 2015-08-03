@@ -4,7 +4,6 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.base.XIdProvider;
-import org.xydra.core.XX;
 import org.xydra.index.impl.IntegerRangeIndex;
 
 /**

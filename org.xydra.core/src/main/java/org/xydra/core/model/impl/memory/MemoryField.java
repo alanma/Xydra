@@ -19,7 +19,6 @@ import org.xydra.base.rmof.impl.XExistsRevWritableField;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XCopyUtils;
-import org.xydra.core.XX;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XObject;

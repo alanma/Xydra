@@ -6,8 +6,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.util.DumpUtilsBase;
-import org.xydra.core.XX;
-import org.xydra.core.util.DumpUtils;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.impl.memory.MemoryPersistence;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;

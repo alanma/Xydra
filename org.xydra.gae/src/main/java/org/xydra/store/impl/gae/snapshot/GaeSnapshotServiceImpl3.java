@@ -30,7 +30,6 @@ import org.xydra.core.model.XChangeLog;
 import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.xml.XmlParser;
-import org.xydra.core.util.DumpUtils;
 import org.xydra.index.iterator.Iterators;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;

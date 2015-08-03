@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.xydra.base.BaseRuntime;
 import org.xydra.base.XId;
 import org.xydra.base.change.XRepositoryCommand;
-import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.perf.StatsGatheringPersistenceWrapper;
 import org.xydra.persistence.XydraPersistence;

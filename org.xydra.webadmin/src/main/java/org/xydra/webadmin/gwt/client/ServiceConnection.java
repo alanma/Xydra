@@ -10,8 +10,6 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableModel;
-import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.webadmin.gwt.client.events.CommittingEvent.CommitStatus;

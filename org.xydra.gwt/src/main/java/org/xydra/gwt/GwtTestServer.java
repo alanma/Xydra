@@ -167,7 +167,7 @@ public class GwtTestServer {
 
 		try {
 			URI uri = new URI("http://localhost:" + this.port + "/");
-			if (contextPath != "" && contextPath != "/") {
+			if (!contextPath.equals("") && !contextPath.equals("/")) {
 				uri = uri.resolve(contextPath + "/");
 			}
 			return uri;

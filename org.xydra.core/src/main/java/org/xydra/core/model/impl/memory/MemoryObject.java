@@ -34,7 +34,6 @@ import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XCopyUtils;
-import org.xydra.core.XX;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XRMOFChangeListener;

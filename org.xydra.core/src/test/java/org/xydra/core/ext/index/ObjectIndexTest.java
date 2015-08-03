@@ -19,7 +19,6 @@ import org.xydra.core.index.IObjectIndex;
 import org.xydra.core.index.IUniqueObjectIndex;
 import org.xydra.core.index.impl.memory.AbstractObjectIndex;
 import org.xydra.core.index.impl.memory.IndexFactoryImpl;
-import org.xydra.core.index.impl.memory.ObjectIndex;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;

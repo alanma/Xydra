@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.xydra.base.Base;
 import org.xydra.core.LoggerTestHelper;
-import org.xydra.core.XX;
 import org.xydra.core.model.impl.memory.AbstractPersistenceSynchronizerTest;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;

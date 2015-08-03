@@ -13,8 +13,6 @@ import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.XydraParser;

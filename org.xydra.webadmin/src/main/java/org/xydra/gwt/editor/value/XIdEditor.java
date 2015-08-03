@@ -2,7 +2,6 @@ package org.xydra.gwt.editor.value;
 
 import org.xydra.base.Base;
 import org.xydra.base.XId;
-import org.xydra.core.XX;
 
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;

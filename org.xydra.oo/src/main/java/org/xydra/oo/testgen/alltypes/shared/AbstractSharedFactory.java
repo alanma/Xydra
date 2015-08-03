@@ -3,7 +3,6 @@ package org.xydra.oo.testgen.alltypes.shared;
 import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
-import org.xydra.core.XX;
 import org.xydra.oo.runtime.shared.AbstractFactory;
 
 /**

@@ -6,8 +6,6 @@ import org.xydra.base.Base;
 import org.xydra.base.BaseRuntime;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommandFactory;
-import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.impl.log4j.Log4jLoggerFactory;

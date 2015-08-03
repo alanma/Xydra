@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.xydra.base.BaseRuntime;
-import org.xydra.core.X;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.store.AbstractPersistenceTestForTransactions;

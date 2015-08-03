@@ -14,7 +14,6 @@ import org.xydra.core.XX;
 import org.xydra.core.change.DiffWritableModel;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
-import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;

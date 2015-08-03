@@ -17,8 +17,6 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.util.DumpUtilsBase.XidComparator;
 import org.xydra.base.value.XValue;
-import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.core.model.delta.IFieldDiff;
 import org.xydra.core.model.delta.IObjectDiff;

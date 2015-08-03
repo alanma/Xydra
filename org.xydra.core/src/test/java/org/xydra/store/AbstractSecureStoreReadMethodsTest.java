@@ -7,8 +7,6 @@ import org.xydra.base.BaseRuntime;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommandFactory;
-import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.store.access.HashUtils;
 import org.xydra.store.access.XA;
 import org.xydra.store.access.XAccessControlManager;

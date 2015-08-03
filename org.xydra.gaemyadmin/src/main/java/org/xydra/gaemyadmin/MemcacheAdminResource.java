@@ -7,7 +7,6 @@ import java.util.Arrays;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.restless.Restless;
-import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils;
 
 import com.google.appengine.api.memcache.MemcacheService;

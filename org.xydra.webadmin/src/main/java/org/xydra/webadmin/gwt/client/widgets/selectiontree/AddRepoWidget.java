@@ -1,7 +1,6 @@
 package org.xydra.webadmin.gwt.client.widgets.selectiontree;
 
 import org.xydra.base.Base;
-import org.xydra.core.XX;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 

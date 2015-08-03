@@ -11,7 +11,6 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
-import org.xydra.core.X;
 import org.xydra.store.XydraStore;
 
 

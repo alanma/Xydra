@@ -2,7 +2,6 @@ package org.xydra.store;
 
 import org.xydra.base.Base;
 import org.xydra.base.XId;
-import org.xydra.core.XX;
 import org.xydra.store.access.HashUtils;
 
 

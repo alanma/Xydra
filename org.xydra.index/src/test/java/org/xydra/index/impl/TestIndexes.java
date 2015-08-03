@@ -4,8 +4,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.xydra.index.Factory;
 import org.xydra.index.IEntrySet;
@@ -15,6 +13,8 @@ import org.xydra.index.query.ITriple;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
+
+import junit.framework.TestCase;
 
 public class TestIndexes extends TestCase {
 

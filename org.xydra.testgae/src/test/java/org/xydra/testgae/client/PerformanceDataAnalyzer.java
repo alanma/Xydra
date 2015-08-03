@@ -14,7 +14,6 @@ import java.util.HashMap;
 import org.xydra.csv.HtmlTool;
 import org.xydra.csv.IRow;
 import org.xydra.csv.TableCoreTools;
-import org.xydra.csv.TableTools;
 import org.xydra.csv.impl.memory.CsvTable;
 import org.xydra.testgae.shared.Operations;
 

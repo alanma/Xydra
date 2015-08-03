@@ -13,7 +13,6 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
-import org.xydra.core.X;
 import org.xydra.store.XydraStore;
 
 

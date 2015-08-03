@@ -6,7 +6,6 @@ import org.xydra.conf.IConfig;
 import org.xydra.conf.IConfigProvider;
 import org.xydra.conf.annotations.ConfDoc;
 import org.xydra.conf.annotations.ConfType;
-import org.xydra.core.XX;
 
 public class ConfParamsXydraServer implements IConfigProvider {
 

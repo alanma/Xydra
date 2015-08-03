@@ -17,7 +17,6 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XValue;
-import org.xydra.core.X;
 import org.xydra.index.query.Pair;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;

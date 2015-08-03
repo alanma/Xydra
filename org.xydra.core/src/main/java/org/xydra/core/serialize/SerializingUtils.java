@@ -8,7 +8,6 @@ import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
-import org.xydra.core.XX;
 import org.xydra.core.serialize.json.ParseNumber;
 import org.xydra.index.XI;
 

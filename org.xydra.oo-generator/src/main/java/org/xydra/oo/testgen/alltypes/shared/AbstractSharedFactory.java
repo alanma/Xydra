@@ -3,10 +3,7 @@ package org.xydra.oo.testgen.alltypes.shared;
 import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
-import org.xydra.core.XX;
 import org.xydra.oo.runtime.shared.AbstractFactory;
-import org.xydra.oo.testgen.alltypes.shared.IHasAllType;
-import org.xydra.oo.testgen.alltypes.shared.IPerson;
 
 /** Generated on Tue Oct 21 22:14:27 CEST 2014 by SpecWriter, a part of xydra.org:oo */
 public abstract class AbstractSharedFactory extends AbstractFactory {

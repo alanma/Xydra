@@ -30,7 +30,6 @@ import org.xydra.base.rmof.impl.XExistsReadable;
 import org.xydra.base.rmof.impl.XExistsWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
-import org.xydra.core.XX;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
 import org.xydra.index.iterator.Iterators;

@@ -5,7 +5,6 @@ import java.net.URI;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.xydra.base.Base;
-import org.xydra.core.XX;
 import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.XydraSerializer;
 import org.xydra.core.serialize.json.JsonParser;

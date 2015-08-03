@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.rmof.XWritableObject;
-import org.xydra.core.XX;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;

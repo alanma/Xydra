@@ -5,7 +5,6 @@ import java.net.URI;
 
 import org.xydra.base.Base;
 import org.xydra.base.XAddress;
-import org.xydra.core.XX;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.server.TestServer;

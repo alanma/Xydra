@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
+
+import junit.framework.TestCase;
 
 public abstract class AbstractPairIndexTest extends TestCase {
 

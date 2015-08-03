@@ -16,7 +16,6 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XIdSetValue;
 import org.xydra.base.value.XValue;
-import org.xydra.core.X;
 import org.xydra.core.index.IObjectIndex;
 import org.xydra.core.model.XObject;
 import org.xydra.sharedutils.XyAssert;

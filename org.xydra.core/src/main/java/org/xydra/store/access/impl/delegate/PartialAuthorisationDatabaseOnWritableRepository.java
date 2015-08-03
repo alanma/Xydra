@@ -24,7 +24,6 @@ import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.value.XBooleanValue;
-import org.xydra.core.XX;
 import org.xydra.index.query.Pair;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;

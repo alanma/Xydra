@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.base.Base;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.XCopyUtils;
-import org.xydra.core.XX;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.log.api.Logger;

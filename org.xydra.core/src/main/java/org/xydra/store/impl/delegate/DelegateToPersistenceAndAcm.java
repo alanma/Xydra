@@ -19,8 +19,6 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.AccessException;
-import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetEventsRequest;

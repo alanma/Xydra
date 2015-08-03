@@ -3,7 +3,6 @@ package org.xydra.oo.runtime.client;
 import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.core.X;
-import org.xydra.core.XX;
 
 import com.google.gwt.core.client.EntryPoint;
 

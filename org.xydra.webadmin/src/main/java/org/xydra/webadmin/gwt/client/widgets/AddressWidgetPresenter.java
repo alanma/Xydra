@@ -3,7 +3,6 @@ package org.xydra.webadmin.gwt.client.widgets;
 import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.core.XX;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
@@ -223,7 +222,6 @@ public class AddressWidgetPresenter extends Presenter {
 		}
 	}
 
-	@SuppressWarnings("static-access")
 	public void addEntity(final XAddress desiredAddress) {
 		log.info("requested to add address " + desiredAddress.toString());
 

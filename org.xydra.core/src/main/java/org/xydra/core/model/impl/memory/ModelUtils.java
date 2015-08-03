@@ -9,7 +9,6 @@ import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.value.XValue;
-import org.xydra.core.XX;
 
 
 public class ModelUtils {

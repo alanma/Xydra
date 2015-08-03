@@ -26,8 +26,6 @@ import org.xydra.base.rmof.impl.memory.SimpleRepository;
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
-import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.util.SimpleSyntaxUtilsTest;

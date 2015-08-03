@@ -7,7 +7,6 @@ import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
-import org.xydra.core.XX;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;

@@ -5,12 +5,10 @@ import org.xydra.base.Base;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.base.util.DumpUtilsBase;
 import org.xydra.base.value.XV;
-import org.xydra.core.XX;
 import org.xydra.core.model.XObject;
 import org.xydra.core.serialize.LineBreaks;
 import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraElement;
-import org.xydra.core.util.DumpUtils;
 
 
 public class JsonKnownBugsTest {

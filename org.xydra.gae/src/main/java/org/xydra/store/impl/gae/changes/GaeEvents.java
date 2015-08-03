@@ -19,7 +19,6 @@ import org.xydra.base.change.impl.memory.MemoryModelEvent;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
 import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.base.value.XValue;
-import org.xydra.core.XX;
 import org.xydra.core.serialize.SerializedValue;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;

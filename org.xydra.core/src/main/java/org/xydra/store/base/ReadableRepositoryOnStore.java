@@ -14,8 +14,6 @@ import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.core.StoreException;
-import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.Callback;
 import org.xydra.store.XydraStore;

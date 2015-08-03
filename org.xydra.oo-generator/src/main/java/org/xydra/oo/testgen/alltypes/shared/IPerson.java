@@ -4,7 +4,6 @@ import org.xydra.base.IHasXId;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.Field;
-import org.xydra.oo.testgen.alltypes.shared.IPerson;
 
 /** Generated on Tue Oct 21 22:14:27 CEST 2014 by SpecWriter, a part of xydra.org:oo */
 public interface IPerson extends IHasXId {

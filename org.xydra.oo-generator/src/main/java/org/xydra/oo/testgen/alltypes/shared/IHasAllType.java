@@ -3,6 +3,7 @@ package org.xydra.oo.testgen.alltypes.shared;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
+
 import org.xydra.base.IHasXId;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
@@ -26,8 +27,6 @@ import org.xydra.base.value.XStringListValue;
 import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.oo.Field;
-import org.xydra.oo.testgen.alltypes.shared.IHasAllType;
-import org.xydra.oo.testgen.alltypes.shared.IPerson;
 import org.xydra.oo.testtypes.Colors;
 import org.xydra.oo.testtypes.MyLongBasedType;
 

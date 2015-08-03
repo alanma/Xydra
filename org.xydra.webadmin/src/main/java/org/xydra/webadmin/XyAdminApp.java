@@ -16,7 +16,6 @@ import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.Restless.IRequestListener;
-import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils;
 import org.xydra.server.rest.XydraRestServer;
 import org.xydra.store.XydraRuntime;

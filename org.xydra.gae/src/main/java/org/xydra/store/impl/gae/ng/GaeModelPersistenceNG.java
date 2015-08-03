@@ -25,7 +25,6 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.common.NanoClock;
 import org.xydra.core.XCopyUtils;
-import org.xydra.core.XX;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedObject;
 import org.xydra.index.iterator.AbstractFilteringIterator;

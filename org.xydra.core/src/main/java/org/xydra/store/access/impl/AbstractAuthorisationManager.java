@@ -10,7 +10,6 @@ import org.xydra.base.change.XModelCommand;
 import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XTransaction;
-import org.xydra.core.XX;
 import org.xydra.store.access.XA;
 import org.xydra.store.access.XAuthorisationManager;
 

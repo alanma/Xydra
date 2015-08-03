@@ -10,7 +10,6 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.value.XValue;
-import org.xydra.core.X;
 import org.xydra.store.XydraStore;
 
 

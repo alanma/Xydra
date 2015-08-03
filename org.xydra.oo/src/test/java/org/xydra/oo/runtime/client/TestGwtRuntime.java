@@ -5,9 +5,7 @@ import java.io.IOException;
 import org.xydra.base.Base;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.util.DumpUtilsBase;
-import org.xydra.core.XX;
 import org.xydra.core.model.impl.memory.MemoryModel;
-import org.xydra.core.util.DumpUtils;
 import org.xydra.oo.testgen.tasks.client.GwtFactory;
 import org.xydra.oo.testgen.tasks.shared.ITask;
 

@@ -8,7 +8,6 @@ import org.xydra.base.Base;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
-import org.xydra.core.XX;
 import org.xydra.testgae.server.model.xmas.Xmas;
 
 public class TooManyGetsTest {

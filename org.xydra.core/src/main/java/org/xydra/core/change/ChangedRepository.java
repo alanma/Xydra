@@ -14,7 +14,6 @@ import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
-import org.xydra.core.XX;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.index.IndexUtils;
 import org.xydra.log.api.Logger;

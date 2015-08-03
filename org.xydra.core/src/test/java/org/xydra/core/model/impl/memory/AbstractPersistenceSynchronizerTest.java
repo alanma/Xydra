@@ -3,7 +3,6 @@ package org.xydra.core.model.impl.memory;
 import static org.junit.Assert.assertNotNull;
 
 import org.xydra.base.Base;
-import org.xydra.core.XX;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.delegate.DelegatingAllowAllStore;

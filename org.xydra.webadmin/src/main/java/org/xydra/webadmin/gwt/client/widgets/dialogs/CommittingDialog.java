@@ -12,7 +12,6 @@ import org.xydra.base.util.DumpUtilsBase.XidComparator;
 import org.xydra.core.model.delta.IFieldDiff;
 import org.xydra.core.model.delta.IModelDiff;
 import org.xydra.core.model.delta.IObjectDiff;
-import org.xydra.core.util.DumpUtils;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.webadmin.gwt.client.resources.BundledRes;

@@ -12,8 +12,6 @@ import org.xydra.base.BaseRuntime;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
-import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;

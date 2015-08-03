@@ -2,7 +2,6 @@ package org.xydra.webadmin.gwt.client.widgets;
 
 import org.xydra.base.Base;
 import org.xydra.base.XAddress;
-import org.xydra.core.XX;
 import org.xydra.gwt.editor.value.XAddressEditor;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
 

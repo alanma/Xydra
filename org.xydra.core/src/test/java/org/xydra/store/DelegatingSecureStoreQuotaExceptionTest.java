@@ -2,7 +2,6 @@ package org.xydra.store;
 
 import org.xydra.base.BaseRuntime;
 import org.xydra.base.change.XCommandFactory;
-import org.xydra.core.X;
 import org.xydra.store.impl.memory.SecureMemoryStore;
 
 

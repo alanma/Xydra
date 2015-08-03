@@ -1,12 +1,12 @@
 package org.xydra.oo.testgen.alltypes.client;
 
-import com.google.gwt.core.client.GWT;
-import java.lang.Override;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.testgen.alltypes.shared.AbstractSharedFactory;
 import org.xydra.oo.testgen.alltypes.shared.IHasAllType;
 import org.xydra.oo.testgen.alltypes.shared.IPerson;
+
+import com.google.gwt.core.client.GWT;
 
 /**
  * Generated on Tue Oct 21 22:14:27 CEST 2014 Generated on Tue Oct 21 22:14:27 CEST

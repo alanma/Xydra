@@ -11,8 +11,6 @@ import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.LoggerTestHelper;
-import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.ModelRevision;
 import org.xydra.store.impl.gae.GaePersistence;

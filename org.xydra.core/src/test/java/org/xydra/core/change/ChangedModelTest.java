@@ -30,8 +30,6 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleRepository;
 import org.xydra.base.value.XValue;
 import org.xydra.core.LoggerTestHelper;
-import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.memory.MemoryModelPersistence;

@@ -29,7 +29,6 @@ import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.rmof.impl.XExistsRevWritableModel;
 import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
 import org.xydra.base.value.XValue;
-import org.xydra.core.XX;
 import org.xydra.core.change.EventUtils;
 import org.xydra.core.change.XRMOFChangeListener;
 import org.xydra.core.model.delta.ChangedField;

@@ -7,7 +7,6 @@ import java.io.OutputStreamWriter;
 
 import org.xydra.base.Base;
 import org.xydra.base.XId;
-import org.xydra.core.XX;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.gae.InstanceContext;

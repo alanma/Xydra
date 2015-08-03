@@ -13,7 +13,6 @@ import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
-import org.xydra.core.XX;
 import org.xydra.index.IndexUtils;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;

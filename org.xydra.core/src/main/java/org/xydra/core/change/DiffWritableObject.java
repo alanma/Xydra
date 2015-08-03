@@ -16,7 +16,6 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
-import org.xydra.core.X;
 import org.xydra.index.IndexUtils;
 import org.xydra.index.impl.MapIndex;
 import org.xydra.index.query.EqualsConstraint;

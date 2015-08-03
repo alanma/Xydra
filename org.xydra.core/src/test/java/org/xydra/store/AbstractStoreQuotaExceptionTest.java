@@ -16,7 +16,6 @@ import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.core.XX;
 import org.xydra.index.query.Pair;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;

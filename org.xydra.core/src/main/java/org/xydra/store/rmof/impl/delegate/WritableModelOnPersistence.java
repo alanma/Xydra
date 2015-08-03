@@ -13,8 +13,6 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
-import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;

@@ -28,7 +28,6 @@ import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
-import org.xydra.core.XX;
 import org.xydra.gwt.editor.value.XAddressEditor;
 import org.xydra.gwt.editor.value.XAddressListEditor;
 import org.xydra.gwt.editor.value.XAddressSetEditor;

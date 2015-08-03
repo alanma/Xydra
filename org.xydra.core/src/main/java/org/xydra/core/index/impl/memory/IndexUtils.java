@@ -11,8 +11,6 @@ import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XLongValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
-import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.sharedutils.XyAssert;
 
 

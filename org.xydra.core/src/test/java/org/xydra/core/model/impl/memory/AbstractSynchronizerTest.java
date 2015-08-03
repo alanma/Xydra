@@ -43,7 +43,6 @@ import org.xydra.core.ChangeRecorder;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.HasChangedListener;
 import org.xydra.core.LoggerTestHelper;
-import org.xydra.core.X;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
 import org.xydra.core.change.XTransactionBuilder;

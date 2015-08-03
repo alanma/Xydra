@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
-import java.util.List;
 
 import org.junit.Test;
 import org.xydra.base.Base;
@@ -17,9 +16,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.util.DumpUtilsBase;
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XV;
-import org.xydra.core.XX;
 import org.xydra.core.model.impl.memory.MemoryModel;
-import org.xydra.core.util.DumpUtils;
 import org.xydra.oo.testgen.alltypes.java.JavaFactory;
 import org.xydra.oo.testgen.alltypes.shared.Colors;
 import org.xydra.oo.testgen.alltypes.shared.IHasAllType;

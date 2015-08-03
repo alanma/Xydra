@@ -18,7 +18,6 @@ import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
-import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils;
 
 import com.google.appengine.api.datastore.DatastoreService;

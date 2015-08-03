@@ -12,7 +12,6 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.XX;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.log.util.Log4jUtils;

@@ -7,8 +7,6 @@ import org.xydra.base.Base;
 import org.xydra.base.BaseRuntime;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.core.LoggerTestHelper;
-import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.xgae.gaeutils.GaeTestfixer;
 

@@ -27,7 +27,6 @@ import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValueJavaUtils;
-import org.xydra.core.XX;
 import org.xydra.oo.runtime.client.GwtXydraMapped;
 import org.xydra.oo.runtime.shared.BaseTypeSpec;
 import org.xydra.oo.runtime.shared.CollectionProxy.IComponentTransformer;

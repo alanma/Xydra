@@ -8,7 +8,6 @@ import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XReadableModel;
-import org.xydra.core.XX;
 import org.xydra.core.model.XChangeLog;
 
 /**

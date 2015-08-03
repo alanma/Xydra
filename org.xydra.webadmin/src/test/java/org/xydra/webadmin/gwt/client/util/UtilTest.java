@@ -3,7 +3,6 @@ package org.xydra.webadmin.gwt.client.util;
 import org.junit.Test;
 import org.xydra.base.Base;
 import org.xydra.base.XAddress;
-import org.xydra.core.XX;
 
 public class UtilTest {
 

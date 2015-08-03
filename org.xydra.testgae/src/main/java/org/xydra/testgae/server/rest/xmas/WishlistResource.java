@@ -11,7 +11,6 @@ import org.xydra.base.XId;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
-import org.xydra.core.XX;
 import org.xydra.core.change.DiffWritableModel;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;

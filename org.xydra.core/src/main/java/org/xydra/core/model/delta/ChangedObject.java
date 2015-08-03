@@ -20,7 +20,6 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.XExistsWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleField;
-import org.xydra.core.XX;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
 import org.xydra.sharedutils.XyAssert;

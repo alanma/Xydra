@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.xydra.base.Base;
 import org.xydra.base.XId;
 import org.xydra.core.LoggerTestHelper;
-import org.xydra.core.XX;
 
 
 /**

@@ -10,7 +10,6 @@ import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.XExistsWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
-import org.xydra.core.XX;
 import org.xydra.core.change.XTransactionBuilder;
 
 

@@ -21,7 +21,6 @@ import org.xydra.base.value.XLongValue;
 import org.xydra.base.value.XStringListValue;
 import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XValue;
-import org.xydra.core.XX;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.index.iterator.NoneIterator;

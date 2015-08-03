@@ -10,7 +10,6 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
-import org.xydra.core.X;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.log.api.Logger;

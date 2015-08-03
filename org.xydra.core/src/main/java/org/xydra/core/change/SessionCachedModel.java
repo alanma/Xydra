@@ -25,7 +25,6 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.util.DumpUtilsBase;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XCopyUtils;
-import org.xydra.core.XX;
 import org.xydra.core.model.delta.IFieldDiff;
 import org.xydra.core.model.delta.IModelDiff;
 import org.xydra.core.model.delta.IObjectDiff;

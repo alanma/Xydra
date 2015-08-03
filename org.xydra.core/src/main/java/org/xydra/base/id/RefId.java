@@ -4,7 +4,6 @@ import java.io.ObjectStreamException;
 
 import org.xydra.base.BaseRuntime;
 import org.xydra.base.XId;
-import org.xydra.core.X;
 
 public class RefId extends MemoryStringID {
 

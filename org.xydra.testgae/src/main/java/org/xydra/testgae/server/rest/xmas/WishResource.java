@@ -13,7 +13,6 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.common.NanoClock;
-import org.xydra.core.XX;
 import org.xydra.core.change.DiffWritableModel;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;

@@ -13,7 +13,6 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
-import org.xydra.core.XX;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.Pair;
 

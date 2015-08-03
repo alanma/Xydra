@@ -12,7 +12,6 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
-import org.xydra.core.XX;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.index.query.Pair;
 import org.xydra.log.api.Logger;
