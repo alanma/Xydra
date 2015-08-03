@@ -9,18 +9,18 @@ import org.xydra.annotations.RunsInGWT;
 
 /**
  * Allows a runtime configuration management with many involved modules.
- * 
+ *
  * Fundamentally simply a singleton, following the blackboard pattern: each
  * component can write or read config values.
- * 
+ *
  * Normal usage is best done with enum types to keep using consistent keys.
- * 
+ *
  * seeAlso {@link org.xydra.conf.impl.ConfigTool}
- * 
+ *
  * TODO handling of enum values is not pretty yet
- * 
+ *
  * @author xamde
- * 
+ *
  */
 @RunsInGWT(true)
 public interface IConfig {
@@ -29,7 +29,7 @@ public interface IConfig {
 	 * Allows a class to register a required key. A call to
 	 * {@link #isComplete()} reveals if all such required keys have been
 	 * satisfied.
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param caller
@@ -40,7 +40,7 @@ public interface IConfig {
 	 * Allows a class to register a required key. A call to
 	 * {@link #isComplete()} reveals if all such required keys have been
 	 * satisfied.
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param caller
@@ -230,7 +230,7 @@ public interface IConfig {
 	/**
 	 * Revert a key to its default value, if defined. Undefined behaviour
 	 * otherwise.
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 */
@@ -239,7 +239,7 @@ public interface IConfig {
 	/**
 	 * Revert a key to its default value, if defined. Undefined behaviour
 	 * otherwise.
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 */
@@ -247,7 +247,7 @@ public interface IConfig {
 
 	/**
 	 * Set the value of key
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param value
@@ -258,7 +258,7 @@ public interface IConfig {
 
 	/**
 	 * Set the value of key
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param value
@@ -269,7 +269,7 @@ public interface IConfig {
 
 	/**
 	 * Set the current value for a keys as a boolean
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param b
@@ -279,7 +279,7 @@ public interface IConfig {
 
 	/**
 	 * Set the current value for a keys as a boolean
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param b
@@ -290,7 +290,7 @@ public interface IConfig {
 	/**
 	 * Set the default value for a key, which is used, if no explicit value is
 	 * set.
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param value
@@ -305,7 +305,7 @@ public interface IConfig {
 	/**
 	 * Set the default value for a key, which is used, if no explicit value is
 	 * set.
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param value
@@ -319,7 +319,7 @@ public interface IConfig {
 
 	/**
 	 * Set the human-readable documentation for the given key
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param documentation
@@ -329,7 +329,7 @@ public interface IConfig {
 
 	/**
 	 * Set the human-readable documentation for the given key
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param documentation
@@ -339,7 +339,7 @@ public interface IConfig {
 
 	/**
 	 * Set the desired instance type for the given key
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param type
@@ -353,7 +353,7 @@ public interface IConfig {
 	/**
 	 * Set the desired instance <em>type</em> for the given key. This does not
 	 * set a value.
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param type
@@ -366,7 +366,7 @@ public interface IConfig {
 
 	/**
 	 * Set the current value for a keys as a long
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param l
@@ -376,7 +376,7 @@ public interface IConfig {
 
 	/**
 	 * Set the current value for a keys as a long
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param l
@@ -412,7 +412,7 @@ public interface IConfig {
 
 	/**
 	 * Throws no exceptions if a value if missing
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @return value or @CanBeNull
@@ -454,7 +454,7 @@ public interface IConfig {
 
 	/**
 	 * Set the current value for a key
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param resolver
@@ -464,7 +464,7 @@ public interface IConfig {
 
 	/**
 	 * Set the current value for a key
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param resolver
@@ -474,7 +474,7 @@ public interface IConfig {
 
 	/**
 	 * Set the current value for a key
-	 * 
+	 *
 	 * @param interfaze
 	 *            @NeverNull
 	 * @param resolver
@@ -484,7 +484,7 @@ public interface IConfig {
 
 	/**
 	 * Convenience method
-	 * 
+	 *
 	 * @param interfaze
 	 *            @NeverNull
 	 * @return @CanBeNull or the desired singleton instance
@@ -495,7 +495,7 @@ public interface IConfig {
 
 	/**
 	 * Convenience method
-	 * 
+	 *
 	 * @param interfaze
 	 *            @NeverNull
 	 * @return @CanBeNull or the desired singleton instance
@@ -504,7 +504,7 @@ public interface IConfig {
 
 	/**
 	 * Convenience method
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @return @CanBeNull or the desired singleton instance
@@ -512,8 +512,8 @@ public interface IConfig {
 	<T> T tryToResolve(String key);
 
 	/**
-	 * Convenience method
-	 * 
+	 * Convenience method, does not String parsing or other forms of advanced type conversion
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param returnType
@@ -526,7 +526,7 @@ public interface IConfig {
 
 	/**
 	 * Convenience method; Throws no exception on missing values
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param returnType
@@ -537,7 +537,7 @@ public interface IConfig {
 
 	/**
 	 * Convenience method
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param returnType
@@ -563,9 +563,9 @@ public interface IConfig {
 	/**
 	 * Eager instantiation. Instance has been created and is set to conf. To be
 	 * used via {@link #getResolver(Class)}.
-	 * 
+	 *
 	 * TODO confusing name; maybe better: 'setValue'
-	 * 
+	 *
 	 * @param interfaze
 	 *            @NeverNull
 	 * @param instance
@@ -575,9 +575,9 @@ public interface IConfig {
 	/**
 	 * Eager instantiation. Instance has been created and is set to conf. To be
 	 * used via {@link #getResolver(Class)}.
-	 * 
+	 *
 	 * TODO confusing name; maybe better: 'setValue'
-	 * 
+	 *
 	 * @param key
 	 *            @NeverNull
 	 * @param instance
@@ -587,7 +587,7 @@ public interface IConfig {
 	/**
 	 * Lazy instantiation. Class needs to have a public zero-args constructor.
 	 * To be used via {@link #getResolver(Class)}.
-	 * 
+	 *
 	 * @param interfaze
 	 *            @NeverNull
 	 * @param clazz
@@ -595,5 +595,6 @@ public interface IConfig {
 	<T> void setClass(Class<T> interfaze, Class<? extends T> clazz);
 
 	Map<String, ? extends Object> asMap();
+
 
 }

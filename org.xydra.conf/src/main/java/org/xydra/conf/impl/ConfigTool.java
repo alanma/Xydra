@@ -41,10 +41,9 @@ import org.xydra.log.api.LoggerFactory;
 import com.google.common.base.Predicate;
 
 /**
- * Scans annotation of a given source code base and summarises: (1) Which
- * hard-coded compile/runtime flags are provided (via @Setting) and (2) Which
- * runtime configuration keys are expected (via @RequireConf)
- * 
+ * Scans annotation of a given source code base and summarises: (1) Which hard-coded compile/runtime flags are provided
+ * (via @Setting) and (2) Which runtime configuration keys are expected (via @RequireConf)
+ *
  * @author xamde
  */
 @RunsInGWT(false)
@@ -56,27 +55,25 @@ public class ConfigTool {
 
 		/**
 		 * @param clazz
-		 * @param subName
-		 *            is null if a class is annotated
+		 * @param subName is null if a class is annotated
 		 * @param annotation
 		 */
-		public AnnotationSpot(Class<?> clazz, String subName, Annotation annotation) {
+		public AnnotationSpot(final Class<?> clazz, final String subName, final Annotation annotation) {
 			super();
 			this.annotation = annotation;
 			this.clazz = clazz;
 			this.subName = subName;
 		}
 
-		private Annotation annotation;
-		private Class<?> clazz;
-		private String subName;
+		private final Annotation annotation;
+		private final Class<?> clazz;
+		private final String subName;
 
 		@Override
 		public String toString() {
 			return this.annotation.getClass().getSimpleName() + " at '" + this.clazz
-					+ (this.subName == null ? "" : "." + this.subName) + "': "
-					+ getValue(this.annotation) + " (" + this.clazz.getSimpleName()
-					+ ".java:1)-fake";
+					+ (this.subName == null ? "" : "." + this.subName) + "': " + getValue(this.annotation) + " ("
+					+ this.clazz.getSimpleName() + ".java:1)-fake";
 		}
 	}
 
@@ -85,37 +82,42 @@ public class ConfigTool {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + ((this.key == null) ? 0 : this.key.hashCode());
-			result = prime * result
-					+ ((this.whereDefined == null) ? 0 : this.whereDefined.hashCode());
+			result = prime * result + (this.key == null ? 0 : this.key.hashCode());
+			result = prime * result + (this.whereDefined == null ? 0 : this.whereDefined.hashCode());
 			return result;
 		}
 
 		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
+		public boolean equals(final Object obj) {
+			if (this == obj) {
 				return true;
-			if (obj == null)
+			}
+			if (obj == null) {
 				return false;
-			if (getClass() != obj.getClass())
+			}
+			if (getClass() != obj.getClass()) {
 				return false;
-			ProvidedConfKey other = (ProvidedConfKey) obj;
+			}
+			final ProvidedConfKey other = (ProvidedConfKey) obj;
 			if (this.key == null) {
-				if (other.key != null)
+				if (other.key != null) {
 					return false;
-			} else if (!this.key.equals(other.key))
+				}
+			} else if (!this.key.equals(other.key)) {
 				return false;
+			}
 			if (this.whereDefined == null) {
-				if (other.whereDefined != null)
+				if (other.whereDefined != null) {
 					return false;
-			} else if (!this.whereDefined.equals(other.whereDefined))
+				}
+			} else if (!this.whereDefined.equals(other.whereDefined)) {
 				return false;
+			}
 			return true;
 		}
 
 		/**
-		 * A ConfParams.... class which typically implements
-		 * {@link IConfigProvider}
+		 * A ConfParams.... class which typically implements {@link IConfigProvider}
 		 */
 		@NeverNull
 		Class<?> whereDefined;
@@ -133,8 +135,7 @@ public class ConfigTool {
 
 		@Override
 		public String toString() {
-			return this.whereDefined + "." + this.key + " "
-					+ (this.type == null ? "noType" : this.type.getName()) + " "
+			return this.whereDefined + "." + this.key + " " + (this.type == null ? "noType" : this.type.getName()) + " "
 					+ (this.doc == null ? "noDoc" : this.doc);
 		}
 
@@ -145,46 +146,45 @@ public class ConfigTool {
 	 * @param packageNames
 	 * @return the list of all spots where the given annotation has been found
 	 */
-	public static List<AnnotationSpot> findAnnotationSpots(Class<? extends Annotation> annotation,
-			String... packageNames) {
-		Reflections reflections = createReflectionsOnPackages(packageNames);
-		List<AnnotationSpot> list = new ArrayList<AnnotationSpot>();
+	public static List<AnnotationSpot> findAnnotationSpots(final Class<? extends Annotation> annotation,
+			final String... packageNames) {
+		final Reflections reflections = createReflectionsOnPackages(packageNames);
+		final List<AnnotationSpot> list = new ArrayList<AnnotationSpot>();
 
 		// types (classes, interfaces)
-		for (Class<?> type : reflections.getTypesAnnotatedWith(annotation)) {
+		for (final Class<?> type : reflections.getTypesAnnotatedWith(annotation)) {
 			list.add(new AnnotationSpot(type, null, type.getAnnotation(annotation)));
 		}
 
 		// fields
-		for (Field field : reflections.getFieldsAnnotatedWith(annotation)) {
-			list.add(new AnnotationSpot(field.getDeclaringClass(), null, field
-					.getAnnotation(annotation)));
+		for (final Field field : reflections.getFieldsAnnotatedWith(annotation)) {
+			list.add(new AnnotationSpot(field.getDeclaringClass(), null, field.getAnnotation(annotation)));
 		}
 
 		// methods
-		for (Method method : reflections.getMethodsAnnotatedWith(annotation)) {
-			if (method == null)
+		for (final Method method : reflections.getMethodsAnnotatedWith(annotation)) {
+			if (method == null) {
 				continue;
+			}
 
 			assert method != null;
 			assert method.getDeclaringClass() != null;
-			list.add(new AnnotationSpot(method.getDeclaringClass(), null, method
-					.getAnnotation(annotation)));
+			list.add(new AnnotationSpot(method.getDeclaringClass(), null, method.getAnnotation(annotation)));
 		}
 		return list;
 	}
 
-	private static Reflections createReflectionsOnPackages(String... packageNames) {
-		Set<URL> packageUrls = new HashSet<URL>();
+	private static Reflections createReflectionsOnPackages(final String... packageNames) {
+		final Set<URL> packageUrls = new HashSet<URL>();
 		for (int i = 0; i < packageNames.length; i++) {
 			packageUrls.addAll(ClasspathHelper.forPackage(packageNames[i]));
 		}
 
-		Reflections reflections = new Reflections(packageUrls, new TypesScanner(),
-				new TypeAnnotationsScanner(), new FieldAnnotationsScanner(),
-				new MethodAnnotationsScanner(), new TypeElementsScanner(), new SubTypesScanner()
-		// ,new ResourcesScanner()
-		);
+		final Reflections reflections = new Reflections(packageUrls, new TypesScanner(), new TypeAnnotationsScanner(),
+				new FieldAnnotationsScanner(), new MethodAnnotationsScanner(), new TypeElementsScanner(),
+				new SubTypesScanner()
+				// ,new ResourcesScanner()
+				);
 
 		return reflections;
 	}
@@ -193,23 +193,24 @@ public class ConfigTool {
 	 * @param annotationInstance
 	 * @return @NeverNull
 	 */
-	private static String getValue(Annotation annotationInstance) {
+	private static String getValue(final Annotation annotationInstance) {
 		if (annotationInstance == null) {
 			return "";
 		}
 
-		Class<? extends Annotation> annotationClass = annotationInstance.annotationType();
-		Set<Method> methods = Reflections.getAllMethods(annotationClass, withName("value"));
+		final Class<? extends Annotation> annotationClass = annotationInstance.annotationType();
+		final Set<Method> methods = Reflections.getAllMethods(annotationClass, withName("value"));
 		Object result;
 		try {
 			assert methods.size() == 1;
-			Method method = methods.iterator().next();
+			final Method method = methods.iterator().next();
 			result = method.invoke(annotationInstance);
 
 			if (result instanceof Object[]) {
-				Object[] a = (Object[]) result;
-				if (a.length == 1)
+				final Object[] a = (Object[]) result;
+				if (a.length == 1) {
 					return a[0].toString();
+				}
 
 				return Arrays.toString(a);
 			}
@@ -220,20 +221,20 @@ public class ConfigTool {
 		}
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		/* Make sure the classpath is set up correctly */
 		try {
 			log.trace("Found Reflections in classpath: " + Reflections.class.getCanonicalName());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 
 		List<AnnotationSpot> list = findAnnotationSpots(Setting.class, "com.calpano", "org.xydra");
-		for (AnnotationSpot a : list) {
+		for (final AnnotationSpot a : list) {
 			System.out.println(a);
 		}
 		list = findAnnotationSpots(RequireConf.class, "com.calpano", "org.xydra");
-		for (AnnotationSpot a : list) {
+		for (final AnnotationSpot a : list) {
 			System.out.println(a);
 		}
 
@@ -242,50 +243,48 @@ public class ConfigTool {
 
 	/**
 	 * Slow.
-	 * 
+	 *
 	 * @param packageNames
 	 * @return @NeverNull
 	 */
-	public static Set<ProvidedConfKey> findProvidedKeys(String... packageNames) {
-		Set<ProvidedConfKey> provided = new HashSet<>();
+	public static Set<ProvidedConfKey> findProvidedKeys(final String... packageNames) {
+		final Set<ProvidedConfKey> provided = new HashSet<>();
 
-		Reflections reflections = createReflectionsOnPackages(packageNames);
-		Set<Class<? extends IConfigProvider>> subTypes = reflections
-				.getSubTypesOf(IConfigProvider.class);
+		final Reflections reflections = createReflectionsOnPackages(packageNames);
+		final Set<Class<? extends IConfigProvider>> subTypes = reflections.getSubTypesOf(IConfigProvider.class);
 
-		for (Class<?> configProvider : subTypes) {
+		for (final Class<?> configProvider : subTypes) {
 			log.info("Found " + configProvider.getCanonicalName());
-			Set<Field> fields = ReflectionUtils.getAllFields(configProvider,
-					new Predicate<Field>() {
+			final Set<Field> fields = ReflectionUtils.getAllFields(configProvider, new Predicate<Field>() {
 
-						@Override
-						public boolean apply(Field f) {
-							return true;
-						}
+				@Override
+				public boolean apply(final Field f) {
+					return true;
+				}
 
-					});
-			for (Field f : fields) {
-				ProvidedConfKey p = new ProvidedConfKey();
+			});
+			for (final Field f : fields) {
+				final ProvidedConfKey p = new ProvidedConfKey();
 
 				p.whereDefined = configProvider;
 
-				ConfDoc doc = f.getAnnotation(ConfDoc.class);
+				final ConfDoc doc = f.getAnnotation(ConfDoc.class);
 				if (doc != null) {
-					String docString = getValue(doc);
+					final String docString = getValue(doc);
 					p.doc = docString;
 				}
 
-				ConfType type = f.getAnnotation(ConfType.class);
+				final ConfType type = f.getAnnotation(ConfType.class);
 				if (type != null) {
-					Class<?> typeClass = type.value();
+					final Class<?> typeClass = type.value();
 					p.type = typeClass;
 				}
 
 				try {
 					p.key = (String) f.get(null);
-				} catch (IllegalArgumentException e) {
+				} catch (final IllegalArgumentException e) {
 					throw new RuntimeException(e);
-				} catch (IllegalAccessException e) {
+				} catch (final IllegalAccessException e) {
 					throw new RuntimeException(e);
 				}
 				provided.add(p);
@@ -301,35 +300,34 @@ public class ConfigTool {
 	}
 
 	/**
-	 * Look at config keys. Which of them are defined in {@link IConfigProvider}
-	 * s? Which keys are requested somewhere? Where is a mismatch? I.e. which
-	 * keys are never requested? Which are requested but not defined?
+	 * Look at config keys. Which of them are defined in {@link IConfigProvider} s? Which keys are requested somewhere?
+	 * Where is a mismatch? I.e. which keys are never requested? Which are requested but not defined?
 	 */
 	public static void analyzeConfiguration() {
-		Map<String, ProvidedConfKey> provMap = new TreeMap<>();
-		Map<String, AnnotationSpot> reqMap = new TreeMap<>();
+		final Map<String, ProvidedConfKey> provMap = new TreeMap<>();
+		final Map<String, AnnotationSpot> reqMap = new TreeMap<>();
 
-		for (AnnotationSpot r : findAnnotationSpots(RequireConf.class, "")) {
+		for (final AnnotationSpot r : findAnnotationSpots(RequireConf.class, "")) {
 			reqMap.put(getValue(r.annotation), r);
 		}
-		for (AnnotationSpot r : findAnnotationSpots(RequireConfInstance.class, "")) {
+		for (final AnnotationSpot r : findAnnotationSpots(RequireConfInstance.class, "")) {
 			reqMap.put(getValue(r.annotation), r);
 		}
 
-		Set<ProvidedConfKey> prov = findProvidedKeys("");
-		for (ProvidedConfKey p : prov) {
+		final Set<ProvidedConfKey> prov = findProvidedKeys("");
+		for (final ProvidedConfKey p : prov) {
 			provMap.put(p.key, p);
 		}
 
 		System.out.println("=== Requested but never defined");
-		for (Entry<String, AnnotationSpot> e : reqMap.entrySet()) {
+		for (final Entry<String, AnnotationSpot> e : reqMap.entrySet()) {
 			if (!provMap.containsKey(e.getKey())) {
 				System.out.println(e.getKey() + " --> " + e.getValue());
 			}
 		}
 
 		System.out.println("=== Defined but never used");
-		for (Entry<String, ProvidedConfKey> e : provMap.entrySet()) {
+		for (final Entry<String, ProvidedConfKey> e : provMap.entrySet()) {
 			if (!reqMap.containsKey(e.getKey())) {
 				System.out.println(e.getKey() + " --> " + e.getValue());
 			}
@@ -338,20 +336,19 @@ public class ConfigTool {
 
 	/**
 	 * To be used together with {@link GwtConfigTool}
-	 * 
+	 *
 	 * @param conf
-	 * @param clientKeys
-	 *            which config values to copy over
+	 * @param clientKeys which config values to copy over
 	 * @return a string to be used in a template
 	 */
-	public static String generateHostPageDictionary(IConfig conf, String... clientKeys) {
-		StringBuffer buf = new StringBuffer();
+	public static String generateHostPageDictionary(final IConfig conf, final String... clientKeys) {
+		final StringBuffer buf = new StringBuffer();
 		buf.append("<script type=\"text/javascript\"><!--\n");
 		buf.append("var ");
 		buf.append(GwtConfigTool.DICT_NAME);
 		buf.append(" = {\n");
-		for (String key : clientKeys) {
-			Object value = conf.get(key);
+		for (final String key : clientKeys) {
+			final Object value = conf.get(key);
 			if (!jsonSerialisable(value)) {
 				throw new IllegalArgumentException("Client key '" + key + "' results in type "
 						+ value.getClass().getName() + " which cannot be JSOnified");
@@ -368,13 +365,21 @@ public class ConfigTool {
 		return buf.toString();
 	}
 
-	private static boolean jsonSerialisable(Object value) {
+	private static boolean jsonSerialisable(final Object value) {
 		return value instanceof String || value instanceof Boolean;
 	}
 
-	public static void addAll(IConfig conf, Map<String, ?> map) {
-		for (Entry<String, ?> e : map.entrySet()) {
+	public static void addAll(final IConfig conf, final Map<String, ?> map) {
+		for (final Entry<String, ?> e : map.entrySet()) {
 			conf.set(e.getKey(), e.getValue());
 		}
 	}
+
+	public static void dump(final IConfig conf) {
+		final Iterable<String> keys = conf.getExplicitlyDefinedKeys();
+		for (final String key : keys) {
+			System.out.println(key + " --> " + conf.tryToGet(key));
+		}
+	}
+
 }

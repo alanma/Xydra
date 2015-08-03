@@ -31,13 +31,13 @@ public class MemoryConfig implements IConfig {
 	// TODO need to check if this one runs in GWT‚
 	private static class ClassResolver<T> implements IResolver<T> {
 
-		private Class<? extends T> clazz;
+		private final Class<? extends T> clazz;
 
 		/**
 		 * @param clazz
 		 * @NeverNull
 		 */
-		public ClassResolver(Class<? extends T> clazz) {
+		public ClassResolver(final Class<? extends T> clazz) {
 			this.clazz = clazz;
 		}
 
@@ -55,13 +55,13 @@ public class MemoryConfig implements IConfig {
 
 	private static class InstanceResolver<T> implements IResolver<T> {
 
-		private T instance;
+		private final T instance;
 
 		/**
 		 * @param instance
 		 * @CanBeNull
 		 */
-		public InstanceResolver(T instance) {
+		public InstanceResolver(final T instance) {
 			this.instance = instance;
 		}
 
@@ -89,37 +89,39 @@ public class MemoryConfig implements IConfig {
 	 * @throws RuntimeException
 	 *             when class could not be loaded or has wrong type
 	 */
-	private static <T> IResolver<T> createResolverFromClassName(String className) {
+	private static <T> IResolver<T> createResolverFromClassName(final String className) {
 		assert className != null;
 		assert className.length() > 0;
 
 		// try dynamic class loading
-		Class<?> clazz = MemoryConfig_GwtEmul.classForName(className);
+		final Class<?> clazz = MemoryConfig_GwtEmul.classForName(className);
 		if (clazz == null) {
 			throw new RuntimeException("Class '" + className + "' could not be loaded");
 		}
-		Object instance = MemoryConfig_GwtEmul.newInstance(clazz);
+		final Object instance = MemoryConfig_GwtEmul.newInstance(clazz);
 		try {
 			@SuppressWarnings("unchecked")
+			final
 			T t = (T) instance;
 			return new InstanceResolver<T>(t);
-		} catch (ClassCastException e) {
+		} catch (final ClassCastException e) {
 			throw new RuntimeException("Defined class '" + clazz.getName()
-					+ "' does not implement required type", e);
+			+ "' does not implement required type", e);
 		}
 
 	}
 
-	public static String[] decodeList(String s) {
+	public static String[] decodeList(final String s) {
 		return s.split("[|]");
 	}
 
-	public static String encodeList(String[] strings) {
-		StringBuilder b = new StringBuilder();
+	public static String encodeList(final String[] strings) {
+		final StringBuilder b = new StringBuilder();
 		for (int i = 0; i < strings.length; i++) {
 			b.append(strings[i]);
-			if (i + 1 < strings.length)
+			if (i + 1 < strings.length) {
 				b.append("|");
+			}
 		}
 		return b.toString();
 	}
@@ -132,54 +134,56 @@ public class MemoryConfig implements IConfig {
 	}
 
 	/** default values, are used if no explicit value has been defined */
-	private TreeMap<String, Object> defaults = new TreeMap<String, Object>();
+	private final TreeMap<String, Object> defaults = new TreeMap<String, Object>();
 
 	/** human-readable */
 	private HashMap<String, String> docs = new HashMap<String, String>();
 
 	/** values that override the defaults */
-	private TreeMap<String, Object> explicit = new TreeMap<String, Object>();
+	private final TreeMap<String, Object> explicit = new TreeMap<String, Object>();
 
 	/** for debugging */
 	private final String internalId;
 
-	private MapSetIndex<String, Class<?>> required = MapSetIndex.createWithFastEntrySets();
+	private final MapSetIndex<String, Class<?>> required = MapSetIndex.createWithFastEntrySets();
 
-	private Set<Exception> setOrigins = new HashSet<Exception>();
+	private final Set<Exception> setOrigins = new HashSet<Exception>();
 
 	/** informative */
-	private HashMap<String, Class<?>> types = new HashMap<String, Class<?>>();
+	private final HashMap<String, Class<?>> types = new HashMap<String, Class<?>>();
 
 	public MemoryConfig() {
-		this.internalId = "" + ((int) (Math.random() * 10000d));
+		this.internalId = "" + (int) (Math.random() * 10000d);
 	}
 
-	private MemoryConfig(String internalId) {
+	private MemoryConfig(final String internalId) {
 		this.internalId = internalId;
 	}
 
 	@Override
-	public void addRequiredSetting(Enum<?> key, Class<?> caller) {
-		if (key == null)
+	public void addRequiredSetting(final Enum<?> key, final Class<?> caller) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		addRequiredSetting(key.name(), caller);
 	}
 
 	@Override
-	public void addRequiredSetting(String key, Class<?> caller) {
-		if (key == null)
+	public void addRequiredSetting(final String key, final Class<?> caller) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		this.required.index(key, caller);
 	}
 
 	@Override
 	public Map<String, Object> asMap() {
-		Map<String, Object> map = new TreeMap<String, Object>();
+		final Map<String, Object> map = new TreeMap<String, Object>();
 
-		for (String s : this.defaults.keySet()) {
+		for (final String s : this.defaults.keySet()) {
 			map.put(s, this.defaults.get(s));
 		}
-		for (String s : this.explicit.keySet()) {
+		for (final String s : this.explicit.keySet()) {
 			map.put(s, this.explicit.get(s));
 		}
 
@@ -187,31 +191,33 @@ public class MemoryConfig implements IConfig {
 	}
 
 	@Override
-	public void assertDefined(Enum<?> key) {
-		if (key == null)
+	public void assertDefined(final Enum<?> key) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		assertDefined(key.name());
 	}
 
 	@Override
-	public void assertDefined(String key) {
-		if (key == null)
+	public void assertDefined(final String key) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		get(key);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public IConfig copy() {
-		MemoryConfig copy = new MemoryConfig(this.internalId + "-copy");
+		final MemoryConfig copy = new MemoryConfig(this.internalId + "-copy");
 		copy.defaults.putAll(this.defaults);
 		copy.docs = (HashMap<String, String>) this.docs.clone();
 		copy.explicit.putAll(this.explicit);
 		copy.required.clear();
-		Iterator<KeyEntryTuple<String, Class<?>>> it = this.required.tupleIterator(
+		final Iterator<KeyEntryTuple<String, Class<?>>> it = this.required.tupleIterator(
 				new Wildcard<String>(), new Wildcard<Class<?>>());
 		while (it.hasNext()) {
-			KeyEntryTuple<String, Class<?>> keyEntryTuple = it.next();
+			final KeyEntryTuple<String, Class<?>> keyEntryTuple = it.next();
 			copy.required.index(keyEntryTuple.getKey(), keyEntryTuple.getEntry());
 		}
 		copy.setOrigins.clear();
@@ -220,15 +226,16 @@ public class MemoryConfig implements IConfig {
 	}
 
 	@Override
-	public Object get(Enum<?> key) {
-		if (key == null)
+	public Object get(final Enum<?> key) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return get(key.name());
 	}
 
 	@Override
-	public Object get(String key) {
-		Object value = tryToGet(key);
+	public Object get(final String key) {
+		final Object value = tryToGet(key);
 		if (value == null) {
 			throw new ConfigException("Config key '" + key
 					+ "' requested but not defined - and no default defined either. " + idStr()
@@ -239,58 +246,65 @@ public class MemoryConfig implements IConfig {
 	}
 
 	@Override
-	public <T> T getAs(Enum<?> key, Class<T> clazz) {
-		if (key == null)
+	public <T> T getAs(final Enum<?> key, final Class<T> clazz) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return getAs(key.name(), clazz);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T getAs(String key, Class<T> clazz) {
-		if (key == null)
+	public <T> T getAs(final String key, final Class<T> clazz) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
-		Object o = get(key);
-		if (o == null)
+		}
+		final Object o = get(key);
+		if (o == null) {
 			return null;
-		return ((T) o);
+		}
+		return (T) o;
 	}
 
 	@Override
-	public boolean getBoolean(Enum<?> key) {
-		if (key == null)
+	public boolean getBoolean(final Enum<?> key) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return getBoolean(key.name());
 	}
 
 	@Override
-	public boolean getBoolean(String key) {
-		Object o = getInternal(key, Boolean.class, null);
-		if (o instanceof String)
+	public boolean getBoolean(final String key) {
+		final Object o = getInternal(key, Boolean.class, null);
+		if (o instanceof String) {
 			return Boolean.parseBoolean((String) o);
-		else
+		} else {
 			return (Boolean) o;
+		}
 	}
 
 	@Override
 	public Iterable<String> getDefinedKeys() {
-		SortedSet<String> keys = new TreeSet<String>();
+		final SortedSet<String> keys = new TreeSet<String>();
 		keys.addAll(this.explicit.keySet());
 		keys.addAll(this.defaults.keySet());
 		return keys;
 	}
 
 	@Override
-	public String getDocumentation(Enum<?> key) {
-		if (key == null)
+	public String getDocumentation(final Enum<?> key) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return getDocumentation(key.name());
 	}
 
 	@Override
-	public String getDocumentation(String key) {
-		if (key == null)
+	public String getDocumentation(final String key) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return this.docs.get(key);
 	}
 
@@ -299,17 +313,46 @@ public class MemoryConfig implements IConfig {
 		return this.explicit.keySet();
 	}
 
+	@Override
+	public int getInt(final Enum<?> key) {
+		if (key == null) {
+			throw new IllegalArgumentException("Key may not be null");
+		}
+		return getInt(key.name());
+	}
+
+	@Override
+	public int getInt(final String key) {
+		final Object o = get(key);
+		if (o instanceof Integer) {
+			return (Integer) o;
+		}
+		if (o instanceof Long) {
+			final long l = (Long) o;
+			assert l <= Integer.MAX_VALUE;
+			assert l >= Integer.MIN_VALUE;
+			return (int) l;
+		}
+		if (o instanceof String) {
+			return Integer.parseInt((String) o);
+		}
+		throw new ConfigException("Value with key '" + key + "' not a int but '"
+				+ o.getClass().getName());
+	}
+
+
 	/**
 	 * @param key
 	 * @param requestedType
 	 *            used only to generate better error messages
 	 * @return
 	 */
-	private Object getInternal(String key, Class<?> requestedType, String callContext) {
-		if (key == null)
+	private Object getInternal(final String key, final Class<?> requestedType, final String callContext) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 
-		Object value = tryToGet(key);
+		final Object value = tryToGet(key);
 
 		if (value == null) {
 			throw new ConfigException("Config key '" + key + "' requested as '"
@@ -330,15 +373,16 @@ public class MemoryConfig implements IConfig {
 	}
 
 	@Override
-	public long getLong(Enum<?> key) {
-		if (key == null)
+	public long getLong(final Enum<?> key) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return getLong(key.name());
 	}
 
 	@Override
-	public long getLong(String key) {
-		Object o = get(key);
+	public long getLong(final String key) {
+		final Object o = get(key);
 		if (o instanceof Integer) {
 			return (Integer) o;
 		}
@@ -354,7 +398,7 @@ public class MemoryConfig implements IConfig {
 
 	@Override
 	public Set<String> getMissingRequiredKeys() {
-		Set<String> open = new HashSet<String>(this.required.keySet());
+		final Set<String> open = new HashSet<String>(this.required.keySet());
 		open.removeAll(this.explicit.keySet());
 		open.removeAll(this.defaults.keySet());
 		return open;
@@ -366,28 +410,30 @@ public class MemoryConfig implements IConfig {
 	}
 
 	@Override
-	public <T> IResolver<T> getResolver(Class<T> interfaze) {
+	public <T> IResolver<T> getResolver(final Class<T> interfaze) {
 		return getResolver(interfaze.getName());
 	}
 
 	@Override
-	public <T> IResolver<T> getResolver(Enum<?> key) {
-		if (key == null)
+	public <T> IResolver<T> getResolver(final Enum<?> key) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return getResolver(key.name());
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> IResolver<T> getResolver(String key) {
-		if (key == null)
+	public <T> IResolver<T> getResolver(final String key) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
-		Object o = get(key);
+		}
+		final Object o = get(key);
 
 		if (o instanceof String) {
 			try {
 				return createResolverFromClassName((String) o);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new RuntimeException("Could not resolve from '" + key + "'='" + o + "'", e);
 			}
 		}
@@ -401,39 +447,43 @@ public class MemoryConfig implements IConfig {
 	}
 
 	@Override
-	public String getString(Enum<?> key) {
+	public String getString(final Enum<?> key) {
 		return getString(key.name());
 	}
 
 	@Override
-	public String getString(String key) {
-		Object o = get(key);
-		if (!(o instanceof String))
+	public String getString(final String key) {
+		final Object o = get(key);
+		if (!(o instanceof String)) {
 			throw new ConfigException("instance at key '" + key + "' was not String but "
 					+ o.getClass().getName());
+		}
 		return (String) o;
 	}
 
 	@Override
-	public String[] getStringArray(String key) {
-		String s = getString(key);
-		if (s == null)
+	public String[] getStringArray(final String key) {
+		final String s = getString(key);
+		if (s == null) {
 			return null;
+		}
 		return decodeList(s);
 	}
 
 	@Override
-	public Set<String> getStringSet(Enum<?> key) {
-		if (key == null)
+	public Set<String> getStringSet(final Enum<?> key) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return getStringSet(key.name());
 	}
 
 	@Override
-	public Set<String> getStringSet(String key) {
+	public Set<String> getStringSet(final String key) {
 		String[] array = getStringArray(key);
-		if (array == null)
+		if (array == null) {
 			array = new String[0];
+		}
 		return new HashSet<String>(Arrays.asList(array));
 	}
 
@@ -447,103 +497,117 @@ public class MemoryConfig implements IConfig {
 	}
 
 	@Override
-	public <T> T resolve(Class<T> interfaze) {
-		IResolver<T> resolver = getResolver(interfaze);
-		if (resolver == null)
+	public <T> T resolve(final Class<T> interfaze) {
+		final IResolver<T> resolver = getResolver(interfaze);
+		if (resolver == null) {
 			return null;
+		}
 		return resolver.resolve();
 	}
 
 	@Override
-	public void revertToDefault(Enum<?> key) {
-		if (key == null)
+	public void revertToDefault(final Enum<?> key) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		revertToDefault(key.name());
 	}
 
 	@Override
-	public void revertToDefault(String key) {
-		if (key == null)
+	public void revertToDefault(final String key) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		this.explicit.remove(key);
 	}
 
 	@Override
-	public ConfBuilder set(Enum<?> key, Object value) {
-		if (key == null)
+	public ConfBuilder set(final Enum<?> key, final Object value) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return set(key.name(), value);
 	}
 
 	@Override
-	public ConfBuilder set(String key, Object value) {
-		if (key == null)
+	public ConfBuilder set(final String key, final Object value) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 
 		ensureLogInit();
-		if (log.isTraceEnabled())
+		if (log.isTraceEnabled()) {
 			log.trace("Setting '" + key + "' to object value");
+		}
 
 		this.explicit.put(key, value);
 		return new ConfBuilder(this, key);
 	}
 
 	@Override
-	public <T> void setAs(Enum<?> key, T value) {
-		if (key == null)
+	public <T> void setAs(final Enum<?> key, final T value) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		setAs(key.name(), value);
 	}
 
 	@Override
-	public <T> void setAs(String key, T value) {
-		if (key == null)
+	public <T> void setAs(final String key, final T value) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		set(key, value);
 	}
 
 	@Override
-	public ConfBuilder setBoolean(Enum<?> key, boolean b) {
-		if (key == null)
+	public ConfBuilder setBoolean(final Enum<?> key, final boolean b) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return setBoolean(key.name(), b);
 	}
 
 	@Override
-	public ConfBuilder setBoolean(String key, boolean b) {
+	public ConfBuilder setBoolean(final String key, final boolean b) {
 		set(key, "" + b);
 		return new ConfBuilder(this, key);
 	}
 
 	@Override
-	public <T> void setClass(Class<T> interfaze, Class<? extends T> clazz) {
-		if (interfaze == null)
+	public <T> void setClass(final Class<T> interfaze, final Class<? extends T> clazz) {
+		if (interfaze == null) {
 			throw new IllegalArgumentException("Key may not be null");
-		if (clazz == null)
+		}
+		if (clazz == null) {
 			throw new IllegalArgumentException("Class may not be null");
+		}
 
 		setResolver(interfaze, new ClassResolver<T>(clazz));
 	}
 
 	@Override
-	public ConfBuilder setDefault(Enum<?> key, Object value, boolean initial) {
-		if (key == null)
+	public ConfBuilder setDefault(final Enum<?> key, final Object value, final boolean initial) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return setDefault(key.name(), value, initial);
 	}
 
 	@Override
-	public ConfBuilder setDefault(String key, Object value, boolean initial) {
-		if (key == null)
+	public ConfBuilder setDefault(final String key, final Object value, final boolean initial) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
-		if (!initial && this.defaults.containsKey(key))
+		}
+		if (!initial && this.defaults.containsKey(key)) {
 			throw new ConfigException("Config key '" + initial + "' had already a default value "
 					+ idStr());
+		}
 		this.defaults.put(key, value);
 		if (traceOrigins) {
 			try {
 				throw new RuntimeException("MARKER");
-			} catch (RuntimeException e) {
+			} catch (final RuntimeException e) {
 				e.fillInStackTrace();
 				this.setOrigins.add(e);
 			}
@@ -552,125 +616,138 @@ public class MemoryConfig implements IConfig {
 	}
 
 	@Override
-	public IConfig setDocumentation(Enum<?> key, String documentation) {
-		if (key == null)
+	public IConfig setDocumentation(final Enum<?> key, final String documentation) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return setDocumentation(key.name(), documentation);
 	}
 
 	@Override
-	public IConfig setDocumentation(String key, String documentation) {
-		if (key == null)
+	public IConfig setDocumentation(final String key, final String documentation) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		this.docs.put(key, documentation);
 		return this;
 	}
 
 	@Override
-	public <T> void setInstance(Class<T> interfaze, T instance) {
-		if (interfaze == null)
+	public <T> void setInstance(final Class<T> interfaze, final T instance) {
+		if (interfaze == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		setResolver(interfaze, new InstanceResolver<T>(instance));
 	}
 
 	@Override
-	public <T> void setInstance(String key, T instance) {
-		if (key == null)
+	public <T> void setInstance(final String key, final T instance) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		setResolver(key, new InstanceResolver<T>(instance));
 	}
 
 	@Override
-	public ConfBuilder setLong(Enum<?> key, long value) {
-		if (key == null)
+	public ConfBuilder setLong(final Enum<?> key, final long value) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return setLong(key.name(), value);
 	}
 
 	@Override
-	public ConfBuilder setLong(String key, long l) {
+	public ConfBuilder setLong(final String key, final long l) {
 		set(key, "" + l);
 		return new ConfBuilder(this, key);
 	}
 
 	@Override
-	public <T> ConfBuilder setResolver(Class<T> interfaze, IResolver<T> resolver) {
+	public <T> ConfBuilder setResolver(final Class<T> interfaze, final IResolver<T> resolver) {
 		return setResolver(interfaze.getName(), resolver);
 	}
 
 	@Override
-	public <T> ConfBuilder setResolver(Enum<?> key, IResolver<T> resolver) {
-		if (key == null)
+	public <T> ConfBuilder setResolver(final Enum<?> key, final IResolver<T> resolver) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return setResolver(key.name(), resolver);
 	}
 
 	@Override
-	public <T> ConfBuilder setResolver(String key, IResolver<T> resolver) {
-		if (key == null)
+	public <T> ConfBuilder setResolver(final String key, final IResolver<T> resolver) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
-		if (resolver == null)
+		}
+		if (resolver == null) {
 			throw new IllegalArgumentException("resolver may not be null");
+		}
 		set(key, resolver);
 		return new ConfBuilder(this, key);
 	}
 
 	@Override
-	public ConfBuilder setStrings(Enum<?> key, String... values) {
-		if (key == null)
+	public ConfBuilder setStrings(final Enum<?> key, final String... values) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return setStrings(key.name(), values);
 	}
 
 	@Override
-	public ConfBuilder setStrings(String key, String... values) {
+	public ConfBuilder setStrings(final String key, final String... values) {
 		assert values != null;
-		String s = encodeList(values);
+		final String s = encodeList(values);
 		set(key, s);
 		return new ConfBuilder(this, key);
 	}
 
 	@Override
-	public IConfig setType(Enum<?> key, Class<?> type) {
-		if (key == null)
+	public IConfig setType(final Enum<?> key, final Class<?> type) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return setType(key.name(), type);
 	}
 
 	@Override
-	public IConfig setType(String key, Class<?> type) {
-		if (key == null)
+	public IConfig setType(final String key, final Class<?> type) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		this.types.put(key, type);
 		return this;
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder b = new StringBuilder();
+		final StringBuilder b = new StringBuilder();
 		b.append("DEFINED\n");
-		List<String> defined = new ArrayList<String>();
-		for (String s : getExplicitlyDefinedKeys()) {
+		final List<String> defined = new ArrayList<String>();
+		for (final String s : getExplicitlyDefinedKeys()) {
 			defined.add(s);
 		}
 		Collections.sort(defined);
-		for (String s : defined) {
+		for (final String s : defined) {
 			b.append(s + "=" + get(s) + "\n");
 		}
 		return b.toString();
 	}
 
 	@Override
-	public Object tryToGet(Enum<?> key) {
-		if (key == null)
+	public Object tryToGet(final Enum<?> key) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		return tryToGet(key.name());
 	}
 
 	@Override
-	public Object tryToGet(String key) {
-		if (key == null)
+	public Object tryToGet(final String key) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
+		}
 		Object value = this.explicit.get(key);
 		if (value == null) {
 			value = this.defaults.get(key);
@@ -680,62 +757,46 @@ public class MemoryConfig implements IConfig {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T tryToGetAs(String key, Class<T> clazz) {
-		if (key == null)
+	public <T> T tryToGetAs(final String key, final Class<T> clazz) {
+		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
-		Object o = tryToGet(key);
+		}
+		final Object o = tryToGet(key);
 		if (o == null) {
-			if (clazz.equals(boolean.class) || clazz.equals(Boolean.class))
+			if (clazz.equals(boolean.class) || clazz.equals(Boolean.class)) {
 				return (T) Boolean.FALSE;
-			else
+			} else {
 				return null;
+			}
 		}
 
 		if (o instanceof IResolver) {
 			return ((IResolver<T>) o).resolve();
 		}
 
-		return ((T) o);
+		return (T) o;
 	}
 
 	@Override
-	public <T> T tryToResolve(Class<T> interfaze) {
+	public <T> T tryToResolve(final Class<T> interfaze) {
 		try {
 			return resolve(interfaze);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return null;
 		}
 	}
 
 	@Override
-	public <T> T tryToResolve(String key) {
+	public <T> T tryToResolve(final String key) {
 		try {
-			IResolver<T> resolver = getResolver(key);
-			if (resolver == null)
+			final IResolver<T> resolver = getResolver(key);
+			if (resolver == null) {
 				return null;
+			}
 			return resolver.resolve();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return null;
 		}
 	}
 
-	@Override
-	public int getInt(Enum<?> key) {
-		if (key == null)
-			throw new IllegalArgumentException("Key may not be null");
-		return getInt(key.name());
-	}
-
-	@Override
-	public int getInt(String key) {
-		Object o = get(key);
-		if (o instanceof Integer) {
-			return (Integer) o;
-		}
-		if (o instanceof String) {
-			return Integer.parseInt((String) o);
-		}
-		throw new ConfigException("Value with key '" + key + "' not a int but '"
-				+ o.getClass().getName());
-	}
 }
