@@ -517,11 +517,13 @@ class RestlessMethod {
 	 * @return true if method launched successfully, i.e. parameters matched
 	 * @throws IOException if result writing fails
 	 */
-	public boolean execute(@NeverNull RestlessMethodExecutionParameters params,
-			@NeverNull final Restless restless, @NeverNull final HttpServletRequest req,
-			@NeverNull final HttpServletResponse res) throws IOException {
+	public boolean execute(@NeverNull final RestlessMethodExecutionParameters params, @NeverNull final Restless restless,
+			@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse res) throws IOException {
 
-		Method method = params.getMethod();
+		final Method method = params.getMethod();
+		/* Help debugging */
+		Thread.currentThread().setName("Restless-exe-" + method.getName());
+
 		IRestlessContext restlessContext = params.getRestlessContext();
 		List<Object> javaMethodArgs = params.getJavaMethodArgs();
 		boolean hasHttpServletResponseParameter = params.hasHttpServletResponseParameter();
