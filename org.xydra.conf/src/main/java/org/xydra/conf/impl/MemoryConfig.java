@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -134,13 +135,13 @@ public class MemoryConfig implements IConfig {
 	}
 
 	/** default values, are used if no explicit value has been defined */
-	private final TreeMap<String, Object> defaults = new TreeMap<String, Object>();
+	private final SortedMap<String, Object> defaults = new TreeMap<String, Object>();
 
 	/** human-readable */
 	private HashMap<String, String> docs = new HashMap<String, String>();
 
 	/** values that override the defaults */
-	private final TreeMap<String, Object> explicit = new TreeMap<String, Object>();
+	private final SortedMap<String, Object> explicit = new TreeMap<String, Object>();
 
 	/** for debugging */
 	private final String internalId;
