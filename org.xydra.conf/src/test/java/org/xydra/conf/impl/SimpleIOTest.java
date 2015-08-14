@@ -17,11 +17,13 @@ import static org.xydra.conf.escape.EscapingTest.weirdWindowsPathWithEscapedBack
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.conf.escape.Escaping;
+import org.xydra.index.IPair;
 
 public class SimpleIOTest {
 
@@ -64,6 +66,20 @@ public class SimpleIOTest {
 		this.memoryConfig.set(classicWindowsPath, d);
 		this.memoryConfig.set(weirdWindowsPathWithEscapedBackslashes, e);
 		this.memoryConfig.set(strangeUnicodeSign, f);
+		this.memoryConfig.set("someInstance", new Date());
+		this.memoryConfig.set("someAnonymousInstance", new IPair<String, String>() {
+
+			@Override
+			public String getFirst() {
+				return "first";
+			}
+
+			@Override
+			public String getSecond() {
+				return "second";
+			}
+		}
+		);
 
 		try {
 			ConfigFiles.write(this.memoryConfig, this.targetFile);
@@ -85,8 +101,8 @@ public class SimpleIOTest {
 			String original = this.memoryConfig.getString(key);
 			System.out.println("successfully gotten value from original");
 			final String reRead = confAgain.getString(key);
-			System.out.println("key: '" + key + "', expected \n'" + Escaping.toCodepoints(original)
-					+ "', got \n'" + Escaping.toCodepoints(reRead) + "'\n\n");
+			System.out.println("key: '" + key + "', expected \n'" + Escaping.toCodepoints(original) + "', got \n'"
+					+ Escaping.toCodepoints(reRead) + "'\n\n");
 
 			if (original.equals("")) {
 				original = "\uF8FF";

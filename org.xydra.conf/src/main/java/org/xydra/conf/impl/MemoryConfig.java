@@ -87,8 +87,7 @@ public class MemoryConfig implements IConfig {
 	 * @param className
 	 * @NeverNull
 	 * @return
-	 * @throws RuntimeException
-	 *             when class could not be loaded or has wrong type
+	 * @throws RuntimeException when class could not be loaded or has wrong type
 	 */
 	private static <T> IResolver<T> createResolverFromClassName(final String className) {
 		assert className != null;
@@ -101,13 +100,10 @@ public class MemoryConfig implements IConfig {
 		}
 		final Object instance = MemoryConfig_GwtEmul.newInstance(clazz);
 		try {
-			@SuppressWarnings("unchecked")
-			final
-			T t = (T) instance;
+			@SuppressWarnings("unchecked") final T t = (T) instance;
 			return new InstanceResolver<T>(t);
 		} catch (final ClassCastException e) {
-			throw new RuntimeException("Defined class '" + clazz.getName()
-			+ "' does not implement required type", e);
+			throw new RuntimeException("Defined class '" + clazz.getName() + "' does not implement required type", e);
 		}
 
 	}
@@ -215,8 +211,8 @@ public class MemoryConfig implements IConfig {
 		copy.docs = (HashMap<String, String>) this.docs.clone();
 		copy.explicit.putAll(this.explicit);
 		copy.required.clear();
-		final Iterator<KeyEntryTuple<String, Class<?>>> it = this.required.tupleIterator(
-				new Wildcard<String>(), new Wildcard<Class<?>>());
+		final Iterator<KeyEntryTuple<String, Class<?>>> it = this.required.tupleIterator(new Wildcard<String>(),
+				new Wildcard<Class<?>>());
 		while (it.hasNext()) {
 			final KeyEntryTuple<String, Class<?>> keyEntryTuple = it.next();
 			copy.required.index(keyEntryTuple.getKey(), keyEntryTuple.getEntry());
@@ -238,10 +234,10 @@ public class MemoryConfig implements IConfig {
 	public Object get(final String key) {
 		final Object value = tryToGet(key);
 		if (value == null) {
-			throw new ConfigException("Config key '" + key
-					+ "' requested but not defined - and no default defined either. " + idStr()
+			throw new ConfigException(
+					"Config key '" + key + "' requested but not defined - and no default defined either. " + idStr()
 
-					+ " \nDoc:" + getDocumentation(key));
+			+ " \nDoc:" + getDocumentation(key));
 		}
 		return value;
 	}
@@ -337,15 +333,12 @@ public class MemoryConfig implements IConfig {
 		if (o instanceof String) {
 			return Integer.parseInt((String) o);
 		}
-		throw new ConfigException("Value with key '" + key + "' not a int but '"
-				+ o.getClass().getName());
+		throw new ConfigException("Value with key '" + key + "' not a int but '" + o.getClass().getName());
 	}
-
 
 	/**
 	 * @param key
-	 * @param requestedType
-	 *            used only to generate better error messages
+	 * @param requestedType used only to generate better error messages
 	 * @return
 	 */
 	private Object getInternal(final String key, final Class<?> requestedType, final String callContext) {
@@ -356,17 +349,14 @@ public class MemoryConfig implements IConfig {
 		final Object value = tryToGet(key);
 
 		if (value == null) {
-			throw new ConfigException("Config key '" + key + "' requested as '"
-					+ requestedType.getName()
-					+ "' but not defined - and no default defined either. " + idStr() + " \n"
-					+ getDocumentation(key));
+			throw new ConfigException("Config key '" + key + "' requested as '" + requestedType.getName()
+					+ "' but not defined - and no default defined either. " + idStr() + " \n" + getDocumentation(key));
 		}
 		return value;
 	}
 
 	/**
-	 * @return a short 4-character marker string to help identify which config
-	 *         is which.
+	 * @return a short 4-character marker string to help identify which config is which.
 	 */
 	@Override
 	public String getInternalId() {
@@ -393,8 +383,7 @@ public class MemoryConfig implements IConfig {
 		if (o instanceof String) {
 			return Long.parseLong((String) o);
 		}
-		throw new ConfigException("Value with key '" + key + "' not a long but '"
-				+ o.getClass().getName());
+		throw new ConfigException("Value with key '" + key + "' not a long but '" + o.getClass().getName());
 	}
 
 	@Override
@@ -443,8 +432,7 @@ public class MemoryConfig implements IConfig {
 			return (IResolver<T>) o;
 		}
 		// default:
-		throw new ConfigException("instance at key '" + key + "' could not be used. Type="
-				+ o.getClass().getName());
+		throw new ConfigException("instance at key '" + key + "' could not be used. Type=" + o.getClass().getName());
 	}
 
 	@Override
@@ -456,8 +444,7 @@ public class MemoryConfig implements IConfig {
 	public String getString(final String key) {
 		final Object o = get(key);
 		if (!(o instanceof String)) {
-			throw new ConfigException("instance at key '" + key + "' was not String but "
-					+ o.getClass().getName());
+			throw new ConfigException("instance at key '" + key + "' was not String but " + o.getClass().getName());
 		}
 		return (String) o;
 	}
@@ -588,6 +575,16 @@ public class MemoryConfig implements IConfig {
 	}
 
 	@Override
+	public <T> ConfBuilder setDefault(final Class<T> interfaze, final T instance, final boolean initial) {
+		if (interfaze == null) {
+			throw new IllegalArgumentException("Key may not be null");
+		}
+		final String key = interfaze.getName();
+		setDefault(key, new InstanceResolver<T>(instance), initial);
+		return new ConfBuilder(this, key);
+	}
+
+	@Override
 	public ConfBuilder setDefault(final Enum<?> key, final Object value, final boolean initial) {
 		if (key == null) {
 			throw new IllegalArgumentException("Key may not be null");
@@ -601,8 +598,7 @@ public class MemoryConfig implements IConfig {
 			throw new IllegalArgumentException("Key may not be null");
 		}
 		if (!initial && this.defaults.containsKey(key)) {
-			throw new ConfigException("Config key '" + initial + "' had already a default value "
-					+ idStr());
+			throw new ConfigException("Config key '" + initial + "' had already a default value " + idStr());
 		}
 		this.defaults.put(key, value);
 		if (traceOrigins) {
