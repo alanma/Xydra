@@ -10,6 +10,8 @@ public class EnumUtils {
 	/**
 	 * {@link Enum#valueOf(Class, String)} variant which handles null gracefully.
 	 *
+	 * Also ignores casing of string s.
+	 *
 	 * @param enumType
 	 * @param s
 	 * @return @CanBeNull if s is null
@@ -18,8 +20,14 @@ public class EnumUtils {
 		if (s == null) {
 			return null;
 		}
-		final E enumValue = Enum.valueOf(enumType, s);
-		return enumValue;
+
+		for (final E enumValue : enumType.getEnumConstants()) {
+	        if (enumValue.name().equalsIgnoreCase(s)) {
+	            return enumValue;
+	        }
+	    }
+
+		return null;
 	}
 
 }
