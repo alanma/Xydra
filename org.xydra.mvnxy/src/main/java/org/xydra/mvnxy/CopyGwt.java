@@ -57,7 +57,7 @@ public class CopyGwt extends AbstractMojo {
 			return;
 		}
 		for (final String moduleName : this.gwtModuleNames) {
-			GwtBuildHelper.copyCompiledGwtModule(this.warPath, moduleName);
+			GwtBuildHelper.copyCompiledGwtModule(this.warPath, "./src/main/webapp", moduleName);
 		}
 	}
 
