@@ -771,6 +771,10 @@ public class MemoryConfig implements IConfig {
 			return ((IResolver<T>) o).resolve();
 		}
 
+		if(o instanceof String && clazz.equals(String[].class)) {
+			return (T) decodeList((String) o);
+		}
+
 		return (T) o;
 	}
 
