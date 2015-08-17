@@ -23,7 +23,7 @@ import org.xydra.sharedutils.XyAssert;
 
 public class DumpUtilsBase {
 
-	private static final Logger log = LoggerFactory.getLogger(DumpUtilsBase.class);
+	public static final Logger log = LoggerFactory.getLogger(DumpUtilsBase.class);
 
 	/**
 	 * @param label to identify the log output
