@@ -35,9 +35,8 @@ import org.xydra.sharedutils.XyAssert;
  *
  * Does not support revision numbers.
  *
- * An implementation of {@link XWritableModel} that works as a diff on top of a
- * base {@link XWritableModel}. Via {@link #toCommandList(boolean)} a minimal
- * list of commands that changes the base model into the current state can be
+ * An implementation of {@link XWritableModel} that works as a diff on top of a base {@link XWritableModel}. Via
+ * {@link #toCommandList(boolean)} a minimal list of commands that changes the base model into the current state can be
  * created. The base model is changed at no times.
  *
  * @author xamde
@@ -51,18 +50,14 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 
 	static final XValue NOVALUE = XV.toValue("__NoValue_DiffWritableModel");
 
-	/*
-	 * Each index has the structure (object, field, value) with the notion to
-	 * represent added/removed content in this model within a given repository.
+	/* Each index has the structure (object, field, value) with the notion to represent added/removed content in this
+	 * model within a given repository.
 	 *
-	 * An added/removed, empty object without fields is represented as
-	 * (objectId, NONE, NOVALUE).
+	 * An added/removed, empty object without fields is represented as (objectId, NONE, NOVALUE).
 	 *
-	 * An added/removed, empty field without values is represented as (objectId,
-	 * fieldId, NOVALUE).
+	 * An added/removed, empty field without values is represented as (objectId, fieldId, NOVALUE).
 	 *
-	 * A added/removed value is represented as (objectId, fieldId, value).
-	 */
+	 * A added/removed value is represented as (objectId, fieldId, value). */
 	MapMapIndex<XId, XId, XValue> added, removed;
 
 	private final XWritableModel base;
@@ -103,8 +98,8 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 
 	@Override
 	protected XValue field_getValue(final XId objectId, final XId fieldId) {
-		assert hasObject(objectId) : "Object '" + resolveObject(objectId)
-				+ "' not found when looking for field '" + fieldId + "'";
+		assert hasObject(objectId) : "Object '" + resolveObject(objectId) + "' not found when looking for field '"
+				+ fieldId + "'";
 		XyAssert.xyAssert(getObject(objectId).hasField(fieldId));
 
 		XValue value = this.added.lookup(objectId, fieldId);
@@ -129,10 +124,12 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		assert objectId != null;
 		XyAssert.xyAssert(fieldId != null);
 		assert fieldId != null;
-		assert hasObject(objectId) : "Missing object with id " + objectId + " to set field "
-				+ fieldId;
+		assert hasObject(objectId) : "Missing object with id " + objectId + " to set field " + fieldId;
 		XyAssert.xyAssert(this.removed.lookup(objectId, fieldId) == null);
-		XyAssert.xyAssert(getObject(objectId).hasField(fieldId));
+		XyAssert.xyAssert(getObject(objectId).hasField(fieldId),
+				"object '"+objectId
+				+ "' has no field '"+fieldId
+				+ "'");
 
 		final XValue v = field_getValue(objectId, fieldId);
 		if (v == null && value == null || v != null && v.equals(value)) {
@@ -152,8 +149,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	/**
 	 * Allows to end a transaction and go back to using the base object.
 	 *
-	 * @return the base object that has been used to created this wrapped
-	 *         {@link DiffWritableModel}.
+	 * @return the base object that has been used to created this wrapped {@link DiffWritableModel}.
 	 */
 	public XWritableModel getBase() {
 		return this.base;
@@ -167,13 +163,11 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	@Override
 	public boolean hasObject(@NeverNull final XId objectId) {
 		if (this.added.containsKey(new EqualsConstraint<XId>(objectId), new Wildcard<XId>())) {
-			XyAssert.xyAssert(!this.removed.containsKey(new EqualsConstraint<XId>(objectId),
-					new EqualsConstraint<XId>(NONE)));
+			XyAssert.xyAssert(
+					!this.removed.containsKey(new EqualsConstraint<XId>(objectId), new EqualsConstraint<XId>(NONE)));
 			return true;
-		} else if (this.removed.containsKey(new EqualsConstraint<XId>(objectId),
-				new EqualsConstraint<XId>(NONE))) {
-			XyAssert.xyAssert(!this.added.containsKey(new EqualsConstraint<XId>(objectId),
-					new Wildcard<XId>()));
+		} else if (this.removed.containsKey(new EqualsConstraint<XId>(objectId), new EqualsConstraint<XId>(NONE))) {
+			XyAssert.xyAssert(!this.added.containsKey(new EqualsConstraint<XId>(objectId), new Wildcard<XId>()));
 			return false;
 		} else {
 			return this.base.hasObject(objectId);
@@ -217,12 +211,12 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		assert objectId != null;
 		XyAssert.xyAssert(fieldId != null);
 		assert fieldId != null;
-		if (this.added.tupleIterator(new EqualsConstraint<XId>(objectId),
-				new EqualsConstraint<XId>(fieldId)).hasNext()) {
+		if (this.added.tupleIterator(new EqualsConstraint<XId>(objectId), new EqualsConstraint<XId>(fieldId))
+				.hasNext()) {
 			return true;
 		}
-		if (this.removed.tupleIterator(new EqualsConstraint<XId>(objectId),
-				new EqualsConstraint<XId>(fieldId)).hasNext()) {
+		if (this.removed.tupleIterator(new EqualsConstraint<XId>(objectId), new EqualsConstraint<XId>(fieldId))
+				.hasNext()) {
 			return false;
 		}
 		// else
@@ -251,8 +245,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		assert fieldId != null;
 		final boolean hasField = object_hasField(objectId, fieldId);
 		if (hasField) {
-			if (this.added.containsKey(new EqualsConstraint<XId>(objectId),
-					new EqualsConstraint<XId>(fieldId))) {
+			if (this.added.containsKey(new EqualsConstraint<XId>(objectId), new EqualsConstraint<XId>(fieldId))) {
 				this.added.deIndex(objectId, fieldId);
 			} else {
 				this.removed.index(objectId, fieldId, NOVALUE);
@@ -314,23 +307,22 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	/**
 	 * @param forced if true, create forced commands
 	 *
-	 *            TODO implement semantics of 'forced'
+	 *        TODO implement semantics of 'forced'
 	 *
-	 * @return a list of commands which transform the base model given at
-	 *         creation time into this current model state
+	 * @return a list of commands which transform the base model given at creation time into this current model state
 	 */
 	public List<XAtomicCommand> toCommandList(final boolean forced) {
 		final List<XAtomicCommand> list = new LinkedList<XAtomicCommand>();
 
 		// remove
-		Iterator<KeyKeyEntryTuple<XId, XId, XValue>> it = this.removed.tupleIterator(
-				new Wildcard<XId>(), new Wildcard<XId>());
+		Iterator<KeyKeyEntryTuple<XId, XId, XValue>> it = this.removed.tupleIterator(new Wildcard<XId>(),
+				new Wildcard<XId>());
 		while (it.hasNext()) {
 			final KeyKeyEntryTuple<XId, XId, XValue> objectFieldValue = it.next();
 			if (objectFieldValue.getKey2().equals(NONE)) {
 				// remove object
-				list.add(BaseRuntime.getCommandFactory().createForcedRemoveObjectCommand(
-						resolveObject(objectFieldValue.getKey1())));
+				list.add(BaseRuntime.getCommandFactory()
+						.createForcedRemoveObjectCommand(resolveObject(objectFieldValue.getKey1())));
 			} else {
 				// remove empty field or field with value
 				list.add(BaseRuntime.getCommandFactory().createForcedRemoveFieldCommand(
@@ -351,45 +343,39 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 						list.add(BaseRuntime.getCommandFactory().createForcedAddObjectCommand(getAddress(),
 								e.getKey1()));
 					} else {
-						list.add(BaseRuntime.getCommandFactory().createSafeAddObjectCommand(getAddress(),
-								e.getKey1()));
+						list.add(BaseRuntime.getCommandFactory().createSafeAddObjectCommand(getAddress(), e.getKey1()));
 					}
 				}
 			} else if (e.getEntry().equals(NOVALUE)) {
 				// add empty field
-				list.add(BaseRuntime.getCommandFactory().createForcedAddFieldCommand(
-						resolveObject(e.getKey1()), e.getKey2()));
+				list.add(BaseRuntime.getCommandFactory().createForcedAddFieldCommand(resolveObject(e.getKey1()),
+						e.getKey2()));
 			} else {
 				// value
 				final XValue currentValue = getFieldValueFromBase(e.getKey1(), e.getKey2());
 				if (currentValue == null) {
 					// maybe still add field
-					if (!this.base.hasObject(e.getKey1())
-							|| !this.base.getObject(e.getKey1()).hasField(e.getKey2())) {
-						list.add(BaseRuntime.getCommandFactory().createForcedAddFieldCommand(
-								resolveObject(e.getKey1()), e.getKey2()));
+					if (!this.base.hasObject(e.getKey1()) || !this.base.getObject(e.getKey1()).hasField(e.getKey2())) {
+						list.add(BaseRuntime.getCommandFactory().createForcedAddFieldCommand(resolveObject(e.getKey1()),
+								e.getKey2()));
 					}
 					// add value
-					list.add(BaseRuntime.getCommandFactory().createForcedAddValueCommand(
-							resolveField(e.getKey1(), e.getKey2()), e.getEntry()));
+					list.add(BaseRuntime.getCommandFactory()
+							.createForcedAddValueCommand(resolveField(e.getKey1(), e.getKey2()), e.getEntry()));
 				} else {
 					// change value
-					list.add(BaseRuntime.getCommandFactory().createForcedChangeValueCommand(
-							resolveField(e.getKey1(), e.getKey2()), e.getEntry()));
+					list.add(BaseRuntime.getCommandFactory()
+							.createForcedChangeValueCommand(resolveField(e.getKey1(), e.getKey2()), e.getEntry()));
 				}
 			}
 		}
 
-		/*
-		 * Make sure model commands come before object commands; object commands
-		 * come before field commands. This avoids e.g. deleting a field before
-		 * deleting its object parent.
-		 */
+		/* Make sure model commands come before object commands; object commands come before field commands. This avoids
+		 * e.g. deleting a field before deleting its object parent. */
 		Collections.sort(list, new Comparator<XAtomicCommand>() {
 			@Override
 			public int compare(final XAtomicCommand a, final XAtomicCommand b) {
-				return b.getChangedEntity().getAddressedType()
-						.compareTo(a.getChangedEntity().getAddressedType());
+				return b.getChangedEntity().getAddressedType().compareTo(a.getChangedEntity().getAddressedType());
 			}
 		});
 

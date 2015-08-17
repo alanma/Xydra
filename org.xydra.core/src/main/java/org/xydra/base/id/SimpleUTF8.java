@@ -7,6 +7,8 @@ import java.nio.charset.Charset;
 public class SimpleUTF8 {
 
 	/**
+	 * Normal UTF-8 encoding which tries to be fast
+	 *
 	 * @param anyString @NeverNull
 	 * @return utf-8 encoding
 	 */
