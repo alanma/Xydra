@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import org.apache.log4j.Level;
@@ -17,11 +18,10 @@ import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 
 /**
- * Utility class for managing log4j.properties files. If some bundled jar
- * contains a log4j.properties (e.g. it might come in from a /src/test/resources
- * folder), then the first log4j.properties found on the classpath is used. To
- * fix that, this class allows to explicitly load a local file from
- * /src/main/resources and apply the config listed in there.
+ * Utility class for managing log4j.properties files. If some bundled jar contains a log4j.properties (e.g. it might
+ * come in from a /src/test/resources folder), then the first log4j.properties found on the classpath is used. To fix
+ * that, this class allows to explicitly load a local file from /src/main/resources and apply the config listed in
+ * there.
  *
  * @author xamde
  */
@@ -30,9 +30,7 @@ public class Log4jUtils {
 	private static final Logger log = LoggerFactory.getLogger(Log4jUtils.class);
 
 	/**
-	 * Use local FILE (not resource)
-	 * './src/{main,test}/resources/log4j.properties' to overwrite log4j
-	 * settings
+	 * Use local FILE (not resource) './src/{main,test}/resources/log4j.properties' to overwrite log4j settings
 	 */
 	public static void configureLog4j() {
 		File file = new File("./src/main/resources/log4j.properties");
@@ -40,8 +38,8 @@ public class Log4jUtils {
 			file = new File("./src/test/resources/log4j.properties");
 		}
 		if (!file.exists()) {
-			log.warn("Logging: Could not update log conf at runtime from file '"
-					+ file.getAbsolutePath() + "' -- not found");
+			log.warn("Logging: Could not update log conf at runtime from file '" + file.getAbsolutePath()
+					+ "' -- not found");
 		}
 		final Properties props = new Properties();
 		Reader r;
@@ -51,9 +49,7 @@ public class Log4jUtils {
 			r.close();
 			PropertyConfigurator.configure(props);
 			log.info("Logging: Updated local log config from " + file.getAbsolutePath());
-		} catch (final FileNotFoundException e) {
-		} catch (final IOException e) {
-		}
+		} catch (final FileNotFoundException e) {} catch (final IOException e) {}
 
 	}
 
@@ -79,8 +75,7 @@ public class Log4jUtils {
 	}
 
 	/**
-	 * This is not fast (hence not public) and only used to dump an internal
-	 * config
+	 * This is not fast (hence not public) and only used to dump an internal config
 	 *
 	 * @param r
 	 * @return
@@ -121,6 +116,26 @@ public class Log4jUtils {
 	 */
 	public static void setLevel(final Class<?> clazz, final Level log4jLevel) {
 		LogManager.getLogger(clazz).setLevel(log4jLevel);
+	}
+
+	/**
+	 * Dump active log conf to System.out
+	 */
+	public static void dumpActiveLogConf() {
+		final Enumeration<org.apache.log4j.Logger> loggerEn = LogManager.getCurrentLoggers();
+		while (loggerEn.hasMoreElements()) {
+			final org.apache.log4j.Logger log4jLogger = loggerEn.nextElement();
+			final String name = log4jLogger.getName();
+			Level level = log4jLogger.getLevel();
+			String levelStr;
+			if(level == null) {
+				level = log4jLogger.getEffectiveLevel();
+				levelStr = level.toString()+ " (inherited)";
+			} else {
+				levelStr = level.toString()+" (defined)";
+			}
+			System.out.println("  " + name + "=" + levelStr);
+		}
 	}
 
 	public static void setRootLevel(final Level log4jLevel) {
