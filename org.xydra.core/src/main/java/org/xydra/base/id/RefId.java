@@ -9,8 +9,6 @@ public class RefId extends MemoryStringID {
 
 	private static final long serialVersionUID = -1638968666051351868L;
 
-	private final int hash;
-
 	@Override
 	public boolean equals(final Object other) {
 		if (other instanceof RefId) {
@@ -24,12 +22,6 @@ public class RefId extends MemoryStringID {
 
 	public RefId(final String uriString) {
 		super(uriString);
-		this.hash = this.string.hashCode();
-	}
-
-	@Override
-	public int hashCode() {
-		return this.hash;
 	}
 
 	/**
