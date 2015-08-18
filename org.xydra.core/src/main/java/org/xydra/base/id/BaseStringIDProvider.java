@@ -178,10 +178,15 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 	@Override
 	public XAddress fromComponents(final XId repositoryId, final XId modelId, final XId objectId, final XId fieldId) {
 
-		final int hash = (repositoryId == null ? 0 : repositoryId.hashCode())
-				+ (modelId == null ? 0 : modelId.hashCode())
-				+ (objectId == null ? 0 : objectId.hashCode())
-				+ (fieldId == null ? 0 : fieldId.hashCode());
+		final int hash =
+
+		(repositoryId == null ? 1 : repositoryId.hashCode())
+
+		* (modelId == null ? 1 : 33 * modelId.hashCode())
+
+		* (objectId == null ? 1 : 1213 * objectId.hashCode())
+
+		* (fieldId == null ? 1 : 313 * fieldId.hashCode());
 
 		final IEntrySet<XAddress> addressSet = this.addressIndex.lookup(hash);
 		if (addressSet != null) {
