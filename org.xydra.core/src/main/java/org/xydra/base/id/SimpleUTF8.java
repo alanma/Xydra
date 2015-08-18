@@ -147,4 +147,16 @@ public class SimpleUTF8 {
 		return true;
 	}
 
+	/**
+	 * A byte encode one Unicode codepoint, if it is in the lower 127 bits. Or it encodes less than a character. Hence
+	 * the maximal string length happens if the bytes are all from lower ASCII.
+	 *
+	 * @param bytes
+	 * @return the maximal length of a string, which corresponds to the Unicode code points encoded by the given byte
+	 *         array
+	 */
+	public static int getMaxCodepoints(final byte[] bytes) {
+		return bytes.length;
+	}
+
 }
