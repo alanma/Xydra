@@ -133,22 +133,39 @@ public class XX extends Base {
 	 * @param fieldId @CanBeNull
 	 * @return
 	 */
-	public static boolean isSameAddress(final XAddress addr, final XId repositoryId,
-			final XId modelId, final XId objectId, final XId fieldId) {
+	public static boolean isSameAddress(final XAddress addr, final XId repositoryId, final XId modelId,
+			final XId objectId, final XId fieldId) {
 
-		if (repositoryId != null && !repositoryId.equals(addr.getRepository())) {
+		/* faster by comparing high-variance parts first */
+		if (fieldId == null) {
+			if (addr.getField() != null) {
+				return false;
+			}
+		} else if (!fieldId.equals(addr.getField())) {
 			return false;
 		}
 
-		if (modelId != null && !modelId.equals(addr.getModel())) {
+		if (objectId == null) {
+			if (addr.getObject() != null) {
+				return false;
+			}
+		} else if (!objectId.equals(addr.getObject())) {
 			return false;
 		}
 
-		if (objectId != null && !objectId.equals(addr.getObject())) {
+		if (modelId == null) {
+			if (addr.getModel() != null) {
+				return false;
+			}
+		} else if (!modelId.equals(addr.getModel())) {
 			return false;
 		}
 
-		if (fieldId != null && !fieldId.equals(addr.getField())) {
+		if (repositoryId == null) {
+			if (addr.getRepository() != null) {
+				return false;
+			}
+		} else if (!repositoryId.equals(addr.getRepository())) {
 			return false;
 		}
 
