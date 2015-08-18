@@ -171,7 +171,7 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 		return fromComponents(repository, model, object, field);
 	}
 
-	// FIXME experimental
+	// FIXME experimental address caching TODO better hash
 	private transient MapSetIndex<Integer, XAddress> addressIndex = MapSetIndex
 			.createWithFastWeakEntrySets();
 

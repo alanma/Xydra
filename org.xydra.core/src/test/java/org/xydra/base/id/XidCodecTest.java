@@ -132,7 +132,8 @@ public class XidCodecTest {
 				Assert.assertFalse("Should be invalid '" + sample + "'",
 						BaseStringIDProvider.isValidId(sample.str));
 			}
-			if (sample.str.length() < 100) {
+			// pretty random guess: 90
+			if (sample.str.length() < 50) {
 				testEncodeDecode(sample.str);
 			}
 		}

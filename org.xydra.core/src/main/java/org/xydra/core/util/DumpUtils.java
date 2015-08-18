@@ -11,17 +11,12 @@ import org.xydra.base.util.DumpUtilsBase;
 import org.xydra.core.model.delta.IFieldDiff;
 import org.xydra.core.model.delta.IModelDiff;
 import org.xydra.core.model.delta.IObjectDiff;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
 
 /**
  * @author xamde
  *
  */
 public class DumpUtils extends DumpUtilsBase {
-
-	@SuppressWarnings("unused")
-	private static final Logger log = LoggerFactory.getLogger(DumpUtils.class);
 
 	public static StringBuilder changesToString(final IModelDiff changedModel) {
 		final StringBuilder sb = new StringBuilder();
