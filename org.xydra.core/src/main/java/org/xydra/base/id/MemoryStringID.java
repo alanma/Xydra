@@ -34,7 +34,6 @@ public class MemoryStringID implements XId, Serializable {
 	 */
 	protected MemoryStringID(final String uriString) {
 		this.string = uriString.intern();
-		this.hash = this.string.hashCode();
 	}
 
 	@Override
@@ -71,12 +70,10 @@ public class MemoryStringID implements XId, Serializable {
 		return this;
 	}
 
-	private int hash = 0;
-
 	@Override
 	public int hashCode() {
-        return this.hash;
-    }
+		return this.string.hashCode();
+	}
 
 	@Override
 	public String toString() {
