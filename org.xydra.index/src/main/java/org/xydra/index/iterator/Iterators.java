@@ -611,4 +611,21 @@ public class Iterators {
 		return list.iterator();
 	}
 
+	/**
+	 * Type-cast an iterator with generics
+	 *
+	 * @param symbols
+	 * @return
+	 * @param <T> type
+	 * @param <T> base type
+	 */
+	public static <T extends B,B> Iterator<B> typeCast(final Iterator<T> typedIt) {
+		return Iterators.transform(typedIt, new ITransformer<T,B>() {
+
+			@Override
+			public B transform(final T in) {
+				return in;
+			}});
+	}
+
 }
