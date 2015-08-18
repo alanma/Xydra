@@ -130,20 +130,20 @@ public class XX extends Base {
 	public static boolean isSameAddress(final XAddress addr, final XId repositoryId, final XId modelId,
 			final XId objectId, final XId fieldId) {
 
-		/* faster by comparing high-variance parts first */
-		if (fieldId == null) {
-			if (addr.getField() != null) {
-				return false;
-			}
-		} else if (!fieldId.equals(addr.getField())) {
-			return false;
-		}
-
+		/* faster by comparing high-variance parts first. */
 		if (objectId == null) {
 			if (addr.getObject() != null) {
 				return false;
 			}
 		} else if (!objectId.equals(addr.getObject())) {
+			return false;
+		}
+
+		if (fieldId == null) {
+			if (addr.getField() != null) {
+				return false;
+			}
+		} else if (!fieldId.equals(addr.getField())) {
 			return false;
 		}
 
