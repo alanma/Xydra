@@ -88,10 +88,8 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 		System.out.println(hex("00F8"));
 	}
 
-	/*
-	 * the XML spec also allows 5-digit unicode characters (\u10000-\uEFFFF) but
-	 * Java can't handle them as char datatype is 16-bit only.
-	 */
+	/* the XML spec also allows 5-digit unicode characters (\u10000-\uEFFFF) but Java can't handle them as char datatype
+	 * is 16-bit only. */
 
 	/**
 	 * Notable excludes: ' ;<=>?@[\]^{|}~§°´%!"#$%&'()*+,-./ '
@@ -103,7 +101,7 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 	 * Random XIds are UUIDs which match [-0-9a-z]
 	 *
 	 * This leaves '_' as the only reasonable escape character
-	 * */
+	 */
 	public static final String nameChar = // .
 	nameStartChar + // .
 			"\\-" // .
@@ -139,13 +137,11 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 		// Note: this strips any trailing slashes
 
 		if (components.length > 5) {
-			throw new URIFormatException("The address \"" + address
-					+ "\" contains too many components.");
+			throw new URIFormatException("The address \"" + address + "\" contains too many components.");
 		}
 
 		if (components.length < 2 || components[0].length() > 0) {
-			throw new URIFormatException("The address \"" + address
-					+ "\" does not start with a slash ('/').");
+			throw new URIFormatException("The address \"" + address + "\" does not start with a slash ('/').");
 		}
 
 		XId repository = null;
@@ -171,9 +167,8 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 		return fromComponents(repository, model, object, field);
 	}
 
-	// FIXME experimental address caching TODO better hash
-	private transient MapSetIndex<Integer, XAddress> addressIndex = MapSetIndex
-			.createWithFastWeakEntrySets();
+	// FIXME experimental address caching
+	private transient MapSetIndex<Integer, XAddress> addressIndex = MapSetIndex.createWithFastWeakEntrySets();
 
 	@Override
 	public XAddress fromComponents(final XId repositoryId, final XId modelId, final XId objectId, final XId fieldId) {
@@ -190,6 +185,9 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 
 		final IEntrySet<XAddress> addressSet = this.addressIndex.lookup(hash);
 		if (addressSet != null) {
+			if (log.isTraceEnabled() && addressSet.size() > 1) {
+				log.trace("Looking among " + addressSet.size() + " addresses with the same hash of " + hash);
+			}
 			final Iterator<XAddress> it = addressSet.iterator();
 			while (it.hasNext()) {
 				final XAddress addr = it.next();
@@ -216,11 +214,15 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 			throw new IllegalArgumentException("s is null");
 		}
 		if (s.length() > XIdProvider.MAX_LENGTH) {
-			log.trace("Too long");
+			if (log.isTraceEnabled()) {
+				log.trace("Too long: '" + s + "'");
+			}
 			return false;
 		}
 		if (s.length() == 0) {
-			log.trace("Too short");
+			if (log.isTraceEnabled()) {
+				log.trace("Too short: '" + s + "'");
+			}
 			return false;
 		}
 		final int firstCodePoint = s.codePointAt(0);
@@ -250,14 +252,14 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 			throw new IllegalArgumentException("'" + uriString + "' is null - cannot create XId");
 		}
 		if (uriString.length() > XIdProvider.MAX_LENGTH) {
-			throw new IllegalArgumentException("'" + uriString + "' is too long (over "
-					+ XIdProvider.MAX_LENGTH + ") - cannot create XId");
+			throw new IllegalArgumentException(
+					"'" + uriString + "' is too long (over " + XIdProvider.MAX_LENGTH + ") - cannot create XId");
 		}
 		if (!isValidId(uriString)) {
-			throw new IllegalArgumentException("'" + uriString
-					+ "' is not a valid XML name or contains ':', cannot create XId");
+			throw new IllegalArgumentException(
+					"'" + uriString + "' is not a valid XML name or contains ':', cannot create XId");
 		}
-		assert !uriString.contains(" ") : "uriString='" + uriString + "'";
+		assert!uriString.contains(" ") : "uriString='" + uriString + "'";
 		return createInstance(uriString);
 	}
 

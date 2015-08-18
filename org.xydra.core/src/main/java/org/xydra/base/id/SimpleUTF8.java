@@ -26,16 +26,14 @@ public class SimpleUTF8 {
 
 	/**
 	 * @param simpleString @NeverNull
-	 * @return a string using only characters a-z, A-Z, '-', '_', '.', 0-9 and
-	 *         starts with a-zA-Z --> can be converted to UTF-8 by just taking
-	 *         the bytes
+	 * @return a string using only characters a-z, A-Z, '-', '_', '.', 0-9 and starts with a-zA-Z --> can be converted
+	 *         to UTF-8 by just taking the bytes
 	 */
 	public static byte[] toUtf8Bytes_fromSimpleString(final String simpleString) {
 		final byte[] bytes = new byte[simpleString.length()];
 		for (int i = 0; i < bytes.length; i++) {
 			final char c = simpleString.charAt(i);
-			assert isXmlNameCharAndWithinAscii(c) : "Non-xmlnamechar '" + c + "' in '"
-					+ simpleString + "'";
+			assert isXmlNameCharAndWithinAscii(c) : "Non-xmlnamechar '" + c + "' in '" + simpleString + "'";
 			assert i > 0 || isXmlNameStartCharAndWithinAscii(c);
 			bytes[i] = (byte) c;
 		}
@@ -44,10 +42,9 @@ public class SimpleUTF8 {
 
 	/**
 	 * @param s
-	 * @return true if string s contains only characters which are the same byte
-	 *         value as in UTF-8 encoding (i.e. they are in lower 127 bits of
-	 *         ASCII) AND they are contained in the legal XML name char fragment
-	 *         (which is a strict subset of the first 127 bits of ASCII)
+	 * @return true if string s contains only characters which are the same byte value as in UTF-8 encoding (i.e. they
+	 *         are in lower 127 bits of ASCII) AND they are contained in the legal XML name char fragment (which is a
+	 *         strict subset of the first 127 bits of ASCII)
 	 */
 	public static boolean isSimpleUtf8CompatibleString(final String s) {
 		if (s == null) {
@@ -80,7 +77,7 @@ public class SimpleUTF8 {
 				|| '0' <= c && c <= '9'// .
 				|| c == '-'// .
 				|| c == '.'// .
-		;
+				;
 	}
 
 	/**
@@ -93,7 +90,7 @@ public class SimpleUTF8 {
 		return 'a' <= c && c <= 'z' // .
 				|| 'A' <= c && c <= 'Z'// .
 				|| c == '_'// .
-		;
+				;
 	}
 
 	public static char[] toUtf8Chars_fromAnyBytes(final byte[] bytes) {
@@ -128,8 +125,7 @@ public class SimpleUTF8 {
 
 	/**
 	 * @param bytes
-	 * @return true if essentially the bytes contain a valid XML 1.0 name in
-	 *         us-ascii
+	 * @return true if essentially the bytes contain a valid XML 1.0 name in us-ascii
 	 */
 	public static boolean isSimpleUtf8CompatibleBytes(final byte[] bytes) {
 		for (int i = 0; i < bytes.length; i++) {
