@@ -3,6 +3,7 @@ package org.xydra.jetty;
 import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
 
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -14,6 +15,8 @@ public class DesktopJetty extends EmbeddedJetty {
 
 	private static Logger log = LoggerFactory.getLogger(DesktopJetty.class);
 
+	private final Filter noCachingFilter = JettyUtils.createNoCacheFilter();
+
 	@Override
 	protected void configureWebapp(final WebAppContext webapp) {
 		log.info("Configuring DesktopJetty");
@@ -24,9 +27,16 @@ public class DesktopJetty extends EmbeddedJetty {
 		// webapp.setClassLoader(classloader);
 
 		/* caching for desktop jetty? don't cache anything until we know better */
+		final FilterHolder cacheNothingFilterHolder = new FilterHolder();
+		cacheNothingFilterHolder.setFilter(this.noCachingFilter);
+		webapp.addFilter(cacheNothingFilterHolder, "*.*", EnumSet.allOf(DispatcherType.class));
+
+		// dont cache marked files
 		final FilterHolder noCacheFilterHolder = new FilterHolder();
-		noCacheFilterHolder.setFilter(JettyUtils.createNoCacheFilter());
-		webapp.addFilter(noCacheFilterHolder, "*.*", EnumSet.allOf(DispatcherType.class));
+		noCacheFilterHolder.setFilter(this.noCachingFilter);
+		webapp.addFilter(noCacheFilterHolder, "*.nocache.*",
+				EnumSet.allOf(DispatcherType.class));
+
 
 		// IMPROVE move?
 		final MimeTypes mimeTypes = new MimeTypes();
