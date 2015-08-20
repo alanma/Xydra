@@ -2,9 +2,12 @@ package org.xydra.base.id;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 
 public class SimpleUTF8 {
+
+	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	/**
 	 * Normal UTF-8 encoding which tries to be fast
@@ -98,9 +101,13 @@ public class SimpleUTF8 {
 		if (isSimpleUtf8CompatibleBytes(bytes)) {
 			return toUtf8Chars_fromSimpleBytes(bytes);
 		} else {
-
 			final ByteBuffer buf = ByteBuffer.wrap(bytes);
-			return Charset.forName("UTF-8").decode(buf).array();
+			// IMPROVE UTF( : this replaces malformed input silently with some default
+			final CharBuffer cbuf = UTF8.decode(buf);
+			final char[] chars = new char[cbuf.length()];
+			cbuf.rewind();
+			cbuf.get(chars);
+			return chars;
 		}
 	}
 
