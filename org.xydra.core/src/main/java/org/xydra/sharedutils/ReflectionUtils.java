@@ -87,30 +87,40 @@ public class ReflectionUtils {
         }
     }
 
-    /**
-     * @param t the {@link Throwable} to inspect
-     * @param n number of lines, if larger than available input: no problem
-     * @return the first n lines of the given {@link Throwable} t, separated by
-     *         new line characters + br tags
-     */
-    public static String firstNLines(final Throwable t, final int n) {
-        BufferedReader br = toBufferedReader(t);
-        int lines = 0;
-        try {
-            final StringBuffer buf = new StringBuffer();
-            lines += append(br, buf, n);
-            Throwable cause = t.getCause();
-            while(lines < n && cause != null) {
-                buf.append("Caused by\n");
-                br = toBufferedReader(cause);
-                lines += append(br, buf, n - lines);
-                cause = t.getCause();
-            }
-            return buf.toString();
-        } catch(final IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+	/**
+	 * @param t the {@link Throwable} to inspect
+	 * @param n number of lines, if larger than available input: no problem
+	 * @return the first n lines of the given {@link Throwable} t, separated by new line characters + br tags
+	 */
+	public static String firstNLines(final Throwable t, final int n) {
+		BufferedReader br = toBufferedReader(t);
+		int lines = 0;
+		try {
+			final StringBuffer buf = new StringBuffer();
+			lines += append(br, buf, n);
+			Throwable cause = t.getCause();
+			while (lines < n && cause != null) {
+				buf.append("Caused by -------------------------------------\n");
+				try {
+					br = toBufferedReader(cause);
+					lines += append(br, buf, n - lines);
+				} catch (final Throwable t2) {
+					log.warn("Exception while turnign exception to string");
+					log.warn("Exception while turnign exception to string",t2);
+				} finally {
+					final Throwable subCause = cause.getCause();
+					if (cause == subCause) {
+						log.warn("Self-referential error object");
+						break;
+					}
+					cause = subCause;
+				}
+			}
+			return buf.toString();
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
     /**
      * Not even emulated in GWT!

@@ -2,8 +2,6 @@ package org.xydra.restless;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -514,14 +512,12 @@ class RestlessMethod {
 
 				if (!handled) {
 					// TODO hide internal messages better from user
-					final StringWriter sw = new StringWriter();
-					final PrintWriter pw = new PrintWriter(sw);
-					e.printStackTrace(pw);
-					final String stacktrace = sw.toString();
+					final String stacktraceHtml = XydraCoreCopy.firstNLines(e, 500);
 					if (!res.isCommitted()) {
-						res.sendError(500, e + " -- " + stacktrace);
+						res.sendError(500, e + " -- " + stacktraceHtml);
 					}
-					log.error("Exception while executing RESTless method. Stacktrace: " + stacktrace, cause);
+					assert log != null;
+					log.error("Exception while executing RESTless method.", e);
 				}
 			}
 		} catch (final IllegalArgumentException e) {
