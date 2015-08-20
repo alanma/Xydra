@@ -226,12 +226,11 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 			return false;
 		}
 		final int firstCodePoint = s.codePointAt(0);
-		final int i = Character.charCount(firstCodePoint);
-
 		if (!RANGEINDEX_nameStartChar.isInInterval(firstCodePoint)) {
 			return false;
 		}
 
+		final int i = Character.charCount(firstCodePoint);
 		return IntegerRangeIndex.isAllCharactersInIntervals(RANGEINDEX_nameChar, s.substring(i));
 	}
 

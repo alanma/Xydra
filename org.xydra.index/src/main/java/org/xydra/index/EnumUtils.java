@@ -14,7 +14,7 @@ public class EnumUtils {
 	 *
 	 * @param enumType
 	 * @param s
-	 * @return @CanBeNull if s is null
+	 * @return @CanBeNull if s is null or if no matching enum constant was found
 	 */
 	public static <E extends Enum<E>> E valueOf(final Class<E> enumType, final String s) {
 		if (s == null) {
