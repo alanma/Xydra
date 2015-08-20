@@ -54,7 +54,23 @@ public class KeyKeyEntryTuple<K, L, E> implements ITriple<K, L, E>, HasEntry<E> 
 
 	@Override
 	public int hashCode() {
-		return this.key1.hashCode() + this.key2.hashCode() + this.entry.hashCode();
+		return hashCode(this.key1, this.key2, this.entry);
+	}
+
+	/**
+	 * A universal template for hash codes on triples
+	 *
+	 * @param s
+	 * @param p
+	 * @param o
+	 * @return
+	 */
+	public static <K, L, E> int hashCode(final K s, final L p, final E o) {
+		int hash = 17;
+		hash = hash * 31 + s.hashCode();
+		hash = hash * 31 + p.hashCode();
+		hash = hash * 31 + o.hashCode();
+		return hash;
 	}
 
 	@Override
@@ -81,6 +97,22 @@ public class KeyKeyEntryTuple<K, L, E> implements ITriple<K, L, E>, HasEntry<E> 
 	@Override
 	public E o() {
 		return this.entry;
+	}
+
+	public static <K, L, E> boolean equals(final K s1, final K s2, final L p1, final L p2, final E o1, final E o2) {
+		if (!s1.equals(s2)) {
+			return false;
+		}
+
+		if (!p1.equals(p2)) {
+			return false;
+		}
+
+		if (!o1.equals(o2)) {
+			return false;
+		}
+
+		return true;
 	}
 
 }
