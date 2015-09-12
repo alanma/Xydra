@@ -96,6 +96,7 @@ public interface IMapSetIndex<K, E> extends IIndex, Serializable {
 	 */
 	Iterator<K> keyIterator();
 
+
 	/**
 	 * @param otherFuture the other map index is the future. What is found here
 	 *            and not present in this, has been added. @NeverNull

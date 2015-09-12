@@ -372,6 +372,12 @@ public class Iterators {
 		return collection;
 	}
 
+	/**
+	 * @param it
+	 * @param collection
+	 * @param n
+	 * @return collection for fluent API
+	 */
 	public static <C extends Collection<T>, T> C addFirstN(final Iterator<? extends T> it, final C collection,
 			final int n) {
 		int i = 0;

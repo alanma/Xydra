@@ -22,10 +22,27 @@ import org.xydra.index.query.KeyKeyKeyEntryTuple;
  */
 public interface IMapMapMapIndex<K, L, M, E> extends IIndex {
 
+	/**
+	 * @param key1
+	 * @param key2
+	 * @param key3
+	 * @return
+	 */
 	E lookup(K key1, L key2, M key3);
 
+	/**
+	 * @param c1
+	 * @param c2
+	 * @param c3
+	 * @return
+	 */
 	boolean containsKey(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3);
 
+	/**
+	 * @param key1
+	 * @param key2
+	 * @param key3
+	 */
 	void deIndex(K key1, L key2, M key3);
 
 	/**
@@ -39,13 +56,28 @@ public interface IMapMapMapIndex<K, L, M, E> extends IIndex {
 	 */
 	void index(K key1, L key2, M key3, E entry);
 
+	/**
+	 * @param c1
+	 * @param c2
+	 * @param c3
+	 * @return
+	 */
 	Iterator<KeyKeyKeyEntryTuple<K, L, M, E>> tupleIterator(Constraint<K> c1, Constraint<L> c2,
 			Constraint<M> c3);
 
+	/**
+	 * @return
+	 */
 	Iterator<K> key1Iterator();
 
+	/**
+	 * @return
+	 */
 	Iterator<L> key2Iterator();
 
+	/**
+	 * @return
+	 */
 	Iterator<M> key3Iterator();
 
 }

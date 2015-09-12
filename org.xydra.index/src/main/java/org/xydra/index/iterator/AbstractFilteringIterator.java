@@ -3,19 +3,18 @@ package org.xydra.index.iterator;
 import java.util.Iterator;
 
 /**
- * Encapsulates an iterator, returning only those elements matching a filter.
- * Uses a pre-fetch strategy.
+ * Encapsulates an iterator, returning only those elements matching a filter. Uses a pre-fetch strategy.
  *
  * @author voelkel
  *
- * @param <E>
- *            Type of objects returned by this iterator.
+ * @param <E> Type of objects returned by this iterator.
  */
 public abstract class AbstractFilteringIterator<E> implements Iterator<E> {
 
 	protected Iterator<E> base;
 
 	boolean hasNext;
+
 	private E nextItem = null;
 
 	public AbstractFilteringIterator(final Iterator<E> base) {

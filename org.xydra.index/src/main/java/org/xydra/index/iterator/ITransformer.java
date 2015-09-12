@@ -14,7 +14,7 @@ public interface ITransformer<I, O> {
 
 	/**
 	 * @param in
-	 * @return ipout type instance of type I transformed to the output type O
+	 * @return input type instance of type I transformed to the output type O
 	 */
 	O transform(I in);
 

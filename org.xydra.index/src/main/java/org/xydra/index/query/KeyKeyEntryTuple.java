@@ -3,7 +3,9 @@ package org.xydra.index.query;
 import org.xydra.index.impl.DebugUtils;
 
 /**
- * A generic triple
+ * A generic triple.
+ *
+ * Useful {@link #hashCode()} and {@link #equals(Object)}.
  *
  * @author xamde
  * @param <K>

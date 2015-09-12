@@ -8,12 +8,12 @@ import java.util.NoSuchElementException;
  *
  * @author voelkel
  *
- * @param <E>
- *            entity type
+ * @param <E> entity type
  */
 public class SingleValueIterator<E> implements Iterator<E> {
 
 	private boolean done = false;
+
 	private final E singleEntry;
 
 	public SingleValueIterator(final E singleEntry) {
