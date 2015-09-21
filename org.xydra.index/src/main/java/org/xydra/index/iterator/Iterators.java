@@ -550,6 +550,11 @@ public class Iterators {
 	 * @return an iterator which returns only those elements of base that match the constraint
 	 */
 	public static <E> Iterator<E> filterWithConstraint(final Iterator<E> base, final Constraint<E> constraint) {
+		if(constraint.isStar()) {
+			return base;
+		}
+
+		// else
 		return Iterators.filter(base, new IFilter<E>() {
 
 			@Override
