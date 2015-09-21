@@ -45,8 +45,7 @@ import com.google.common.base.Function;
  * @param <E>
  */
 @NotThreadSafe
-// SmallTrieStringMapSetIndex
-public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializable {
+public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, Serializable {
 
 	/**
 	 * Implementation note:
@@ -123,8 +122,8 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		private IEntrySet<E> entrySet;
 
 		public Node() {
-			assert SmallStringSetTrie.this.entrySetFactory != null;
-			this.entrySet = SmallStringSetTrie.this.entrySetFactory.createInstance();
+			assert SmallTrieStringMapSetIndex.this.entrySetFactory != null;
+			this.entrySet = SmallTrieStringMapSetIndex.this.entrySetFactory.createInstance();
 			this.children = new SortedStringMapIndex<Node>();
 		}
 
@@ -149,14 +148,14 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 				} else {
 					// search...
 					final Iterator<KeyEntryTuple<String, Node>> it = this.children.tupleIterator(c1);
-					return Iterators.cascade(it, SmallStringSetTrie.this.TRANSFORMER_KET2EntrySet);
+					return Iterators.cascade(it, SmallTrieStringMapSetIndex.this.TRANSFORMER_KET2EntrySet);
 				}
 			}
 		}
 
 		public boolean deIndex(final Node parent, final String parentKey, final String removeKey) {
 			assert removeKey != null;
-			return deIndex(parent, parentKey, removeKey, SmallStringSetTrie.this.FUNCTION_clear);
+			return deIndex(parent, parentKey, removeKey, SmallTrieStringMapSetIndex.this.FUNCTION_clear);
 		}
 
 		public boolean deIndex(final Node parent, final String parentKey, final String removeKey, final E removeEntry) {
@@ -232,7 +231,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		 * @return recursively all entries
 		 */
 		public Iterator<E> entriesIterator() {
-			return Iterators.cascade(nodeIterator(), SmallStringSetTrie.this.TRANSFORMER_NODE2ENTRIES);
+			return Iterators.cascade(nodeIterator(), SmallTrieStringMapSetIndex.this.TRANSFORMER_NODE2ENTRIES);
 		}
 
 		/**
@@ -314,7 +313,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 
 			final String key = s.substring(start, start + len);
 
-			final IEntrySet<E> es = SmallStringSetTrie.this.lookup(key);
+			final IEntrySet<E> es = SmallTrieStringMapSetIndex.this.lookup(key);
 			if (es != null && !es.isEmpty()) {
 				// we have a real match
 				return new Pair<Integer, Set<E>>(len, es.toSet());
@@ -634,7 +633,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 				return true;
 			}
 
-			for (final SmallStringSetTrie<E>.Node childNode : this.children.values()) {
+			for (final SmallTrieStringMapSetIndex<E>.Node childNode : this.children.values()) {
 				if (childNode.containsEntries()) {
 					return true;
 				}
@@ -762,7 +761,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 			});
 
 			final Iterator<IEntrySet<E>> nonEmptyEntrySetIt = Iterators.filter(entrySetIt,
-					SmallStringSetTrie.this.FILTER_NON_EMPTY_ENTRYSET);
+					SmallTrieStringMapSetIndex.this.FILTER_NON_EMPTY_ENTRYSET);
 
 			return nonEmptyEntrySetIt;
 		}
@@ -806,7 +805,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 
 	private static final Constraint<String> ANY_STRING = new Wildcard<String>();
 
-	private static final Logger log = LoggerFactory.getLogger(SmallStringSetTrie.class);
+	private static final Logger log = LoggerFactory.getLogger(SmallTrieStringMapSetIndex.class);
 
 	/**
 	 * @param combinedKey
@@ -873,10 +872,10 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 	private transient Function<Node, Boolean> FUNCTION_clear;
 
 	/* this class works around the fact that Java generics + Serialization + anonymous inner class does not work */
-	private static class FUNCTION_clear<E> implements Function<SmallStringSetTrie<E>.Node, Boolean> {
+	private static class FUNCTION_clear<E> implements Function<SmallTrieStringMapSetIndex<E>.Node, Boolean> {
 
 		@Override
-		public Boolean apply(final SmallStringSetTrie<E>.Node node) {
+		public Boolean apply(final SmallTrieStringMapSetIndex<E>.Node node) {
 			node.entrySet.clear();
 			node.children.clear();
 			return true;
@@ -906,34 +905,34 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 
 	/* this class works around the fact that Java generics + Serialization + anonymous inner class does not work */
 	private static class TRANSFORMER_KET2EntrySet<E>
-	implements ITransformer<KeyEntryTuple<String, SmallStringSetTrie<E>.Node>, Iterator<E>> {
+	implements ITransformer<KeyEntryTuple<String, SmallTrieStringMapSetIndex<E>.Node>, Iterator<E>> {
 
 		@Override
-		public Iterator<E> transform(final KeyEntryTuple<String, SmallStringSetTrie<E>.Node> ket) {
+		public Iterator<E> transform(final KeyEntryTuple<String, SmallTrieStringMapSetIndex<E>.Node> ket) {
 			return ket.getSecond().entrySet.iterator();
 		}
 	}
 
 	/* this class works around the fact that Java generics + Serialization + anonymous inner class does not work */
-	private static class TRANSFORMER_NODE2ENTRIES<E> implements ITransformer<SmallStringSetTrie<E>.Node, Iterator<E>> {
+	private static class TRANSFORMER_NODE2ENTRIES<E> implements ITransformer<SmallTrieStringMapSetIndex<E>.Node, Iterator<E>> {
 
 		@Override
-		public Iterator<E> transform(final SmallStringSetTrie<E>.Node node) {
+		public Iterator<E> transform(final SmallTrieStringMapSetIndex<E>.Node node) {
 			return node.entrySet.iterator();
 		}
 	}
 
 	/* this class works around the fact that Java generics + Serialization + anonymous inner class does not work */
 	private static class TRANSFORMER_NODE2ENTRYSET<E>
-	implements ITransformer<SmallStringSetTrie<E>.Node, IEntrySet<E>> {
+	implements ITransformer<SmallTrieStringMapSetIndex<E>.Node, IEntrySet<E>> {
 
 		@Override
-		public IEntrySet<E> transform(final SmallStringSetTrie<E>.Node node) {
+		public IEntrySet<E> transform(final SmallTrieStringMapSetIndex<E>.Node node) {
 			return node.entrySet;
 		}
 	}
 
-	public SmallStringSetTrie(final Factory<IEntrySet<E>> entrySetFactory) {
+	public SmallTrieStringMapSetIndex(final Factory<IEntrySet<E>> entrySetFactory) {
 		assert entrySetFactory != null;
 		this.entrySetFactory = entrySetFactory;
 		this.root = new Node();
@@ -1001,7 +1000,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 			return containsKey(c1.getExpected());
 		} else {
 			// third case
-			final ClosableIterator<KeyEntryTuple<String, SmallStringSetTrie<E>.Node>> it = keyAndNodeIterator(c1);
+			final ClosableIterator<KeyEntryTuple<String, SmallTrieStringMapSetIndex<E>.Node>> it = keyAndNodeIterator(c1);
 			final boolean b = it.hasNext();
 			it.close();
 			return b;
@@ -1149,7 +1148,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 	@ReadOperation
 	public ClosableIterator<KeyEntryTuple<String, Node>> keyAndNodeIterator(final Constraint<String> c1) {
 		readOperationStart();
-		final Iterator<KeyEntryTuple<String, SmallStringSetTrie<E>.Node>> it = this.root.keyAndNodeIterator("", c1);
+		final Iterator<KeyEntryTuple<String, SmallTrieStringMapSetIndex<E>.Node>> it = this.root.keyAndNodeIterator("", c1);
 		return unlockIteratorOnClose(it);
 	}
 
@@ -1238,7 +1237,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 				}
 				this.closed = true;
 				super.close();
-				SmallStringSetTrie.this.readOperationEnd();
+				SmallTrieStringMapSetIndex.this.readOperationEnd();
 			}
 		};
 	}

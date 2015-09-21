@@ -181,7 +181,7 @@ public class SmallSortedStringMapIndex<E> implements IMapIndex<String, E>, Seria
 	}
 
 	/**
-	 * This method is required for a trie, such as {@link SmallStringSetTrie}
+	 * This method is required for a trie, such as {@link SmallTrieStringMapSetIndex}
 	 *
 	 * @param keyPrefix
 	 * @return the first (lowest) complete key starting with the given prefix @CanBeNull

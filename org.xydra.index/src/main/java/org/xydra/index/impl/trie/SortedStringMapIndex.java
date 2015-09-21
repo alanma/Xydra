@@ -161,7 +161,7 @@ public class SortedStringMapIndex<E> implements IMapIndex<String, E>, Serializab
 	}
 
 	/**
-	 * This method is required for a trie, such as {@link SmallStringSetTrie}
+	 * This method is required for a trie, such as {@link SmallTrieStringMapSetIndex}
 	 *
 	 * @param keyPrefix
 	 * @return the first (lowest) complete key starting with the given prefix @CanBeNull if no such key exists.

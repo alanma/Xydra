@@ -14,7 +14,7 @@ import org.xydra.index.AbstractMapSetIndexTest;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.impl.SmallEntrySetFactory;
 import org.xydra.index.impl.TestDataGenerator;
-import org.xydra.index.impl.trie.SmallStringSetTrie.KeyFragments;
+import org.xydra.index.impl.trie.SmallTrieStringMapSetIndex.KeyFragments;
 import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.Wildcard;
@@ -26,7 +26,7 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 	private static final Logger log = LoggerFactory.getLogger(SmallStringSetTrieTest.class);
 
 	public SmallStringSetTrieTest() {
-		super(new SmallStringSetTrie<Integer>(new SmallEntrySetFactory<Integer>()));
+		super(new SmallTrieStringMapSetIndex<Integer>(new SmallEntrySetFactory<Integer>()));
 	}
 
 	private static int i = 1;
@@ -43,8 +43,8 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 		return "s" + s++;
 	}
 
-	protected SmallStringSetTrie<Integer> trie() {
-		return (SmallStringSetTrie<Integer>) this.mapSetIndex;
+	protected SmallTrieStringMapSetIndex<Integer> trie() {
+		return (SmallTrieStringMapSetIndex<Integer>) this.mapSetIndex;
 	}
 
 	@Test
@@ -157,11 +157,11 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 
 	@Test
 	public void test1() {
-		final int sharedLen = SmallStringSetTrie.getSharedPrefixLength("Hello World",
+		final int sharedLen = SmallTrieStringMapSetIndex.getSharedPrefixLength("Hello World",
 				"Hell a lot of work");
 		assertEquals(4, sharedLen);
 
-		final SmallStringSetTrie<Integer> st = new SmallStringSetTrie<Integer>(
+		final SmallTrieStringMapSetIndex<Integer> st = new SmallTrieStringMapSetIndex<Integer>(
 				new SmallEntrySetFactory<Integer>());
 		st.index("Hello World", 13);
 		st.index("Hell", 11);
@@ -185,7 +185,7 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 		st.deIndex("Hell");
 
 		// next test
-		final SmallStringSetTrie<Void> st2 = new SmallStringSetTrie<Void>(
+		final SmallTrieStringMapSetIndex<Void> st2 = new SmallTrieStringMapSetIndex<Void>(
 				new SmallEntrySetFactory<Void>());
 		st2.indexKey("aaabbccc");
 		st2.indexKey("aaaddeee");
