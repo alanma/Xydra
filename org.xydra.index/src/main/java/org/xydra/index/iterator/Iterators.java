@@ -630,13 +630,56 @@ public class Iterators {
 	 * @param <T> type
 	 * @param <T> base type
 	 */
-	public static <T extends B,B> Iterator<B> typeCast(final Iterator<T> typedIt) {
-		return Iterators.transform(typedIt, new ITransformer<T,B>() {
+	public static <T extends B, B> Iterator<B> typeCast(final Iterator<T> typedIt) {
+		return Iterators.transform(typedIt, new ITransformer<T, B>() {
 
 			@Override
 			public B transform(final T in) {
 				return in;
-			}});
+			}
+		});
+	}
+
+	/**
+	 * @param iterator
+	 * @return a pseudo-iterable which is only iterable once
+	 */
+	public static <E> Iterable<E> from(final Iterator<E> iterator) {
+		return new Iterable<E>() {
+
+			private boolean done = false;
+
+			@Override
+			public Iterator<E> iterator() {
+				if (this.done) {
+					throw new IllegalStateException("Iterator can be used only once");
+				}
+				this.done = true;
+				return iterator;
+			}
+		};
+	}
+
+	public static <E> Iterator<E> removable(final Iterator<E> iterator, final IRemove remove) {
+
+		return new Iterator<E>() {
+
+			@Override
+			public boolean hasNext() {
+				return iterator.hasNext();
+			}
+
+			@Override
+			public E next() {
+				return iterator.next();
+			}
+
+			@Override
+			public void remove() {
+				remove.remove();
+			}
+
+		};
 	}
 
 }
