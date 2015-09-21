@@ -31,7 +31,7 @@ import org.xydra.log.api.LoggerFactory;
 import com.google.common.base.Function;
 
 /**
- * Current impl: this class -> {@link SortedStringMap} -> {@link SortedArrayMap}
+ * Current impl: this class -> {@link SortedStringMapIndex} -> {@link SortedArrayMap}
  *
  * IMPROVE rewrite algorithms into non-recursive form
  *
@@ -45,6 +45,7 @@ import com.google.common.base.Function;
  * @param <E>
  */
 @NotThreadSafe
+// SmallTrieStringMapSetIndex
 public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializable {
 
 	/**
@@ -114,7 +115,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		 * Invariant: Strings are prefix-free, i.e. no two strings in the map start with the same prefix, not even a
 		 * single character. Different from normal tries, strings might be longer than 1 character
 		 */
-		private SortedStringMap<Node> children;
+		private SortedStringMapIndex<Node> children;
 
 		/**
 		 * @NeverNull
@@ -124,7 +125,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		public Node() {
 			assert SmallStringSetTrie.this.entrySetFactory != null;
 			this.entrySet = SmallStringSetTrie.this.entrySetFactory.createInstance();
-			this.children = new SortedStringMap<Node>();
+			this.children = new SortedStringMapIndex<Node>();
 		}
 
 		public Node(final E value) {
@@ -153,9 +154,9 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 			}
 		}
 
-		public void deIndex(final Node parent, final String parentKey, final String removeKey) {
+		public boolean deIndex(final Node parent, final String parentKey, final String removeKey) {
 			assert removeKey != null;
-			deIndex(parent, parentKey, removeKey, SmallStringSetTrie.this.FUNCTION_clear);
+			return deIndex(parent, parentKey, removeKey, SmallStringSetTrie.this.FUNCTION_clear);
 		}
 
 		public boolean deIndex(final Node parent, final String parentKey, final String removeKey, final E removeEntry) {
@@ -1015,10 +1016,11 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 
 	@Override
 	@ModificationOperation
-	public void deIndex(final String key) {
+	public boolean deIndex(final String key) {
 		writeOperationStart();
-		this.root.deIndex(null, null, key);
+		final boolean b = this.root.deIndex(null, null, key);
 		writeOperationEnd();
+		return b;
 	}
 
 	@Override
@@ -1208,6 +1210,12 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 	@ReadOperation
 	public String toString() {
 		return this.root.toString();
+	}
+
+	@Override
+	@ReadOperation
+	public String toString(final String indent) {
+		return indent+this.root.toString();
 	}
 
 	@Override
