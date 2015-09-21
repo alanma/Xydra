@@ -90,15 +90,7 @@ public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String, E>, Seri
 	@Override
 	public Iterator<KeyEntryTuple<String, E>> tupleIterator(final Constraint<String> c1) {
 		if (c1.isStar()) {
-			return new AbstractTransformingIterator<Map.Entry<String, E>, KeyEntryTuple<String, E>>(
-					this.map.entrySet().iterator()) {
-
-				@Override
-				public KeyEntryTuple<String, E> transform(final Entry<String, E> in) {
-					return new KeyEntryTuple<String, E>(in.getKey(), in.getValue());
-				}
-
-			};
+			return tupleIterator();
 		}
 		final String key = ((EqualsConstraint<String>) c1).getKey();
 		if (this.map.containsKey(key)) {
@@ -108,6 +100,19 @@ public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String, E>, Seri
 			return NoneIterator.<KeyEntryTuple<String, E>> create();
 		}
 
+	}
+
+	@Override
+	public Iterator<KeyEntryTuple<String, E>> tupleIterator() {
+		return new AbstractTransformingIterator<Map.Entry<String, E>, KeyEntryTuple<String, E>>(
+				this.map.entrySet().iterator()) {
+
+			@Override
+			public KeyEntryTuple<String, E> transform(final Entry<String, E> in) {
+				return new KeyEntryTuple<String, E>(in.getKey(), in.getValue());
+			}
+
+		};
 	}
 
 	@Override
