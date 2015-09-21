@@ -3,6 +3,7 @@ package org.xydra.index;
 import java.util.Iterator;
 
 import org.xydra.index.query.Constraint;
+import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.KeyKeyKeyEntryTuple;
 
 /**
@@ -79,5 +80,15 @@ public interface IMapMapMapIndex<K, L, M, E> extends IIndex {
 	 * @return
 	 */
 	Iterator<M> key3Iterator();
+
+	/**
+	 * @param c1
+	 * @param c2
+	 * @param c3
+	 * @return tuples of matching keys only.
+	 */
+	Iterator<KeyKeyEntryTuple<K, L, M>> keyKeyKeyIterator(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3);
+
+	void dump();
 
 }

@@ -1,5 +1,7 @@
 package org.xydra.index.impl;
 
+import java.io.Serializable;
+
 import org.xydra.index.IMapMapIndex;
 import org.xydra.index.IMapMapMapIndex;
 
@@ -17,7 +19,7 @@ import org.xydra.index.IMapMapMapIndex;
  * @param <M> key3 type
  * @param <E> entity type
  */
-public class MapMapMapIndex<K,L,M,E>
+public class SerializableMapMapMapIndex<K extends Serializable, L extends Serializable, M extends Serializable, E extends Serializable>
 		extends AbstractMapMapMapIndex<K, L, M, E>implements IMapMapMapIndex<K, L, M, E> {
 
 	@Override
