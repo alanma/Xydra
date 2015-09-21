@@ -31,4 +31,16 @@ public class KeyKeyKeyEntryTuple<K, L, M, E> implements HasEntry<E> {
 		return this.key3;
 	}
 
+	public K s() {
+		return this.key1;
+	}
+
+	public L p() {
+		return this.key2;
+	}
+
+	public M o() {
+		return this.key3;
+	}
+
 }
