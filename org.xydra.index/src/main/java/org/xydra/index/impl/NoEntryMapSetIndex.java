@@ -71,7 +71,7 @@ public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K, E>, Serializabl
 	}
 
 	@Override
-	public void deIndex(final K key1) {
+	public boolean deIndex(final K key1) {
 		throw new RuntimeException("this index is not meant to write");
 	}
 
@@ -111,4 +111,13 @@ public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K, E>, Serializabl
 		return false;
 	}
 
+	@Override
+	public String toString(final String indent) {
+		return toString("");
+	}
+
+	@Override
+	public String toString() {
+		return "NoEntryMapSetIndex";
+	}
 }

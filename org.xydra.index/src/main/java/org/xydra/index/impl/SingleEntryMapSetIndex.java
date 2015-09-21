@@ -107,12 +107,14 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 	}
 
 	@Override
-	public void deIndex(final K key1) {
+	public boolean deIndex(final K key1) {
 		/*
 		 * This implementation can at most store a single entry, so clear is
 		 * correct
 		 */
+		final boolean b = !isEmpty();
 		this.clear();
+		return b;
 	}
 
 	@Override
@@ -278,6 +280,11 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 			return set;
 		}
 
+	}
+
+	@Override
+	public String toString(final String indent) {
+		return indent + getKey()+" -> { "+getEntry()+" }\n";
 	}
 
 }

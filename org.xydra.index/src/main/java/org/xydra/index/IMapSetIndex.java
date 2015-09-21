@@ -68,9 +68,10 @@ public interface IMapSetIndex<K, E> extends IIndex, Serializable {
 	 * De-index all current entries with (key1, *).
 	 *
 	 * @param key1
+	 * @return
 	 * @NeverNull
 	 */
-	void deIndex(K key1);
+	boolean deIndex(K key1);
 
 	/**
 	 * Add a tuple to the index
@@ -129,5 +130,7 @@ public interface IMapSetIndex<K, E> extends IIndex, Serializable {
 	 *         if no entries
 	 */
 	IEntrySet<E> lookup(K key);
+
+	String toString(String indent);
 
 }

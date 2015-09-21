@@ -1,6 +1,7 @@
 package org.xydra.index.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import org.xydra.index.Factory;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.IEntrySet.IEntrySetDiff;
 import org.xydra.index.IMapSetIndex;
+import org.xydra.index.IPair;
 import org.xydra.index.iterator.AbstractCascadedIterator;
 import org.xydra.index.iterator.ClosableIterator;
 import org.xydra.index.iterator.ClosableIteratorAdapter;
@@ -25,6 +27,7 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.GenericKeyEntryTupleConstraintFilteringIterator;
 import org.xydra.index.query.KeyEntryTuple;
+import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
@@ -90,7 +93,7 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K, E> {
 
 	/* needed for tupleIterator() */
 	private class CascadingMapEntry_K_EntrySet_Iterator
-	extends AbstractCascadedIterator<Map.Entry<K, IEntrySet<E>>, KeyEntryTuple<K, E>> {
+			extends AbstractCascadedIterator<Map.Entry<K, IEntrySet<E>>, KeyEntryTuple<K, E>> {
 
 		public CascadingMapEntry_K_EntrySet_Iterator(final Iterator<Map.Entry<K, IEntrySet<E>>> base) {
 			super(base);
@@ -328,8 +331,14 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K, E> {
 	}
 
 	@Override
-	public void deIndex(final K key) {
-		this.map.remove(key);
+	public boolean deIndex(final K key) {
+		return this.map.remove(key) != null;
+	}
+
+	public void deIndexAll(final Iterable<K> keys) {
+		for (final K key : keys) {
+			deIndex(key);
+		}
 	}
 
 	@Override
@@ -391,6 +400,9 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K, E> {
 		log.info("(" + t.getFirst() + ", " + t.getSecond() + ")");
 	}
 
+	/**
+	 * @return the internal map.entrySet
+	 */
 	public Set<Entry<K, IEntrySet<E>>> getEntries() {
 		return this.map.entrySet();
 	}
@@ -438,7 +450,42 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K, E> {
 
 	@Override
 	public String toString() {
-		return this.map.toString();
+		return toString("");
+	}
+
+	@Override
+	public String toString(final String indent) {
+		final StringBuilder b = new StringBuilder();
+
+		final List<IPair<String, K>> keyMap = new ArrayList<>(this.map.size());
+		for (final K key : this.map.keySet()) {
+			keyMap.add(new Pair<>(key.toString(), key));
+		}
+		Collections.sort(keyMap, new Comparator<IPair<String, K>>() {
+
+			@Override
+			public int compare(final IPair<String, K> a, final IPair<String, K> b) {
+				return a.getFirst().compareTo(b.getFirst());
+			}
+
+		});
+
+		for (final IPair<String, K> pair : keyMap) {
+			b.append(indent);
+			b.append(pair.getFirst());
+			b.append(" -> ");
+
+			final IEntrySet<E> subMap = this.map.get(pair.getSecond());
+			if(subMap.size() > 1) {
+				b.append("\n");
+				b.append(indent);
+				b.append("  ");
+			}
+			b.append(subMap.toString());
+			b.append("\n");
+		}
+
+		return b.toString();
 	}
 
 	@Override
@@ -473,6 +520,13 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K, E> {
 		} else {
 			throw new AssertionError("unknown constraint type " + c1.getClass());
 		}
+	}
+
+	/**
+	 * @return number of keys
+	 */
+	public int size() {
+		return this.map.size();
 	}
 
 }
