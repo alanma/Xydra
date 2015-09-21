@@ -24,4 +24,22 @@ public class CollectionUtils {
 		return result;
 	}
 
+	/**
+	 * @param a
+	 * @param b
+	 * @return true iff both sets contain the same elements
+	 */
+	public static <E> boolean equalSets(final Set<E> a, final Set<E> b) {
+		if (a.size() != b.size()) {
+			return false;
+		}
+
+		for (final E e : a) {
+			if (!b.contains(e)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 }
