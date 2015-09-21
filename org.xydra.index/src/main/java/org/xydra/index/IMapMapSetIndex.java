@@ -5,6 +5,7 @@ import java.util.Iterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.ITriple;
+import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 
@@ -101,6 +102,29 @@ public interface IMapMapSetIndex<K, L, E> extends IIndex {
 		IMapMapSetIndex<K, L, E> getRemoved();
 	}
 
+	/**
+	 * @param c1
+	 * @param c2
+	 * @return
+	 */
+	Iterator<KeyEntryTuple<K, L>> keyKeyIterator(Constraint<K> c1, Constraint<L> c2);
+
+
+	/**
+	 * @return an iterator over all keys
+	 */
 	Iterator<K> keyIterator();
+
+	/**
+	 * @param key1
+	 * @return
+	 */
+	IMapSetIndex<L, E> lookup(K key1);
+
+	String toString( String indent );
+
+	void dump();
+
+
 
 }

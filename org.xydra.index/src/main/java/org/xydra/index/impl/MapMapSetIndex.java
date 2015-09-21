@@ -1,7 +1,11 @@
 package org.xydra.index.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -10,7 +14,10 @@ import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapMapSetIndex;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.IMapSetIndex.IMapSetDiff;
+import org.xydra.index.IPair;
 import org.xydra.index.iterator.AbstractCascadedIterator;
+import org.xydra.index.iterator.ITransformer;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
@@ -18,7 +25,10 @@ import org.xydra.index.query.GenericKeyEntryTupleConstraintFilteringIterator;
 import org.xydra.index.query.ITriple;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.KeyKeyEntryTuple;
+import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 /**
  * <pre>
@@ -32,11 +42,6 @@ import org.xydra.index.query.Wildcard;
  */
 public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 
-	// reduce object creation at runtime, recycling these
-	private final Wildcard<K> STAR_K = new Wildcard<K>();
-	private final Wildcard<L> STAR_L = new Wildcard<L>();
-	private final Wildcard<E> STAR_E = new Wildcard<E>();
-
 	/* needed for tupleIterator()
 	 *
 	 * This iterator knows key1. Together with the values from the tuple (tuple-key, tuple-entry) it forms the
@@ -44,6 +49,7 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 	private static class AdaptMapEntryToTupleIterator<K, L, E> implements Iterator<ITriple<K, L, E>> {
 
 		private final K key1;
+
 		private final Iterator<KeyEntryTuple<L, E>> tupleIterator;
 
 		public AdaptMapEntryToTupleIterator(final K key1, final Iterator<KeyEntryTuple<L, E>> tupleIterator) {
@@ -75,7 +81,7 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 
 	/* needed for tupleIterator() */
 	private static class CascadingMapEntry_K_MapSet_Iterator<K, L, E>
-	extends AbstractCascadedIterator<Map.Entry<K, IMapSetIndex<L, E>>, ITriple<K, L, E>> {
+			extends AbstractCascadedIterator<Map.Entry<K, IMapSetIndex<L, E>>, ITriple<K, L, E>> {
 
 		private final Constraint<L> c1;
 
@@ -120,6 +126,28 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 		}
 	}
 
+	public static class DiffImpl<K, L, E> implements IMapMapSetDiff<K, L, E> {
+
+		protected MapMapSetIndex<K, L, E> added;
+		protected MapMapSetIndex<K, L, E> removed;
+
+		public DiffImpl(final Factory<IEntrySet<E>> entrySetFactory) {
+			this.added = new MapMapSetIndex<K, L, E>(entrySetFactory);
+			this.removed = new MapMapSetIndex<K, L, E>(entrySetFactory);
+		}
+
+		@Override
+		public IMapMapSetIndex<K, L, E> getAdded() {
+			return this.added;
+		}
+
+		@Override
+		public IMapMapSetIndex<K, L, E> getRemoved() {
+			return this.removed;
+		}
+
+	}
+
 	/* needed for tupleIterator() */
 	private class RememberKeyIterator implements Iterator<ITriple<K, L, E>> {
 
@@ -148,19 +176,54 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 		}
 	}
 
-	private final Map<K, IMapSetIndex<L, E>> map = new HashMap<K, IMapSetIndex<L, E>>(2);
+	/* needed for sp_tupleIterator() */
+	private class SP_RememberKeyIterator<A, B> implements Iterator<KeyEntryTuple<A, B>> {
 
-	// experimental extension
-	public Iterator<K> key1Iterator() {
-		return this.map.keySet().iterator();
+		private final A key;
+		private final Iterator<B> subIterator;
+
+		public SP_RememberKeyIterator(final A key, final Iterator<B> subIterator) {
+			this.key = key;
+			this.subIterator = subIterator;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return this.subIterator.hasNext();
+		}
+
+		@Override
+		public KeyEntryTuple<A, B> next() {
+			final B b = this.subIterator.next();
+			return new KeyEntryTuple<A, B>(this.key, b);
+		}
+
+		@Override
+		public void remove() {
+			this.subIterator.remove();
+		}
 	}
 
-	// experimental extension
-	public IMapSetIndex<L, E> getMapEntry(final K k) {
-		return this.map.get(k);
+	private static final Logger log = LoggerFactory.getLogger(MapMapSetIndex.class);
+
+	public static <K, L, E> MapMapSetIndex<K, L, E> createWithFastSets() {
+		return new MapMapSetIndex<K, L, E>(new FastEntrySetFactory<E>());
+	}
+
+	public static <K, L, E> MapMapSetIndex<K, L, E> createWithSmallSets() {
+		return new MapMapSetIndex<K, L, E>(new SmallEntrySetFactory<E>());
 	}
 
 	private final Factory<IEntrySet<E>> entrySetFactory;
+
+	private final Map<K, IMapSetIndex<L, E>> map = new HashMap<K, IMapSetIndex<L, E>>(2);
+
+	private final Wildcard<E> STAR_E = new Wildcard<E>();
+
+	// reduce object creation at runtime, recycling these
+	private final Wildcard<K> STAR_K = new Wildcard<K>();
+
+	private final Wildcard<L> STAR_L = new Wildcard<L>();
 
 	/**
 	 * @param entrySetFactory Theis factory configures the trade-off between time and space. Existing factories you can
@@ -173,86 +236,6 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 	@Override
 	public void clear() {
 		this.map.clear();
-	}
-
-	@Override
-	public Iterator<E> constraintIterator(final Constraint<K> c1, final Constraint<L> c2) {
-		if (c1 instanceof Wildcard<?>) {
-			return new CascadingMapSetIndexIterator(this.map.values().iterator(), c2);
-		} else if (c1 instanceof EqualsConstraint<?>) {
-			final EqualsConstraint<K> keyConstraint = (EqualsConstraint<K>) c1;
-			final K key = keyConstraint.getKey();
-			final IMapSetIndex<L, E> index1 = this.map.get(key);
-			return index1 == null ? NoneIterator.<E> create() : index1.constraintIterator(c2);
-		} else {
-			throw new AssertionError("unknown constraint type " + c1.getClass());
-		}
-	}
-
-	@Override
-	public boolean contains(final Constraint<K> c1, final Constraint<L> c2, final Constraint<E> entryConstraint) {
-		final Iterator<E> c1it = this.constraintIterator(c1, c2);
-		while (c1it.hasNext()) {
-			final E entry = c1it.next();
-			if (entryConstraint.matches(entry)) {
-				// we found any element, that's good enough
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public boolean contains(final K c1, final L c2, final E entryConstraint) {
-		// IMPROVE could be implemented faster if all indexes supported
-		// Constraint-less querying
-		return contains(
-
-				c1 == null ? this.STAR_K : new EqualsConstraint<K>(c1),
-
-						c2 == null ? this.STAR_L : new EqualsConstraint<L>(c2),
-
-								entryConstraint == null ? this.STAR_E : new EqualsConstraint<E>(entryConstraint)
-
-				);
-	}
-
-	/**
-	 * @param key1
-	 * @NeverNull
-	 * @param key2
-	 * @NeverNull
-	 * @return @CanBeNull
-	 */
-	public IEntrySet<E> lookup(final K key1, final L key2) {
-		final IMapSetIndex<L, E> e = this.map.get(key1);
-		if (e == null) {
-			return null;
-		}
-
-		return e.lookup(key2);
-	}
-
-	public static class DiffImpl<K, L, E> implements IMapMapSetDiff<K, L, E> {
-
-		protected MapMapSetIndex<K, L, E> added;
-		protected MapMapSetIndex<K, L, E> removed;
-
-		@Override
-		public IMapMapSetIndex<K, L, E> getAdded() {
-			return this.added;
-		}
-
-		@Override
-		public IMapMapSetIndex<K, L, E> getRemoved() {
-			return this.removed;
-		}
-
-		public DiffImpl(final Factory<IEntrySet<E>> entrySetFactory) {
-			this.added = new MapMapSetIndex<K, L, E>(entrySetFactory);
-			this.removed = new MapMapSetIndex<K, L, E>(entrySetFactory);
-		}
-
 	}
 
 	@Override
@@ -291,8 +274,61 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 		return diff;
 	}
 
+	@Override
+	public Iterator<E> constraintIterator(final Constraint<K> c1, final Constraint<L> c2) {
+		if (c1 instanceof Wildcard<?>) {
+			return new CascadingMapSetIndexIterator(this.map.values().iterator(), c2);
+		} else if (c1 instanceof EqualsConstraint<?>) {
+			final EqualsConstraint<K> keyConstraint = (EqualsConstraint<K>) c1;
+			final K key = keyConstraint.getKey();
+			final IMapSetIndex<L, E> index1 = this.map.get(key);
+			return index1 == null ? NoneIterator.<E> create() : index1.constraintIterator(c2);
+		} else {
+			throw new AssertionError("unknown constraint type " + c1.getClass());
+		}
+	}
+
+	@Override
+	public boolean contains(final Constraint<K> c1, final Constraint<L> c2, final Constraint<E> entryConstraint) {
+		final Iterator<E> c1it = this.constraintIterator(c1, c2);
+		while (c1it.hasNext()) {
+			final E entry = c1it.next();
+			if (entryConstraint.matches(entry)) {
+				// we found any element, that's good enough
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean contains(final K c1, final L c2, final E entryConstraint) {
+		// IMPROVE could be implemented faster if all indexes supported
+		// Constraint-less querying
+		return contains(toConstraint_K(c1), toConstraint_L(c2), toConstraint(entryConstraint));
+	}
+
 	private boolean containsKey(final K key) {
 		return this.map.containsKey(key);
+	}
+
+	public boolean deIndex(final K key1, final L key2) {
+		final IMapSetIndex<L, E> index1 = this.map.get(key1);
+		if (index1 != null) {
+			if (index1 instanceof SingleEntryMapSetIndex<?, ?>) {
+				// special remove of single entry map
+				return this.map.remove(key1) != null;
+			} else {
+				// normal remove
+				final boolean contains = index1.deIndex(key2);
+				if (index1.isEmpty()) {
+					this.map.remove(key1);
+				}
+				return contains;
+			}
+		} else {
+			return false;
+		}
 	}
 
 	@Override
@@ -313,6 +349,61 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public void dump() {
+		final StringBuilder b = new StringBuilder();
+
+		// sort keys
+		final List<K> keys = Iterators.toList(this.keyIterator());
+		Collections.sort(keys, new Comparator<K>() {
+
+			@Override
+			public int compare(final K a, final K b) {
+				return a.toString().compareTo(b.toString());
+			}
+		});
+		for (final K key : keys) {
+			final Iterator<ITriple<K, L, E>> it = this.tupleIterator(new EqualsConstraint<K>(key), this.STAR_L,
+					this.STAR_E);
+			while (it.hasNext()) {
+				final ITriple<K, L, E> t = it.next();
+				b.append("(" + t.getKey1() + ", " + t.getKey2() + ", " + t.getEntry() + ")\n");
+			}
+		}
+		log.info(b.toString());
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final MapMapSetIndex other = (MapMapSetIndex) obj;
+		if (this.map == null) {
+			if (other.map != null) {
+				return false;
+			}
+		} else if (!this.map.equals(other.map)) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (this.map == null ? 0 : this.map.hashCode());
+		return result;
 	}
 
 	@Override
@@ -346,6 +437,123 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 	@Override
 	public Iterator<E> iterator() {
 		return this.constraintIterator(new Wildcard<K>(), new Wildcard<L>());
+	}
+
+	@Override
+	public Iterator<K> keyIterator() {
+		return this.map.keySet().iterator();
+	}
+
+	@Override
+	public Iterator<KeyEntryTuple<K, L>> keyKeyIterator(final Constraint<K> c1, final Constraint<L> c2) {
+		assert c1 != null;
+		assert c2 != null;
+		if (c1 instanceof Wildcard<?>) {
+			final Iterator<Map.Entry<K, IMapSetIndex<L, E>>> entryIt = this.map.entrySet().iterator();
+
+			// performance gain
+			if (!entryIt.hasNext()) {
+				return NoneIterator.create();
+			}
+
+			return Iterators.cascade(entryIt,
+					new ITransformer<Map.Entry<K, IMapSetIndex<L, E>>, Iterator<KeyEntryTuple<K, L>>>() {
+
+						@Override
+						public Iterator<KeyEntryTuple<K, L>> transform(final Entry<K, IMapSetIndex<L, E>> in) {
+							final K key = in.getKey();
+							return Iterators.transform(in.getValue().keyIterator(),
+									new ITransformer<L, KeyEntryTuple<K, L>>() {
+
+								@Override
+								public KeyEntryTuple<K, L> transform(final L in) {
+									return new KeyEntryTuple<K, L>(key, in);
+								}
+							});
+						}
+					});
+		} else if (c1 instanceof EqualsConstraint<?>) {
+			final EqualsConstraint<K> keyConstraint = (EqualsConstraint<K>) c1;
+			final K key = keyConstraint.getKey();
+			final IMapSetIndex<L, E> index1 = this.map.get(key);
+			if (index1 == null) {
+				return NoneIterator.<KeyEntryTuple<K, L>> create();
+			} else {
+				return new SP_RememberKeyIterator<K, L>(key,
+
+				Iterators.filterWithConstraint(index1.keyIterator(), c2)
+
+				);
+			}
+		} else {
+			throw new AssertionError("unknown constraint type " + c1.getClass());
+		}
+	}
+
+	@Override
+	public IMapSetIndex<L, E> lookup(final K k) {
+		return this.map.get(k);
+	}
+
+	/**
+	 * @param key1
+	 * @NeverNull
+	 * @param key2
+	 * @NeverNull
+	 * @return @CanBeNull
+	 */
+	public IEntrySet<E> lookup(final K key1, final L key2) {
+		final IMapSetIndex<L, E> e = this.map.get(key1);
+		if (e == null) {
+			return null;
+		}
+
+		return e.lookup(key2);
+	}
+
+	private Constraint<E> toConstraint(final E entryConstraint) {
+		return entryConstraint == null ? this.STAR_E : new EqualsConstraint<E>(entryConstraint);
+	}
+
+	private Constraint<K> toConstraint_K(final K c1) {
+		return c1 == null ? this.STAR_K : new EqualsConstraint<K>(c1);
+	}
+
+	private Constraint<L> toConstraint_L(final L c2) {
+		return c2 == null ? this.STAR_L : new EqualsConstraint<L>(c2);
+	}
+
+	@Override
+	public String toString() {
+		return toString("");
+	}
+
+	@Override
+	public String toString(final String indent) {
+		final StringBuilder b = new StringBuilder();
+
+		final List<IPair<String, K>> keyMap = new ArrayList<>(this.map.size());
+		for (final K key : this.map.keySet()) {
+			keyMap.add(new Pair<>(key.toString(), key));
+		}
+		Collections.sort(keyMap, new Comparator<IPair<String, K>>() {
+
+			@Override
+			public int compare(final IPair<String, K> a, final IPair<String, K> b) {
+				return a.getFirst().compareTo(b.getFirst());
+			}
+
+		});
+
+		for (final IPair<String, K> pair : keyMap) {
+			b.append(indent);
+			b.append(pair.getFirst());
+			b.append(" -> \n");
+			final IMapSetIndex<L, E> subMap = this.map.get(pair.getSecond());
+			b.append(subMap.toString(indent + "  "));
+		}
+
+		return b.toString();
 	}
 
 	@Override
@@ -384,44 +592,10 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 	}
 
 	@Override
-	public String toString() {
-		return this.map.toString();
-	}
-
-	@Override
-	public Iterator<K> keyIterator() {
-		return this.map.keySet().iterator();
-	}
-
-	@Override
 	public Iterator<ITriple<K, L, E>> tupleIterator(final K c1, final L c2, final E entryConstraint) {
 		// IMPROVE could be implemented faster if all indexes supported
 		// Constraint-less querying
-		return tupleIterator(
-
-				c1 == null ? this.STAR_K : new EqualsConstraint<K>(c1),
-
-						c2 == null ? this.STAR_L : new EqualsConstraint<L>(c2),
-
-								entryConstraint == null ? this.STAR_E : new EqualsConstraint<E>(entryConstraint)
-
-				);
-	}
-
-	public void dump() {
-		final Iterator<ITriple<K, L, E>> it = tupleIterator(this.STAR_K, this.STAR_L, this.STAR_E);
-		while (it.hasNext()) {
-			final ITriple<K, L, E> e = it.next();
-			System.out.println("(" + e.getKey1() + ", " + e.getKey2() + ", " + e.getEntry() + ")");
-		}
-	}
-
-	public static <K, L, E> MapMapSetIndex<K, L, E> createWithSmallSets() {
-		return new MapMapSetIndex<K, L, E>(new SmallEntrySetFactory<E>());
-	}
-
-	public static <K, L, E> MapMapSetIndex<K, L, E> createWithFastSets() {
-		return new MapMapSetIndex<K, L, E>(new FastEntrySetFactory<E>());
+		return tupleIterator(toConstraint_K(c1), toConstraint_L(c2), toConstraint(entryConstraint));
 	}
 
 }
