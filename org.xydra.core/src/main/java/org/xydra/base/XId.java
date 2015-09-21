@@ -41,4 +41,10 @@ public interface XId extends XValue, Serializable, Comparable<XId>, IHasXId {
 	 */
 	byte[] toBytes();
 
+	@Override
+	int hashCode();
+
+	@Override
+	boolean equals(Object o);
+
 }

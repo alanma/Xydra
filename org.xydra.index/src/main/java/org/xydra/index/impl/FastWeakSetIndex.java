@@ -139,4 +139,20 @@ public class FastWeakSetIndex<E> implements IEntrySet<E>, Serializable {
 		return this.set.size();
 	}
 
+	@Override
+	public String toString() {
+		final StringBuilder b = new StringBuilder();
+		b.append("{");
+		final Iterator<E> it = iterator();
+		while (it.hasNext()) {
+			final E e = it.next();
+			b.append(e.toString());
+			if(it.hasNext()) {
+				b.append(", ");
+			}
+		}
+		b.append("}");
+		return b.toString();
+	}
+
 }

@@ -22,6 +22,14 @@ import org.xydra.index.query.Wildcard;
  * Fast implementation for {@link #contains(Constraint, Constraint, Constraint)} and fast implementation for
  * {@link #getTriples(Constraint, Constraint, Constraint)}.
  *
+ * State:
+ *
+ * <pre>
+ * s > p > o (inherited)
+ * o > s > p
+ * p > o > s
+ * </pre>
+ *
  * @author voelkel
  *
  * @param <K> key type 1 (s)

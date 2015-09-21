@@ -45,11 +45,11 @@ public class KeyKeyEntryTuple<K, L, E> implements ITriple<K, L, E>, HasEntry<E> 
 	public String toString() {
 		return "("
 
-		+ DebugUtils.toLimitedString(this.key1, 20) + ","
+		+ DebugUtils.toLimitedString(this.key1, 40) + ","
 
-		+ DebugUtils.toLimitedString(this.key2, 20) + ","
+		+ DebugUtils.toLimitedString(this.key2, 40) + ","
 
-		+ DebugUtils.toLimitedString(this.entry, 20)
+		+ DebugUtils.toLimitedString(this.entry, 40)
 
 		+ ")";
 	}
@@ -101,6 +101,15 @@ public class KeyKeyEntryTuple<K, L, E> implements ITriple<K, L, E>, HasEntry<E> 
 		return this.entry;
 	}
 
+	/**
+	 * @param s1
+	 * @param s2
+	 * @param p1
+	 * @param p2
+	 * @param o1
+	 * @param o2
+	 * @return
+	 */
 	public static <K, L, E> boolean equals(final K s1, final K s2, final L p1, final L p2, final E o1, final E o2) {
 		if (!s1.equals(s2)) {
 			return false;
