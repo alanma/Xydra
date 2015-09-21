@@ -9,7 +9,7 @@ import org.xydra.index.iterator.TransformingIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.ITriple;
 
-public class UniformTripleIndex<K extends Serializable> extends FastContainsTripleIndex<K, K, K> implements
+public class UniformTripleIndex<K extends Serializable> extends FastContainsSerializableTripleIndex<K, K, K> implements
 IUniformTripleIndex<K> {
 
 	/**

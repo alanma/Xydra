@@ -16,14 +16,23 @@ import org.xydra.index.query.Wildcard;
  * Fast implementation for {@link #contains(Constraint, Constraint, Constraint)} , slow for
  * {@link #getTriples(Constraint, Constraint, Constraint)}.
  *
+ * This is a compromise between speed and memory footprint. Use {@link FastSerializableTripleIndex} for high speed.
+ *
+ * State:
+ * <pre>
+ * s > p > o (inherited)
+ * o > s
+ * p > o
+ * </pre>
+
  * @author voelkel
  *
  * @param <K> key type 1
  * @param <L> key type 2
  * @param <M> key type 3
  */
-public class FastContainsTripleIndex<K extends Serializable, L extends Serializable, M extends Serializable>
-extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M> {
+public class FastContainsSerializableTripleIndex<K extends Serializable, L extends Serializable, M extends Serializable>
+extends SmallSerializableTripleIndex<K, L, M>implements ITripleIndex<K, L, M> {
 
 	/**
 	 * o-URI -> p-URI
@@ -35,7 +44,7 @@ extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M> {
 	 */
 	private transient IMapSetIndex<L, M> index_p_o;
 
-	public FastContainsTripleIndex() {
+	public FastContainsSerializableTripleIndex() {
 		super();
 		this.index_o_s = new MapSetIndex<M, K>(new FastEntrySetFactory<K>());
 		this.index_p_o = new MapSetIndex<L, M>(new FastEntrySetFactory<M>());

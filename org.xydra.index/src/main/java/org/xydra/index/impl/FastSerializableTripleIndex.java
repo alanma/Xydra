@@ -1,5 +1,7 @@
 package org.xydra.index.impl;
 
+import java.io.Serializable;
+
 import org.xydra.index.IMapMapSetIndex;
 import org.xydra.index.ITripleIndex;
 import org.xydra.index.query.Constraint;
@@ -24,19 +26,19 @@ import org.xydra.index.query.Constraint;
  * @param <L> key type 2 (p)
  * @param <M> key type 3 (o)
  */
-public class FastTripleIndex<K,L,M>
+public class FastSerializableTripleIndex<K extends Serializable, L extends Serializable, M extends Serializable>
 extends AbstractFastTripleIndex<K, L, M>
-implements ITripleIndex<K, L, M> {
+implements ITripleIndex<K, L, M>, Serializable {
 
 	@SuppressWarnings("unchecked")
-	public FastTripleIndex() {
+	public FastSerializableTripleIndex() {
 		super(
 
-				(AbstractSmallTripleIndex<K, L, M, ? extends IMapMapSetIndex<K, L, M>>) new SmallTripleIndex<K, L, M>(true),
+				(AbstractSmallTripleIndex<K, L, M, ? extends IMapMapSetIndex<K, L, M>>) new SmallSerializableTripleIndex<K, L, M>(),
 
-				(IMapMapSetIndex<L, M, K>) new MapMapSetIndex<M, K, L>(new FastEntrySetFactory<L>()),
+				(IMapMapSetIndex<L, M, K>) new SerializableMapMapSetIndex<M, K, L>(new FastEntrySetFactory<L>()),
 
-				(IMapMapSetIndex<M, K, L>) new MapMapSetIndex<L, M, K>(new FastEntrySetFactory<K>())
+				(IMapMapSetIndex<M, K, L>) new SerializableMapMapSetIndex<L, M, K>(new FastEntrySetFactory<K>())
 
 				);
 	}
