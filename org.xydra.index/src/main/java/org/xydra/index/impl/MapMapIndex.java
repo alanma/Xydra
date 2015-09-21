@@ -7,6 +7,7 @@ import org.xydra.index.IMapIndex;
 import org.xydra.index.IMapMapIndex;
 import org.xydra.index.iterator.AbstractCascadedIterator;
 import org.xydra.index.iterator.ITransformer;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.iterator.TransformingIterator;
 import org.xydra.index.query.Constraint;
@@ -29,8 +30,7 @@ import org.xydra.index.query.Wildcard;
  * @param <L> key2 type
  * @param <E> entity type
  */
-public class MapMapIndex<K extends Serializable, L extends Serializable, E extends Serializable>
-implements IMapMapIndex<K, L, E>, Serializable {
+public class MapMapIndex<K, L, E> implements IMapMapIndex<K, L, E>, Serializable {
 
 	protected IMapIndex<K, IMapIndex<L, E>> index;
 
@@ -133,8 +133,7 @@ implements IMapMapIndex<K, L, E>, Serializable {
 		return new FixedFirstKeyIterator(key1, map, c2);
 	}
 
-	static private class CascadingIterator<K extends Serializable, L extends Serializable, E extends Serializable>
-	implements Iterator<KeyKeyEntryTuple<K, L, E>> {
+	static private class CascadingIterator<K, L, E> implements Iterator<KeyKeyEntryTuple<K, L, E>> {
 
 		Iterator<KeyEntryTuple<K, IMapIndex<L, E>>> outer;
 		K key1;
@@ -284,6 +283,32 @@ implements IMapMapIndex<K, L, E>, Serializable {
 		};
 	}
 
+	@Override
+	public Iterator<KeyEntryTuple<K, L>> keyKeyIterator() {
+		return keyKeyIterator(new Wildcard<K>(), new Wildcard<L>());
+	}
+
+
+	@Override
+	public Iterator<KeyEntryTuple<K, L>> keyKeyIterator(final Constraint<K> c1, final Constraint<L> c2) {
+		return Iterators.cascade(Iterators.filterWithConstraint(key1Iterator(), c1),
+				new ITransformer<K, Iterator<KeyEntryTuple<K, L>>>() {
+
+					@Override
+					public Iterator<KeyEntryTuple<K, L>> transform(final K key_k) {
+						return Iterators.transform(
+								Iterators.filterWithConstraint(MapMapIndex.this.index.lookup(key_k).keyIterator(), c2),
+								new ITransformer<L, KeyEntryTuple<K, L>>() {
+
+							@Override
+							public KeyEntryTuple<K, L> transform(final L key_l) {
+								return new KeyEntryTuple<K, L>(key_k, key_l);
+							}
+						});
+					}
+				});
+	}
+
 	public Iterator<E> entryIterator() {
 		// IMPROVE this can be done faster if never creating intermediate tuples
 		return new TransformingIterator<KeyKeyEntryTuple<K, L, E>, E>(
@@ -316,5 +341,6 @@ implements IMapMapIndex<K, L, E>, Serializable {
 	public boolean containsKey1(final K key1) {
 		return this.index.containsKey(key1);
 	}
+
 
 }

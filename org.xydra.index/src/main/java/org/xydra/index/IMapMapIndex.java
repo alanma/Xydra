@@ -1,10 +1,10 @@
 package org.xydra.index;
 
-import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.Constraint;
+import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.KeyKeyEntryTuple;
 
 /**
@@ -21,7 +21,7 @@ import org.xydra.index.query.KeyKeyEntryTuple;
  *
  * @author dscharrer
  */
-public interface IMapMapIndex<K extends Serializable, L extends Serializable, E extends Serializable> extends IIndex {
+public interface IMapMapIndex<K,L,E> extends IIndex {
 
 	/**
 	 * @param key1
@@ -74,5 +74,17 @@ public interface IMapMapIndex<K extends Serializable, L extends Serializable, E 
 	 *         Use {@link Iterators#distinct(Iterator)} for distinct values.
 	 */
 	Iterator<L> key2Iterator();
+
+	/**
+	 * @return
+	 */
+	Iterator<KeyEntryTuple<K, L>> keyKeyIterator();
+
+	/**
+	 * @param c1
+	 * @param c2
+	 * @return
+	 */
+	Iterator<KeyEntryTuple<K, L>> keyKeyIterator(Constraint<K> c1, Constraint<L> c2);
 
 }
