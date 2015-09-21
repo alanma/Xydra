@@ -13,7 +13,7 @@ import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.index.IMapMapMapIndex;
 import org.xydra.index.XI;
-import org.xydra.index.impl.FastTripleMap;
+import org.xydra.index.impl.FastSerializableTripleMap;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyKeyKeyEntryTuple;
@@ -53,7 +53,7 @@ XAuthorisationManager, XAuthorisationDatabaseWitListeners {
 
 	public MemoryAuthorisationManager(final XGroupDatabaseWithListeners groups) {
 		this.groups = groups;
-		this.rights = new FastTripleMap<XId,XAddress,XId,Boolean>();
+		this.rights = new FastSerializableTripleMap<XId,XAddress,XId,Boolean>();
 		this.listeners = new HashSet<XAccessListener>();
 	}
 

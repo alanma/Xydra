@@ -22,7 +22,7 @@ public class FastContainsTripleIndexTest extends AbstractTripleIndexTest<String,
 
 	@Override
 	public ITripleIndex<String, String, String> create() {
-		final ITripleIndex<String, String, String> ti = new FastContainsTripleIndex<String, String, String>();
+		final ITripleIndex<String, String, String> ti = new FastContainsSerializableTripleIndex<String, String, String>();
 		return ti;
 	}
 }

@@ -1,12 +1,12 @@
 package org.xydra.index.impl;
 
 import org.xydra.index.AbstractMapIndexTest;
-import org.xydra.index.impl.trie.SmallSortedStringMap;
+import org.xydra.index.impl.trie.SmallSortedStringMapIndex;
 
 public class SmallSortedStringMapIndexTest extends AbstractMapIndexTest<String, Integer> {
 
 	public SmallSortedStringMapIndexTest() {
-		super(new SmallSortedStringMap<Integer>());
+		super(new SmallSortedStringMapIndex<Integer>());
 	}
 
 	private static int i = 1;

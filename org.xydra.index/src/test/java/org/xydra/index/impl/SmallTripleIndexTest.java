@@ -22,7 +22,7 @@ public class SmallTripleIndexTest extends AbstractTripleIndexTest<String, String
 
 	@Override
 	public ITripleIndex<String, String, String> create() {
-		final ITripleIndex<String, String, String> ti = new SmallTripleIndex<String, String, String>();
+		final ITripleIndex<String, String, String> ti = new SmallSerializableTripleIndex<String, String, String>();
 		return ti;
 	}
 }
