@@ -50,7 +50,7 @@ public class Pair<A, B> implements IPair<A, B>, Serializable {
 	@Override
 	public int hashCode() {
 		return (this.first == null ? 0 : this.first.hashCode())
-				+ (this.second == null ? 0 : this.second.hashCode());
+				* (this.second == null ? 0 : this.second.hashCode());
 	}
 
 	public Pair<B, A> inverse() {
