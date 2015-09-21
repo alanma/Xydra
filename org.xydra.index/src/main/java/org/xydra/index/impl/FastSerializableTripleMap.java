@@ -1,5 +1,7 @@
 package org.xydra.index.impl;
 
+import java.io.Serializable;
+
 import org.xydra.index.IMapMapMapIndex;
 
 /**
@@ -13,21 +15,22 @@ import org.xydra.index.IMapMapMapIndex;
  * @param <M> key3
  * @param <E> entry
  */
-public class FastTripleMap<K, L, M, E> extends AbstractFastTripleMap<K, L, M, E>implements IMapMapMapIndex<K, L, M, E> {
+public class FastSerializableTripleMap<K extends Serializable, L extends Serializable, M extends Serializable, E extends Serializable>
+		extends AbstractFastTripleMap<K, L, M, E>implements IMapMapMapIndex<K, L, M, E> {
 
 	@Override
 	protected IMapMapMapIndex<K, L, M, E> createMapMapMapIndex_KLME() {
-		return new MapMapMapIndex<K,L,M,E>();
+		return new SerializableMapMapMapIndex<>();
 	}
 
 	@Override
 	protected IMapMapMapIndex<L, M, K, E> createMapMapMapIndex_LMKE() {
-		return new MapMapMapIndex<L,M,K,E>();
+		return new SerializableMapMapMapIndex<>();
 	}
 
 	@Override
 	protected IMapMapMapIndex<M, K, L, E> createMapMapMapIndex_MKLE() {
-		return new MapMapMapIndex<M,K,L,E>();
+		return new SerializableMapMapMapIndex<>();
 	}
 
 }
