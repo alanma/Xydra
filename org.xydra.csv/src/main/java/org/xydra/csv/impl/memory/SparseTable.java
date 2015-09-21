@@ -47,7 +47,7 @@ public class SparseTable implements ISparseTable {
 
 	/**
 	 * Older Excel limits: You are trying to open a file that contains more than
-	 * 65,536 rows or 256 columns.
+	 * 65,536 rows or 256 columns. Default: false
 	 */
 	boolean restrictToExcelSize = false;
 

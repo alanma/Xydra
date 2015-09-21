@@ -315,12 +315,14 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		w.write(CsvCodec.excelEncode(COLUMNNAME_ROW));
 		final Iterator<String> colIt = columnNames.iterator();
 		int writtenCols = 0;
-		while (colIt.hasNext() && writtenCols < EXCEL_MAX_COLS) {
+		boolean warnedOnColumnNumber = false;
+		while (colIt.hasNext() ){
 			final String columnName = colIt.next();
 			w.write(CsvCodec.CELL_DELIMITER + CsvCodec.excelEncode(columnName));
 			writtenCols++;
-			if (writtenCols == EXCEL_MAX_COLS) {
-				log.warn("Reached Excels limit of " + EXCEL_MAX_COLS + " columns");
+			if (!warnedOnColumnNumber && writtenCols == EXCEL_MAX_COLS) {
+				log.warn("Reached Excels limit of " + EXCEL_MAX_COLS + " columns. Writing more anyway.");
+				warnedOnColumnNumber = true;
 			}
 		}
 		w.write(CsvCodec.CELL_DELIMITER + "\n");
@@ -332,12 +334,14 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		w.write(CsvCodec.excelEncode(rowName));
 		final Iterator<String> colIt = columnNames.iterator();
 		int writtenCols = 0;
-		while (colIt.hasNext() && writtenCols < EXCEL_MAX_COLS) {
+		boolean warnedOnColumnNumber = false;
+		while (colIt.hasNext() ){
 			final String columnName = colIt.next();
 			w.write(CsvCodec.CELL_DELIMITER + CsvCodec.excelEncode(row.getValue(columnName)));
 			writtenCols++;
-			if (writtenCols == EXCEL_MAX_COLS) {
-				log.warn("Reached Excels limit of " + EXCEL_MAX_COLS + " columns");
+			if (!warnedOnColumnNumber && writtenCols == EXCEL_MAX_COLS) {
+				log.warn("Reached Excels limit of " + EXCEL_MAX_COLS + " columns. Writing more anyway.");
+				warnedOnColumnNumber = true;
 			}
 		}
 		w.write(CsvCodec.CELL_DELIMITER + "\n");
