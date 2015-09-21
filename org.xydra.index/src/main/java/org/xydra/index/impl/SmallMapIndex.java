@@ -73,15 +73,10 @@ public class SmallMapIndex<K, E> implements IMapIndex<K, E>, Serializable {
 
 	@Override
 	public Iterator<KeyEntryTuple<K, E>> tupleIterator(final Constraint<K> c1) {
-		if (!containsKey(c1)) {
+		if (c1.isExact() && !containsKey(c1)) {
 			return NoneIterator.<KeyEntryTuple<K, E>> create();
 		}
-		return new SingleValueIterator<KeyEntryTuple<K, E>>(this.tuple) {
-			@Override
-			public void remove() {
-				clear();
-			}
-		};
+		return tupleIterator();
 	}
 
 	@Override
@@ -109,6 +104,16 @@ public class SmallMapIndex<K, E> implements IMapIndex<K, E>, Serializable {
 			return NoneIterator.<K> create();
 		}
 		return new SingleValueIterator<K>(this.tuple.getKey());
+	}
+
+	@Override
+	public Iterator<KeyEntryTuple<K, E>> tupleIterator() {
+		return new SingleValueIterator<KeyEntryTuple<K, E>>(this.tuple) {
+			@Override
+			public void remove() {
+				clear();
+			}
+		};
 	}
 
 }

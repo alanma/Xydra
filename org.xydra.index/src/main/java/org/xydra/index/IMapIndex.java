@@ -62,8 +62,14 @@ public interface IMapIndex<K, E> extends IIndex {
 	Iterator<KeyEntryTuple<K, E>> tupleIterator(Constraint<K> keyConstraint);
 
 	/**
+	 * @return
+	 */
+	Iterator<KeyEntryTuple<K, E>> tupleIterator();
+
+	/**
 	 * @return an iterator over all keys
 	 */
 	Iterator<K> keyIterator();
+
 
 }

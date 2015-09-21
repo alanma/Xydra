@@ -22,12 +22,10 @@ import org.xydra.log.api.LoggerFactory;
  *
  * @author dscharrer
  *
- * @param <K>
- *            key type
- * @param <E>
- *            entity type
+ * @param <K> key type
+ * @param <E> entity type
  */
-public class MapIndex<K, E> implements IMapIndex<K, E>, Serializable {
+public class MapIndex<K, E> implements IMapIndex<K, E>, Serializable, Iterable<E> {
 
 	private static final long serialVersionUID = -156688788520337376L;
 
@@ -38,8 +36,7 @@ public class MapIndex<K, E> implements IMapIndex<K, E>, Serializable {
 	}
 
 	/**
-	 * @param concurrent
-	 *            iff true, a concurrent data structure is used internally
+	 * @param concurrent iff true, a concurrent data structure is used internally
 	 */
 	public MapIndex(final boolean concurrent) {
 		if (concurrent) {
@@ -87,20 +84,11 @@ public class MapIndex<K, E> implements IMapIndex<K, E>, Serializable {
 	@Override
 	public Iterator<KeyEntryTuple<K, E>> tupleIterator(final Constraint<K> c1) {
 		if (c1.isStar()) {
-			return new AbstractTransformingIterator<Map.Entry<K, E>, KeyEntryTuple<K, E>>(
-					this.index.entrySet().iterator()) {
-
-				@Override
-				public KeyEntryTuple<K, E> transform(final Entry<K, E> in) {
-					return new KeyEntryTuple<K, E>(in.getKey(), in.getValue());
-				}
-
-			};
+			return tupleIterator();
 		}
 		final K key = ((EqualsConstraint<K>) c1).getKey();
 		if (this.index.containsKey(key)) {
-			return new SingleValueIterator<KeyEntryTuple<K, E>>(new KeyEntryTuple<K, E>(key,
-					this.index.get(key))) {
+			return new SingleValueIterator<KeyEntryTuple<K, E>>(new KeyEntryTuple<K, E>(key, this.index.get(key))) {
 				@Override
 				public void remove() {
 					MapIndex.this.deIndex(key);
@@ -109,7 +97,6 @@ public class MapIndex<K, E> implements IMapIndex<K, E>, Serializable {
 		} else {
 			return NoneIterator.<KeyEntryTuple<K, E>> create();
 		}
-
 	}
 
 	@Override
@@ -138,6 +125,23 @@ public class MapIndex<K, E> implements IMapIndex<K, E>, Serializable {
 		for (final Entry<K, E> e : this.index.entrySet()) {
 			log.info("'" + e.getKey() + "' = '" + e.getValue() + "'");
 		}
+	}
+
+	public int size() {
+		return this.index.size();
+	}
+
+	@Override
+	public Iterator<KeyEntryTuple<K, E>> tupleIterator() {
+		return new AbstractTransformingIterator<Map.Entry<K, E>, KeyEntryTuple<K, E>>(
+				this.index.entrySet().iterator()) {
+
+			@Override
+			public KeyEntryTuple<K, E> transform(final Entry<K, E> in) {
+				return new KeyEntryTuple<K, E>(in.getKey(), in.getValue());
+			}
+
+		};
 	}
 
 }
