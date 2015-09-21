@@ -22,7 +22,7 @@ import org.xydra.index.query.Pair;
  *
  * @param <E>
  */
-public class SortedStringMap<E> implements IMapIndex<String, E>, Serializable {
+public class SortedStringMapIndex<E> implements IMapIndex<String, E>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -80,15 +80,28 @@ public class SortedStringMap<E> implements IMapIndex<String, E>, Serializable {
 	@Override
 	public Iterator<KeyEntryTuple<String, E>> tupleIterator(final Constraint<String> keyConstraint) {
 		Iterator<Entry<String, E>> mapentryIt = this.map.entrySet().iterator();
-		mapentryIt = Iterators.filter(mapentryIt, new IFilter<Entry<String, E>>() {
+		if (keyConstraint.isExact()) {
+			mapentryIt = Iterators.filter(mapentryIt, new IFilter<Entry<String, E>>() {
+
+				@Override
+				public boolean matches(final Entry<String, E> mapentry) {
+					return keyConstraint.matches(mapentry.getKey());
+				}
+			});
+		}
+		return Iterators.transform(mapentryIt, new ITransformer<Map.Entry<String, E>, KeyEntryTuple<String, E>>() {
 
 			@Override
-			public boolean matches(final Entry<String, E> mapentry) {
-				return keyConstraint.matches(mapentry.getKey());
+			public KeyEntryTuple<String, E> transform(final Entry<String, E> mapentry) {
+				return new KeyEntryTuple<String, E>(mapentry.getKey(), mapentry.getValue());
 			}
 		});
-		return Iterators.transform(mapentryIt,
-				new ITransformer<Map.Entry<String, E>, KeyEntryTuple<String, E>>() {
+	}
+
+	@Override
+	public Iterator<KeyEntryTuple<String, E>> tupleIterator() {
+		final Iterator<Entry<String, E>> mapentryIt = this.map.entrySet().iterator();
+		return Iterators.transform(mapentryIt, new ITransformer<Map.Entry<String, E>, KeyEntryTuple<String, E>>() {
 
 			@Override
 			public KeyEntryTuple<String, E> transform(final Entry<String, E> mapentry) {
@@ -131,8 +144,7 @@ public class SortedStringMap<E> implements IMapIndex<String, E>, Serializable {
 	 * Special function of Sorted...
 	 *
 	 * @param keyPrefix
-	 * @return true iff at least one key has been indexed which starts with the
-	 *         given keyPrefix
+	 * @return true iff at least one key has been indexed which starts with the given keyPrefix
 	 */
 	public boolean containsKeysStartingWith(final String keyPrefix) {
 		return lookupFirstPrefix(keyPrefix) != null;
@@ -140,8 +152,8 @@ public class SortedStringMap<E> implements IMapIndex<String, E>, Serializable {
 
 	/**
 	 * @param keyPrefix
-	 * @return all entries which have been indexed at a key starting with the
-	 *         given prefix. Collects the results of potentially many such keys.
+	 * @return all entries which have been indexed at a key starting with the given prefix. Collects the results of
+	 *         potentially many such keys.
 	 */
 	public Iterator<E> lookupStartingWith(final String keyPrefix) {
 		final SortedMap<String, E> subMap = this.map.subMap(keyPrefix, keyPrefix + LAST_UNICODE_CHAR);
@@ -152,8 +164,7 @@ public class SortedStringMap<E> implements IMapIndex<String, E>, Serializable {
 	 * This method is required for a trie, such as {@link SmallStringSetTrie}
 	 *
 	 * @param keyPrefix
-	 * @return the first (lowest) complete key starting with the given prefix @CanBeNull
-	 *         if no such key exists.
+	 * @return the first (lowest) complete key starting with the given prefix @CanBeNull if no such key exists.
 	 */
 	public String lookupFirstPrefix(final String keyPrefix) {
 		// fast path hack
@@ -186,9 +197,8 @@ public class SortedStringMap<E> implements IMapIndex<String, E>, Serializable {
 
 	/**
 	 * @param keyPrefix
-	 * @return @CanBeNull if no entry starts with the given keyPrefix. If not
-	 *         null, a Pair is returned. Pair.first: @CanBeNull, is the found
-	 *         value; Pair.second: iff true, the found value is a perfect match;
+	 * @return @CanBeNull if no entry starts with the given keyPrefix. If not null, a Pair is returned.
+	 *         Pair.first: @CanBeNull, is the found value; Pair.second: iff true, the found value is a perfect match;
 	 *         iff false, it's merely a prefix match.
 	 */
 	public Pair<E, Boolean> findWithPrefix(final String keyPrefix) {

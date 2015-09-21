@@ -23,7 +23,7 @@ import org.xydra.index.query.KeyEntryTuple;
  *
  * @param <E>
  */
-public class SmallSortedStringMap<E> implements IMapIndex<String, E>, Serializable {
+public class SmallSortedStringMapIndex<E> implements IMapIndex<String, E>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -99,12 +99,16 @@ public class SmallSortedStringMap<E> implements IMapIndex<String, E>, Serializab
 
 	@Override
 	public Iterator<KeyEntryTuple<String, E>> tupleIterator(final Constraint<String> keyConstraint) {
+		if(keyConstraint.isStar()) {
+			return tupleIterator();
+		}
+
 		Iterator<Entry<byte[], E>> mapentryIt = this.map.entrySet().iterator();
 		mapentryIt = Iterators.filter(mapentryIt, new IFilter<Entry<byte[], E>>() {
 
 			@Override
 			public boolean matches(final Entry<byte[], E> mapentry) {
-				return keyConstraint.matches(SmallSortedStringMap.toString(mapentry.getKey()));
+				return keyConstraint.matches(SmallSortedStringMapIndex.toString(mapentry.getKey()));
 			}
 		});
 		return Iterators.transform(mapentryIt,
@@ -112,7 +116,21 @@ public class SmallSortedStringMap<E> implements IMapIndex<String, E>, Serializab
 
 			@Override
 			public KeyEntryTuple<String, E> transform(final Entry<byte[], E> mapentry) {
-				return new KeyEntryTuple<String, E>(SmallSortedStringMap.toString(mapentry
+				return new KeyEntryTuple<String, E>(SmallSortedStringMapIndex.toString(mapentry
+						.getKey()), mapentry.getValue());
+			}
+		});
+	}
+
+	@Override
+	public Iterator<KeyEntryTuple<String, E>> tupleIterator() {
+		final Iterator<Entry<byte[], E>> mapentryIt = this.map.entrySet().iterator();
+		return Iterators.transform(mapentryIt,
+				new ITransformer<Map.Entry<byte[], E>, KeyEntryTuple<String, E>>() {
+
+			@Override
+			public KeyEntryTuple<String, E> transform(final Entry<byte[], E> mapentry) {
+				return new KeyEntryTuple<String, E>(SmallSortedStringMapIndex.toString(mapentry
 						.getKey()), mapentry.getValue());
 			}
 		});
@@ -122,7 +140,7 @@ public class SmallSortedStringMap<E> implements IMapIndex<String, E>, Serializab
 
 		@Override
 		public String transform(final byte[] in) {
-			return SmallSortedStringMap.toString(in);
+			return SmallSortedStringMapIndex.toString(in);
 		}
 	};
 
