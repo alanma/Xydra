@@ -528,6 +528,9 @@ class RestlessMethod {
 			log.error("", e);
 		}
 
+		/* Help debugging */
+		Thread.currentThread().setName("Restless-done-" + method.getName());
+
 		return true;
 	}
 
