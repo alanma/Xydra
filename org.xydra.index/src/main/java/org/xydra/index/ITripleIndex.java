@@ -1,6 +1,6 @@
 package org.xydra.index;
 
-import org.xydra.index.IMapMapSetIndex.IMapMapSetDiff;
+import java.util.Iterator;
 
 /**
  * An index for triples of keys that supports queries on all three keys. Indexes three keys (to boolean, either a key
@@ -15,11 +15,45 @@ import org.xydra.index.IMapMapSetIndex.IMapMapSetDiff;
 public interface ITripleIndex<K, L, M> extends IIndex, IRemovableTripleSink<K, L, M>, ITripleSource<K, L, M> {
 
 	/**
-	 * Optional operation.
-	 *
-	 * @param other
-	 * @return the diff between this index and the other index
+	 * @return a distinct iterator over all objects
 	 */
-	IMapMapSetDiff<K, L, M> computeDiff(ITripleIndex<K, L, M> other) throws UnsupportedOperationException;
+	Iterator<M> getObjects();
+
+	/**
+	 * @param s @NeverNull
+	 * @param p @NeverNull
+	 * @return an iterator over all objects matching (s,p,*)
+	 */
+	Iterator<M> getObjects_SPX(final K s, final L p);
+
+	/**
+	 * @return a distinct iterator over all used predicates
+	 */
+	Iterator<L> getPredicates();
+
+	/**
+	 * @param s @NeverNull
+	 * @return a distinct iterator over all predicates ?p occurring in triples (s,?p,*) @NeverNull
+	 */
+	Iterator<L> getPredicates_SX(final K s);
+
+	/**
+	 * @param s @NeverNull
+	 * @param o @NeverNull
+	 * @return an iterator over all predicates occurring in triples (s,*,o) @NeverNull
+	 */
+	Iterator<L> getPredicates_SXO(final K s, final M o);
+
+	/**
+	 * @return a distinct iterator over all subjects
+	 */
+	Iterator<K> getSubjects();
+
+	/**
+	 * @param p @NeverNull
+	 * @param o @NeverNull
+	 * @return an iterator over all subjects matching (*,p,o) @NeverNull
+	 */
+	Iterator<K> getSubjects_XPO(final L p, final M o);
 
 }
