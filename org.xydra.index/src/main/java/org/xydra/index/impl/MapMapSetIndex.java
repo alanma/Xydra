@@ -238,13 +238,11 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 		this.map.clear();
 	}
 
-	@Override
-	public IMapMapSetDiff<K, L, E> computeDiff(final IMapMapSetIndex<K, L, E> otherFuture) {
-		final DiffImpl<K, L, E> diff = new DiffImpl<K, L, E>(this.entrySetFactory);
+	public static <K, L, E> IMapMapSetDiff<K, L, E> computeDiff(final MapMapSetIndex<K, L, E> mmsi,
+			final MapMapSetIndex<K, L, E> otherIndex) {
+		final DiffImpl<K, L, E> diff = new DiffImpl<K, L, E>(mmsi.entrySetFactory);
 
-		final MapMapSetIndex<K, L, E> otherIndex = (MapMapSetIndex<K, L, E>) otherFuture;
-
-		for (final Entry<K, IMapSetIndex<L, E>> thisEntry : this.map.entrySet()) {
+		for (final Entry<K, IMapSetIndex<L, E>> thisEntry : mmsi.map.entrySet()) {
 			final K key = thisEntry.getKey();
 			final IMapSetIndex<L, E> otherValue = otherIndex.map.get(key);
 			if (otherValue != null) {
@@ -265,13 +263,18 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 		// compare other to this
 		for (final Entry<K, IMapSetIndex<L, E>> otherEntry : otherIndex.map.entrySet()) {
 			final K key = otherEntry.getKey();
-			if (!this.containsKey(key)) {
+			if (!mmsi.containsKey(key)) {
 				// whole set (key,*,*) missing in this => added
 				diff.added.map.put(key, otherEntry.getValue());
 			}
 		}
 
 		return diff;
+	}
+
+	@Override
+	public IMapMapSetDiff<K, L, E> computeDiff(final IMapMapSetIndex<K, L, E> otherFuture) {
+		return computeDiff(this,  (MapMapSetIndex<K, L, E>) otherFuture);
 	}
 
 	@Override
