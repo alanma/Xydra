@@ -1,18 +1,13 @@
-/*
- * Based on code Copyright 2009 Google Inc.
+/* Based on code Copyright 2009 Google Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License. */
 package org.xydra.index.impl.trie;
 
 import java.io.Serializable;
@@ -37,8 +32,7 @@ import org.xydra.log.api.LoggerFactory;
 /**
  * A memory-efficient sorted map based on two simple sorted arrays.
  *
- * Arrays resizing is decoupled from insert/remove, as long as capacity allows
- * it.
+ * Arrays resizing is decoupled from insert/remove, as long as capacity allows it.
  *
  * @param <K> the key type
  * @param <V> the value type
@@ -137,7 +131,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 			}
 			final Entry<K, V> entry = (Entry<K, V>) o;
 			final V value = SortedArrayMap.this.get(entry.getKey());
-			return SortedArrayMap.this.valueEquals(value, entry.getValue());
+			return SortedArrayMap.valueEquals(value, entry.getValue());
 		}
 
 		@Override
@@ -360,36 +354,33 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	}
 
 	/**
-	 * Backing store for all the keys. Default access to avoid synthetic
-	 * accessors from inner classes.
+	 * Backing store for all the keys. Default access to avoid synthetic accessors from inner classes.
 	 */
-	Object[] keys;
+	private Object[] keys;
 
 	/**
-	 * Number of pairs in this set. This is managed explicitly to let the arrays
-	 * being longer than required. This allows for better performance if
-	 * frequent add/remove operations are performed towards the end. Can also
-	 * enable faster access on pre-sorted keys.
+	 * Number of pairs in this set. This is managed explicitly to let the arrays being longer than required. This allows
+	 * for better performance if frequent add/remove operations are performed towards the end. Can also enable faster
+	 * access on pre-sorted keys.
 	 *
 	 * Default access to avoid synthetic accessors from inner classes.
 	 */
-	int size = 0;
+	private int size = 0;
 
 	/**
-	 * Backing store for all the values. Default access to avoid synthetic
-	 * accessors from inner classes.
+	 * Backing store for all the values. Default access to avoid synthetic accessors from inner classes.
 	 */
-	Object[] vals;
+	private Object[] vals;
 
 	private boolean isSubMap() {
 		return this.max != -1;
 	}
 
 	/** used for sub-maps, default is 0 */
-	int min;
+	private int min;
 
 	/** used for sub-maps. -1 == unbounded, use size() */
-	int max;
+	private int max;
 
 	public SortedArrayMap() {
 		this(INITIAL_TABLE_SIZE);
@@ -412,8 +403,8 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	 */
 	private SortedArrayMap(final Object[] keys, final Object[] values, final int min, final int max) {
 		assert values.length == keys.length;
-		assert keys.length >= max : "requesting a sub-map with a max (" + max
-				+ ") greater than available lenght (" + keys.length + ")";
+		assert keys.length >= max : "requesting a sub-map with a max (" + max + ") greater than available lenght ("
+				+ keys.length + ")";
 
 		this.keys = keys;
 		this.vals = values;
@@ -530,16 +521,15 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 		assert this.size == 0 || this.keys[this.size - 1] != null;
 
 		if (log.isTraceEnabled()) {
-			log.trace("Put '" + key + "' into " + Arrays.toString(this.keys) + " "
-					+ ((Object) this.keys).hashCode());
+			log.trace("Put '" + key + "' into " + Arrays.toString(this.keys) + " " + ((Object) this.keys).hashCode());
 		}
 
 		int index = binarySearch(key);
 		if (index >= 0 && index < this.size) {
 			// update existing value
 			if (index < this.min || index > max()) {
-				throw new IllegalArgumentException("Cannot put index=" + index
-						+ " outside of structural bounds [" + this.min + "," + this.max + "]");
+				throw new IllegalArgumentException("Cannot put index=" + index + " outside of structural bounds ["
+						+ this.min + "," + this.max + "]");
 			}
 			final Object previousValue = this.vals[index];
 			this.vals[index] = value;
@@ -548,8 +538,8 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 		} else {
 			// insert new value
 			if (isSubMap()) {
-				throw new IllegalArgumentException("Cannot insert value; have structural bounds ["
-						+ this.min + "," + this.max + "]");
+				throw new IllegalArgumentException(
+						"Cannot insert value; have structural bounds [" + this.min + "," + this.max + "]");
 			}
 			index = -(index + 1);
 
@@ -639,8 +629,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 					buf.append(',').append(' ');
 				}
 				final Object value = this.vals[i];
-				buf.append(key == this ? "(this Map)" : key).append('=')
-						.append(value == this ? "(this Map)" : value);
+				buf.append(key == this ? "(this Map)" : key).append('=').append(value == this ? "(this Map)" : value);
 				needComma = true;
 			}
 		}
@@ -648,9 +637,8 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 		return buf.toString();
 	}
 
-	public String stats() {
-		return " min=" + this.min + " max=" + this.max + " size=" + this.size + " capacity="
-				+ this.keys.length;
+	private String stats() {
+		return " min=" + this.min + " max=" + this.max + " size=" + this.size + " capacity=" + this.keys.length;
 	}
 
 	@Override
@@ -661,37 +649,36 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	/**
 	 * Returns whether two keys are equal for the purposes of this set.
 	 */
-	protected boolean keyEquals(final Object a, final Object b) {
+	private static boolean keyEquals(final Object a, final Object b) {
 		return a == null ? b == null : a.equals(b);
 	}
 
 	/**
 	 * Returns the hashCode for a key.
 	 */
-	protected int keyHashCode(final Object k) {
+	private static int keyHashCode(final Object k) {
 		return k == null ? 0 : k.hashCode();
 	}
 
 	/**
 	 * Returns whether two values are equal for the purposes of this set.
 	 */
-	protected boolean valueEquals(final Object a, final Object b) {
+	private static boolean valueEquals(final Object a, final Object b) {
 		return a == null ? b == null : a.equals(b);
 	}
 
 	/**
 	 * Returns the hashCode for a value.
 	 */
-	protected int valueHashCode(final Object v) {
+	private static int valueHashCode(final Object v) {
 		return v == null ? 0 : v.hashCode();
 	}
 
 	/**
-	 * Ensures the map is large enough to contain the specified number of
-	 * entries. Default access to avoid synthetic accessors from inner classes.
+	 * Ensures the map is large enough to contain the specified number of entries. Default access to avoid synthetic
+	 * accessors from inner classes.
 	 */
-	@Deprecated
-	boolean ensureSizeFor(final int expectedSize) {
+	private @Deprecated boolean ensureSizeFor(final int expectedSize) {
 		if (this.keys.length * 3 >= expectedSize * 4) {
 			return false;
 		}
@@ -712,11 +699,10 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	/**
 	 * Respects submaps.
 	 *
-	 * @return the index in the key table at which a particular key resides, or
-	 *         -1 if the key is not in the table. Default access to avoid
-	 *         synthetic accessors from inner classes.
+	 * @return the index in the key table at which a particular key resides, or -1 if the key is not in the table.
+	 *         Default access to avoid synthetic accessors from inner classes.
 	 */
-	int findKey(final Object k) {
+	private int findKey(final Object k) {
 		final int index = binarySearch(k);
 		if (index < 0) {
 			return -1;
@@ -729,8 +715,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	 * Respects submaps.
 	 *
 	 * @param key
-	 * @return x >= 0 if value was found, -(x+1) if not found and x is insertion
-	 *         point. The +1 disambiguates the 0.
+	 * @return x >= 0 if value was found, -(x+1) if not found and x is insertion point. The +1 disambiguates the 0.
 	 */
 	private int binarySearch(final Object key) {
 		assert key != null;
@@ -746,20 +731,16 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 			final int mid = low + high >>> 1;
 
 			if (log.isTraceEnabled()) {
-				log.trace("low=" + low + " high=" + high + " mid=" + mid + " size=" + this.size()
-						+ " keys=" + Arrays.toString(this.keys));
+				log.trace("low=" + low + " high=" + high + " mid=" + mid + " size=" + this.size() + " keys="
+						+ Arrays.toString(this.keys));
 			}
 
-			@SuppressWarnings("rawtypes")
-			final
-			Comparable midVal = (Comparable) this.keys[mid];
-			@SuppressWarnings("unchecked")
-			final
+			@SuppressWarnings("rawtypes") final Comparable midVal = (Comparable) this.keys[mid];
+			@SuppressWarnings("unchecked") final
 			// [ cmp > 0 ] [ cmp == 0 ] [ cmp < 0 ]
 			int cmp = midVal.compareTo(key);
 
-			if (cmp == 0)
-			 {
+			if (cmp == 0) {
 				return mid; // key found
 			}
 
@@ -795,10 +776,9 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	}
 
 	/**
-	 * Returns the index in the key table at which a particular key resides, or
-	 * the index of an empty slot in the table where this key should be inserted
-	 * if it is not already in the table. Default access to avoid synthetic
-	 * accessors from inner classes.
+	 * Returns the index in the key table at which a particular key resides, or the index of an empty slot in the table
+	 * where this key should be inserted if it is not already in the table. Default access to avoid synthetic accessors
+	 * from inner classes.
 	 */
 	int findKeyOrEmpty(final Object k) {
 		final int index = binarySearch(k);
@@ -806,15 +786,13 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	}
 
 	/**
-	 * Removes the entry at the specified index, and performs internal
-	 * management to make sure we don't wind up with a hole in the table.
-	 * Default access to avoid synthetic accessors from inner classes.
+	 * Removes the entry at the specified index, and performs internal management to make sure we don't wind up with a
+	 * hole in the table. Default access to avoid synthetic accessors from inner classes.
 	 */
-	void internalRemove(final int index) {
+	private void internalRemove(final int index) {
 		assert index >= this.min;
 		assert index < this.max();
-		assert this.keys.length >= this.size : "keys.len=" + this.keys.length + " vs. size="
-				+ this.size;
+		assert this.keys.length >= this.size : "keys.len=" + this.keys.length + " vs. size=" + this.size;
 		assert this.keys[this.size - 1] != null;
 
 		this.keys[index] = null;
@@ -827,31 +805,26 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 		// TODO implement shrinking
 
 		if (log.isTraceEnabled()) {
-			log.trace("Removed at " + index + " keys=" + Arrays.toString(this.keys) + " size="
-					+ this.size);
+			log.trace("Removed at " + index + " keys=" + Arrays.toString(this.keys) + " size=" + this.size);
 		}
 
 		assert this.size == 0 || this.keys[this.size - 1] != null;
 	}
 
 	/**
-	 * Resizes this map to accommodate the minimum size required to join this
-	 * map with another map. This is an optimization to prevent multiple resizes
-	 * during the join operation. Naively, it would seem like we should resize
-	 * to hold {@code (size + otherSize)}. However, the incoming map might have
-	 * duplicates with this map; it might even be all duplicates. The correct
-	 * behavior when the incoming map is all duplicates is NOT to resize, and
-	 * therefore not to invalidate any iterators.
+	 * Resizes this map to accommodate the minimum size required to join this map with another map. This is an
+	 * optimization to prevent multiple resizes during the join operation. Naively, it would seem like we should resize
+	 * to hold {@code (size + otherSize)}. However, the incoming map might have duplicates with this map; it might even
+	 * be all duplicates. The correct behavior when the incoming map is all duplicates is NOT to resize, and therefore
+	 * not to invalidate any iterators.
 	 * <p>
-	 * In practice, this strategy results in a worst-case of two resizes. In the
-	 * worst case, where {@code size} and {@code otherSize} are roughly equal
-	 * and the sets are completely disjoint, we might do 1 initial rehash and
-	 * then 1 additional rehash down the road. But this is an edge case that
-	 * requires getting unlucky on both boundaries. Most of the time, we do
-	 * either 1 initial rehash or 1 down the road, because doubling the capacity
-	 * generally allows this map to absorb an equally-sized disjoint map.
+	 * In practice, this strategy results in a worst-case of two resizes. In the worst case, where {@code size} and
+	 * {@code otherSize} are roughly equal and the sets are completely disjoint, we might do 1 initial rehash and then 1
+	 * additional rehash down the road. But this is an edge case that requires getting unlucky on both boundaries. Most
+	 * of the time, we do either 1 initial rehash or 1 down the road, because doubling the capacity generally allows
+	 * this map to absorb an equally-sized disjoint map.
 	 */
-	boolean resizeForJoin(final int sizeOther) {
+	private boolean resizeForJoin(final int sizeOther) {
 		return ensureSizeFor(Math.max(this.size, sizeOther));
 	}
 
@@ -881,8 +854,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 			fromIndex = size();
 		}
 
-		assert fromIndex >= 0 && fromIndex <= size() : "fromKey=" + fromKey + " fromIndex="
-				+ fromIndex;
+		assert fromIndex >= 0 && fromIndex <= size() : "fromKey=" + fromKey + " fromIndex=" + fromIndex;
 
 		int toIndex = binarySearch(toKey);
 		if (toIndex < 0) {
@@ -891,8 +863,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 		if (toIndex > size()) {
 			toIndex = size();
 		}
-		assert toIndex >= 0 && toIndex <= size() : "toKey=" + toKey + " toIndex=" + toIndex
-				+ " size()=" + size();
+		assert toIndex >= 0 && toIndex <= size() : "toKey=" + toKey + " toIndex=" + toIndex + " size()=" + size();
 
 		// FIXME double-check this
 		return new SortedArrayMap<K, V>(this.keys, this.vals, fromIndex, toIndex);
@@ -900,9 +871,8 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 
 	/**
 	 * @param keyPrefix
-	 * @return @CanBeNull if no entry starts with the given keyPrefix. If not
-	 *         null, a Pair is returned. Pair.first: @CanBeNull, is the found
-	 *         value; Pair.second: iff true, the found value is a perfect match;
+	 * @return @CanBeNull if no entry starts with the given keyPrefix. If not null, a Pair is returned.
+	 *         Pair.first: @CanBeNull, is the found value; Pair.second: iff true, the found value is a perfect match;
 	 *         iff false, it's merely a prefix match.
 	 */
 	@SuppressWarnings("unchecked")
@@ -917,11 +887,8 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 			return new Pair<V, Boolean>((V) this.vals[i], true);
 		} else {
 			assert i < -1;
-			/*
-			 * the found key is longer than the keyPrefix and since keys stored
-			 * here are prefix-free among each other, the found key is the only
-			 * one which contains nodes with the searched prefix
-			 */
+			/* the found key is longer than the keyPrefix and since keys stored here are prefix-free among each other,
+			 * the found key is the only one which contains nodes with the searched prefix */
 			final int insertionPoint = -(i + 1);
 			return new Pair<V, Boolean>((V) this.vals[insertionPoint - 1], false);
 		}
@@ -957,8 +924,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 			fromIndex = size();
 		}
 
-		assert fromIndex >= 0 && fromIndex <= size() : "fromKey=" + fromKey + " fromIndex="
-				+ fromIndex;
+		assert fromIndex >= 0 && fromIndex <= size() : "fromKey=" + fromKey + " fromIndex=" + fromIndex;
 
 		int toIndex = binarySearch(toKey);
 		if (toIndex < 0) {
@@ -967,8 +933,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 		if (toIndex > size()) {
 			toIndex = size();
 		}
-		assert toIndex >= 0 && toIndex <= size() : "toKey=" + toKey + " toIndex=" + toIndex
-				+ " size()=" + size();
+		assert toIndex >= 0 && toIndex <= size() : "toKey=" + toKey + " toIndex=" + toIndex + " size()=" + size();
 
 		if (fromIndex == toIndex) {
 			return -1;
@@ -992,8 +957,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 		if (toIndex > size()) {
 			toIndex = size();
 		}
-		assert toIndex >= 0 && toIndex <= size() : "toKey=" + toKey + " toIndex=" + toIndex
-				+ " size()=" + size();
+		assert toIndex >= 0 && toIndex <= size() : "toKey=" + toKey + " toIndex=" + toIndex + " size()=" + size();
 		// FIXME double-check this
 		return new SortedArrayMap<K, V>(this.keys, this.vals, 0, toIndex);
 	}
@@ -1014,8 +978,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 			fromIndex = size() - 1;
 		}
 
-		assert fromIndex >= 0 && fromIndex <= size() - 1 : "fromKey=" + fromKey + " fromIndex="
-				+ fromIndex;
+		assert fromIndex >= 0 && fromIndex <= size() - 1 : "fromKey=" + fromKey + " fromIndex=" + fromIndex;
 		// FIXME double-check this
 		return new SortedArrayMap<K, V>(this.keys, this.vals, fromIndex, this.size);
 	}
@@ -1046,7 +1009,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	/**
 	 * @return
 	 */
-	int max() {
+	private int max() {
 		if (this.max == -1) {
 			return this.size;
 		} else {
