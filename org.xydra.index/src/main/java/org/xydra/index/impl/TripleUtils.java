@@ -51,21 +51,21 @@ public class TripleUtils {
 	 * @return an {@link Iterator} that contains all triples matching the given constraints, projected to a single
 	 *         component (first, second, or third)
 	 */
-	public static <K, L, M> Iterator<K> getMatchingAndProject_S(final ITripleSource<K, L, M> tripleIndex,
+	public static <K, L, M> Iterator<K> getConstraintMatchingAndProject_S(final ITripleSource<K, L, M> tripleIndex,
 			final Constraint<K> c1, final Constraint<L> c2, final Constraint<M> c3) {
 		final Iterator<ITriple<K, L, M>> tupleIterator = tripleIndex.getTriples(c1, c2, c3);
 		final ITransformer<ITriple<K, L, M>, K> transformer = transformer_s();
 		return new TransformingIterator<ITriple<K, L, M>, K>(tupleIterator, transformer);
 	}
 
-	public static <K, L, M> Iterator<L> getMatchingAndProject_P(final ITripleSource<K, L, M> tripleIndex,
+	public static <K, L, M> Iterator<L> getConstraintMatchingAndProject_P(final ITripleSource<K, L, M> tripleIndex,
 			final Constraint<K> c1, final Constraint<L> c2, final Constraint<M> c3) {
 		final Iterator<ITriple<K, L, M>> tupleIterator = tripleIndex.getTriples(c1, c2, c3);
 		final ITransformer<ITriple<K, L, M>, L> transformer = transformer_p();
 		return new TransformingIterator<ITriple<K, L, M>, L>(tupleIterator, transformer);
 	}
 
-	public static <K, L, M> Iterator<M> getMatchingAndProject_O(final ITripleSource<K, L, M> tripleIndex,
+	public static <K, L, M> Iterator<M> getConstraintMatchingAndProject_O(final ITripleSource<K, L, M> tripleIndex,
 			final Constraint<K> c1, final Constraint<L> c2, final Constraint<M> c3) {
 		final Iterator<ITriple<K, L, M>> tupleIterator = tripleIndex.getTriples(c1, c2, c3);
 		final ITransformer<ITriple<K, L, M>, M> transformer = transformer_o();
@@ -93,7 +93,7 @@ public class TripleUtils {
 		return new TransformingIterator<ITriple<K, L, M>, M>(tupleIterator, transformer);
 	}
 
-	public static <K, L, M> Iterator<ITriple<K, L, M>> getTriples(final IMapMapSetIndex<K, L, M> index_s_p_o, final Constraint<K> c1,
+	public static <K, L, M> Iterator<ITriple<K, L, M>> getConstraintTriples(final IMapMapSetIndex<K, L, M> index_s_p_o, final Constraint<K> c1,
 			final Constraint<L> c2, final Constraint<M> c3) {
 		if (c1 == null) {
 			throw new IllegalArgumentException("c1 was null");
@@ -113,7 +113,7 @@ public class TripleUtils {
 		final Constraint<K> c1 = s == null ? new Wildcard<K>() : new EqualsConstraint<K>(s);
 		final Constraint<L> c2 = p == null ? new Wildcard<L>() : new EqualsConstraint<L>(p);
 		final Constraint<M> c3 = o == null ? new Wildcard<M>() : new EqualsConstraint<M>(o);
-		return getTriples(index_s_p_o, c1, c2, c3);
+		return getConstraintTriples(index_s_p_o, c1, c2, c3);
 	}
 
 }

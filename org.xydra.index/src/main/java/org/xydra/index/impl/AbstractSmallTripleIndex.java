@@ -144,7 +144,7 @@ public abstract class AbstractSmallTripleIndex<K, L, M, MMSI extends IMapMapSetI
 	// objects
 	@Override
 	public Iterator<M> getObjects() {
-		return Iterators.distinct(TripleUtils.getMatchingAndProject_O(this, null, null, null));
+		return Iterators.distinct(TripleUtils.getMatchingAndProject_O(this, (K) null, null, null));
 	}
 
 	// sub-classes can provide optimized implementations which do not need to create KeyKeyEntry tuple intermediate
@@ -158,7 +158,7 @@ public abstract class AbstractSmallTripleIndex<K, L, M, MMSI extends IMapMapSetI
 	// objects
 	@Override
 	public Iterator<L> getPredicates() {
-		return Iterators.distinct(TripleUtils.getMatchingAndProject_P(this, null, null, null));
+		return Iterators.distinct(TripleUtils.getMatchingAndProject_P(this, (K) null, null, null));
 	}
 
 	// sub-classes can provide optimized implementations which do not need to create KeyKeyEntry tuple intermediate
@@ -179,7 +179,7 @@ public abstract class AbstractSmallTripleIndex<K, L, M, MMSI extends IMapMapSetI
 	// objects
 	@Override
 	public Iterator<K> getSubjects() {
-		return Iterators.distinct(TripleUtils.getMatchingAndProject_S(this, null, null, null));
+		return Iterators.distinct(TripleUtils.getMatchingAndProject_S(this, (K) null, null, null));
 	}
 
 	// sub-classes can provide optimized implementations which do not need to create KeyKeyEntry tuple intermediate

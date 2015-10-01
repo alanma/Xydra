@@ -287,7 +287,7 @@ public abstract class AbstractFastTripleIndex<K, L, M> implements ITripleIndex<K
 	@Override
 	public Iterator<ITriple<K, L, M>> getTriples(final Constraint<K> c1, final Constraint<L> c2,
 			final Constraint<M> c3) {
-		return TripleUtils.getTriples(this.index_s_p_o, c1, c2, c3);
+		return TripleUtils.getConstraintTriples(this.index_s_p_o, c1, c2, c3);
 	}
 
 	/**
