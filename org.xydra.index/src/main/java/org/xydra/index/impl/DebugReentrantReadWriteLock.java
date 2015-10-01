@@ -6,6 +6,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.xydra.annotations.Feature;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.Setting;
 import org.xydra.log.api.Logger;
@@ -13,20 +14,16 @@ import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.util.SharedExceptionUtils;
 
 /**
- * A drop-in replacement of {@link ReentrantReadWriteLock} which provides more
- * debug information.
+ * A drop-in replacement of {@link ReentrantReadWriteLock} which provides more debug information.
  *
  * Configurable via log#isDebugEnabled
  *
- * The lock count is not used. The first call to lock() locks, thr first call to
- * unlock() unlocks. Redundant calls of lock() and unlock() are silently
- * ignored.
+ * The lock count is not used. The first call to lock() locks, thr first call to unlock() unlocks. Redundant calls of
+ * lock() and unlock() are silently ignored.
  *
- * I.e. It can be locked by a thread multiple times (even when already locked)
- * without causing any errors.
+ * I.e. It can be locked by a thread multiple times (even when already locked) without causing any errors.
  *
- * I.e. It can be unlocked by a thread multiple times (even when it is already
- * unlocked) without causing any errors.
+ * I.e. It can be unlocked by a thread multiple times (even when it is already unlocked) without causing any errors.
  *
  * @author xamde
  */
@@ -77,7 +74,7 @@ public class DebugReentrantReadWriteLock implements ReadWriteLock {
 			try {
 				DebugReentrantReadWriteLock.this.reentrant.readLock().unlock();
 			} catch (final IllegalMonitorStateException e) {
-				log.warn("Lock issue, ignored",e);
+				log.warn("Lock issue, ignored", e);
 			}
 			readOperationEnd();
 		}
@@ -131,19 +128,19 @@ public class DebugReentrantReadWriteLock implements ReadWriteLock {
 
 	private static final Logger log = LoggerFactory.getLogger(DebugReentrantReadWriteLock.class);
 
+	@Feature("DebugInfos")
 	private int openReadCount = 0;
 
-	/*
-	 * thread -> set of stack traces. A thread may open and close a read access
-	 * at very different places. We can only track ALL open reads and close
-	 * them, when this thread released all of them. No other kind of mapping is
-	 * possible.
-	 */
-	MapSetIndex<Long, String> openReads = MapSetIndex.createWithFastEntrySets();
+	/* thread -> set of stack traces. A thread may open and close a read access at very different places. We can only
+	 * track ALL open reads and close them, when this thread released all of them. No other kind of mapping is possible. */
+	@Feature("DebugInfos")
+	private final MapSetIndex<Long, String> openReads = MapSetIndex.createWithFastEntrySets();
 
+	@Feature("DebugInfos")
 	private int openWriteCount = 0;
 
-	MapSetIndex<Long, String> openWrites = MapSetIndex.createWithFastEntrySets();
+	@Feature("DebugInfos")
+	private final MapSetIndex<Long, String> openWrites = MapSetIndex.createWithFastEntrySets();
 
 	private transient Lock debugReadLock;
 
@@ -155,8 +152,7 @@ public class DebugReentrantReadWriteLock implements ReadWriteLock {
 	private static final boolean ALWAYS_ON = true;
 
 	/**
-	 * Behavior depends on setting of log. If isDebugEnabled, debug support is
-	 * on.
+	 * Behavior depends on setting of log. If isDebugEnabled, debug support is on.
 	 */
 	@SuppressWarnings("unused")
 	public DebugReentrantReadWriteLock() {
@@ -174,10 +170,14 @@ public class DebugReentrantReadWriteLock implements ReadWriteLock {
 		return this.debugReadLock;
 	}
 
+	@Feature("DebugInfos")
 	/**
 	 * Read operation just ended, we released the lock already
 	 */
 	private void readOperationEnd() {
+		if(!log.isDebugEnabled()) {
+			return;
+		}
 		this.openReadCount--;
 
 		if (this.reentrant.getReadHoldCount() == 0) {
@@ -189,10 +189,14 @@ public class DebugReentrantReadWriteLock implements ReadWriteLock {
 		stats();
 	}
 
+	@Feature("DebugInfos")
 	/**
 	 * Read operation will start, about the get the lock ...
 	 */
 	private void readOperationStart() {
+		if(!log.isDebugEnabled()) {
+			return;
+		}
 		this.openReadCount++;
 		try {
 			throw new RuntimeException("CALL");
@@ -204,11 +208,11 @@ public class DebugReentrantReadWriteLock implements ReadWriteLock {
 		stats();
 	}
 
+	@Feature("DebugInfos")
 	private void stats() {
 		if (log.isDebugEnabled()) {
-			log.debug("this thread openReads=" + this.reentrant.getReadHoldCount() + "/"
-					+ this.openReadCount + " openWrites=" + this.reentrant.getWriteHoldCount()
-					+ "/" + this.openWriteCount);
+			log.debug("this thread openReads=" + this.reentrant.getReadHoldCount() + "/" + this.openReadCount
+					+ " openWrites=" + this.reentrant.getWriteHoldCount() + "/" + this.openWriteCount);
 		}
 	}
 
@@ -217,10 +221,14 @@ public class DebugReentrantReadWriteLock implements ReadWriteLock {
 		return this.debugWriteLock;
 	}
 
+	@Feature("DebugInfos")
 	/**
 	 * Write operation just ended, we released the lock already
 	 */
 	private void writeOperationEnd() {
+		if(!log.isDebugEnabled()) {
+			return;
+		}
 		this.openWriteCount--;
 
 		if (this.reentrant.getWriteHoldCount() == 0) {
@@ -232,17 +240,23 @@ public class DebugReentrantReadWriteLock implements ReadWriteLock {
 		stats();
 	}
 
+	@Feature("DebugInfos")
 	/**
 	 * Write operation will start, about the get the lock ...
 	 */
 	private void writeOperationStart() {
+		if(!log.isDebugEnabled()) {
+			return;
+		}
 		this.openWriteCount++;
-		try {
-			throw new RuntimeException("CALL");
-		} catch (final RuntimeException e) {
-			final String stackTrace = SharedExceptionUtils.toString(e);
-			final long id = Thread.currentThread().getId();
-			this.openWrites.index(id, stackTrace);
+		if (log.isTraceEnabled()) {
+			try {
+				throw new RuntimeException("CALL");
+			} catch (final RuntimeException e) {
+				final String stackTrace = SharedExceptionUtils.toString(e);
+				final long id = Thread.currentThread().getId();
+				this.openWrites.index(id, stackTrace);
+			}
 		}
 		stats();
 
@@ -257,13 +271,12 @@ public class DebugReentrantReadWriteLock implements ReadWriteLock {
 				final long now = System.nanoTime();
 				final long duration = now - start;
 				final long millisWaited = duration / (1000 * 1000);
-				log.info("Could not get write lock, waited already " + millisWaited
-						+ ". Will wait " + this.maxWaitForWriteLockMillis + ".");
+				log.info("Could not get write lock, waited already " + millisWaited + ". Will wait "
+						+ this.maxWaitForWriteLockMillis + ".");
 				if (millisWaited > this.maxWaitForWriteLockMillis) {
 					// waited over k=10 seconds
-					log.warn("Could not get lock even after waiting "
-							+ this.maxWaitForWriteLockMillis + " ms");
-					log.info("Reads have been recorded from these threads / code locations:");
+					log.warn("Could not get lock even after waiting " + this.maxWaitForWriteLockMillis + " ms");
+					log.info("Reads have been recorded from these threads / code locations (recorded only if this is log.debugEnabled):");
 					this.openReads.dump();
 					log.info("Thread sleeps now for 1 hour to let you debug");
 					try {
