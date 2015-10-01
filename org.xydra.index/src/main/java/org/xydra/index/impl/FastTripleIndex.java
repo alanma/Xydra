@@ -24,23 +24,19 @@ import org.xydra.index.query.Constraint;
  * @param <L> key type 2 (p)
  * @param <M> key type 3 (o)
  */
-public class FastTripleIndex<K,L,M>
-extends AbstractFastTripleIndex<K, L, M>
-implements ITripleIndex<K, L, M> {
+public class FastTripleIndex<K, L, M> extends AbstractFastTripleIndex<K, L, M>implements ITripleIndex<K, L, M> {
 
 	@SuppressWarnings("unchecked")
 	public FastTripleIndex() {
 		super(
 
-				(AbstractSmallTripleIndex<K, L, M, ? extends IMapMapSetIndex<K, L, M>>) new SmallTripleIndex<K, L, M>(true),
+		(IMapMapSetIndex<K, L, M>) new MapMapSetIndex<K, L, M>(new FastEntrySetFactory<M>()),
 
-				(IMapMapSetIndex<L, M, K>) new MapMapSetIndex<M, K, L>(new FastEntrySetFactory<L>()),
+		(IMapMapSetIndex<L, M, K>) new MapMapSetIndex<M, K, L>(new FastEntrySetFactory<L>()),
 
-				(IMapMapSetIndex<M, K, L>) new MapMapSetIndex<L, M, K>(new FastEntrySetFactory<K>())
+		(IMapMapSetIndex<M, K, L>) new MapMapSetIndex<L, M, K>(new FastEntrySetFactory<K>())
 
-				);
+		);
 	}
 
-
 }
-

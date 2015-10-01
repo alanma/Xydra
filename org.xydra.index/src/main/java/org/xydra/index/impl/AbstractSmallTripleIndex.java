@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.index.IMapMapSetIndex;
-import org.xydra.index.IMapMapSetIndex.IMapMapSetDiff;
 import org.xydra.index.ITripleIndex;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.ITriple;
@@ -14,9 +14,11 @@ import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 
 /**
- * An implementation that uses no indexes. Slow, but small memory footprint.
+ * An implementation that uses no additional indexes. Slow, but small memory footprint. Sub-classes can override methods
+ * and use more indexes.
  *
  * State:
+ *
  * <pre>
  * s > p > o
  * </pre>
@@ -27,8 +29,8 @@ import org.xydra.log.api.LoggerFactory;
  * @param <L> key type 2
  * @param <M> key type 3
  */
-public abstract class AbstractSmallTripleIndex<K, L, M, MMSI extends IMapMapSetIndex<K,L,M>>
-implements ITripleIndex<K, L, M>, Serializable {
+public abstract class AbstractSmallTripleIndex<K, L, M, MMSI extends IMapMapSetIndex<K, L, M>>
+		implements ITripleIndex<K, L, M>, Serializable {
 
 	private static final Logger log = LoggerFactory.getLogger(AbstractSmallTripleIndex.class);
 
@@ -46,19 +48,19 @@ implements ITripleIndex<K, L, M>, Serializable {
 		this.index_s_p_o.clear();
 	}
 
-	@Override
-	public IMapMapSetDiff<K, L, M> computeDiff(final ITripleIndex<K, L, M> other) {
-		if(other instanceof AbstractSmallTripleIndex) {
-			@SuppressWarnings("rawtypes")
-			final AbstractSmallTripleIndex otherIndex = (AbstractSmallTripleIndex) other;
-			@SuppressWarnings("unchecked")
-			final IMapMapSetIndex<K, L, M> otherRawIndex =  otherIndex.getMapMapSetIndex();
-			final IMapMapSetDiff<K, L, M> spoDiff = this.index_s_p_o.computeDiff(otherRawIndex);
-			return spoDiff;
-		} else {
-			throw new UnsupportedOperationException();
-		}
-	}
+	// @Override
+	// public IMapMapSetDiff<K, L, M> computeDiff(final ITripleIndex<K, L, M> other) {
+	// if(other instanceof AbstractSmallTripleIndex) {
+	// @SuppressWarnings("rawtypes")
+	// final AbstractSmallTripleIndex otherIndex = (AbstractSmallTripleIndex) other;
+	// @SuppressWarnings("unchecked")
+	// final IMapMapSetIndex<K, L, M> otherRawIndex = otherIndex.getMapMapSetIndex();
+	// final IMapMapSetDiff<K, L, M> spoDiff = this.index_s_p_o.computeDiff(otherRawIndex);
+	// return spoDiff;
+	// } else {
+	// throw new UnsupportedOperationException();
+	// }
+	// }
 
 	@Override
 	public boolean contains(final Constraint<K> c1, final Constraint<L> c2, final Constraint<M> c3) {
@@ -90,9 +92,10 @@ implements ITripleIndex<K, L, M>, Serializable {
 	}
 
 	@Override
-	public void dump() {
+	public String dump() {
 		log.info("Dumping s-p-o-index (there are other indexes)");
 		this.index_s_p_o.dump();
+		return "";
 	}
 
 	public MMSI getMapMapSetIndex() {
@@ -135,6 +138,55 @@ implements ITripleIndex<K, L, M>, Serializable {
 
 	public Iterator<K> keyIterator() {
 		return this.index_s_p_o.keyIterator();
+	}
+
+	// sub-classes can provide optimized implementations which do not need to create KeyKeyEntry tuple intermediate
+	// objects
+	@Override
+	public Iterator<M> getObjects() {
+		return Iterators.distinct(TripleUtils.getMatchingAndProject_O(this, null, null, null));
+	}
+
+	// sub-classes can provide optimized implementations which do not need to create KeyKeyEntry tuple intermediate
+	// objects
+	@Override
+	public Iterator<M> getObjects_SPX(final K s, final L p) {
+		return Iterators.distinct(TripleUtils.getMatchingAndProject_O(this, s, p, null));
+	}
+
+	// sub-classes can provide optimized implementations which do not need to create KeyKeyEntry tuple intermediate
+	// objects
+	@Override
+	public Iterator<L> getPredicates() {
+		return Iterators.distinct(TripleUtils.getMatchingAndProject_P(this, null, null, null));
+	}
+
+	// sub-classes can provide optimized implementations which do not need to create KeyKeyEntry tuple intermediate
+	// objects
+	@Override
+	public Iterator<L> getPredicates_SX(final K s) {
+		return Iterators.distinct(TripleUtils.getMatchingAndProject_P(this, s, null, null));
+	}
+
+	// sub-classes can provide optimized implementations which do not need to create KeyKeyEntry tuple intermediate
+	// objects
+	@Override
+	public Iterator<L> getPredicates_SXO(final K s, final M o) {
+		return Iterators.distinct(TripleUtils.getMatchingAndProject_P(this, s, null, o));
+	}
+
+	// sub-classes can provide optimized implementations which do not need to create KeyKeyEntry tuple intermediate
+	// objects
+	@Override
+	public Iterator<K> getSubjects() {
+		return Iterators.distinct(TripleUtils.getMatchingAndProject_S(this, null, null, null));
+	}
+
+	// sub-classes can provide optimized implementations which do not need to create KeyKeyEntry tuple intermediate
+	// objects
+	@Override
+	public Iterator<K> getSubjects_XPO(final L p, final M o) {
+		return Iterators.distinct(TripleUtils.getMatchingAndProject_S(this, null, p, o));
 	}
 
 }
