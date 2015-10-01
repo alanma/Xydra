@@ -6,12 +6,10 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.ITriple;
 
 /**
- * A read-only triple index, for triples of keys that supports queries on all
- * three keys. Indexes three keys (to boolean, either a key combination is there
- * or not).
+ * A read-only triple index, for triples of keys that supports queries on all three keys. Indexes three keys (to
+ * boolean, either a key combination is there or not).
  *
- * The same concept for two-tuples instead of three-tuples is called
- * {@link IPairIndex}.
+ * The same concept for two-tuples instead of three-tuples is called {@link IPairIndex}.
  *
  * @param <K> key type
  * @param <L> key type
@@ -23,8 +21,7 @@ public interface ITripleSource<K, L, M> extends IIndex {
 	 * @param c1
 	 * @param c2
 	 * @param c3
-	 * @return true if there is a triple in the index where s matches c1, p
-	 *         matches c2 and o matches c3
+	 * @return true if there is a triple in the index where s matches c1, p matches c2 and o matches c3
 	 */
 	boolean contains(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3);
 
@@ -48,8 +45,7 @@ public interface ITripleSource<K, L, M> extends IIndex {
 	 * @param c1 constraint for component 1 of triple (subject) @NeverNull
 	 * @param c2 constraint for component 2 of triple (property) @NeverNull
 	 * @param c3 constraint for component 3 of triple (object) @NeverNull
-	 * @return an {@link Iterator} over all {@link ITriple} that match the given
-	 *         constraints
+	 * @return an {@link Iterator} over all {@link ITriple} that match the given constraints
 	 */
 	Iterator<ITriple<K, L, M>> getTriples(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3);
 
