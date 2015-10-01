@@ -38,8 +38,14 @@ public interface ITripleSource<K, L, M> extends IIndex {
 
 	/**
 	 * Dump the contents to Xydra Logging as log.info(...)
+	 *
+	 * @return an empty String, just so that dump() can be used in
+	 *
+	 *         <pre>
+	 * assert foo : dump()
+	 *         </pre>
 	 */
-	void dump();
+	String dump();
 
 	/**
 	 * @param c1 constraint for component 1 of triple (subject) @NeverNull
