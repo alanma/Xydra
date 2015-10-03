@@ -247,11 +247,11 @@ public abstract class AbstractFastTripleIndex<K, L, M> implements ITripleIndex<K
 		assert o != null;
 		final IMapSetIndex<K, L> index_o_Sx_Px = this.index_o_s_p.lookup(o);
 		if (index_o_Sx_Px == null) {
-			return NoneIterator.<L> create();
+			return Iterators.none();
 		}
 		final IEntrySet<L> index_o_s_Px = index_o_Sx_Px.lookup(s);
 		if (index_o_s_Px == null) {
-			return NoneIterator.<L> create();
+			return Iterators.none();
 		}
 		return index_o_s_Px.iterator();
 	}
