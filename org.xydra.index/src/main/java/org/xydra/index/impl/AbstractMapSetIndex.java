@@ -455,7 +455,7 @@ public abstract class AbstractMapSetIndex<K, E> implements IMapSetIndex<K, E> {
 			b.append(" -> ");
 
 			final IEntrySet<E> subMap = this.map.get(pair.getSecond());
-			if(subMap.size() > 1) {
+			if (subMap.size() > 1) {
 				b.append("\n");
 				b.append(indent);
 				b.append("  ");
@@ -499,6 +499,16 @@ public abstract class AbstractMapSetIndex<K, E> implements IMapSetIndex<K, E> {
 		} else {
 			throw new AssertionError("unknown constraint type " + c1.getClass());
 		}
+	}
+
+	public Iterator<KeyEntryTuple<K, E>> tuples() {
+		final Iterator<Map.Entry<K, IEntrySet<E>>> entryIt = this.map.entrySet().iterator();
+		if (!entryIt.hasNext()) {
+			return NoneIterator.create();
+		}
+		// cascade to tuples
+		final Iterator<KeyEntryTuple<K, E>> cascaded = new CascadingMapEntry_K_EntrySet_Iterator(entryIt);
+		return cascaded;
 	}
 
 	/**
