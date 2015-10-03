@@ -5,7 +5,7 @@ import org.xydra.index.AbstractMapSetIndexTest;
 public class MapSetIndexTest extends AbstractMapSetIndexTest<String, Integer> {
 
 	public MapSetIndexTest() {
-		super(new MapSetIndex<String, Integer>(new SmallEntrySetFactory<Integer>()));
+		super(new SerializableMapSetIndex<String, Integer>(new SmallEntrySetFactory<Integer>()));
 	}
 
 	private static int i = 1;

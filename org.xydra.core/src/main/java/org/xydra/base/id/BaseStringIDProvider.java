@@ -11,7 +11,7 @@ import org.xydra.base.XIdProvider;
 import org.xydra.core.XX;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.impl.IntegerRangeIndex;
-import org.xydra.index.impl.MapSetIndex;
+import org.xydra.index.impl.SerializableMapSetIndex;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 
@@ -168,7 +168,7 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 	}
 
 	// FIXME experimental address caching
-	private transient MapSetIndex<Integer, XAddress> addressIndex = MapSetIndex.createWithFastWeakEntrySets();
+	private transient SerializableMapSetIndex<Integer, XAddress> addressIndex = SerializableMapSetIndex.createWithFastWeakEntrySets();
 
 	@Override
 	public XAddress fromComponents(final XId repositoryId, final XId modelId, final XId objectId, final XId fieldId) {

@@ -29,12 +29,12 @@ public class TestIndexes extends TestCase {
 	@Test
 	public void testMapSetIndex() {
 		final Factory<IEntrySet<String>> entrySetFactory = new FastEntrySetFactory<String>();
-		final MapSetIndex<String, String> mapSetIndex1 = new MapSetIndex<String, String>(entrySetFactory);
+		final SerializableMapSetIndex<String, String> mapSetIndex1 = new SerializableMapSetIndex<String, String>(entrySetFactory);
 		mapSetIndex1.index("-1", "1");
 		mapSetIndex1.index("=2", "2");
 		mapSetIndex1.index("-4", "4");
 
-		final MapSetIndex<String, String> mapSetIndex2 = new MapSetIndex<String, String>(entrySetFactory);
+		final SerializableMapSetIndex<String, String> mapSetIndex2 = new SerializableMapSetIndex<String, String>(entrySetFactory);
 		mapSetIndex2.index("=2", "2");
 		mapSetIndex2.index("+3", "3");
 		mapSetIndex2.index("+4", "5");

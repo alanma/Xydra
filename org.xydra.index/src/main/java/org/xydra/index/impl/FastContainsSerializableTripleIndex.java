@@ -47,8 +47,8 @@ public class FastContainsSerializableTripleIndex<K extends Serializable, L exten
 
 	public FastContainsSerializableTripleIndex() {
 		super();
-		this.index_o_s = new MapSetIndex<M, K>(new FastEntrySetFactory<K>());
-		this.index_p_o = new MapSetIndex<L, M>(new FastEntrySetFactory<M>());
+		this.index_o_s = new SerializableMapSetIndex<M, K>(new FastEntrySetFactory<K>());
+		this.index_p_o = new SerializableMapSetIndex<L, M>(new FastEntrySetFactory<M>());
 	}
 
 	@Override

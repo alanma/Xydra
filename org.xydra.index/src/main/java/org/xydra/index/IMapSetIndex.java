@@ -1,6 +1,5 @@
 package org.xydra.index;
 
-import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.index.iterator.ClosableIterator;
@@ -11,8 +10,6 @@ import org.xydra.index.query.KeyEntryTuple;
  * Some implementations might used {@link ClosableIterator} as return types to
  * handle concurrency. Remember to close them to release read-locks.
  *
- * Note: All implementations need to be {@link Serializable}.
- *
  * @author voelkel
  *
  *         Multiple entries can be indexed for a certain key-combination.
@@ -20,7 +17,7 @@ import org.xydra.index.query.KeyEntryTuple;
  * @param <K> key type
  * @param <E> entity type
  */
-public interface IMapSetIndex<K, E> extends IIndex, Serializable {
+public interface IMapSetIndex<K, E> extends IIndex {
 
 	/**
 	 * @param c1

@@ -1,6 +1,8 @@
 package org.xydra.index.query;
 
-public interface ITriple<K, L, E> extends HasEntry<E> {
+import java.io.Serializable;
+
+public interface ITriple<K, L, E> extends HasEntry<E>, Serializable {
 
 	@Override
 	E getEntry();
