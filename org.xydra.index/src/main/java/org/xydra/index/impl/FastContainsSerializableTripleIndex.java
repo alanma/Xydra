@@ -19,12 +19,13 @@ import org.xydra.index.query.Wildcard;
  * This is a compromise between speed and memory footprint. Use {@link FastSerializableTripleIndex} for high speed.
  *
  * State:
+ *
  * <pre>
  * s > p > o (inherited)
  * o > s
  * p > o
  * </pre>
-
+ *
  * @author voelkel
  *
  * @param <K> key type 1
@@ -32,7 +33,7 @@ import org.xydra.index.query.Wildcard;
  * @param <M> key type 3
  */
 public class FastContainsSerializableTripleIndex<K extends Serializable, L extends Serializable, M extends Serializable>
-extends SmallSerializableTripleIndex<K, L, M>implements ITripleIndex<K, L, M> {
+		extends SmallSerializableTripleIndex<K, L, M>implements ITripleIndex<K, L, M> {
 
 	/**
 	 * o-URI -> p-URI
@@ -61,27 +62,23 @@ extends SmallSerializableTripleIndex<K, L, M>implements ITripleIndex<K, L, M> {
 	public boolean contains(final Constraint<K> c1, final Constraint<L> c2, final Constraint<M> c3) {
 		// deal with the eight patterns
 		if (
-				// spo -> s_p_o
-				!c1.isStar() && !c2.isStar() && !c3.isStar() ||
-				!c1.isStar() && !c2.isStar() && c3.isStar() ||
-				!c1.isStar() && c2.isStar() && c3.isStar() ||
-				c1.isStar() && c2.isStar() && c3.isStar()
+		// spo -> s_p_o
+		!c1.isStar() && !c2.isStar() && !c3.isStar() || !c1.isStar() && !c2.isStar() && c3.isStar()
+				|| !c1.isStar() && c2.isStar() && c3.isStar() || c1.isStar() && c2.isStar() && c3.isStar()
 
-				) {
+		) {
 			return this.index_s_p_o.contains(c1, c2, c3);
 		} else if (
-				// *po -> p_o
-				c1.isStar() && !c2.isStar() && !c3.isStar() ||
-				c1.isStar() && !c2.isStar() && c3.isStar()
+		// *po -> p_o
+		c1.isStar() && !c2.isStar() && !c3.isStar() || c1.isStar() && !c2.isStar() && c3.isStar()
 
-				) {
+		) {
 			return this.index_p_o.contains(c2, c3);
 		} else if (
-				// s*o -> o_s
-				!c1.isStar() && c2.isStar() && !c3.isStar() ||
-				c1.isStar() && c2.isStar() && !c3.isStar()
+		// s*o -> o_s
+		!c1.isStar() && c2.isStar() && !c3.isStar() || c1.isStar() && c2.isStar() && !c3.isStar()
 
-				) {
+		) {
 			return this.index_o_s.contains(c3, c1);
 		}
 
@@ -97,10 +94,14 @@ extends SmallSerializableTripleIndex<K, L, M>implements ITripleIndex<K, L, M> {
 	}
 
 	@Override
-	public void deIndex(final K s, final L p, final M o) {
-		super.deIndex(s, p, o);
+	public boolean deIndex(final K s, final L p, final M o) {
+		final boolean b = super.deIndex(s, p, o);
+		if(!b) {
+			return false;
+		}
 		this.index_o_s.deIndex(o, s);
 		this.index_p_o.deIndex(p, o);
+		return true;
 	}
 
 	@Override

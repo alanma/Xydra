@@ -87,8 +87,8 @@ public abstract class AbstractSmallTripleIndex<K, L, M, MMSI extends IMapMapSetI
 	protected abstract MMSI createMMSI();
 
 	@Override
-	public void deIndex(final K s, final L p, final M o) {
-		this.index_s_p_o.deIndex(s, p, o);
+	public boolean deIndex(final K s, final L p, final M o) {
+		return this.index_s_p_o.deIndex(s, p, o);
 	}
 
 	@Override

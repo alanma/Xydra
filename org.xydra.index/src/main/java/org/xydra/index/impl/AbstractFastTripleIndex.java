@@ -164,13 +164,17 @@ public abstract class AbstractFastTripleIndex<K, L, M> implements ITripleIndex<K
 	}
 
 	@Override
-	public void deIndex(final K s, final L p, final M o) {
+	public boolean deIndex(final K s, final L p, final M o) {
 		assert s != null;
 		assert p != null;
 		assert o != null;
-		this.index_s_p_o.deIndex(s, p, o);
+		final boolean b = this.index_s_p_o.deIndex(s, p, o);
+		if(!b) {
+			return false;
+		}
 		this.index_o_s_p.deIndex(o, s, p);
 		this.index_p_o_s.deIndex(p, o, s);
+		return true;
 	}
 
 	@Override

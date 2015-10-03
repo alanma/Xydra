@@ -17,7 +17,8 @@ public interface IRemovableTripleSink<K, L, M> extends ITripleSink<K, L, M> {
 	 * @param s
 	 * @param p
 	 * @param o
+	 * @return true iff triple was present
 	 */
-	void deIndex(K s, L p, M o);
+	boolean deIndex(K s, L p, M o);
 
 }
