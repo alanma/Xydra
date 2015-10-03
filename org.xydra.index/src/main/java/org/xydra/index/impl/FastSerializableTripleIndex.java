@@ -3,7 +3,7 @@ package org.xydra.index.impl;
 import java.io.Serializable;
 
 import org.xydra.index.IMapMapSetIndex;
-import org.xydra.index.ITripleIndex;
+import org.xydra.index.ISerializableTripleIndex;
 import org.xydra.index.query.Constraint;
 
 /**
@@ -27,7 +27,7 @@ import org.xydra.index.query.Constraint;
  * @param <M> key type 3 (o)
  */
 public class FastSerializableTripleIndex<K extends Serializable, L extends Serializable, M extends Serializable>
-		extends AbstractFastTripleIndex<K, L, M>implements ITripleIndex<K, L, M>, Serializable {
+		extends AbstractFastTripleIndex<K, L, M>implements ISerializableTripleIndex<K, L, M>  {
 
 	@SuppressWarnings("unchecked")
 	public FastSerializableTripleIndex() {
