@@ -17,7 +17,7 @@ public interface ITripleIndex<K, L, M> extends IIndex, IRemovableTripleSink<K, L
 	/**
 	 * @return a distinct iterator over all objects
 	 */
-	Iterator<M> getObjects();
+	Iterator<M> getObjects_XXX();
 
 	/**
 	 * @param s @NeverNull
@@ -29,13 +29,13 @@ public interface ITripleIndex<K, L, M> extends IIndex, IRemovableTripleSink<K, L
 	/**
 	 * @return a distinct iterator over all used predicates
 	 */
-	Iterator<L> getPredicates();
+	Iterator<L> getPredicates_XXX();
 
 	/**
 	 * @param s @NeverNull
 	 * @return a distinct iterator over all predicates ?p occurring in triples (s,?p,*) @NeverNull
 	 */
-	Iterator<L> getPredicates_SX(final K s);
+	Iterator<L> getPredicates_SXX(final K s);
 
 	/**
 	 * @param s @NeverNull
@@ -47,7 +47,7 @@ public interface ITripleIndex<K, L, M> extends IIndex, IRemovableTripleSink<K, L
 	/**
 	 * @return a distinct iterator over all subjects
 	 */
-	Iterator<K> getSubjects();
+	Iterator<K> getSubjects_XXX();
 
 	/**
 	 * @param p @NeverNull

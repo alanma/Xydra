@@ -17,9 +17,11 @@ import org.xydra.index.IEntrySet;
 import org.xydra.index.IEntrySet.IEntrySetDiff;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.IPair;
+import org.xydra.index.IndexUtils;
 import org.xydra.index.iterator.AbstractCascadedIterator;
 import org.xydra.index.iterator.ClosableIterator;
 import org.xydra.index.iterator.ClosableIteratorAdapter;
+import org.xydra.index.iterator.IFilter;
 import org.xydra.index.iterator.ITransformer;
 import org.xydra.index.iterator.Iterators;
 import org.xydra.index.iterator.NoneIterator;
@@ -404,6 +406,43 @@ public abstract class AbstractMapSetIndex<K, E> implements IMapSetIndex<K, E> {
 	@Override
 	public Iterator<K> keyIterator() {
 		return this.map.keySet().iterator();
+	}
+
+	/**
+	 * This implementation is slightly faster on average than {@link IndexUtils#keyIterator(IMapSetIndex, Constraint)}
+	 *
+	 * @param entryConstraint
+	 * @return
+	 */
+	public Iterator<K> keyIterator(final Constraint<E> entryConstraint) {
+		if(entryConstraint.isStar()) {
+			return keyIterator();
+		}
+
+
+		final Iterator<Entry<K, IEntrySet<E>>> baseIt = this.map.entrySet().iterator();
+
+		final Iterator<Entry<K, IEntrySet<E>>> filterIt = Iterators.filter(baseIt, new IFilter<Entry<K, IEntrySet<E>>>() {
+
+			@Override
+			public boolean matches(final Entry<K, IEntrySet<E>> entry) {
+				final IEntrySet<E> entrySet = entry.getValue();
+				for( final E e : entrySet) {
+					if(entryConstraint.matches(e)) {
+						// speed-up comes from here
+						return true;
+					}
+				}
+				return false;
+			}});
+
+
+		return Iterators.transform(filterIt, new ITransformer<Entry<K, IEntrySet<E>>, K>() {
+
+			@Override
+			public K transform(final Entry<K, IEntrySet<E>> in) {
+				return in.getKey();
+			}});
 	}
 
 	public Set<K> keySet() {

@@ -194,7 +194,7 @@ public abstract class AbstractFastTripleIndex<K, L, M> implements ITripleIndex<K
 	 * @return a distinct iterator over all objects
 	 */
 	@Override
-	public Iterator<M> getObjects() {
+	public Iterator<M> getObjects_XXX() {
 		return this.index_o_s_p.keyIterator();
 	}
 
@@ -222,7 +222,7 @@ public abstract class AbstractFastTripleIndex<K, L, M> implements ITripleIndex<K
 	 * @return a distinct iterator over all used predicates
 	 */
 	@Override
-	public Iterator<L> getPredicates() {
+	public Iterator<L> getPredicates_XXX() {
 		return this.index_p_o_s.keyIterator();
 	}
 
@@ -231,7 +231,7 @@ public abstract class AbstractFastTripleIndex<K, L, M> implements ITripleIndex<K
 	 * @return a distinct iterator over all predicates occurring in triples (s,*,*) @NeverNull
 	 */
 	@Override
-	public Iterator<L> getPredicates_SX(final K s) {
+	public Iterator<L> getPredicates_SXX(final K s) {
 		assert s != null;
 		final IMapSetIndex<L, M> index_s_Px_Ox = this.index_s_p_o.lookup(s);
 		if (index_s_Px_Ox == null) {
@@ -264,7 +264,7 @@ public abstract class AbstractFastTripleIndex<K, L, M> implements ITripleIndex<K
 	 * @return a distinct iterator over all subjects
 	 */
 	@Override
-	public Iterator<K> getSubjects() {
+	public Iterator<K> getSubjects_XXX() {
 		return this.index_s_p_o.keyIterator();
 	}
 
