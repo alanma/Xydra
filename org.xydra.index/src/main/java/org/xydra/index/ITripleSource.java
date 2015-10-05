@@ -56,14 +56,11 @@ public interface ITripleSource<K, L, M> extends IIndex {
 	Iterator<ITriple<K, L, M>> getTriples(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3);
 
 	/**
-	 * @param c1
-	 * @CanBeNull to denote a wildcard
-	 * @param c2
-	 * @CanBeNull to denote a wildcard
-	 * @param c3
-	 * @CanBeNull to denote a wildcard
+	 * @param s @CanBeNull to denote a wildcard
+	 * @param p @CanBeNull to denote a wildcard
+	 * @param o @CanBeNull to denote a wildcard
 	 * @return an iterator with all triples matching the given constraints
 	 */
-	Iterator<ITriple<K, L, M>> getTriples(K c1, L c2, M c3);
+	Iterator<ITriple<K, L, M>> getTriples(K s, L p, M o);
 
 }

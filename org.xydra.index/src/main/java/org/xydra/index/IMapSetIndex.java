@@ -20,6 +20,8 @@ import org.xydra.index.query.KeyEntryTuple;
 public interface IMapSetIndex<K, E> extends IIndex {
 
 	/**
+	 * Logically queries for all tuples (c1,?x) and projects ?x.
+	 *
 	 * @param c1
 	 * @NeverNull
 	 * @return an iterator that ranges over all entries indexed by keys, where
@@ -94,7 +96,6 @@ public interface IMapSetIndex<K, E> extends IIndex {
 	 */
 	Iterator<K> keyIterator();
 
-
 	/**
 	 * @param otherFuture the other map index is the future. What is found here
 	 *            and not present in this, has been added. @NeverNull
@@ -129,5 +130,7 @@ public interface IMapSetIndex<K, E> extends IIndex {
 	IEntrySet<E> lookup(K key);
 
 	String toString(String indent);
+
+
 
 }

@@ -9,4 +9,5 @@ import java.io.Serializable;
  * @param <E> entity type
  */
 public interface ISerializableMapSetIndex<K extends Serializable, E extends Serializable> extends IMapSetIndex<K, E>, Serializable {
+
 }
