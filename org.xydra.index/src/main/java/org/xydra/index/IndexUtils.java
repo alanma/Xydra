@@ -5,9 +5,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.xydra.index.impl.AbstractMapSetIndex;
 import org.xydra.index.impl.MapMapIndex;
+import org.xydra.index.iterator.IFilter;
+import org.xydra.index.iterator.ITransformer;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.Constraint;
+import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.KeyKeyEntryTuple;
+import org.xydra.index.query.Wildcard;
 
 import com.google.common.collect.Sets;
 
@@ -194,6 +200,49 @@ public class IndexUtils {
 		buf.append(cO == null ? "*" : cO.toString());
 		buf.append(")");
 		return buf.toString();
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static final Wildcard ANY = new Wildcard();
+
+	/**
+	 * Query for all tuples (?k, entryConstraint) and project ?k
+	 *
+	 * @param mapSetIndex
+	 * @param entryConstraint
+	 * @return
+	 */
+	public static <K, E> Iterator<K> keyIterator(final IMapSetIndex<K, E> mapSetIndex,
+			final Constraint<E> entryConstraint) {
+		if(entryConstraint.isStar()) {
+			return mapSetIndex.keyIterator();
+		}
+
+		// fast path
+		if (mapSetIndex instanceof AbstractMapSetIndex) {
+			final AbstractMapSetIndex<K, E> abstractMapSetIndex = (AbstractMapSetIndex<K, E>) mapSetIndex;
+			return abstractMapSetIndex.keyIterator(entryConstraint);
+		}
+
+		// regular path
+		@SuppressWarnings("unchecked") final Iterator<KeyEntryTuple<K, E>> tupleIt = mapSetIndex.tupleIterator(ANY,
+				entryConstraint);
+
+		final Iterator<KeyEntryTuple<K, E>> filterIt = Iterators.filter(tupleIt, new IFilter<KeyEntryTuple<K, E>>() {
+
+			@Override
+			public boolean matches(final KeyEntryTuple<K, E> entry) {
+				return entryConstraint.matches(entry.getSecond());
+			}
+		});
+
+		return Iterators.transform(filterIt, new ITransformer<KeyEntryTuple<K, E>, K>() {
+
+			@Override
+			public K transform(final KeyEntryTuple<K, E> in) {
+				return in.getKey();
+			}
+		});
 	}
 
 }
