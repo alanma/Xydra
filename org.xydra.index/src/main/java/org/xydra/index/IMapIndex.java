@@ -6,8 +6,7 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyEntryTuple;
 
 /**
- * Multiple entries can be indexed for a certain key-combination.
- *
+ * Similar to a normal {@link java.util.Map}, just using Xydra index method conventions.
  *
  * @author voelkel
  * @param <K>
@@ -15,7 +14,7 @@ import org.xydra.index.query.KeyEntryTuple;
  * @param <E>
  *            entity type
  */
-public interface IMapIndex<K, E> extends IIndex {
+public interface IMapIndex<K, E> extends IIndex, Iterable<E> {
 
 	/**
 	 * @param key
@@ -38,6 +37,7 @@ public interface IMapIndex<K, E> extends IIndex {
 	/**
 	 * @return all entries
 	 */
+	@Override
 	Iterator<E> iterator();
 
 	/**
