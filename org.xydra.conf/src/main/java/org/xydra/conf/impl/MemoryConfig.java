@@ -20,7 +20,7 @@ import org.xydra.conf.ConfBuilder;
 import org.xydra.conf.ConfigException;
 import org.xydra.conf.IConfig;
 import org.xydra.conf.IResolver;
-import org.xydra.index.impl.SerializableMapSetIndex;
+import org.xydra.index.impl.MapSetIndex;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 import org.xydra.log.api.Logger;
@@ -142,7 +142,7 @@ public class MemoryConfig implements IConfig {
 	/** for debugging */
 	private final String internalId;
 
-	private final SerializableMapSetIndex<String, Class<?>> required = SerializableMapSetIndex.createWithFastEntrySets();
+	private final MapSetIndex<String, Class<?>> required = MapSetIndex.createWithFastEntrySets();
 
 	private final Set<Exception> setOrigins = new HashSet<Exception>();
 
