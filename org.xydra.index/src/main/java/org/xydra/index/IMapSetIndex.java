@@ -7,8 +7,8 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyEntryTuple;
 
 /**
- * Some implementations might used {@link ClosableIterator} as return types to
- * handle concurrency. Remember to close them to release read-locks.
+ * Some implementations might used {@link ClosableIterator} as return types to handle concurrency. Remember to close
+ * them to release read-locks.
  *
  * @author voelkel
  *
@@ -22,19 +22,15 @@ public interface IMapSetIndex<K, E> extends IIndex {
 	/**
 	 * Logically queries for all tuples (c1,?x) and projects ?x.
 	 *
-	 * @param c1
-	 * @NeverNull
-	 * @return an iterator that ranges over all entries indexed by keys, where
-	 *         the keys match c1
+	 * @param c1 @NeverNull
+	 * @return an iterator that ranges over all entries indexed by keys, where the keys match c1
 	 */
 	Iterator<E> constraintIterator(Constraint<K> c1);
 
 	/**
-	 * @param c1
-	 * @NeverNull
-	 * @param entryConstraint
-	 * @return true iff this index contains a tuple matching the given
-	 *         constraints.
+	 * @param c1 @NeverNull
+	 * @param entryConstraint @NeverNull
+	 * @return true iff this index contains a tuple matching the given constraints.
 	 */
 	boolean contains(Constraint<K> c1, Constraint<E> entryConstraint);
 
@@ -46,8 +42,7 @@ public interface IMapSetIndex<K, E> extends IIndex {
 	boolean contains(K k, E e);
 
 	/**
-	 * @param key
-	 * @NeverNull
+	 * @param key @NeverNull
 	 * @return true if this index contains any tuple (key,*)
 	 */
 	boolean containsKey(K key);
@@ -55,10 +50,8 @@ public interface IMapSetIndex<K, E> extends IIndex {
 	/**
 	 * Removed a tuple from the index.
 	 *
-	 * @param key1
-	 * @NeverNull
-	 * @param entry
-	 * @NeverNull
+	 * @param key1 @NeverNull
+	 * @param entry @NeverNull
 	 * @return true iff set K contained entry
 	 */
 	boolean deIndex(K key1, E entry);
@@ -67,18 +60,15 @@ public interface IMapSetIndex<K, E> extends IIndex {
 	 * De-index all current entries with (key1, *).
 	 *
 	 * @param key1
-	 * @return
-	 * @NeverNull
+	 * @return @NeverNull
 	 */
 	boolean deIndex(K key1);
 
 	/**
 	 * Add a tuple to the index
 	 *
-	 * @param key1
-	 * @NeverNull
-	 * @param entry
-	 * @NeverNull
+	 * @param key1 @NeverNull
+	 * @param entry @NeverNull
 	 * @return true iff set K did not contain entry yet
 	 */
 	boolean index(K key1, E entry);
@@ -91,14 +81,13 @@ public interface IMapSetIndex<K, E> extends IIndex {
 	Iterator<KeyEntryTuple<K, E>> tupleIterator(Constraint<K> c1, Constraint<E> entryConstraint);
 
 	/**
-	 * @return an iterator over all keys ?x in tuples (?x,?y) without
-	 *         duplicates.
+	 * @return an iterator over all keys ?x in tuples (?x,?y) without duplicates.
 	 */
 	Iterator<K> keyIterator();
 
 	/**
-	 * @param otherFuture the other map index is the future. What is found here
-	 *            and not present in this, has been added. @NeverNull
+	 * @param otherFuture the other map index is the future. What is found here and not present in this, has been
+	 *        added. @NeverNull
 	 * @return an {@link IMapSetDiff}
 	 */
 	IMapSetDiff<K, E> computeDiff(IMapSetIndex<K, E> otherFuture);
@@ -122,15 +111,11 @@ public interface IMapSetIndex<K, E> extends IIndex {
 	}
 
 	/**
-	 * @param key
-	 * @NeverNull
-	 * @return an {@link IEntrySet} containing all ?y from tuples (key,?y), @CanBeNull
-	 *         if no entries
+	 * @param key @NeverNull
+	 * @return an {@link IEntrySet} containing all ?y from tuples (key,?y), @CanBeNull if no entries
 	 */
 	IEntrySet<E> lookup(K key);
 
 	String toString(String indent);
-
-
 
 }
