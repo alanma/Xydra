@@ -218,8 +218,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 
 	/**
 	 * @param validIntervals
-	 * @param s
-	 * @NeverNull
+	 * @param s @NeverNull
 	 * @return true if all Unicode codepoints of s are in an indexed range of the given index; true for the empty
 	 *         string.
 	 */
@@ -245,8 +244,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 
 	/**
 	 * @param tabooIntervals
-	 * @param s
-	 * @NeverNull
+	 * @param s @NeverNull
 	 * @return true if any codepoint in s is indexed in the tabooIntervals; false for the empty string
 	 */
 	public static boolean isAnyCharacterInIntervals(final IIntegerRangeIndex tabooIntervals, final String s) {

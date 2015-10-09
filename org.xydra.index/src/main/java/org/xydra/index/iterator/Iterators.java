@@ -28,8 +28,7 @@ import org.xydra.index.query.Constraint;
 public class Iterators {
 
 	/**
-	 * @param base
-	 * @NeverNull
+	 * @param base @NeverNull
 	 * @param filter
 	 * @return an iterator returning fewer elements, namely only those matching the filter
 	 */
@@ -62,8 +61,7 @@ public class Iterators {
 	 * Lazy evaluated
 	 *
 	 * @param base elements must have valid implementation of {@link Object#hashCode()} and
-	 *        {@link Object#equals(Object)}
-	 * @NeverNull
+	 *        {@link Object#equals(Object)} @NeverNull
 	 * @return unique elements
 	 */
 	public static <E> ClosableIterator<E> distinct(final Iterator<E> base) {
@@ -172,8 +170,7 @@ public class Iterators {
 	}
 
 	/**
-	 * @param base
-	 * @NeverNull
+	 * @param base @NeverNull
 	 * @param transformer
 	 * @return an iterator returning entries of another type as the input type
 	 */
@@ -193,8 +190,7 @@ public class Iterators {
 	 * An optimized version of {@link #transform(Iterator, ITransformer)}, which implicitly filters out all items for
 	 * which the transformer returns null
 	 *
-	 * @param base
-	 * @NeverNull
+	 * @param base @NeverNull
 	 * @param transformer returns null for unwanted elements @NeverNull
 	 * @return an iterator returning entries of another type as the input type @NeverNull
 	 */
@@ -212,10 +208,8 @@ public class Iterators {
 	}
 
 	/**
-	 * @param it1
-	 * @NeverNull
-	 * @param it2
-	 * @NeverNull
+	 * @param it1 @NeverNull
+	 * @param it2 @NeverNull
 	 * @return a single, continuous iterator; might contain duplicates
 	 */
 	public static <E> ClosableIterator<E> concat(final Iterator<? extends E> it1, final Iterator<? extends E> it2) {
@@ -239,8 +233,7 @@ public class Iterators {
 	}
 
 	/**
-	 * @param base
-	 * @NeverNull
+	 * @param base @NeverNull
 	 * @param transformer
 	 * @return a uniform iterator in which each element of base was turned into a part of the resulting sequence
 	 */
@@ -287,8 +280,7 @@ public class Iterators {
 	}
 
 	/**
-	 * @param partIterators
-	 * @NeverNull each may return an element only once, no duplicates
+	 * @param partIterators @NeverNull each may return an element only once, no duplicates
 	 * @return an iterator representing the set-intersection of the set implied by the partial iterators
 	 */
 	public static <E> Iterator<E> setIntersect(final Iterator<Iterator<E>> partIterators) {

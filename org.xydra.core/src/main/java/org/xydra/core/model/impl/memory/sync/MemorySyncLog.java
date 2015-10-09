@@ -24,8 +24,7 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	private final XSyncLogState state;
 
 	/**
-	 * @param state
-	 * @NeverNull
+	 * @param state @NeverNull
 	 */
 	public MemorySyncLog(final XSyncLogState state) {
 		if (state == null) {

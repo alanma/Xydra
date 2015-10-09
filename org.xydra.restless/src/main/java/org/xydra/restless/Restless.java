@@ -241,8 +241,7 @@ public class Restless extends HttpServlet {
 	 * @param javaMethodName a method name like 'getName', see
 	 *            {@link #addMethod(String, String, Object, String, boolean, RestlessParameter...)}
 	 *            for handling of this parameter @NeverNull
-	 * @param parameter
-	 * @NeverNull
+	 * @param parameter @NeverNull
 	 */
 	public void addGet(@NeverNull final String pathTemplate, @NeverNull final Object instanceOrClass,
 			@NeverNull final String javaMethodName, @NeverNull final RestlessParameter... parameter) {
@@ -327,10 +326,8 @@ public class Restless extends HttpServlet {
 	 * http://stackoverflow.com/questions/132052/servlet-for-serving-static
 	 * -content
 	 *
-	 * @param req
-	 * @NeverNull
-	 * @param res
-	 * @NeverNull
+	 * @param req @NeverNull
+	 * @param res @NeverNull
 	 * @throws IOException
 	 */
 	public void delegateToDefaultServlet(@NeverNull final HttpServletRequest req,
@@ -359,10 +356,8 @@ public class Restless extends HttpServlet {
 	}
 
 	/**
-	 * @param req
-	 * @NeverNull
-	 * @param res
-	 * @NeverNull
+	 * @param req @NeverNull
+	 * @param res @NeverNull
 	 */
 	@Override
 	public void doDelete(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse res) {
@@ -373,10 +368,8 @@ public class Restless extends HttpServlet {
 	}
 
 	/**
-	 * @param req
-	 * @NeverNull
-	 * @param res
-	 * @NeverNull
+	 * @param req @NeverNull
+	 * @param res @NeverNull
 	 */
 	@Override
 	public void doGet(@NeverNull final HttpServletRequest req,
@@ -393,10 +386,8 @@ public class Restless extends HttpServlet {
 	}
 
 	/**
-	 * @param req
-	 * @NeverNull
-	 * @param res
-	 * @NeverNull
+	 * @param req @NeverNull
+	 * @param res @NeverNull
 	 */
 	@Override
 	public void doHead(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse res) {
@@ -416,10 +407,8 @@ public class Restless extends HttpServlet {
 	 * Print the current mapping from URL patterns to Java methods as a web
 	 * page.
 	 *
-	 * @param req
-	 * @NeverNull
-	 * @param res
-	 * @NeverNull
+	 * @param req @NeverNull
+	 * @param res @NeverNull
 	 */
 	private void doIntrospection(@NeverNull final HttpServletRequest req,
 			@NeverNull final HttpServletResponse res) {
@@ -502,10 +491,8 @@ public class Restless extends HttpServlet {
 	}
 
 	/**
-	 * @param req
-	 * @NeverNull
-	 * @param res
-	 * @NeverNull
+	 * @param req @NeverNull
+	 * @param res @NeverNull
 	 */
 	@Override
 	public void doPost(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse res) {
@@ -516,10 +503,8 @@ public class Restless extends HttpServlet {
 	}
 
 	/**
-	 * @param req
-	 * @NeverNull
-	 * @param res
-	 * @NeverNull
+	 * @param req @NeverNull
+	 * @param res @NeverNull
 	 */
 	@Override
 	public void doPut(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse res) {
@@ -531,8 +516,7 @@ public class Restless extends HttpServlet {
 
 	/**
 	 *
-	 * @param restlessContext
-	 * @NeverNull
+	 * @param restlessContext @NeverNull
 	 */
 	protected void fireRequestFinished(@NeverNull final IRestlessContext restlessContext) {
 		synchronized (this.requestListeners) {
@@ -544,8 +528,7 @@ public class Restless extends HttpServlet {
 
 	/**
 	 *
-	 * @param restlessContext
-	 * @NeverNull
+	 * @param restlessContext @NeverNull
 	 */
 	protected void fireRequestStarted(@NeverNull final IRestlessContext restlessContext) {
 		synchronized (this.requestListeners) {
@@ -620,8 +603,7 @@ public class Restless extends HttpServlet {
 	 * the Restless servlet.
 	 *
 	 * @see javax.servlet.GenericServlet#init()
-	 * @param servletConfig
-	 * @NeverNull
+	 * @param servletConfig @NeverNull
 	 */
 	@Override
 	public void init(@NeverNull final ServletConfig servletConfig) {
@@ -877,10 +859,8 @@ public class Restless extends HttpServlet {
 	 * Generic method to map incoming web requests to mapped
 	 * {@link RestlessMethod}. Match path and HTTP method.
 	 *
-	 * @param req
-	 * @NeverNull
-	 * @param res
-	 * @NeverNull
+	 * @param req @NeverNull
+	 * @param res @NeverNull
 	 */
 	protected void restlessService(@NeverNull final HttpServletRequest req,
 			@NeverNull final HttpServletResponse res) {

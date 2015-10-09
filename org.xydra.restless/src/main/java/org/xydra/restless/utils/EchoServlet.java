@@ -32,10 +32,8 @@ public class EchoServlet extends HttpServlet {
 
 	/**
 	 *
-	 * @param req
-	 * @NeverNull
-	 * @param resp
-	 * @NeverNull
+	 * @param req @NeverNull
+	 * @param resp @NeverNull
 	 */
 	@Override
 	public void doGet(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse resp)
@@ -45,10 +43,8 @@ public class EchoServlet extends HttpServlet {
 
 	/**
 	 *
-	 * @param req
-	 * @NeverNull
-	 * @param resp
-	 * @NeverNull
+	 * @param req @NeverNull
+	 * @param resp @NeverNull
 	 */
 	@Override
 	public void doPost(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse resp)
@@ -58,10 +54,8 @@ public class EchoServlet extends HttpServlet {
 
 	/**
 	 *
-	 * @param req
-	 * @NeverNull
-	 * @param resp
-	 * @NeverNull
+	 * @param req @NeverNull
+	 * @param resp @NeverNull
 	 */
 	private static void echo(@NeverNull final HttpServletRequest req, @NeverNull final HttpServletResponse resp)
 			throws IOException {

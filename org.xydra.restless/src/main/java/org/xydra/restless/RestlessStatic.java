@@ -19,8 +19,7 @@ class RestlessStatic {
 	/**
 	 * @param clock
 	 * @param staticMethodName
-	 * @param instance
-	 * @NeverNull
+	 * @param instance @NeverNull
 	 * @param parameterTypes
 	 *            length n, excluding the type of instance
 	 * @param parameters
@@ -141,8 +140,7 @@ class RestlessStatic {
 
 	/**
 	 *
-	 * @param instanceOrClass
-	 * @NeverNull
+	 * @param instanceOrClass @NeverNull
 	 * @return
 	 */
 	protected static final String instanceOrClass_className(@NeverNull final Object instanceOrClass) {
@@ -210,8 +208,7 @@ class RestlessStatic {
 
 	/**
 	 *
-	 * @param instanceOrClass
-	 * @NeverNull
+	 * @param instanceOrClass @NeverNull
 	 * @return the given class, if it was a class. If it was an object, return
 	 *         the class of it.
 	 */

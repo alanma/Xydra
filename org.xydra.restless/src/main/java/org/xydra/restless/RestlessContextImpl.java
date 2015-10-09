@@ -19,14 +19,10 @@ public class RestlessContextImpl implements IRestlessContext {
 
 	/**
 	 *
-	 * @param restless
-	 * @NeverNull
-	 * @param req
-	 * @NeverNull
-	 * @param res
-	 * @NeverNull
-	 * @param requestIdentifier
-	 * @NeverNull
+	 * @param restless @NeverNull
+	 * @param req @NeverNull
+	 * @param res @NeverNull
+	 * @param requestIdentifier @NeverNull
 	 */
 	public RestlessContextImpl(@NeverNull final Restless restless, @NeverNull final HttpServletRequest req,
 			@NeverNull final HttpServletResponse res, @NeverNull final String requestIdentifier) {

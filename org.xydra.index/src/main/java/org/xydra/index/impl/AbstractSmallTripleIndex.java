@@ -68,12 +68,9 @@ public abstract class AbstractSmallTripleIndex<K, L, M, MMSI extends IMapMapSetI
 	}
 
 	/**
-	 * @param key1
-	 * @NeverNull
-	 * @param key2
-	 * @NeverNull
-	 * @param key3
-	 * @NeverNull
+	 * @param key1 @NeverNull
+	 * @param key2 @NeverNull
+	 * @param key3 @NeverNull
 	 * @return true if triple index contains the given triple
 	 */
 	@Override

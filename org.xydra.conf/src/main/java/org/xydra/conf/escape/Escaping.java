@@ -6,8 +6,7 @@ public class Escaping {
 	static final int UNICODE_RESERVED_START = Integer.parseInt("D800", 16);
 
 	/**
-	 * @param b
-	 * @NeverNull
+	 * @param b @NeverNull
 	 * @param codepoint must be below xD800 (55296 as int)
 	 */
 	public static void appendAsUnicodeEscapeSequence(final StringBuilder b, final int codepoint) {

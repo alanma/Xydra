@@ -499,10 +499,8 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 	}
 
 	/**
-	 * @param key1
-	 * @NeverNull
-	 * @param key2
-	 * @NeverNull
+	 * @param key1 @NeverNull
+	 * @param key2 @NeverNull
 	 * @return @CanBeNull
 	 */
 	public IEntrySet<E> lookup(final K key1, final L key2) {

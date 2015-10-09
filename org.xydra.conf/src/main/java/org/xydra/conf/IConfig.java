@@ -292,8 +292,7 @@ public interface IConfig {
 	 * Set the desired instance type for the given key
 	 *
 	 * @param key @NeverNull
-	 * @param type
-	 * @NeverNull The expected type of a config key. Currently a purely informative setting, might be used stronger in
+	 * @param type @NeverNull The expected type of a config key. Currently a purely informative setting, might be used stronger in
 	 *            later IConfig versions.
 	 * @return a {@link ConfBuilder} for a fluent API style
 	 */
@@ -303,8 +302,7 @@ public interface IConfig {
 	 * Set the desired instance <em>type</em> for the given key. This does not set a value.
 	 *
 	 * @param key @NeverNull
-	 * @param type
-	 * @NeverNull The expected type of a config key. Currently a purely informative setting, might be used stronger in
+	 * @param type @NeverNull The expected type of a config key. Currently a purely informative setting, might be used stronger in
 	 *            later IConfig versions.
 	 * @return a {@link ConfBuilder} for a fluent API style
 	 */

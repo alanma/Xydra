@@ -84,8 +84,7 @@ public class MemoryConfig implements IConfig {
 	private static boolean traceOrigins = true;
 
 	/**
-	 * @param className
-	 * @NeverNull
+	 * @param className @NeverNull
 	 * @return
 	 * @throws RuntimeException when class could not be loaded or has wrong type
 	 */

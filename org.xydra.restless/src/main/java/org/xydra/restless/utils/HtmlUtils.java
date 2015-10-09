@@ -33,8 +33,7 @@ public class HtmlUtils extends SharedHtmlUtils {
 	/**
 	 * Writes core html content including charset header
 	 *
-	 * @param w
-	 * @NeverNull
+	 * @param w @NeverNull
 	 * @param title
 	 * @CanBeNull
 	 * @param headChildren
@@ -84,8 +83,7 @@ public class HtmlUtils extends SharedHtmlUtils {
 
 	/**
 	 *
-	 * @param res
-	 * @NeverNull
+	 * @param res @NeverNull
 	 * @param title
 	 * @CanBeNull
 	 * @param content
@@ -101,8 +99,7 @@ public class HtmlUtils extends SharedHtmlUtils {
 
 	/**
 	 *
-	 * @param w
-	 * @NeverNull
+	 * @param w @NeverNull
 	 * @throws IOException
 	 */
 	public static void endHtmlPage(@NeverNull final Writer w) throws IOException {
@@ -137,10 +134,8 @@ public class HtmlUtils extends SharedHtmlUtils {
 
 	/**
 	 *
-	 * @param res
-	 * @NeverNull
-	 * @param statusCode
-	 * @NeverNull
+	 * @param res @NeverNull
+	 * @param statusCode @NeverNull
 	 * @param title
 	 * @CanBeNull
 	 * @param headChildren
@@ -158,8 +153,7 @@ public class HtmlUtils extends SharedHtmlUtils {
 	}
 
 	/**
-	 * @param redirectUrl
-	 * @NeverNull
+	 * @param redirectUrl @NeverNull
 	 * @param redirectWaitMs
 	 *            >= 0 @NeverNull
 	 * @return a script snippet
@@ -177,12 +171,9 @@ public class HtmlUtils extends SharedHtmlUtils {
 	}
 
 	/**
-	 * @param w
-	 * @NeverNull
-	 * @param messageHtml
-	 * @NeverNull
-	 * @param redirectUrl
-	 * @NeverNull
+	 * @param w @NeverNull
+	 * @param messageHtml @NeverNull
+	 * @param redirectUrl @NeverNull
 	 * @param redirectWaitMs
 	 *            >= 0 @NeverNull
 	 * @throws IOException

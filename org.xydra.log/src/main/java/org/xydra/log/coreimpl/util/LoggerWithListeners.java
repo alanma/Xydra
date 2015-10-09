@@ -22,8 +22,7 @@ public class LoggerWithListeners implements Logger {
 	protected final Collection<ILogListener> logListeners;
 
 	/**
-	 * @param logger
-	 * @NeverNull
+	 * @param logger @NeverNull
 	 * @param logListeners
 	 * @CanBeNull
 	 */

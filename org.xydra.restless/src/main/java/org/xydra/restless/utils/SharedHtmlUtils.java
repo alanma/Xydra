@@ -27,8 +27,7 @@ import org.xydra.annotations.RunsInGWT;
 public class SharedHtmlUtils {
 
 	/**
-	 * @param url
-	 * @NeverNull
+	 * @param url @NeverNull
 	 * @param text
 	 * @CanBeNull
 	 * @return HTML source code snippet for a link
@@ -47,8 +46,7 @@ public class SharedHtmlUtils {
 
 	/**
 	 *
-	 * @param label
-	 * @NeverNull
+	 * @param label @NeverNull
 	 * @return ...
 	 */
 	public static SubmitInput inputSubmit(@NeverNull final String label) {
@@ -246,10 +244,8 @@ public class SharedHtmlUtils {
 
 	/**
 	 *
-	 * @param method
-	 * @NeverNull
-	 * @param action
-	 * @NeverNull
+	 * @param method @NeverNull
+	 * @param action @NeverNull
 	 * @return ...
 	 */
 	public static Form form(@NeverNull final METHOD method, @NeverNull final String action) {
@@ -508,8 +504,7 @@ public class SharedHtmlUtils {
 	}
 
 	/**
-	 * @param name
-	 * @NeverNull
+	 * @param name @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @return ' ' name '=' '"' value '"' OR the emtpy string if value is null.
@@ -558,8 +553,7 @@ public class SharedHtmlUtils {
 
 	/**
 	 *
-	 * @param listItemContent
-	 * @NeverNull
+	 * @param listItemContent @NeverNull
 	 * @return ...
 	 */
 	public static String toOrderedList(@NeverNull final String... listItemContent) {

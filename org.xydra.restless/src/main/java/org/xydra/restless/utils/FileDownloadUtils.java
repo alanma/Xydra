@@ -58,12 +58,9 @@ public class FileDownloadUtils {
 	/**
 	 * This sets no "Content-Type" headers.
 	 *
-	 * @param res
-	 * @NeverNull
-	 * @param archivename
-	 * @NeverNull
-	 * @param extension
-	 * @NeverNull
+	 * @param res @NeverNull
+	 * @param archivename @NeverNull
+	 * @param extension @NeverNull
 	 * @return an OutputStream to which you can write
 	 * @throws IOException
 	 */
@@ -81,12 +78,9 @@ public class FileDownloadUtils {
 	/**
 	 * This sets also "Content-Type" headers.
 	 *
-	 * @param res
-	 * @NeverNull
-	 * @param archivename
-	 * @NeverNull
-	 * @param extension
-	 * @NeverNull
+	 * @param res @NeverNull
+	 * @param archivename @NeverNull
+	 * @param extension @NeverNull
 	 * @param contentType
 	 *            e.g. 'application/zip' or 'text/csv' @NeverNull
 	 * @return an OutputStream to which you can write

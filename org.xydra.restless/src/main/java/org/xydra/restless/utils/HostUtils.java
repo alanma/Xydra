@@ -72,8 +72,7 @@ public class HostUtils {
 
 	/**
 	 *
-	 * @param req
-	 * @NeverNull
+	 * @param req @NeverNull
 	 * @return the port number of the request
 	 */
 	public static int getRequestPort(@NeverNull final HttpServletRequest req) {
@@ -82,8 +81,7 @@ public class HostUtils {
 
 	/**
 	 *
-	 * @param req
-	 * @NeverNull
+	 * @param req @NeverNull
 	 * @return the server name (part before the port)
 	 */
 	public static String getServernameWithPort(@NeverNull final HttpServletRequest req) {

@@ -124,10 +124,8 @@ public class IndexUtils {
 	}
 
 	/**
-	 * @param a
-	 * @NeverNull
-	 * @param b
-	 * @NeverNull
+	 * @param a @NeverNull
+	 * @param b @NeverNull
 	 * @return a diff with all elements added (not present in a, but present in b); and all elements remove (present in
 	 *         a, but no longer present in b)
 	 */

@@ -453,12 +453,9 @@ public class JavaCodeGenerator {
 	}
 
 	/**
-	 * @param packageSpec
-	 * @NeverNull
-	 * @param specClass
-	 * @NeverNull
-	 * @param toBeGeneratedTypes
-	 * @NeverNull
+	 * @param packageSpec @NeverNull
+	 * @param specClass @NeverNull
+	 * @param toBeGeneratedTypes @NeverNull
 	 * @return a new {@link ClassSpec}, attached to the given packageSpec.
 	 *         Content is based on specClass.
 	 */

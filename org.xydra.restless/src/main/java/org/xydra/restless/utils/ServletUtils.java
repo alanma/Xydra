@@ -243,8 +243,7 @@ public class ServletUtils {
 	}
 
 	/**
-	 * @param req
-	 * @NeverNull
+	 * @param req @NeverNull
 	 * @return all get and post parameters as delivered in the servlet API - but
 	 *         additionally URL-decoded
 	 * @throws IllegalStateException
@@ -273,8 +272,7 @@ public class ServletUtils {
 	}
 
 	/**
-	 * @param req
-	 * @NeverNull
+	 * @param req @NeverNull
 	 * @return complete server URI (protocol+host), not port
 	 */
 	public static final String getServerUri(@NeverNull final HttpServletRequest req) {
@@ -282,8 +280,7 @@ public class ServletUtils {
 	}
 
 	/**
-	 * @param req
-	 * @NeverNull
+	 * @param req @NeverNull
 	 * @param paramName
 	 * @CanBeNull
 	 * @return true if parameter name not null and value defined
@@ -308,8 +305,7 @@ public class ServletUtils {
 	 *            via headers (Cache-Control=no-cache; Expires=0). Positive
 	 *            numbers are the time to cache the response in minutes from now
 	 *            on.
-	 * @param contentType
-	 * @NeverNull
+	 * @param contentType @NeverNull
 	 */
 	public static void headers(@NeverNull final HttpServletResponse res, final int status,
 			final long cachingInMinutes, @CanBeNull final String contentType) {
@@ -394,8 +390,7 @@ public class ServletUtils {
 	}
 
 	/**
-	 * @param req
-	 * @NeverNull
+	 * @param req @NeverNull
 	 * @return true if request is just an http://-request and not an https://
 	 *         request.
 	 */
@@ -405,8 +400,7 @@ public class ServletUtils {
 	}
 
 	/**
-	 * @param req
-	 * @NeverNull
+	 * @param req @NeverNull
 	 * @return true if request is to root URL '/', may also have query
 	 *         parameters
 	 */
@@ -417,8 +411,7 @@ public class ServletUtils {
 	}
 
 	/**
-	 * @param req
-	 * @NeverNull
+	 * @param req @NeverNull
 	 * @return true if request is a secure https://-request
 	 */
 	public static boolean isSecureHttpsRequest(@NeverNull final HttpServletRequest req) {
@@ -437,10 +430,8 @@ public class ServletUtils {
 
 	/**
 	 *
-	 * @param headerValue
-	 * @NeverNull
-	 * @param contentType2q
-	 * @NeverNull
+	 * @param headerValue @NeverNull
+	 * @param contentType2q @NeverNull
 	 */
 	private static void parseAcceptHeaderPart(@NeverNull final String headerValue,
 			@NeverNull final Map<String, Double> contentType2q) {
@@ -467,8 +458,7 @@ public class ServletUtils {
 
 	/**
 	 *
-	 * @param q
-	 * @NeverNull
+	 * @param q @NeverNull
 	 * @return the query string as a map: parameter name maps to parameter
 	 *         value. If the URL contains the same key twice, later values
 	 *         override earlier values.
@@ -488,8 +478,7 @@ public class ServletUtils {
 
 	/**
 	 *
-	 * @param encoded
-	 * @NeverNull
+	 * @param encoded @NeverNull
 	 * @return url decoded string
 	 */
 	@RunsInGWT(false)

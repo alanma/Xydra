@@ -778,10 +778,8 @@ class RestlessMethod {
 	 * Handle exceptions via handlers registered before at
 	 * {@link Restless#addExceptionHandler(RestlessExceptionHandler)}
 	 *
-	 * @param cause
-	 * @NeverNull
-	 * @param context
-	 * @NeverNull
+	 * @param cause @NeverNull
+	 * @param context @NeverNull
 	 * @return
 	 */
 	private static boolean callGlobalExceptionHandlers(@NeverNull final Throwable cause,
@@ -800,8 +798,7 @@ class RestlessMethod {
 	/**
 	 * If the given parameter is a Class, return an instance of it, otherwise simply return the given parameter itself.
 	 *
-	 * @param instanceOrClass
-	 * @NeverNull
+	 * @param instanceOrClass @NeverNull
 	 * @return an instance
 	 */
 	private static Object toInstance(@NeverNull final Object instanceOrClass) {
@@ -873,10 +870,8 @@ class RestlessMethod {
 	 *
 	 * Note: POST-parameters are ignored.
 	 *
-	 * @param urlParameter
-	 * @NeverNull
-	 * @param cookieMap
-	 * @NeverNull
+	 * @param urlParameter @NeverNull
+	 * @param cookieMap @NeverNull
 	 * @return an existing request id found in URL parameters or cookies.
 	 */
 	private static String reuseOrCreateUniqueRequestIdentifier(@NeverNull final Map<String, String> urlParameter,

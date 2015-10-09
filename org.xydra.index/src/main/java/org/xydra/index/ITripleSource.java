@@ -26,12 +26,9 @@ public interface ITripleSource<K, L, M> extends IIndex {
 	boolean contains(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3);
 
 	/**
-	 * @param s
-	 * @NeverNull
-	 * @param p
-	 * @NeverNull
-	 * @param o
-	 * @NeverNull
+	 * @param s @NeverNull
+	 * @param p @NeverNull
+	 * @param o @NeverNull
 	 * @return true iff
 	 */
 	boolean contains(K s, L p, M o);

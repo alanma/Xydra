@@ -68,8 +68,7 @@ public class NanoClock {
 	 * Stops the clock with the given name for the clock entry and immediately
 	 * restarts it.
 	 *
-	 * @param name
-	 * @NeverNull
+	 * @param name @NeverNull
 	 */
 	public synchronized void stopAndStart(@NeverNull final String name) {
 		stop(name);

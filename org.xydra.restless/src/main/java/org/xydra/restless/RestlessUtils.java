@@ -16,10 +16,8 @@ import org.xydra.annotations.NeverNull;
 public class RestlessUtils {
 
 	/**
-	 * @param req
-	 * @NeverNull
-	 * @param pathTemplate
-	 * @NeverNull
+	 * @param req @NeverNull
+	 * @param pathTemplate @NeverNull
 	 * @return a single map of key-value pairs extracted from the path-part of
 	 *         the request-URI
 	 */

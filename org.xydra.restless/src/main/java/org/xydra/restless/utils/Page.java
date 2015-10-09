@@ -239,8 +239,7 @@ public class Page {
 	/**
 	 * For GWT there is a univerals function in Xydra.core
 	 *
-	 * @param s
-	 * @NeverNull
+	 * @param s @NeverNull
 	 * @return encoded string
 	 */
 	@RunsInGWT(false)
@@ -601,8 +600,7 @@ public class Page {
 
 	/**
 	 *
-	 * @param title
-	 * @NeverNull
+	 * @param title @NeverNull
 	 * @return a HEAD-element
 	 *
 	 */
@@ -649,10 +647,8 @@ public class Page {
 	 * @CanBeNull
 	 * @param first
 	 *            no newline at start @NeverNull
-	 * @param renderMode
-	 * @NeverNull
-	 * @param tag
-	 * @NeverNull
+	 * @param renderMode @NeverNull
+	 * @param tag @NeverNull
 	 * @param content
 	 * @CanBeNull
 	 * @param attributes
@@ -706,8 +702,7 @@ public class Page {
 
 	/**
 	 *
-	 * @param raw
-	 * @NeverNull
+	 * @param raw @NeverNull
 	 * @return XML-encoded string
 	 *
 	 */

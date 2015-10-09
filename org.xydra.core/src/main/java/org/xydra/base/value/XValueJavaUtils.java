@@ -340,10 +340,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a XAddress value if set
 	 * @throws ClassCastException if value exists but is not a {@link XAddress}
 	 * @throws IllegalArgumentException if given readableObject is null
@@ -372,10 +370,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a Address value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XAddressListValue}
@@ -399,10 +395,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a ID value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XAddressSetValue}
@@ -426,10 +420,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a Address value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XAddressSortedSetValue}
@@ -454,10 +446,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a byte[] value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XBinaryValue}
@@ -479,10 +469,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a Boolean value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XBooleanValue}
@@ -505,10 +493,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a String value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XBooleanListValue}
@@ -532,10 +518,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a Double value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XDoubleValue}
@@ -557,10 +541,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a String value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XDoubleListValue}
@@ -584,10 +566,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a XId value if set
 	 * @throws ClassCastException if value exists but is not a {@link XId}
 	 * @throws IllegalArgumentException if given readableObject is null
@@ -616,10 +596,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a ID value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XIdListValue}
@@ -642,10 +620,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a ID value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XIdSetValue}
@@ -668,10 +644,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a ID value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XIdSortedSetValue}
@@ -695,10 +669,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a Integer value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XIntegerValue}
@@ -721,10 +693,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a String value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XIntegerListValue}
@@ -748,10 +718,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a Long value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XLongValue}
@@ -773,10 +741,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a String value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XLongListValue}
@@ -800,10 +766,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a String value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XStringValue}
@@ -833,10 +797,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a String value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XStringListValue}
@@ -860,10 +822,8 @@ public class XValueJavaUtils {
 	}
 
 	/**
-	 * @param readableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param readableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @return null if field or value does not exist; a ID value if set
 	 * @throws ClassCastException if value exists but is not a
 	 *             {@link XStringSetValue}
@@ -928,10 +888,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -956,10 +914,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -978,10 +934,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -999,10 +953,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1021,10 +973,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1042,10 +992,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1075,10 +1023,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1097,10 +1043,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1128,10 +1072,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1150,10 +1092,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1178,10 +1118,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1199,10 +1137,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1220,10 +1156,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1242,10 +1176,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1273,10 +1205,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1295,10 +1225,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1326,10 +1254,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1348,10 +1274,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1379,10 +1303,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null
@@ -1400,10 +1322,8 @@ public class XValueJavaUtils {
 	 * Sets the value of given field in given object to desired value. Creates
 	 * the field if required.
 	 *
-	 * @param writableObject
-	 * @NeverNull
-	 * @param fieldId
-	 * @NeverNull
+	 * @param writableObject @NeverNull
+	 * @param fieldId @NeverNull
 	 * @param value
 	 * @CanBeNull
 	 * @throws IllegalArgumentException if given writableObject is null

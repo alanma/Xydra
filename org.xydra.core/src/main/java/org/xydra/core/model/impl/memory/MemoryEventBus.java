@@ -58,12 +58,9 @@ public class MemoryEventBus {
 	}
 
 	/**
-	 * @param eventType
-	 * @NeverNull
-	 * @param event
-	 * @NeverNull
-	 * @param listener
-	 * @NeverNull
+	 * @param eventType @NeverNull
+	 * @param event @NeverNull
+	 * @param listener @NeverNull
 	 */
 	private static void fireEventToListener(final EventType eventType, final Object event, final Object listener) {
 		switch (eventType) {
@@ -124,10 +121,8 @@ public class MemoryEventBus {
 	 * Notifies all listeners that have registered interest for notification on
 	 * events of type EventType happening on source-entities.
 	 *
-	 * @param eventType
-	 * @NeverNull
-	 * @param source
-	 * @NeverNull
+	 * @param eventType @NeverNull
+	 * @param source @NeverNull
 	 * @param event The, e.g., {@link XFieldEvent} which will be propagated to
 	 *            the registered listeners.
 	 */
