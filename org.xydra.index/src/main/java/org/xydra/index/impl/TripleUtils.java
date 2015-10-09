@@ -116,4 +116,28 @@ public class TripleUtils {
 		return getConstraintTriples(index_s_p_o, c1, c2, c3);
 	}
 
+	/**
+	 * @param t
+	 * @return the reverse triple (o,p,s)
+	 */
+	public static <K, L, M> ITriple<M, L, K> reverse(final ITriple<K, L, M> t) {
+		return new KeyKeyEntryTuple<M, L, K>(t.o(), t.p(), t.s());
+	}
+
+	/**
+	 * Return the other end of a triple, given one if it'S "ends" (subject or object)
+	 *
+	 * @param a must be triple.s() or triple.o()
+	 * @param triple
+	 * @return s, if a==triple.o(); o, if a==triple.s();
+	 */
+	public static <T> T getOtherEnd(final T a, final ITriple<T, T, T> triple) {
+		assert triple.s().equals(a) || triple.o().equals(a);
+		if (triple.s().equals(a)) {
+			return triple.o();
+		}
+		assert triple.o().equals(a);
+		return triple.s();
+	}
+
 }
