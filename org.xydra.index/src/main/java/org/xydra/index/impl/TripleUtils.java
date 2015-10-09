@@ -9,6 +9,7 @@ import org.xydra.index.iterator.TransformingIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.ITriple;
+import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 
 public class TripleUtils {
@@ -93,8 +94,8 @@ public class TripleUtils {
 		return new TransformingIterator<ITriple<K, L, M>, M>(tupleIterator, transformer);
 	}
 
-	public static <K, L, M> Iterator<ITriple<K, L, M>> getConstraintTriples(final IMapMapSetIndex<K, L, M> index_s_p_o, final Constraint<K> c1,
-			final Constraint<L> c2, final Constraint<M> c3) {
+	public static <K, L, M> Iterator<ITriple<K, L, M>> getConstraintTriples(final IMapMapSetIndex<K, L, M> index_s_p_o,
+			final Constraint<K> c1, final Constraint<L> c2, final Constraint<M> c3) {
 		if (c1 == null) {
 			throw new IllegalArgumentException("c1 was null");
 		}
@@ -108,8 +109,8 @@ public class TripleUtils {
 		return tupleIterator;
 	}
 
-	public static <K, L, M> Iterator<ITriple<K, L, M>> getTriples(final IMapMapSetIndex<K, L, M> index_s_p_o, final K s, final L p,
-			final M o) {
+	public static <K, L, M> Iterator<ITriple<K, L, M>> getTriples(final IMapMapSetIndex<K, L, M> index_s_p_o, final K s,
+			final L p, final M o) {
 		final Constraint<K> c1 = s == null ? new Wildcard<K>() : new EqualsConstraint<K>(s);
 		final Constraint<L> c2 = p == null ? new Wildcard<L>() : new EqualsConstraint<L>(p);
 		final Constraint<M> c3 = o == null ? new Wildcard<M>() : new EqualsConstraint<M>(o);
