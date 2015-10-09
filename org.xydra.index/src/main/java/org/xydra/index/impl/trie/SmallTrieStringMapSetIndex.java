@@ -84,6 +84,11 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 		public void setKeyPrefix(final String keyPrefix) {
 			this.keyPrefix = keyPrefix;
 		}
+
+		@Override
+		public String toString() {
+			return isStar() ? "*" : "'" + getExpected() + "'";
+		}
 	}
 
 	public static class KeyFragments implements Serializable {
@@ -451,24 +456,24 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 			// else we need to (also) traverse children
 			final Iterator<KeyEntryTuple<String, Node>> fromChildrenIt = Iterators.cascade(
 
-					this.children.tupleIterator(ANY_STRING),
+			this.children.tupleIterator(ANY_STRING),
 
-					new ITransformer<KeyEntryTuple<String, Node>, Iterator<KeyEntryTuple<String, Node>>>() {
+			new ITransformer<KeyEntryTuple<String, Node>, Iterator<KeyEntryTuple<String, Node>>>() {
 
-						@Override
-						public Iterator<KeyEntryTuple<String, Node>> transform(final KeyEntryTuple<String, Node> tuple) {
-							/* does it make sense to recurse here? */
-							final String currentKey = combinedKey + tuple.getKey();
-							if (canMatch(currentKey, keyConstraint)) {
-								// IMPROVE avoid recursion here
-								// recursion (!)
-								return tuple.getEntry().keyAndNodeIterator(currentKey, keyConstraint);
-							} else {
-								return NoneIterator.create();
-							}
-						}
+				@Override
+				public Iterator<KeyEntryTuple<String, Node>> transform(final KeyEntryTuple<String, Node> tuple) {
+					/* does it make sense to recurse here? */
+					final String currentKey = combinedKey + tuple.getKey();
+					if (canMatch(currentKey, keyConstraint)) {
+						// IMPROVE avoid recursion here
+						// recursion (!)
+						return tuple.getEntry().keyAndNodeIterator(currentKey, keyConstraint);
+					} else {
+						return NoneIterator.create();
+					}
+				}
 
-					});
+			});
 
 			if (keyConstraint.isStar()) {
 				assert thisNodeIt != null;
@@ -495,16 +500,16 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 		public Iterator<String> keyIterator(final String combinedKey) {
 			final Iterator<String> fromChildren = Iterators.cascade(
 
-					this.children.tupleIterator(new Wildcard<String>()),
+			this.children.tupleIterator(new Wildcard<String>()),
 
-					new ITransformer<KeyEntryTuple<String, Node>, Iterator<String>>() {
+			new ITransformer<KeyEntryTuple<String, Node>, Iterator<String>>() {
 
-						@Override
-						public Iterator<String> transform(final KeyEntryTuple<String, Node> in) {
-							return in.getSecond().keyIterator(combinedKey + in.getFirst());
-						}
+				@Override
+				public Iterator<String> transform(final KeyEntryTuple<String, Node> in) {
+					return in.getSecond().keyIterator(combinedKey + in.getFirst());
+				}
 
-					});
+			});
 
 			final boolean includeThisNode = !this.entrySet.isEmpty();
 
@@ -558,11 +563,11 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 			final Iterator<Node> fromChildren = Iterators.cascade(this.children.iterator(),
 					new ITransformer<Node, Iterator<Node>>() {
 
-				@Override
-				public Iterator<Node> transform(final Node node) {
-					return node.nodeIterator();
-				}
-			});
+						@Override
+						public Iterator<Node> transform(final Node node) {
+							return node.nodeIterator();
+						}
+					});
 
 			if (this.entrySet == null || this.entrySet.isEmpty()) {
 				return fromChildren;
@@ -591,24 +596,24 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 			// else we need to (also) traverse children
 			final Iterator<Node> fromChildrenIt = Iterators.cascade(
 
-					this.children.tupleIterator(ANY_STRING),
+			this.children.tupleIterator(ANY_STRING),
 
-					new ITransformer<KeyEntryTuple<String, Node>, Iterator<Node>>() {
+			new ITransformer<KeyEntryTuple<String, Node>, Iterator<Node>>() {
 
-						@Override
-						public Iterator<Node> transform(final KeyEntryTuple<String, Node> tuple) {
-							/* does it make sense to recurse here? */
-							final String currentKey = combinedKey + tuple.getKey();
-							if (canMatch(currentKey, keyConstraint)) {
-								// IMPROVE avoid recursion here
-								// recursion (!)
-								return tuple.getEntry().nodeIterator(currentKey, keyConstraint);
-							} else {
-								return NoneIterator.create();
-							}
-						}
+				@Override
+				public Iterator<Node> transform(final KeyEntryTuple<String, Node> tuple) {
+					/* does it make sense to recurse here? */
+					final String currentKey = combinedKey + tuple.getKey();
+					if (canMatch(currentKey, keyConstraint)) {
+						// IMPROVE avoid recursion here
+						// recursion (!)
+						return tuple.getEntry().nodeIterator(currentKey, keyConstraint);
+					} else {
+						return NoneIterator.create();
+					}
+				}
 
-					});
+			});
 
 			if (keyConstraint.isStar()) {
 				assert thisNodeIt != null;
@@ -663,7 +668,7 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 			// find common prefix to extract
 			final int commonPrefixLen = getSharedPrefixLength(searchKeyPrefix, indexedKey);
 			assert commonPrefixLen > 0 : "commonPrefixLen==0? insertKey=" + searchKeyPrefix + " conflictKey="
-			+ indexedKey;
+					+ indexedKey;
 			if (indexedKey.equals(searchKeyPrefix)) {
 				// the conflicting node is our node
 				final Node indexedNode = this.children.lookup(indexedKey);
@@ -712,33 +717,33 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 			final Iterator<KeyEntryTuple<String, E>> keyEntriesIt = Iterators.cascade(keyNodeIt,
 					new ITransformer<KeyEntryTuple<String, Node>, Iterator<KeyEntryTuple<String, E>>>() {
 
-				@Override
-				public Iterator<KeyEntryTuple<String, E>> transform(
-						final KeyEntryTuple<String, Node> ketCombinedKeyNode) {
-					/* for each matching (combinedKey-Node)-pair: look in the node and take all
-					 * entryConstraint-matching entries and ... */
-					final Iterator<E> entryIt = ketCombinedKeyNode.getEntry().entrySet.iterator();
-
-					Iterator<E> filteredEntryIt;
-					if (entryConstraint.isStar()) {
-						filteredEntryIt = entryIt;
-					} else {
-						// apply constraint
-						filteredEntryIt = Iterators.filter(entryIt, entryConstraint);
-					}
-					/* ... wrap them back into the final KeyEntry tuples */
-					return Iterators.transform(filteredEntryIt,
-							new ITransformer<E, KeyEntryTuple<String, E>>() {
-
 						@Override
-						public KeyEntryTuple<String, E> transform(final E entry) {
-							assert entry != null;
+						public Iterator<KeyEntryTuple<String, E>> transform(
+								final KeyEntryTuple<String, Node> ketCombinedKeyNode) {
+							/* for each matching (combinedKey-Node)-pair: look in the node and take all
+							 * entryConstraint-matching entries and ... */
+							final Iterator<E> entryIt = ketCombinedKeyNode.getEntry().entrySet.iterator();
 
-							return new KeyEntryTuple<String, E>(ketCombinedKeyNode.getKey(), entry);
+							Iterator<E> filteredEntryIt;
+							if (entryConstraint.isStar()) {
+								filteredEntryIt = entryIt;
+							} else {
+								// apply constraint
+								filteredEntryIt = Iterators.filter(entryIt, entryConstraint);
+							}
+							/* ... wrap them back into the final KeyEntry tuples */
+							return Iterators.transform(filteredEntryIt,
+									new ITransformer<E, KeyEntryTuple<String, E>>() {
+
+								@Override
+								public KeyEntryTuple<String, E> transform(final E entry) {
+									assert entry != null;
+
+									return new KeyEntryTuple<String, E>(ketCombinedKeyNode.getKey(), entry);
+								}
+							});
 						}
 					});
-				}
-			});
 
 			return keyEntriesIt;
 		}
@@ -751,14 +756,14 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 			final Iterator<IEntrySet<E>> entrySetIt = Iterators.transform(keyNodeIt,
 					new ITransformer<Node, IEntrySet<E>>() {
 
-				@Override
-				public IEntrySet<E> transform(final Node ketCombinedKeyNode) {
-					/* for each matching (combinedKey-Node)-pair: look in the node and take all
-					 * entryConstraint-matching entries and ... */
-					final IEntrySet<E> set = ketCombinedKeyNode.entrySet;
-					return set;
-				}
-			});
+						@Override
+						public IEntrySet<E> transform(final Node ketCombinedKeyNode) {
+							/* for each matching (combinedKey-Node)-pair: look in the node and take all
+							 * entryConstraint-matching entries and ... */
+							final IEntrySet<E> set = ketCombinedKeyNode.entrySet;
+							return set;
+						}
+					});
 
 			final Iterator<IEntrySet<E>> nonEmptyEntrySetIt = Iterators.filter(entrySetIt,
 					SmallTrieStringMapSetIndex.this.FILTER_NON_EMPTY_ENTRYSET);
@@ -905,7 +910,7 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 
 	/* this class works around the fact that Java generics + Serialization + anonymous inner class does not work */
 	private static class TRANSFORMER_KET2EntrySet<E>
-	implements ITransformer<KeyEntryTuple<String, SmallTrieStringMapSetIndex<E>.Node>, Iterator<E>> {
+			implements ITransformer<KeyEntryTuple<String, SmallTrieStringMapSetIndex<E>.Node>, Iterator<E>> {
 
 		@Override
 		public Iterator<E> transform(final KeyEntryTuple<String, SmallTrieStringMapSetIndex<E>.Node> ket) {
@@ -914,7 +919,8 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 	}
 
 	/* this class works around the fact that Java generics + Serialization + anonymous inner class does not work */
-	private static class TRANSFORMER_NODE2ENTRIES<E> implements ITransformer<SmallTrieStringMapSetIndex<E>.Node, Iterator<E>> {
+	private static class TRANSFORMER_NODE2ENTRIES<E>
+			implements ITransformer<SmallTrieStringMapSetIndex<E>.Node, Iterator<E>> {
 
 		@Override
 		public Iterator<E> transform(final SmallTrieStringMapSetIndex<E>.Node node) {
@@ -924,7 +930,7 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 
 	/* this class works around the fact that Java generics + Serialization + anonymous inner class does not work */
 	private static class TRANSFORMER_NODE2ENTRYSET<E>
-	implements ITransformer<SmallTrieStringMapSetIndex<E>.Node, IEntrySet<E>> {
+			implements ITransformer<SmallTrieStringMapSetIndex<E>.Node, IEntrySet<E>> {
 
 		@Override
 		public IEntrySet<E> transform(final SmallTrieStringMapSetIndex<E>.Node node) {
@@ -1000,7 +1006,8 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 			return containsKey(c1.getExpected());
 		} else {
 			// third case
-			final ClosableIterator<KeyEntryTuple<String, SmallTrieStringMapSetIndex<E>.Node>> it = keyAndNodeIterator(c1);
+			final ClosableIterator<KeyEntryTuple<String, SmallTrieStringMapSetIndex<E>.Node>> it = keyAndNodeIterator(
+					c1);
 			final boolean b = it.hasNext();
 			it.close();
 			return b;
@@ -1148,7 +1155,8 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 	@ReadOperation
 	public ClosableIterator<KeyEntryTuple<String, Node>> keyAndNodeIterator(final Constraint<String> c1) {
 		readOperationStart();
-		final Iterator<KeyEntryTuple<String, SmallTrieStringMapSetIndex<E>.Node>> it = this.root.keyAndNodeIterator("", c1);
+		final Iterator<KeyEntryTuple<String, SmallTrieStringMapSetIndex<E>.Node>> it = this.root.keyAndNodeIterator("",
+				c1);
 		return unlockIteratorOnClose(it);
 	}
 
@@ -1214,7 +1222,7 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 	@Override
 	@ReadOperation
 	public String toString(final String indent) {
-		return indent+this.root.toString();
+		return indent + this.root.toString();
 	}
 
 	@Override
