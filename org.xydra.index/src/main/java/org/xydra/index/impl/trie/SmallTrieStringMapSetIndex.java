@@ -229,7 +229,7 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 		}
 
 		public void dump(final String indent, final String combinedKey) {
-			System.out.println();
+			log.info(toString(indent, combinedKey).toString());
 		}
 
 		/**
