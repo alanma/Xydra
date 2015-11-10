@@ -9,8 +9,8 @@ import org.xydra.base.change.ChangeType;
  */
 public class Change {
 
-	/** range -1, 0, 1 */
-	private AtomicChangeType state = AtomicChangeType.Change;
+	/** Added, Changed, Removed, null = Added+Removed */
+	private ChangeSummaryType state = ChangeSummaryType.Neutral;
 
 	public long lastRev;
 
@@ -20,26 +20,26 @@ public class Change {
 		switch (changeType) {
 		case ADD:
 			switch (this.state) {
-			case Add:
-				throw new AssertionError();
-			case Change:
-				this.state = AtomicChangeType.Add;
+			case Added:
+				throw new AssertionError("Cannot add something, which is already added");
+			case Neutral:
+				this.state = ChangeSummaryType.Added;
 				break;
-			case Remove:
-				this.state = AtomicChangeType.Remove;
+			case Removed:
+				this.state = ChangeSummaryType.Neutral;
 				break;
 			}
 			break;
 		case REMOVE:
 			switch (this.state) {
-			case Add:
-				this.state = AtomicChangeType.Remove;
+			case Added:
+				this.state = ChangeSummaryType.Neutral;
 				break;
-			case Change:
-				this.state = AtomicChangeType.Remove;
+			case Neutral:
+				this.state = ChangeSummaryType.Removed;
 				break;
-			case Remove:
-				throw new AssertionError();
+			case Removed:
+				throw new AssertionError("Cannot remove something, which is already removed");
 			}
 			break;
 		case TRANSACTION:
@@ -49,12 +49,12 @@ public class Change {
 		}
 	}
 
-	public AtomicChangeType getAtomicChangeType() {
+	public ChangeSummaryType getChangeSummaryType() {
 		return this.state;
 	}
 
 	public boolean isAdded() {
-		return getAtomicChangeType() == AtomicChangeType.Add;
+		return getChangeSummaryType() == ChangeSummaryType.Added;
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class Change {
 	 *         on the children.
 	 */
 	public boolean isChanged() {
-		return getAtomicChangeType() == AtomicChangeType.Change;
+		return getChangeSummaryType() == ChangeSummaryType.Neutral;
 	}
 
 	public int getChangeEvents() {
@@ -70,18 +70,20 @@ public class Change {
 	}
 
 	public boolean isRemoved() {
-		return getAtomicChangeType() == AtomicChangeType.Remove;
+		return getChangeSummaryType() == ChangeSummaryType.Removed;
 	}
 
 	@Override
 	public String toString() {
 		switch (this.state) {
-		case Remove:
+		case Removed:
 			return "Removed";
-		case Change:
-			return "Changed";
-		case Add:
+		case Neutral:
+			return "Neutral";
+		case Added:
 			return "Added";
+		default:
+			break;
 		}
 		throw new AssertionError();
 	}

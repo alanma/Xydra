@@ -40,8 +40,8 @@ abstract class SummaryEntity implements IHasXId {
 	/**
 	 * @return
 	 */
-	public AtomicChangeType getAtomichChangeType() {
-		return this.change.getAtomicChangeType();
+	public ChangeSummaryType getChangeSummaryType() {
+		return this.change.getChangeSummaryType();
 	}
 
 	/**

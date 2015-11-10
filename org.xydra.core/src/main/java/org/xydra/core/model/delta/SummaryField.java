@@ -7,6 +7,7 @@ import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
+import org.xydra.core.serialize.xml.XmlEncoder;
 
 /**
  * State: {@link Change} (of the field); old {@link XValue}; new {@link XValue};
@@ -85,15 +86,15 @@ public class SummaryField extends SummaryEntity {
 		final StringBuilder b = new StringBuilder();
 		b.append(indent + "Field." + this.change + " '" + getId() + "'  ");
 		b.append(indent);
-		switch (this.change.getAtomicChangeType()) {
-		case Add:
-			b.append("+ '" + this.newValue + "'");
+		switch (this.change.getChangeSummaryType()) {
+		case Added:
+			b.append("+ '" + XmlEncoder.encode(this.newValue.toString()) + "'");
 			break;
-		case Change:
-			b.append("Changed: ['" + this.oldValue + "'->'" + this.newValue + "']");
+		case Neutral:
+			b.append("Changed: ['" + XmlEncoder.encode(this.oldValue.toString()) + "'->'" + XmlEncoder.encode(this.newValue.toString()) + "']");
 			break;
-		case Remove:
-			b.append("- '" + this.oldValue + "'");
+		case Removed:
+			b.append("- '" + XmlEncoder.encode(this.oldValue.toString()) + "'");
 			break;
 		default:
 			throw new AssertionError();
