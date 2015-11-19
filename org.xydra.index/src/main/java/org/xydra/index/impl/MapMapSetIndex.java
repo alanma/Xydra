@@ -319,8 +319,14 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 		final IMapSetIndex<L, E> index1 = this.map.get(key1);
 		if (index1 != null) {
 			if (index1 instanceof SingleEntryMapSetIndex<?, ?>) {
-				// special remove of single entry map
-				return this.map.remove(key1) != null;
+				final SingleEntryMapSetIndex<?, ?> semsi = (SingleEntryMapSetIndex<?, ?>) index1;
+				if(semsi.getKey().equals(key2)) {
+					// special remove of single entry map
+					this.map.remove(key1);
+					return true;
+				} else {
+					return false;
+				}
 			} else {
 				// normal remove
 				final boolean contains = index1.deIndex(key2);
@@ -339,8 +345,14 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 		final IMapSetIndex<L, E> index1 = this.map.get(key1);
 		if (index1 != null) {
 			if (index1 instanceof SingleEntryMapSetIndex<?, ?>) {
-				// special remove of single entry map
-				return this.map.remove(key1) != null;
+				final SingleEntryMapSetIndex<?, ?> semsi = (SingleEntryMapSetIndex<?, ?>) index1;
+				if(semsi.getKey().equals(key2) && semsi.getEntry().equals(entry)) {
+					// special remove of single entry map
+					this.map.remove(key1);
+					return true;
+				} else {
+					return false;
+				}
 			} else {
 				// normal remove
 				final boolean contains = index1.deIndex(key2, entry);
