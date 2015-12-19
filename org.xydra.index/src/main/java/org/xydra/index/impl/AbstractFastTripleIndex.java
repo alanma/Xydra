@@ -335,6 +335,12 @@ public abstract class AbstractFastTripleIndex<K, L, M> implements ITripleIndex<K
 		throw new AssertionError("one of the patterns should have matched");
 	}
 
+	@Override
+	public Iterator<ITriple<K, L, M>> getTriples() {
+		return this.index_s_p_o.tupleIterator( (K) null,null,null);
+	}
+
+
 	/**
 	 * @param s @NeverNull
 	 * @return an iterator over (p,o)-tuples for the given s @NeverNull

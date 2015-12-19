@@ -124,6 +124,11 @@ public abstract class AbstractSmallTripleIndex<K, L, M, MMSI extends IMapMapSetI
 	}
 
 	@Override
+	public Iterator<ITriple<K, L, M>> getTriples() {
+		return getTriples( (K) null, (L) null, (M) null);
+	}
+
+	@Override
 	public boolean index(final K s, final L p, final M o) {
 		return this.index_s_p_o.index(s, p, o);
 	}
