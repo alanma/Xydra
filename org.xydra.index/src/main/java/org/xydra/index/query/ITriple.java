@@ -26,4 +26,10 @@ public interface ITriple<K, L, E> extends HasEntry<E>, Serializable {
 	 */
 	E o();
 
+	@Override
+	int hashCode();
+
+	@Override
+	boolean equals(Object other);
+
 }
