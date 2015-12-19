@@ -45,13 +45,13 @@ public class KeyKeyEntryTuple<K, L, E> implements ITriple<K, L, E>, HasEntry<E> 
 	public String toString() {
 		return "("
 
-		+ DebugUtils.toLimitedString(this.key1, 40) + ","
+				+ DebugUtils.toLimitedString(this.key1, 40) + ","
 
-		+ DebugUtils.toLimitedString(this.key2, 40) + ","
+				+ DebugUtils.toLimitedString(this.key2, 40) + ","
 
-		+ DebugUtils.toLimitedString(this.entry, 40)
+				+ DebugUtils.toLimitedString(this.entry, 40)
 
-		+ ")";
+				+ ")";
 	}
 
 	@Override
@@ -62,16 +62,16 @@ public class KeyKeyEntryTuple<K, L, E> implements ITriple<K, L, E>, HasEntry<E> 
 	/**
 	 * A universal template for hash codes on triples
 	 *
-	 * @param s
-	 * @param p
-	 * @param o
+	 * @param s @CanBeNull
+	 * @param p @CanBeNull
+	 * @param o @CanBeNull
 	 * @return
 	 */
 	public static <K, L, E> int hashCode(final K s, final L p, final E o) {
 		int hash = 17;
-		hash = hash * 31 + s.hashCode();
-		hash = hash * 31 + p.hashCode();
-		hash = hash * 31 + o.hashCode();
+		hash = hash * 31 + (s == null ? 0 : s.hashCode());
+		hash = hash * 31 + (p == null ? 0 : p.hashCode());
+		hash = hash * 31 + (o == null ? 0 : o.hashCode());
 		return hash;
 	}
 
@@ -79,11 +79,11 @@ public class KeyKeyEntryTuple<K, L, E> implements ITriple<K, L, E>, HasEntry<E> 
 	public boolean equals(final Object other) {
 		return other instanceof ITriple<?, ?, ?>
 
-		&& this.key1.equals(((ITriple<?, ?, ?>) other).getKey1())
+				&& this.key1.equals(((ITriple<?, ?, ?>) other).getKey1())
 
-		&& this.key2.equals(((ITriple<?, ?, ?>) other).getKey2())
+				&& this.key2.equals(((ITriple<?, ?, ?>) other).getKey2())
 
-		&& this.entry.equals(((ITriple<?, ?, ?>) other).getEntry());
+				&& this.entry.equals(((ITriple<?, ?, ?>) other).getEntry());
 	}
 
 	@Override
