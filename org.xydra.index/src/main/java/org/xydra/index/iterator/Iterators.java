@@ -674,4 +674,25 @@ public class Iterators {
 		};
 	}
 
+	/**
+	 * @param it
+	 * @param comparator
+	 * @return the element that gets sorted as the maximum
+	 */
+	public static <T> T getElementWithHighestValue(final Iterator<T> it, final Comparator<T> comparator) {
+		T best = null;
+	
+		while (it.hasNext()) {
+			final T node = it.next();
+			if (best == null) {
+				best = node;
+			} else {
+				if (comparator.compare(best, node) > 0) {
+					best = node;
+				}
+			}
+		}
+		return best;
+	}
+
 }
