@@ -2,7 +2,6 @@ package org.xydra.core.model.impl.memory.sync;
 
 import org.xydra.core.model.XChangeLogState;
 
-
 /**
  * Internal sync log state for serialisation/deserialisation
  *
@@ -11,44 +10,44 @@ import org.xydra.core.model.XChangeLogState;
  */
 public interface XSyncLogState extends XChangeLogState, IReadableSyncLog {
 
-    /**
-     * @param syncLogEntry The {@link ISyncLogEntry} which is to be logged
-     */
-    void appendSyncLogEntry(ISyncLogEntry syncLogEntry);
+	/**
+	 * @param syncLogEntry The {@link ISyncLogEntry} which is to be logged
+	 */
+	void appendSyncLogEntry(ISyncLogEntry syncLogEntry);
 
-    /**
-     * Returns the {@link ISyncLogEntry} this sync log logged at the given
-     * revision number
-     *
-     * @param revisionNumber for which to return an {@link ISyncLogEntry}
-     * @return the {@link ISyncLogEntry} that was logged at the given revision
-     *         number or null if the {@link ISyncLogEntry} cannot be accessed.
-     * @throws IndexOutOfBoundsException if the given revision number is less
-     *             than the first revision number or greater than or equal to
-     *             the current revision number of this change log
-     */
-    ISyncLogEntry getSyncLogEntry(long revisionNumber);
+	/**
+	 * Returns the {@link ISyncLogEntry} this sync log logged at the given revision number
+	 *
+	 * @param revisionNumber for which to return an {@link ISyncLogEntry}
+	 * @return the {@link ISyncLogEntry} that was logged at the given revision number or null if the
+	 *         {@link ISyncLogEntry} cannot be accessed.
+	 * @throws IndexOutOfBoundsException if the given revision number is less than the first revision number or greater
+	 *         than or equal to the current revision number of this change log
+	 */
+	ISyncLogEntry getSyncLogEntry(long revisionNumber);
 
-    /**
-     * @return the revision number up to which the log has been synchronised
-     *         successfully with the server
-     */
-    long getSyncRevisionNumber();
+	/**
+	 * @return the revision number up to which the log has been synchronised successfully with the server
+	 */
+	long getSyncRevisionNumber();
 
-    /**
-     * Set the sync revision number.
-     *
-     * @param rev
-     */
-    void setSyncRevisionNumber(long rev);
+	/**
+	 * Set the sync revision number.
+	 *
+	 * @param rev
+	 */
+	void setSyncRevisionNumber(long rev);
 
-    void removeSyncLogEntryAt(Long l);
+	void removeSyncLogEntryAt(Long l);
 
-    /**
-     * Internal use
-     *
-     * @return number of sync log entries managed
-     */
-    long getSize();
+	/**
+	 * Internal use.
+	 *
+	 * The number of managed events does <em>not</em> correspond directly to revision numbers. Some revisions numbers
+	 * can be skipped.
+	 *
+	 * @return number of sync log entries managed
+	 */
+	long getSize();
 
 }
