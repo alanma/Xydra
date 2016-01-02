@@ -842,6 +842,8 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 	}
 
 	/**
+	 * Note this method can return unpaired Unicode surrogate pair halves
+	 *
 	 * @param master
 	 * @param copy
 	 * @return the number of shared characters from master in copy
@@ -851,10 +853,10 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 		assert copy != null;
 		int i = 0;
 		while (i < Math.min(master.length(), copy.length())) {
-			final int m = master.codePointAt(i);
-			final int c = copy.codePointAt(i);
+			final int m = master.charAt(i);
+			final int c = copy.charAt(i);
 			if (m == c) {
-				i += Character.charCount(m);
+				i += 1;
 			} else {
 				break;
 			}
