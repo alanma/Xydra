@@ -1127,11 +1127,11 @@ public class SmallTrieStringMapSetIndex<E> implements IMapSetIndex<String, E>, S
 	 * @param key
 	 * @return true iff set K did not contain key yet
 	 */
-	@ReadOperation
+	@ModificationOperation
 	public boolean indexKey(final String insertKey) {
-		readOperationStart();
+		writeOperationStart();
 		final boolean result = this.root.indexKey(insertKey);
-		readOperationEnd();
+		writeOperationEnd();
 		return result;
 	}
 
