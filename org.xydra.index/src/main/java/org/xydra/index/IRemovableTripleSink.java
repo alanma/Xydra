@@ -1,7 +1,7 @@
 package org.xydra.index;
 
 /**
- * A sink for triples which also allows triple removes.
+ * A sink for triples (index s-p-o) which additionally supports triple-remove (deIndex s-p-o).
  *
  * RDF nomenclature.
  *
