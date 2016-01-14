@@ -15,7 +15,7 @@ import org.xydra.index.query.ITriple;
  * @param <L> key type
  * @param <M> key type
  */
-public interface ITripleSource<K, L, M> extends IIndex, ITripleStreamSource<K, L, M> {
+public interface ITripleSource<K, L, M> extends IIndex, ITripleIterable<K, L, M> {
 
 	/**
 	 * @param c1

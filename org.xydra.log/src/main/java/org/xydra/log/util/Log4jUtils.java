@@ -112,11 +112,20 @@ public class Log4jUtils {
 	 * Tweak log level at runtime
 	 *
 	 * @param clazz
-	 * @param log4jLevel
+	 * @param log4jLevel @CanBeNull
 	 */
 	public static void setLevel(final Class<?> clazz, final Level log4jLevel) {
 		LogManager.getLogger(clazz).setLevel(log4jLevel);
 	}
+
+	/**
+	 * @param clazz
+	 * @return currently configured runtime level @CanBeNull if none is set here
+	 */
+	public static Level getLevel(final Class<?> clazz) {
+		return LogManager.getLogger(clazz).getLevel();
+	}
+
 
 	/**
 	 * Dump active log conf to System.out
@@ -141,4 +150,5 @@ public class Log4jUtils {
 	public static void setRootLevel(final Level log4jLevel) {
 		LogManager.getRootLogger().setLevel(log4jLevel);
 	}
+
 }

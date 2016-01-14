@@ -28,6 +28,9 @@ public class Clock {
 		return this;
 	}
 
+	/**
+	 * Clear all stats; Clock is like new, never started. Not running.
+	 */
 	public void reset() {
 		this.start = -1;
 		this.stats = new StringBuffer();
