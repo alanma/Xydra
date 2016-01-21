@@ -248,7 +248,7 @@ public class Iterators {
 		return new CascadedIterator<B, E>(base, transformer);
 	}
 
-	private static class CascadedIterator<B, E> extends AbstractCascadedIterator<B, E>implements ClosableIterator<E> {
+	private static class CascadedIterator<B, E> extends AbstractCascadedIterator<B, E> implements ClosableIterator<E> {
 
 		private final ITransformer<B, Iterator<E>> transformer;
 
@@ -428,24 +428,35 @@ public class Iterators {
 	}
 
 	/**
+	 * Note: In case Java complains about generics, use the {@link #toText(Iterator)} versions of this method.
+	 *
 	 * @param collection
 	 * @return the collections as a string, elements separated by ','
 	 */
 	public static <T> String toText(final Collection<T> collection) {
-		final StringBuffer buf = new StringBuffer();
-		for (final T s : collection) {
-			buf.append(s).append(",");
-		}
-		return buf.toString();
+		return toText(collection.iterator(), ",");
 	}
 
+	/**
+	 * @param it
+	 * @return
+	 */
 	public static <T> String toText(final Iterator<T> it) {
+		return toText(it, ",");
+	}
+
+	/**
+	 * @param it
+	 * @param separator e.g. ','
+	 * @return
+	 */
+	public static <T> String toText(final Iterator<T> it, final String separator) {
 		final StringBuffer buf = new StringBuffer();
 		while (it.hasNext()) {
 			final T t = it.next();
 			buf.append(t);
 			if (it.hasNext()) {
-				buf.append(",");
+				buf.append(separator);
 			}
 		}
 		return buf.toString();
@@ -542,7 +553,7 @@ public class Iterators {
 	 * @return an iterator which returns only those elements of base that match the constraint
 	 */
 	public static <E> Iterator<E> filterWithConstraint(final Iterator<E> base, final Constraint<E> constraint) {
-		if(constraint.isStar()) {
+		if (constraint.isStar()) {
 			return base;
 		}
 
@@ -681,7 +692,7 @@ public class Iterators {
 	 */
 	public static <T> T getElementWithHighestValue(final Iterator<T> it, final Comparator<T> comparator) {
 		T best = null;
-	
+
 		while (it.hasNext()) {
 			final T node = it.next();
 			if (best == null) {
@@ -694,5 +705,6 @@ public class Iterators {
 		}
 		return best;
 	}
+
 
 }
