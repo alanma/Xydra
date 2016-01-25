@@ -434,7 +434,7 @@ public class Iterators {
 	 * @return the collections as a string, elements separated by ','
 	 */
 	public static <T> String toText(final Collection<T> collection) {
-		return toText(collection.iterator(), ",");
+		return toText(collection.iterator(), "{", ",", "}");
 	}
 
 	/**
@@ -442,16 +442,19 @@ public class Iterators {
 	 * @return
 	 */
 	public static <T> String toText(final Iterator<T> it) {
-		return toText(it, ",");
+		return toText(it, "{", ",", "}");
 	}
 
 	/**
 	 * @param it
+	 * @param start TODO
 	 * @param separator e.g. ','
+	 * @param end TODO
 	 * @return
 	 */
-	public static <T> String toText(final Iterator<T> it, final String separator) {
+	public static <T> String toText(final Iterator<T> it, final String start, final String separator, final String end) {
 		final StringBuffer buf = new StringBuffer();
+		buf.append(start);
 		while (it.hasNext()) {
 			final T t = it.next();
 			buf.append(t);
@@ -459,6 +462,7 @@ public class Iterators {
 				buf.append(separator);
 			}
 		}
+		buf.append(end);
 		return buf.toString();
 	}
 
