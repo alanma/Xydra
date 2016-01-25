@@ -1,9 +1,5 @@
 package org.xydra.sharedutils;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.xydra.annotations.RunsInGWT;
 
 @RunsInGWT(true)
@@ -18,14 +14,6 @@ public class DebugUtils {
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	public static <T> Set<T> toSet(final Iterator<T> iterator) {
-		final HashSet<T> set = new HashSet<T>();
-		while (iterator.hasNext()) {
-			set.add(iterator.next());
-		}
-		return set;
 	}
 
 	public static String toIndent(final String indent, final int count) {
