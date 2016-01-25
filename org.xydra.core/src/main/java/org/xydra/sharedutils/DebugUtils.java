@@ -45,21 +45,4 @@ public class DebugUtils {
 		return (booleanFlag ? "+" : "-") + label;
 	}
 
-	public static <T> String toString(final Iterable<T> c) {
-		return toString(c.iterator());
-	}
-
-	public static <T> String toString(final Iterator<T> it) {
-		final StringBuffer buf = new StringBuffer();
-		buf.append("{");
-		while (it.hasNext()) {
-			final T t = it.next();
-			buf.append(t.toString());
-			if (it.hasNext()) {
-				buf.append(", ");
-			}
-		}
-		buf.append("}");
-		return buf.toString();
-	}
 }
