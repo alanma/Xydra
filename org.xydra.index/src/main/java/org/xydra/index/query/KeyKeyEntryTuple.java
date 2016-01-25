@@ -45,9 +45,9 @@ public class KeyKeyEntryTuple<K, L, E> implements ITriple<K, L, E>, HasEntry<E> 
 	public String toString() {
 		return "("
 
-				+ DebugUtils.toLimitedString(this.key1, 40) + ","
+				+ DebugUtils.toLimitedString(this.key1, 40) + ", "
 
-				+ DebugUtils.toLimitedString(this.key2, 40) + ","
+				+ DebugUtils.toLimitedString(this.key2, 40) + ", "
 
 				+ DebugUtils.toLimitedString(this.entry, 40)
 
